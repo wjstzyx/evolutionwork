@@ -12,7 +12,7 @@ ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 
 
 def changeTimetype():
-	sql="select id,D,T,stockdate from Tsymbol where stockdate>'2016-01-11 13:00:00.000'"
+	sql="select id,D,T,stockdate,symbol from Tsymbol where stockdate>'2016-01-11 13:00:00.000'"
 	res=ms.dict_sql(sql)
 	for item in res:
 		stockdate=str(item['stockdate'])
@@ -20,9 +20,10 @@ def changeTimetype():
 		newT=stockdate[11:16]
 		if len(item['D'])!=10 or len(item['T'])!=5 or newD!=item['D'] or newT!=item['T']:
 			sql="update Tsymbol set D='%s',T='%s' where id=%s" % (newD,newT,item['id'])
-			ms.insert_sql(sql)
+			# ms.insert_sql(sql)
 			scroptsql="update Tsymbol set D='%s',T='%s' where id=%s;" % (item['D'],item['T'],item['id'])
-			#print scroptsql
+			# print scroptsql
+			print item['symbol']
 
 
 
