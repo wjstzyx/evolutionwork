@@ -19,11 +19,11 @@ def changeTimetype():
 		newD=stockdate[0:4]+'/'+stockdate[5:7]+'/'+stockdate[8:10]
 		newT=stockdate[11:16]
 		if len(item['D'])!=10 or len(item['T'])!=5 or newD!=item['D'] or newT!=item['T']:
+			print item['symbol'] 
 			sql="update Tsymbol set D='%s',T='%s' where id=%s" % (newD,newT,item['id'])
-			# ms.insert_sql(sql)
-			scroptsql="update Tsymbol set D='%s',T='%s' where id=%s;" % (item['D'],item['T'],item['id'])
-			# print scroptsql
-			print item['symbol']
+			ms.insert_sql(sql)
+			scroptsql="update Tsymbol set D='%s',T='%s' where id=%s and symbol='%s' ;" % (item['D'],item['T'],item['id'],item['symbol'])
+			print scroptsql
 
 
 
