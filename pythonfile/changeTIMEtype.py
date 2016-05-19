@@ -24,6 +24,7 @@ def changeTimetype():
 			ms.insert_sql(sql)
 			scroptsql="update Tsymbol set D='%s',T='%s' where id=%s and symbol='%s' ;" % (item['D'],item['T'],item['id'],item['symbol'])
 			print scroptsql
+			
 
 
 

@@ -165,7 +165,7 @@ def main_test_sig():
 	# sub_test_itemlist(RBlist,'RB')
 	# sub_test_itemlist(CUlist,'CU')
 	# sub_test_itemlist(AGlist,'AG')
-	sub_test_itemlist(IClist,'IC')
+	# sub_test_itemlist(IClist,'IC')
 	# sub_test_itemlist(IFlist,'IF')
 
 
