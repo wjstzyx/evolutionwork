@@ -22,14 +22,15 @@ def input_temp_table(ac,symbol,type):
 	ms.insert_sql(sql)
 	sql="UPDATE ##temp_quanyi  SET PP=0 where id in(select MIN(id) as id from ##temp_quanyi a inner join(select min(stockdate) as stockdate,st from ##temp_quanyi  where p is not null group by st) temp on a.stockdate=temp.stockdate and a.st=temp.st group by a.stockdate,a.st) and pp!=0"
 	ms.insert_sql(sql)
-	sql="select top 1 * from [quanyi_log] where AC='%s' AND Symbol='%s' and TYPE=%s order by stockdate desc " % (ac,symbol,type)
+	sql="select top 1 * from [quanyi_log_groupby] where AC='%s' AND Symbol='%s' and TYPE=%s order by stockdate desc " % (ac,symbol,type)
 	res=ms.dict_sql(sql)
 	if not res:
-		sql="insert into [quanyi_log] select * from  ##temp_quanyi"
+		sql="insert into [quanyi_log_groupby]  select '%s','%s',%s,SUM((P-PP)*p_size*ratio/100) as position,stockdate from ##temp_quanyi where AC='%s' AND Symbol='%s' and TYPE=%s and p is not null group by stockdate order by stockdate" % (ac,symbol,type,ac,symbol,type)
 		ms.insert_sql(sql)
 	else:
 		laststockdate=res[0]['stockdate']
-		sql="insert into [quanyi_log] select * from  ##temp_quanyi where StockDate>'%s'" % (laststockdate)
+		sql="insert into [quanyi_log_groupby]  select '%s','%s',%s,SUM((P-PP)*p_size*ratio/100) as position,stockdate from ##temp_quanyi where AC='%s' AND Symbol='%s' and TYPE=%s and p is not null and StockDate>'%s'  group by stockdate order by stockdate" % (ac,symbol,type,ac,symbol,type,laststockdate)
+		print sql
 		ms.insert_sql(sql)
 	sql="drop table ##temp_quanyi"
 	ms.insert_sql(sql)
@@ -61,7 +62,7 @@ def pre_data_for_ac(itemlist,symbol):
 def main_pre_quanyi():
 	i=0
 	TAlist=('CH4tazs','DayBrTA','DayTALineRrate')
-	RUlist=('RUDTA','RUMY','RUV4E','RUv4ehc','RUV7','RUWEEKLY')
+	RUlist=('RBQGstrev_TG','RBQGTR_TG','RUDTA','RUMY','RUV4E','RUv4ehc','RUV7','RUWEEKLY')
 	RBlist=('Rb_QGpLud','RbCX_QGRev','RbCX_QGtr','RB_CXVolume','RB_Daybreaker','RB_LiangtuPipei','RB_LRC_Trend','RB_LUD','RB_MT','RB_RBreaker','RB_RSI','RB_ST_Reversal','RB_ST_Trend','RB_VPIN','RB_ZhixianPipei','CH4RBZS','DAYGAPRB','RBHAL','RBPUD','RBSV','UDKRB','V7RB')
 	CUlist=('CUDUDHL','ESPcu','LKVCU1','LKVCU2','PUDCU','QCU18MIN','QPMCU','Vk2CU','CUVK3')
 	AGlist=('9AGOLD','9AGVD05','9AGVD06','AGNEW4','AGNEW6','AGNEW8','AGNEW19','AGNEWLVO')
@@ -83,3 +84,4 @@ def main_pre_quanyi():
 # res=ms.dict_sql(sql)
 # print res
 main_pre_quanyi()
+# pre_data_for_ac(['RBQGstrev_TG','RBQGTR_TG'],'RB')
