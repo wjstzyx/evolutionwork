@@ -75,6 +75,7 @@ def test_ac_symbol_lianxu(ac,symbol):
 		i=i+1
 		print 'stnum:',i,st
 		sql="select st_report.* from st_report inner join p_log p on p.st=st_report.st and p.ac='%s' and p.symbol='%s' and st_report.st=%s and p.d=st_report.d and st_report.type=0 order by stockdate,st_report.id" % (ac,symbol,st)
+		print sql
 		itemres=ms.dict_sql(sql)
 		lastpsig=itemres[0]['P']
 		for item1 in itemres[1:]:
@@ -155,17 +156,17 @@ def main_test_sig():
 	i=0
 	TAlist=('CH4tazs','DayBrTA','DayTALineRrate')
 	RUlist=('RUDTA','RUMY','RUV4E','RUv4ehc','RUV7','RUWEEKLY')
-	RBlist=('Rb_QGpLud','RbCX_QGRev','RbCX_QGtr','RB_CXVolume','RB_Daybreaker','RB_LiangtuPipei','RB_LRC_Trend','RB_LUD','RB_MT','RB_RBreaker','RB_RSI','RB_ST_Reversal','RB_ST_Trend','RB_VPIN','RB_ZhixianPipei','CH4RBZS','DAYGAPRB','RBHAL','RBPUD','RBSV','UDKRB','V7RB')
+	RBlist=('Rb_QGpLud','RbCX_QGRev','RbCX_QGtr','RB_CXVolume','RB_Daybreaker','RB_LiangtuPipei','RB_LRC_Trend','RB_LUD','RB_MT','RB_RBreaker','RB_RSI','RB_ST_Reversal','RB_ST_Trend','RB_VPIN','RB_ZhixianPipei','CH4RBZS','DAYGAPRB','RBHAL','RBPUD','RBSV','UDKRB','V7RB','RBQGstrev_TG','RBQGTR_TG')
 	CUlist=('CUDUDHL','ESPcu','LKVCU1','LKVCU2','PUDCU','QCU18MIN','QPMCU','Vk2CU','CUVK3')
 	AGlist=('9AGOLD','9AGVD05','9AGVD06','AGNEW4','AGNEW6','AGNEW8','AGNEW19','AGNEWLVO')
 	IClist=('YEEXIC','YEOTIC','YETRIC','YEZHIC')
 	IFlist=('9CPPUD','DayBrIF','9Distance','9DUD1','9DUDHL','9DUDRV','9EXR1410','9EXV1410','9FORCE','9FQS1','9HAL','9HAL2','9HAL3','9HALMA','9HUITIAO','9HUITIAO2','9HUITIAO3','9HUITIAO4','9KDHDAY','9KDHPM','9Linerate','9RATE','9MALONGK','9MiddayTrend','9MinVolPbuy','9MONDAY','9MORNINGOUT','9MT','9MVRATE','9NHL','9NOON','9OpenBet','9QMA','9QPMIF','9Reversal','9Reversal2','9Reversal3','9V4EIV','9VK1','9VK3','9VPINVOl_L','9VPINVOl_S','9VPINVOl_S2','9wb','9weipan','9WeipanREV','9WeipanStatics','9YAP01','9YY2','9YYMA','9LUD','9LUD2CH','9LUD3','9LUD4','9LUD5','9LUD6','9LUD7','9LUD8','9LUD10','9LUD11V2','9LUD13','9LUD14','9LUD16','LUDch1','LUDch4','LUDch5','LUDch6','LUDch8','LUD52015','LUD62015','LUD72015','LUD82015','TimeV2Pm','TimeV3DtaPm','TimeV3HLAm','TimeV3HLPm','V4EIVelements','V4EIVNEW','IFQG1310','IFQGEX','IFQGOT','9QGBombma2','IFQGTB','IFQGTR','IFQGWB','YEQGTR','YEQGEX','YEQGOT','YEQGZH211')
 	# sub_test_itemlist(TAlist,'TA')
 	# sub_test_itemlist(RUlist,'RU')
-	# sub_test_itemlist(RBlist,'RB')
+	# sub_test_itemlist(RBlist[15:],'RB')
 	# sub_test_itemlist(CUlist,'CU')
 	# sub_test_itemlist(AGlist,'AG')
-	sub_test_itemlist(IClist,'IC')
+	# sub_test_itemlist(IClist,'IC')
 	# sub_test_itemlist(IFlist,'IF')
 
 
@@ -176,7 +177,7 @@ main_test_sig()
 
 
 # change_lianxu(50037)
-# test_ac_symbol_lianxu('9AGOLD','AG')
+test_ac_symbol_lianxu('RBQGTR_TG','RB')
 
 def update_pp():
 	sql="select a.* from st_report a inner join (select MIN(stockdate) as stockdate ,st_report.st from st_report  inner join p_log p on p.st=st_report.st and p.ac='IFQGWB' and p.symbol='IF' and p.d=st_report.d and st_report.type=0 group by st_report.st ) temp on a.stockdate = temp.stockdate and a.st=temp.ST "
