@@ -25,7 +25,7 @@ def read_maillist():
 		subject=item['subject']+datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
 		msg=item['inserttime'].strftime('%Y-%m-%d %H-%M-%S')+'<br>message: '+item['msg']+'</br>'
 		#一小时最多发10封
-		sql="select * from [LogRecord].[dbo].[maillist] where msg='%s' and type=1" % (item['msg'])
+		sql="select top 1 * from [LogRecord].[dbo].[maillist] where msg='%s' and type=1 order by id desc " % (item['msg'])
 		tempres=ms.find_sql(sql)
 		print tempres,"222"
 		if tempres:
