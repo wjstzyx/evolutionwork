@@ -23,7 +23,7 @@ def read_maillist():
 		for item in res:
 			msg=item['msg']
 			subject=item['subject']+datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
-			totalmsg=totalmsg+'<br>'+item['inserttime'].strftime('%Y-%m-%d %H-%M-%S')+'<br>message: '+item['msg']+'</br>'
+			totalmsg=item['inserttime'].strftime('%Y-%m-%d %H-%M-%S')+'<br>message: '+item['msg']+'</br>'
 		print totalmsg
 		if send_mail(mailtolist,subject,totalmsg):
 			sql="update [LogRecord].[dbo].[maillist] set type=1,updatetime=getdate() where id=%s" % (item['id'])
