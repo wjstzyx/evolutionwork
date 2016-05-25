@@ -10,14 +10,15 @@ ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 # -*- coding: UTF-8 -*-
 import smtplib  
 from email.mime.text import MIMEText  
-mailto_list=['794513386@qq.com'] 
-mail_host="smtp.sina.com"  #设置服务器
-mail_user="yuyang_998"    #用户名
-mail_pass="diannaodiaole"   #口令 
-mail_postfix="sina.com"  #发件箱的后缀
+mailto_list=['yuyang@evolutionlabs.com.cn'] 
+mail_host="smtp.evolutionlabs.com.cn"  #设置服务器
+mail_user="warning@evolutionlabs.com.cn"    #用户名
+mail_pass="El104104"   #口令 
+mail_postfix="evolutionlabs.com.cn"  #发件箱的后缀
   
 def send_mail(to_list,sub,content):  
-    me="hello"+"<"+mail_user+"@"+mail_postfix+">"  
+    # me="俞洋"+"<"+mail_user+"@"+mail_postfix+">"  
+    me="warning"+"<"+mail_user+">"  
     #msg = MIMEText(content,_subtype='plain',_charset='utf8')
     msg = MIMEText(content,_subtype='html',_charset='utf8')  
     msg['Subject'] = sub  
@@ -34,7 +35,7 @@ def send_mail(to_list,sub,content):
         print str(e)  
         return False  
 if __name__ == '__main__':  
-    if send_mail(mailto_list,"hello恩啊的的","hello world的</br>点发货速度"):  
+    if send_mail(mailto_list,"测试报警","这是一封测试邮件，请忽略"):  
         print "发送成功"  
     else:  
         print "发送失败"
