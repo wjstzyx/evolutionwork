@@ -15,6 +15,8 @@ def read_maillist():
 	sql="select * from [LogRecord].[dbo].[maillist] where type !=1 "
 	res=ms.dict_sql(sql)
 	for item in res:
+		sql="update [LogRecord].[dbo].[maillist] set type=3,updatetime=getdate() where id=%s" % (item['id'])
+		ms.insert_sql(sql)
 		mailtolist=item['mailtolist'].split(',')
 		print mailtolist
 		totalmsg=''
