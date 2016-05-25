@@ -10,6 +10,8 @@ from sendmail import send_mail
 ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="LogRecord")
 # resList = ms.find_sql("select top 2 * from st_report")
 # print resList
+#id	subject	mailtolist	msg	type	inserttime	updatetime
+#1	dddddd2	794513386@qq.com,yuyang@evolutionlabs.com.cn,yuyang_998@sina.com	dfdfdd	1	2016-05-25 14:59:15.170	2016-05-25 14:59:16.887
 
 def read_maillist():
 	sql="select * from [LogRecord].[dbo].[maillist] where type=0 or type=2 "
