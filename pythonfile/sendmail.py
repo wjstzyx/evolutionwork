@@ -10,15 +10,23 @@ ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 # -*- coding: UTF-8 -*-
 import smtplib  
 from email.mime.text import MIMEText  
+# mailto_list=['yuyang@evolutionlabs.com.cn'] 
+# mail_host="smtp.evolutionlabs.com.cn"  #设置服务器
+# mail_user="warning@evolutionlabs.com.cn"    #用户名
+# mail_pass="El104104"   #口令 
+# mail_postfix="evolutionlabs.com.cn"  #发件箱的后缀
+
 mailto_list=['yuyang@evolutionlabs.com.cn'] 
-mail_host="smtp.evolutionlabs.com.cn"  #设置服务器
-mail_user="warning@evolutionlabs.com.cn"    #用户名
-mail_pass="El104104"   #口令 
-mail_postfix="evolutionlabs.com.cn"  #发件箱的后缀
-  
+mail_host="smtp.sina.com"  #设置服务器
+mail_user="yuyang_998"    #用户名
+mail_pass="diannaodiaole"   #口令 
+mail_postfix="sina.com"  #发件箱的后缀
+sendmail='yuyang_998@sina.com'
+
+
 def send_mail(to_list,sub,content):  
     # me="俞洋"+"<"+mail_user+"@"+mail_postfix+">"  
-    me="warning"+"<"+mail_user+">"  
+    me=sendmail
     #msg = MIMEText(content,_subtype='plain',_charset='utf8')
     msg = MIMEText(content,_subtype='html',_charset='utf8')  
     msg['Subject'] = sub  
