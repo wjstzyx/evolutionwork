@@ -19,20 +19,39 @@ def read_maillist():
 		ms.insert_sql(sql)
 		mailtolist=item['mailtolist'].split(',')
 		print mailtolist
-		totalmsg=''
-		for item in res:
-			msg=item['msg']
-			subject=item['subject']+datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
-			totalmsg=item['inserttime'].strftime('%Y-%m-%d %H-%M-%S')+'<br>message: '+item['msg']+'</br>'
-		print totalmsg
-		if send_mail(mailtolist,subject,totalmsg):
-			sql="update [LogRecord].[dbo].[maillist] set type=1,updatetime=getdate() where id=%s" % (item['id'])
-			ms.insert_sql(sql)
-			print "发送成功"  
+		msg=item['msg']
+		subject=item['subject']+datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
+		msg=item['inserttime'].strftime('%Y-%m-%d %H-%M-%S')+'<br>message: '+item['msg']+'</br>'
+		#一小时最多发10封
+		sql="select * from [LogRecord].[dbo].[maillist] where msg='%s' and type=1" % (item['msg'])
+		tempres=ms.find_sql(sql)
+		print tempres,"222"
+		if tempres:
+			lasttime=tempres[0][6]
+			seconds=(datetime.datetime.now()-lasttime).seconds
+			print seconds,type(seconds)
+			if seconds<1800:
+				print "时间少于半小时，不再发送"
+			else:
+				print "时间大于半小时，准备发送"
+				if send_mail(mailtolist,subject,msg):
+					sql="update [LogRecord].[dbo].[maillist] set type=1,updatetime=getdate() where id=%s" % (item['id'])
+					ms.insert_sql(sql)
+					print "发送成功"  
+				else:
+					sql="update [LogRecord].[dbo].[maillist] set type=2,updatetime=getdate() where id=%s" % (item['id'])
+					ms.insert_sql(sql)
+					print "发送失败"
 		else:
-			sql="update [LogRecord].[dbo].[maillist] set type=2,updatetime=getdate() where id=%s" % (item['id'])
-			ms.insert_sql(sql)
-			print "发送失败"
+			print "else"
+			if send_mail(mailtolist,subject,msg):
+				sql="update [LogRecord].[dbo].[maillist] set type=1,updatetime=getdate() where id=%s" % (item['id'])
+				ms.insert_sql(sql)
+				print "发送成功"  
+			else:
+				sql="update [LogRecord].[dbo].[maillist] set type=2,updatetime=getdate() where id=%s" % (item['id'])
+				ms.insert_sql(sql)
+				print "发送失败"
 
 
 i=0
