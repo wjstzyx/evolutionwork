@@ -16,12 +16,12 @@ from email.mime.text import MIMEText
 # mail_pass="El104104"   #口令 
 # mail_postfix="evolutionlabs.com.cn"  #发件箱的后缀
 
-mailto_list=['yuyang@evolutionlabs.com.cn'] 
+mailto_list=['yuyang@evolutionlabs.com.cn','794513386@qq.com'] 
 mail_host="smtp.sina.com"  #设置服务器
-mail_user="yuyang_998"    #用户名
-mail_pass="diannaodiaole"   #口令 
+mail_user="elwarning"    #用户名
+mail_pass="qwe123"   #口令 
 mail_postfix="sina.com"  #发件箱的后缀
-sendmail='yuyang_998@sina.com'
+sendmail='elwarning@sina.com'
 
 
 def send_mail(to_list,sub,content):  
