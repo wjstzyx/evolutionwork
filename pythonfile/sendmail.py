@@ -25,8 +25,8 @@ sendmail='elwarning@sina.com'
 
 
 def send_mail(to_list,sub,content):  
-    # me="俞洋"+"<"+mail_user+"@"+mail_postfix+">"  
-    me=sendmail
+    me="elwarning"+"<"+mail_user+"@"+mail_postfix+">"  
+    # me=sendmail
     #msg = MIMEText(content,_subtype='plain',_charset='utf8')
     msg = MIMEText(content,_subtype='html',_charset='utf8')  
     msg['Subject'] = sub  
