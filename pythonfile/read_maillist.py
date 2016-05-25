@@ -38,10 +38,6 @@ def read_maillist():
 
 i=0
 while(1):
-	i=i+1
-	print i
-	if i>100:
-		break
 	read_maillist()
 	time.sleep(2)	
 
