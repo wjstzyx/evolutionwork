@@ -12,7 +12,7 @@ ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="LogRecord")
 # print resList
 
 def read_maillist():
-	sql="select * from [LogRecord].[dbo].[maillist] where type !=1 "
+	sql="select * from [LogRecord].[dbo].[maillist] where type=0 or type=2 "
 	res=ms.dict_sql(sql)
 	for item in res:
 		sql="update [LogRecord].[dbo].[maillist] set type=3,updatetime=getdate() where id=%s" % (item['id'])
