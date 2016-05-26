@@ -11,6 +11,12 @@ ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 # resList = ms.find_sql("select top 2 * from st_report")
 # print resList
 
+def myround(num):
+	if num>=0:
+		return round(num)
+	if num<=0:
+		return round(num+0.000000001)
+
 #将记录放入临时表(14秒)
 def input_temp_table(ac,symbol,type):
 	try:
@@ -40,8 +46,9 @@ def input_temp_table(ac,symbol,type):
 
 
 def main_calculate(symbol,ac):
-	pointvalue={'IF':300,'CU':5,'RB':10,'AG':15,'IC':300,'RU':10,'TA':5}
-	commvalue={'IF':60,'CU':50,'RB':10,'AG':20,'IC':60,'RU':50,'TA':10}
+	pointvalue={'IF':300,'CU':5,'RB':10,'AG':15,'IC':200,'RU':10,'TA':5}
+	#commvalue={'IF':60,'CU':50,'RB':10,'AG':20,'IC':60,'RU':50,'TA':10}
+	commvalue={'IF':60,'CU':20,'RB':10,'AG':8,'IC':60,'RU':20,'TA':10}
 	tablename="#tempinfo_%s" % (ac)
 	# tablename='tempquanyiinfo'
 	try:		
@@ -72,9 +79,9 @@ def main_calculate(symbol,ac):
 		tempD=D[2:4]+D[5:7]+D[8:10]
 		deltaposition=item['deltaposition']
 		##开始计算
-		deltaquanyi=round(position)*float((C-lastClose))*float(pointvalue[symbol])
-		comm=abs(round(position+deltaposition)-round(position))*commvalue[symbol]
-		times=times+abs(round(position+deltaposition)-round(position))
+		deltaquanyi=myround(position)*float((C-lastClose))*float(pointvalue[symbol])
+		comm=abs(myround(position+deltaposition)-myround(position))*commvalue[symbol]
+		times=times+abs(myround(position+deltaposition)-myround(position))
 		if changeD!=tempD:
 			print lastrecordday,changeD
 			#每天第一根
@@ -83,7 +90,7 @@ def main_calculate(symbol,ac):
 				d_max=ms.find_sql(sql)[0][0]
 				if d_max is None or d_max==0:
 					d_max=0.0001
-				sql="insert into dailyquanyi(ac,symbol,position,quanyi,comm,D,d_max,times) values('%s','%s',%s,%s,%s,%s,%s,%s)" % (ac,symbol,round(position),lastdayquanyi,lastdaycomm,changeD,d_max,times)
+				sql="insert into dailyquanyi(ac,symbol,position,quanyi,comm,D,d_max,times) values('%s','%s',%s,%s,%s,%s,%s,%s)" % (ac,symbol,myround(position),lastdayquanyi,lastdaycomm,changeD,d_max,times)
 				# print sql
 				ms.insert_sql(sql)
 			changeD=tempD
@@ -104,7 +111,7 @@ def main_calculate(symbol,ac):
 		d_max=ms.find_sql(sql)[0][0]
 		if d_max is None or d_max==0:
 			d_max=0.0001
-		sql="insert into dailyquanyi(ac,symbol,position,quanyi,comm,D,d_max,times) values('%s','%s',%s,%s,%s,%s,%s,%s)" % (ac,symbol,round(position),lastdayquanyi,lastdaycomm,newD,d_max,times)
+		sql="insert into dailyquanyi(ac,symbol,position,quanyi,comm,D,d_max,times) values('%s','%s',%s,%s,%s,%s,%s,%s)" % (ac,symbol,myround(position),lastdayquanyi,lastdaycomm,newD,d_max,times)
 		ms.insert_sql(sql)
 
 		# if tempD=='160523' and deltaposition!=0:
@@ -167,3 +174,4 @@ def main_pre_quanyi():
 # print res
 main_pre_quanyi()
 # pre_data_for_ac(['RBQGstrev_TG','RBQGTR_TG'],'RB')
+
