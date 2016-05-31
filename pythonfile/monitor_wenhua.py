@@ -95,6 +95,47 @@ def monitor_AB():
 
 
 
+def monitor_Thunder():
+	#查询发件人
+	sql="select email from [LogRecord].[dbo].[mailtolist] where istomail=1"
+	reslist=ms.find_sql(sql)
+	mailtolist=''
+	for item in reslist:
+		mailtolist=mailtolist+','+item[0]
+	# print mailtolist
+	#待检测的ABmachine列表
+	sql="select item,starttime,endtime from [LogRecord].[dbo].[monitorconfig] where type='Thunder' and ismonitor=1"
+	res=ms.dict_sql(sql)
+	for item in res:
+		symbol=item['item']
+		starttime=item['starttime']
+		endtime=item['endtime']
+		sql="select getdate()"
+		getnow=ms.find_sql(sql)[0][0]
+		nowtime=getnow.strftime('%H:%M:%S')
+		nowtime=datetime.datetime.strptime(nowtime,'%H:%M:%S')
+		starttime=datetime.datetime.strptime(starttime,'%H:%M:%S')
+		endtime=datetime.datetime.strptime(endtime,'%H:%M:%S')
+		if nowtime>starttime and nowtime<=endtime:
+			#检测最新更新时间与当时的时间差，如果相差60s就报警
+			sql="SELECT TOP 1 UpdateTime   FROM [Future].[dbo].[Trading_ABMonitor] WHERE ComputerName='%s' and IFMonitor=1" % (symbol)
+			res=ms.find_sql(sql)
+			if res:
+				lasttime=res[0][0]
+				print lasttime
+				print getnow
+				if (getnow-lasttime).seconds>60:
+					subject='%s Thunder程序出错' % (symbol)
+					msg='%s Thunder程序出错' % (symbol)
+					sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime) values('%s','%s','%s',%s,getdate())" % (subject,mailtolist,msg,0)
+					ms.insert_sql(sql)
+		else:	
+			# print starttime
+			# print endtime
+			# print nowtime
+			pass
+
+
 
 
 

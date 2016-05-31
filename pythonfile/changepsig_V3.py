@@ -171,13 +171,14 @@ def main_test_sig():
 
 
 
-main_test_sig()
+# main_test_sig()
 
 
 
 
 # change_lianxu(50037)
-test_ac_symbol_lianxu('RBQGTR_TG','RB')
+# test_ac_symbol_lianxu('RBQGTR_TG','RB')
+test_ac_symbol_pp('RBQGTR_TG','RB')
 
 def update_pp():
 	sql="select a.* from st_report a inner join (select MIN(stockdate) as stockdate ,st_report.st from st_report  inner join p_log p on p.st=st_report.st and p.ac='IFQGWB' and p.symbol='IF' and p.d=st_report.d and st_report.type=0 group by st_report.st ) temp on a.stockdate = temp.stockdate and a.st=temp.ST "

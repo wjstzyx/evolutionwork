@@ -12,12 +12,20 @@ ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 import smtplib  
 from email.mime.text import MIMEText  
 # mailto_list=['yuyang_998@sina.com'] 
-mailto_list=['yuyang@evolutionlabs.com.cn','13764504303@qq.com','13764048827@qq.com'] 
+# mailto_list=['yuyang@evolutionlabs.com.cn','13764504303@qq.com','13764048827@qq.com'] 
+# mail_host="smtp.evolutionlabs.com.cn"  #设置服务器
+# mail_user="warning@evolutionlabs.com.cn"    #用户名
+# mail_pass="El104104"   #口令 
+# mail_postfix="evolutionlabs.com.cn"  #发件箱的后缀
+# sendmail='warning@evolutionlabs.com.cn'
+
+mailto_list=['yuyang@evolutionlabs.com.cn','13764504303@qq.com'] 
 mail_host="smtp.evolutionlabs.com.cn"  #设置服务器
-mail_user="warning@evolutionlabs.com.cn"    #用户名
-mail_pass="El104104"   #口令 
+mail_user="yuyang@evolutionlabs.com.cn"    #用户名
+mail_pass="Wjstyzx2"   #口令 
 mail_postfix="evolutionlabs.com.cn"  #发件箱的后缀
-sendmail='warning@evolutionlabs.com.cn'
+sendmail='yuyang@evolutionlabs.com.cn'
+
 #rwecstmzqbwzbchh
 # mailto_list=['yuyang_998@sina.com'] 
 # mail_host="smtp.qq.com"  #设置服务器
