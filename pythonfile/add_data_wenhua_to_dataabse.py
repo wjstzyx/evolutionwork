@@ -25,7 +25,9 @@ def ftp_down(dfrom,localf,filename = "histWhcj.txt"):
         #print ftp.getwelcome()#显示ftp服务器欢迎信息
         lf = str(localf)
         ml = lf[-4:]
-        ftp.cwd(ml+'_1m/') #选择操作目录 
+        ftp.cwd(ml+'_1m/') #选择操作目录
+        # ftp.cwd(ml+'_1m(all_40cid)/') #选择操作目录 
+        #0324_1m(all_40cid)
         bufsize = 1024 
         localname = lf+".csv"
         localname = open(os.path.join(dfrom,localname),'wb')
@@ -46,7 +48,7 @@ def ftp_down(dfrom,localf,filename = "histWhcj.txt"):
 
 
 ##将下载的数据按照数据库格式生成
-def  add_data_wenhua(rawroot,date, timestart, timeend):
+def  add_data_wenhua(rawroot,date, timestart, timeend,mysymbol=''):
     timestart=int(timestart)
     timeend=int(timeend)
     fin = open(join(rawroot, str(date)+'.csv'))
@@ -70,10 +72,11 @@ def  add_data_wenhua(rawroot,date, timestart, timeend):
         oclose = p[9]
         ovol= p[12]
         oopi = p[-3]
-        orefc = p[-1]        
-        resarr=[symbol,oopen,oclose,ohigh,olow,ovol,oopi,odate,otime,datetime,orefc]        
-        newline = ','.join(resarr).strip() + '\n'
-        fout.write(newline)
+        orefc = p[-1]
+        if mysymbol=='' or mysymbol.lower()== symbol.lower():
+            resarr=[symbol,oopen,oclose,ohigh,olow,ovol,oopi,odate,otime,datetime,orefc]        
+            newline = ','.join(resarr).strip() + '\n'
+            fout.write(newline)
         
     fin.close()
     fout.close()
@@ -83,7 +86,7 @@ def  add_data_wenhua(rawroot,date, timestart, timeend):
 
 
 ##读取数据写入数据库
-def read_date_write_to_database(targetfile,date):
+def read_date_write_to_database(targetfile,date,mysymbol=''):
     ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
     #date=20160428
     date=str(date)
@@ -98,7 +101,7 @@ def read_date_write_to_database(targetfile,date):
         for line in lines:
             line=line.strip('\n')
             linelist=line.split(',')
-            if linelist[7]==date:
+            if linelist[7]==date and (mysymbol=='' or mysymbol.lower()==linelist[0].lower()):
                 sql="insert into Tsymbol ([Symbol],[O],[C],[H],[L],[V],[OPI],[D],[T],[StockDate],[refc])values('%s',%s,%s,%s,%s,%s,%s,'%s','%s','%s',%s)" % (linelist[0],linelist[1],linelist[2],linelist[3],linelist[4],linelist[5],linelist[6],linelist[7],linelist[8],linelist[9],linelist[10])
                 try:
                     ms.insert_sql(sql)
@@ -121,10 +124,15 @@ def read_date_write_to_database(targetfile,date):
 
 
 _dfrom =r'Y:\data_wenhua'
-
-date = 20160513
+date = sys.argv[1] 
+#date=20160513
+if len(sys.argv)>2:
+    mysymbol=sys.argv[2]
+else:
+    mysymbol=''
 timestart ='0900'
 timeend = 1600
+print date,mysymbol
 
 
 targetfile=_dfrom+'\\'+str(date)+'.csv'
@@ -134,11 +142,10 @@ if not os.path.isfile(targetfile):
     newtargetfile.close()
 
 
-# downresult=ftp_down(_dfrom,date)# down from ftp
-downresult=1
+downresult=ftp_down(_dfrom,date)# down from ftp
+# downresult=1
 if downresult==1:
-    targetfilename=add_data_wenhua(_dfrom,date, timestart, timeend )  #  extrct  data from timestart to timeend
-    read_date_write_to_database(targetfilename,date) # targetfile=r'Y:\data_wenhua\20160427_0_2359.csv'
-
+    targetfilename=add_data_wenhua(_dfrom,date, timestart, timeend,mysymbol )  #  extrct  data from timestart to timeend
+    read_date_write_to_database(targetfilename,date,mysymbol) # targetfile=r'Y:\data_wenhua\20160427_0_2359.csv'
 
 

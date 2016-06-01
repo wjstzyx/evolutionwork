@@ -147,7 +147,12 @@ def main_calculate(symbol,ac):
 
 
 def pre_quanyi_data(ac,symbol,type):
-	sql="select distinct D from st_report where D<=160531 and D>160522 order by D"
+	sql="select (year(getdate())-2000)*10000+month(getdate())*100+day(getdate())"
+	print sql
+	nowD=ms.find_sql(sql)[0][0]
+	# print nowD
+	# exit()
+	sql="select distinct D from st_report where D=%s  order by D" % (nowD)
 	res=ms.dict_sql(sql)
 	for item1 in res:
 		print item1['D']
@@ -194,12 +199,4 @@ def main_pre_quanyi():
 # print res
 main_pre_quanyi()
 # pre_data_for_ac(['RBQGstrev_TG','RBQGTR_TG'],'RB')
-
-def test():
-	sql="select distinct D from st_report  where D>=160510 and D<160530  order by D"
-	res=ms.dict_sql(sql)
-	for item1 in res:
-		input_temp_table('RBQGTR_TG','RB',0,item1['D'])
-
-# test()
 
