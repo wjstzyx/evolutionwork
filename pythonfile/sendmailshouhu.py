@@ -10,7 +10,7 @@ ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 # resList = ms.find_sql("select top 2 * from st_report")
 # print resList
 
-nowtimehour=datetime.datetime.now().strftime("%H")
+nowtimehour=datetime.datetime.now().strftime("%H:%M")
 print nowtimehour
 
 
@@ -19,7 +19,7 @@ cmd="ps -ef|grep 'read_maillist.py'|grep -v 'grep'|awk '{print $2}'"
 output=os.popen(cmd)
 res=output.read()
 print res,type(res)
-if res and (nowtimehour=='11' or nowtimehour=='20'):
+if res and (nowtimehour=='11:46' or nowtimehour=='19:46'):
 	processid=res
 	print processid
 	cmd="kill %s" % (processid)
@@ -36,7 +36,7 @@ cmd="ps -ef|grep 'monitor_wenhua.py'|grep -v 'grep'|awk '{print $2}'"
 output=os.popen(cmd)
 res=output.read()
 print res,type(res)
-if res and (nowtimehour=='11' or nowtimehour=='20'):
+if res and (nowtimehour=='11:46' or nowtimehour=='19:46'):
 	processid=res
 	print processid
 	cmd="kill %s" % (processid)
