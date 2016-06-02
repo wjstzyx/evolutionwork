@@ -23,6 +23,7 @@ if res and (nowtimehour==11 or nowtimehour==20):
 	processid=res
 	print processid
 	cmd="kill %s" % (processid)
+	print cmd
 	os.system(cmd)
 	cmd='python /home/yuyang/myfile/evolutionwork/pythonfile/read_maillist.py &'
 	os.system(cmd)
