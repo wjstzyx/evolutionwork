@@ -15,7 +15,7 @@ res=output.read()
 print res,type(res)
 if res:
 	processid=res
-	print record
+	print processid
 if res=='':
 	cmd='python /home/yuyang/myfile/evolutionwork/pythonfile/read_maillist.py &'
 	os.system(cmd)
