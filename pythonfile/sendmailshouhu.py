@@ -19,7 +19,7 @@ cmd="ps -ef|grep 'read_maillist.py'|grep -v 'grep'|awk '{print $2}'"
 output=os.popen(cmd)
 res=output.read()
 print res,type(res)
-if res and (nowtimehour==11 or nowtimehour==20):
+if res and (nowtimehour=='11' or nowtimehour=='20'):
 	processid=res
 	print processid
 	cmd="kill %s" % (processid)
@@ -36,7 +36,7 @@ cmd="ps -ef|grep 'monitor_wenhua.py'|grep -v 'grep'|awk '{print $2}'"
 output=os.popen(cmd)
 res=output.read()
 print res,type(res)
-if res and (nowtimehour==11 or nowtimehour==20):
+if res and (nowtimehour=='11' or nowtimehour=='20'):
 	processid=res
 	print processid
 	cmd="kill %s" % (processid)
