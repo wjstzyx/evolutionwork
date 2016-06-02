@@ -103,11 +103,12 @@ def fix_data_CU(Date):
 
 
 
-Date='2016/05/12'
-fix_data_IF(Date)
-fix_data_CU(Date)
+Date='2016/05/13'
+# fix_data_IF(Date)
+# fix_data_CU(Date)
 # symbol='J'
 # time='2015/02/06'
 # print symbol,time
 # add_for_item_CU(symbol,time)
-# add_for_item_CU_before('LZL','2015/11/20')
+# add_for_item_CU_before('p','2016/05/13')
+# add_for_item_CU('p','2016/05/13')

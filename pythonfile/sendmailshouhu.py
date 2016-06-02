@@ -13,6 +13,9 @@ cmd="ps -ef|grep 'read_maillist.py'|grep -v 'grep'"
 output=os.popen(cmd)
 res=output.read()
 print res,type(res)
+if res:
+	record=res.split(' ')
+	print record
 if res=='':
 	cmd='python /home/yuyang/myfile/evolutionwork/pythonfile/read_maillist.py &'
 	os.system(cmd)

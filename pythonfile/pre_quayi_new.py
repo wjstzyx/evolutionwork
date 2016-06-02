@@ -148,7 +148,7 @@ def main_calculate(symbol,ac):
 
 def pre_quanyi_data(ac,symbol,type):
 	sql="select (year(getdate())-2000)*10000+month(getdate())*100+day(getdate())"
-	print sql
+	# print sql
 	nowD=ms.find_sql(sql)[0][0]
 	# print nowD
 	# exit()

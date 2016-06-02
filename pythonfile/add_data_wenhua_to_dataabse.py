@@ -143,7 +143,7 @@ if not os.path.isfile(targetfile):
 
 
 downresult=ftp_down(_dfrom,date)# down from ftp
-# downresult=1
+#downresult=1
 if downresult==1:
     targetfilename=add_data_wenhua(_dfrom,date, timestart, timeend,mysymbol )  #  extrct  data from timestart to timeend
     read_date_write_to_database(targetfilename,date,mysymbol) # targetfile=r'Y:\data_wenhua\20160427_0_2359.csv'

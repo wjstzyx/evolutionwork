@@ -33,27 +33,3 @@ def test_replicate():
 
 test_replicate()
 
-
-# def backup_AU():
-# 	#Symbol='AU' and StockDate>'2015-05-22 11:10:00.000'
-# 	sql="select id,D,StockDate from Tsymbol where symbol='AU' and StockDate>='2015-06-19 11:23:00.000' order by StockDate"
-# 	#sql="select a.id,a.D,a.StockDate from Tsymbol a inner join (select top 20 sum(1)as num ,StockDate,symbol  from Tsymbol group by StockDate,Symbol having sum(1)!=1) temp on a.Symbol=temp.Symbol and a.StockDate=temp.StockDate"
-# 	res=ms.dict_sql(sql)
-# 	for item in res:
-# 		if item['D']=='2015/05/22':
-# 			StockDate=item['StockDate']
-# 			sql="select year('%s')" % (StockDate)
-# 			year=ms.find_sql(sql)[0][0]
-# 			sql="select month('%s')" % (StockDate)
-# 			month=ms.find_sql(sql)[0][0]
-# 			sql="select day('%s')" % (StockDate)
-# 			day=ms.find_sql(sql)[0][0]
-# 			newD=str(year)+'/'+str(month).zfill(2)+'/'+str(day).zfill(2)
-# 			sql="update Tsymbol set D='%s' where id=%s and symbol='AU' and StockDate='%s'" % (newD,item['id'],StockDate)
-# 			# print sql
-# 			ms.insert_sql(sql)
-
-
-
-
-# backup_AU()
