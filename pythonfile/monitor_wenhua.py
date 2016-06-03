@@ -7,6 +7,7 @@ reload(sys)
 sys.setdefaultencoding('utf8')
 from dbconn import MSSQL
 ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+ms1 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="future")
 # resList = ms.find_sql("select top 2 * from st_report")
 # print resList
 
@@ -118,13 +119,19 @@ def monitor_Thunder():
 		endtime=datetime.datetime.strptime(endtime,'%H:%M:%S')
 		if nowtime>starttime and nowtime<=endtime:
 			#检测最新更新时间与当时的时间差，如果相差60s就报警
-			sql="SELECT TOP 1 UpdateTime   FROM [Future].[dbo].[Trading_ABMonitor] WHERE ComputerName='%s' and IFMonitor=1" % (symbol)
-			res=ms.find_sql(sql)
+			sql="SELECT time  FROM [future].[dbo].[Program_night] where name='%s'" % (symbol)
+			print sql
+			res=ms1.find_sql(sql)
 			if res:
 				lasttime=res[0][0]
 				print lasttime
-				print getnow
-				if (getnow-lasttime).seconds>60:
+				#lasttime=210509
+				#nowtime='21:05:01'
+				mynowtime=int(getnow.strftime('%H%M%S'))
+				print mynowtime
+				chayi=minusmin(lasttime,mynowtime)
+				print 'chayi',chayi
+				if chayi>60 or chayi<-60:
 					subject='%s Thunder程序出错' % (symbol)
 					msg='%s Thunder程序出错' % (symbol)
 					sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime) values('%s','%s','%s',%s,getdate())" % (subject,mailtolist,msg,0)
@@ -136,11 +143,33 @@ def monitor_Thunder():
 			pass
 
 
+def minusmin(time1,time2):
+	#time1=160523
+	hour1=round(time1/10000)
+	min1=round((time1%10000)/100)
+	sec1=time1-hour1*10000-min1*100
+	hour2=round(time2/10000)
+	min2=round((time2%10000)/100)
+	sec2=time2-hour2*10000-min2*100
+	return (hour2-hour1)*3600+(min2-min1)*60+(sec2-sec1)
+
+
+
 
 
 
 
 while(1):
-	monitor_wenhua()
-	monitor_AB()
+	try:
+		monitor_wenhua()
+	except:
+		pass
+	try:
+		monitor_AB()
+	except:
+		pass
+	try:
+		monitor_Thunder()
+	except:
+		pass
 	time.sleep(60)
