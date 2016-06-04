@@ -158,7 +158,7 @@ def minusmin(time1,time2):
 
 
 
-
+i=0
 while(1):
 	try:
 		monitor_wenhua()
@@ -173,3 +173,6 @@ while(1):
 	except:
 		pass
 	time.sleep(60)
+	i=i+1
+	if i>240:
+		break
