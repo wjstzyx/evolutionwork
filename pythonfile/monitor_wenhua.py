@@ -156,6 +156,20 @@ def minusmin(time1,time2):
 
 
 
+def ismonitorday():
+	sql="select top 1 D from TSymbol ORDER BY id desc"
+	lastday=ms.find_sql(sql)[0][0]
+	lastday='20'+lastday[2:4]+lastday[5:7]+lastday[8:10]
+	sql="select getdate()"
+	nowD=ms.find_sql(sql)[0][0].strftime('%Y%m%d')
+	if nowD==lastday:
+		return 1
+	else:
+		return 0
+
+
+if ismonitorday()==0:
+	exit()
 
 
 i=0

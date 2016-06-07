@@ -127,8 +127,13 @@ def main_calculate(symbol,ac):
 		d_max=ms.find_sql(sql)[0][0]
 		if d_max is None or d_max==0:
 			d_max=0.0001
-		sql="insert into dailyquanyi(ac,symbol,position,quanyi,comm,D,d_max,times) values('%s','%s',%s,%s,%s,%s,%s,%s)" % (ac,symbol,myround(position),lastdayquanyi,lastdaycomm,newD,d_max,times)
-		ms.insert_sql(sql)
+		sql="select top 1 d fROM TSymbol ORDER BY id desc"
+		refD=ms.find_sql(sql)[0][0]
+		refD=refD[2:4]+refD[5:7]+refD[8:10]
+		if newD==refD:
+			sql="insert into dailyquanyi(ac,symbol,position,quanyi,comm,D,d_max,times) values('%s','%s',%s,%s,%s,%s,%s,%s)" % (ac,symbol,myround(position),lastdayquanyi,lastdaycomm,newD,d_max,times)
+			ms.insert_sql(sql)
+
 
 		# if tempD=='160523' and deltaposition!=0:
 		# 	print item['stockdate'],'   ',lastdayquanyi,'   ',lastdaycomm,'   ',position
