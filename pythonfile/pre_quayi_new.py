@@ -237,7 +237,7 @@ def pre_quanyi_data(ac,symbol,type):
 	# print nowD
 	# exit()
 	sql="select distinct D from st_report where D=%s  order by D" % (nowD)
-	sql="select distinct D from st_report  order by D"
+	# sql="select distinct D from st_report  order by D"
 	res=ms.dict_sql(sql)
 	for item1 in res:
 		print item1['D']
