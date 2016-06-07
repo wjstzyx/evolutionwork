@@ -146,6 +146,85 @@ def main_calculate(symbol,ac):
 # main_calculate(symbol,ac)
 
 
+def main_calculate_distinc(symbolfrom,symbolto,ac):
+	pointvalue={'IF':300,'CU':5,'RB':10,'AG':15,'IC':200,'RU':10,'TA':5}
+	#commvalue={'IF':60,'CU':50,'RB':10,'AG':20,'IC':60,'RU':50,'TA':10}
+	commvalue={'IF':60,'CU':20,'RB':10,'AG':8,'IC':60,'RU':20,'TA':10}
+	tablename="#tempinfo_%s" % (ac)
+	# tablename='tempquanyiinfo'
+	try:		
+		sql="drop table %s" % (tablename)
+		ms.insert_sql(sql)
+	except:
+		pass
+	sql="select deltaposition,0 as position,C,0 as deltaquanyi,0 as comm, D,stockdate into %s from (select ISNULL(b.position,0) AS deltaposition ,a.StockDate,a.C,a.D from TSymbol a left outer join [quanyi_log_groupby] b on a.Symbol='%s'  and b.symbol='%s' and b.type=0  and b.ac='%s' and a.StockDate=b.stockdate where a.Symbol='%s' ) temp " % (tablename,symbolto,symbolfrom,ac,symbolto)
+	ms.insert_sql(sql)
+	sql="select * from %s order by stockdate" % (tablename)
+	res=ms.dict_sql(sql)
+	# print res[1]
+	lastposition=0
+	lastClose=res[0]['C']
+	position=res[0]['deltaposition']
+	changeD=0
+	lastdaypostiion=0
+	lastdayquanyi=0
+	lastdaycomm=0
+	times=0
+	sql="select max(D) from dailyquanyi where ac='%s' and symbol='%s'" % (ac,symbolto)
+	lastrecordday=ms.find_sql(sql)[0][0]
+	for item in res[1:]:
+		C=item['C']
+		D=item['D']
+		tempD=D[2:4]+D[5:7]+D[8:10]
+		deltaposition=item['deltaposition']
+		##开始计算
+		deltaquanyi=myround(position)*float((C-lastClose))*float(pointvalue[symbolto])
+		comm=abs(myround(position+deltaposition)-myround(position))*commvalue[symbolto]
+		times=times+abs(myround(position+deltaposition)-myround(position))
+		if changeD!=tempD:
+			print lastrecordday,changeD
+			#每天第一根
+			if changeD>lastrecordday:
+				sql="SELECT round(sum(p_size*ratio/100),0) FROM p_log where type=1 and st<>123456 and ac='%s' and symbol='%s' and d=%s" % (ac,symbolfrom,changeD)
+				d_max=ms.find_sql(sql)[0][0]
+				if d_max is None or d_max==0:
+					d_max=0.0001
+				sql="insert into dailyquanyi(ac,symbol,position,quanyi,comm,D,d_max,times) values('%s','%s',%s,%s,%s,%s,%s,%s)" % (ac,symbolto,myround(position),lastdayquanyi,lastdaycomm,changeD,d_max,times)
+				# print sql
+				ms.insert_sql(sql)
+			changeD=tempD
+			lastdayquanyi=0
+			lastdaycomm=0
+			times=0
+		lastdayquanyi=lastdayquanyi+deltaquanyi
+		lastdaycomm=lastdaycomm+comm
+		position=position+deltaposition
+		lastClose=C
+	sql="select getdate()"
+	res=ms.find_sql(sql)[0][0]
+	res=res.strftime("%Y-%m-%d %H:%M:%S")
+	newD=res[2:4]+res[5:7]+res[8:10]
+	if newD>lastrecordday:
+		sql="SELECT round(sum(p_size*ratio/100),0) FROM p_log where type=1 and st<>123456 and ac='%s' and symbol='%s' and d=%s" % (ac,symbolfrom,newD)
+		d_max=ms.find_sql(sql)[0][0]
+		if d_max is None or d_max==0:
+			d_max=0.0001
+		sql="select top 1 d fROM TSymbol ORDER BY id desc"
+		refD=ms.find_sql(sql)[0][0]
+		refD=refD[2:4]+refD[5:7]+refD[8:10]
+		if newD==refD:
+			sql="insert into dailyquanyi(ac,symbol,position,quanyi,comm,D,d_max,times) values('%s','%s',%s,%s,%s,%s,%s,%s)" % (ac,symbolto,myround(position),lastdayquanyi,lastdaycomm,newD,d_max,times)
+			ms.insert_sql(sql)
+
+
+	try:		
+		sql="drop table %s" % (tablename)
+		ms.insert_sql(sql)
+	except:
+		pass
+
+
+
 
 
 
@@ -158,6 +237,7 @@ def pre_quanyi_data(ac,symbol,type):
 	# print nowD
 	# exit()
 	sql="select distinct D from st_report where D=%s  order by D" % (nowD)
+	sql="select distinct D from st_report  order by D"
 	res=ms.dict_sql(sql)
 	for item1 in res:
 		print item1['D']
@@ -176,6 +256,18 @@ def pre_data_for_ac(itemlist,symbol):
 		main_calculate(symbol,ac)
 
 
+def pre_data_for_ac_distinc(itemlist,symbolfrom,symbolto):
+	i=0
+	for item in itemlist:
+		i=i+1
+		ac=item
+		print i,ac,symbolto
+		# pre_quanyi_data(ac,symbol,0)
+		# pre_quanyi_data(ac,symbol,1)
+		main_calculate_distinc(symbolfrom,symbolto,ac)
+
+
+
 
 
 def main_pre_quanyi():
@@ -187,6 +279,7 @@ def main_pre_quanyi():
 	AGlist=('9AGOLD','9AGVD05','9AGVD06','AGNEW4','AGNEW6','AGNEW8','AGNEW19','AGNEWLVO')
 	IClist=('YEEXIC','YEOTIC','YETRIC','YEZHIC')
 	IFlist=('9CPPUD','DayBrIF','9Distance','9DUD1','9DUDHL','9DUDRV','9EXR1410','9EXV1410','9FORCE','9FQS1','9HAL','9HAL2','9HAL3','9HALMA','9HUITIAO','9HUITIAO2','9HUITIAO3','9HUITIAO4','9KDHDAY','9KDHPM','9Linerate','9RATE','9MALONGK','9MiddayTrend','9MinVolPbuy','9MONDAY','9MORNINGOUT','9MT','9MVRATE','9NHL','9NOON','9OpenBet','9QMA','9QPMIF','9Reversal','9Reversal2','9Reversal3','9V4EIV','9VK1','9VK3','9VPINVOl_L','9VPINVOl_S','9VPINVOl_S2','9wb','9weipan','9WeipanREV','9WeipanStatics','9YAP01','9YY2','9YYMA','9LUD','9LUD2CH','9LUD3','9LUD4','9LUD5','9LUD6','9LUD7','9LUD8','9LUD10','9LUD11V2','9LUD13','9LUD14','9LUD16','LUDch1','LUDch4','LUDch5','LUDch6','LUDch8','LUD52015','LUD62015','LUD72015','LUD82015','TimeV2Pm','TimeV3DtaPm','TimeV3HLAm','TimeV3HLPm','V4EIVelements','V4EIVNEW','IFQG1310','IFQGEX','IFQGOT','9QGBombma2','IFQGTB','IFQGTR','IFQGWB','YEQGTR','YEQGEX','YEQGOT','YEQGZH211')
+	ICIFlist=('YEQGEX','YEQGOT','YEQGTR')
 
 	pre_data_for_ac(RBlist,'RB')
 	pre_data_for_ac(CUlist,'CU')
@@ -195,6 +288,7 @@ def main_pre_quanyi():
 	pre_data_for_ac(IFlist,'IF')
 	pre_data_for_ac(RUlist,'RU')
 	pre_data_for_ac(TAlist,'TA')
+	pre_data_for_ac_distinc(ICIFlist,'IF','IC')
 
 
 
