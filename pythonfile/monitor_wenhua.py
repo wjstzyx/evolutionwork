@@ -41,6 +41,8 @@ def monitor_wenhua():
 			res=ms.find_sql(sql)
 			if res:
 				lasttime=res[0][0]
+				print "wenhua"
+				print (getnow-lasttime).seconds
 				if (getnow-lasttime).seconds>180:
 					subject='%s文华数据采集产生延迟' % (symbol)
 					msg='%s 文华数据采集产生延迟' % (symbol)
@@ -81,6 +83,7 @@ def monitor_AB():
 			res=ms.find_sql(sql)
 			if res:
 				lasttime=res[0][0]
+				print "AB"
 				print lasttime
 				print getnow
 				if (getnow-lasttime).seconds>50:
@@ -120,7 +123,6 @@ def monitor_Thunder():
 		if nowtime>starttime and nowtime<=endtime:
 			#检测最新更新时间与当时的时间差，如果相差60s就报警
 			sql="SELECT time  FROM [future].[dbo].[Program_night] where name='%s'" % (symbol)
-			print sql
 			res=ms1.find_sql(sql)
 			if res:
 				lasttime=res[0][0]
@@ -136,6 +138,13 @@ def monitor_Thunder():
 					msg='%s Thunder程序出错' % (symbol)
 					sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime) values('%s','%s','%s',%s,getdate())" % (subject,mailtolist,msg,0)
 					ms.insert_sql(sql)
+			else:
+				subject='%s Thunder程序出错' % (symbol)
+				msg='%s Thunder程序出错' % (symbol)
+				sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime) values('%s','%s','%s',%s,getdate())" % (subject,mailtolist,msg,0)
+				ms.insert_sql(sql)
+
+
 		else:	
 			# print starttime
 			# print endtime
@@ -171,7 +180,7 @@ def ismonitorday():
 if ismonitorday()==0:
 	exit()
 
-
+print "begin"
 i=0
 while(1):
 	try:
