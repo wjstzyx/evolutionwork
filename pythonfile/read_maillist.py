@@ -34,6 +34,8 @@ def read_maillist():
 			print seconds,type(seconds)
 			if seconds<1800:
 				print "时间少于半小时，不再发送"
+				sql="update [LogRecord].[dbo].[maillist] set ms01g=msg+' 经过 %s 秒',updatetime=getdate() where id=%s" % (seconds,item['id'])
+				ms.insert_sql(sql)
 			else:
 				print "时间大于半小时，准备发送"
 				if send_mail(mailtolist,subject,msg):
