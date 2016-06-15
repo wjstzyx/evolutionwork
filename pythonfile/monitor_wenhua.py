@@ -133,7 +133,7 @@ def monitor_Thunder():
 				print mynowtime
 				chayi=minusmin(lasttime,mynowtime)
 				print 'chayi',chayi
-				if chayi>60 or chayi<-60:
+				if chayi>70 or chayi<-70:
 					subject='%s Thunder程序出错' % (symbol)
 					msg='%s Thunder程序出错' % (symbol)
 					sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime) values('%s','%s','%s',%s,getdate())" % (subject,mailtolist,msg,0)

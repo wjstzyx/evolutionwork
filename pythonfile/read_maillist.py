@@ -32,7 +32,7 @@ def read_maillist():
 			lasttime=tempres[0][6]
 			seconds=(datetime.datetime.now()-lasttime).seconds
 			print seconds,type(seconds)
-			if seconds<1800:
+			if seconds<310:
 				print "时间少于半小时，不再发送"
 				sql="update [LogRecord].[dbo].[maillist] set ms01g=msg+' 经过 %s 秒',updatetime=getdate() where id=%s" % (seconds,item['id'])
 				ms.insert_sql(sql)
