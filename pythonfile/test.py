@@ -2,6 +2,7 @@
 #!/usr/bin/env python
 import sys
 import os
+import datetime
 reload(sys)
 sys.setdefaultencoding('utf8')
 from dbconn import MSSQL
@@ -39,4 +40,17 @@ def read_txt():
 	print i
 
 	f.close()
-read_txt()
+
+
+
+def is_time_right():
+	ms1 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="future")
+	sql="select getdate()"
+	res=ms1.find_sql(sql)
+	print res[0][0]
+	res=ms.find_sql(sql)
+	print res[0][0]
+	print datetime.datetime.now()
+
+
+is_time_right()

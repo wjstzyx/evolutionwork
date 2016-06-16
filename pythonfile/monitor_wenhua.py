@@ -19,8 +19,14 @@ def monitor_wenhua():
 	sql="select email from [LogRecord].[dbo].[mailtolist] where istomail=1"
 	reslist=ms.find_sql(sql)
 	mailtolist=''
+	sendmessage=''
 	for item in reslist:
-		mailtolist=mailtolist+','+item[0]
+		if "@" in item[0]:
+			mailtolist=mailtolist+','+item[0]
+		else:
+			sendmessage=sendmessage+','+item[0]
+	mailtolist=mailtolist.strip(',')
+	sendmessage=sendmessage.strip(',')
 	# print mailtolist
 	#待检测的ABmachine列表
 	sql="select item,starttime,endtime from [LogRecord].[dbo].[monitorconfig] where type='wenhua' and ismonitor=1"
@@ -46,7 +52,7 @@ def monitor_wenhua():
 				if (getnow-lasttime).seconds>180:
 					subject='%s文华数据采集产生延迟' % (symbol)
 					msg='%s 文华数据采集产生延迟' % (symbol)
-					sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime) values('%s','%s','%s',%s,getdate())" % (subject,mailtolist,msg,0)
+					sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,msg,0,sendmessage)
 					ms.insert_sql(sql)
 		else:	
 			# print starttime
@@ -61,8 +67,14 @@ def monitor_AB():
 	sql="select email from [LogRecord].[dbo].[mailtolist] where istomail=1"
 	reslist=ms.find_sql(sql)
 	mailtolist=''
+	sendmessage=''
 	for item in reslist:
-		mailtolist=mailtolist+','+item[0]
+		if "@" in item[0]:
+			mailtolist=mailtolist+','+item[0]
+		else:
+			sendmessage=sendmessage+','+item[0]
+	mailtolist=mailtolist.strip(',')
+	sendmessage=sendmessage.strip(',')
 	# print mailtolist
 	#待检测的ABmachine列表
 	sql="select item,starttime,endtime from [LogRecord].[dbo].[monitorconfig] where type='AB' and ismonitor=1"
@@ -89,7 +101,7 @@ def monitor_AB():
 				if (getnow-lasttime).seconds>50:
 					subject='%s AB程序出错' % (symbol)
 					msg='%s AB程序出错' % (symbol)
-					sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime) values('%s','%s','%s',%s,getdate())" % (subject,mailtolist,msg,0)
+					sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,msg,0,sendmessage)
 					ms.insert_sql(sql)
 		else:	
 			# print starttime
@@ -104,8 +116,14 @@ def monitor_Thunder():
 	sql="select email from [LogRecord].[dbo].[mailtolist] where istomail=1"
 	reslist=ms.find_sql(sql)
 	mailtolist=''
+	sendmessage=''
 	for item in reslist:
-		mailtolist=mailtolist+','+item[0]
+		if "@" in item[0]:
+			mailtolist=mailtolist+','+item[0]
+		else:
+			sendmessage=sendmessage+','+item[0]
+	mailtolist=mailtolist.strip(',')
+	sendmessage=sendmessage.strip(',')
 	# print mailtolist
 	#待检测的ABmachine列表
 	sql="select item,starttime,endtime from [LogRecord].[dbo].[monitorconfig] where type='Thunder' and ismonitor=1"
@@ -121,7 +139,7 @@ def monitor_Thunder():
 		starttime=datetime.datetime.strptime(starttime,'%H:%M:%S')
 		endtime=datetime.datetime.strptime(endtime,'%H:%M:%S')
 		if nowtime>starttime and nowtime<=endtime:
-			#检测最新更新时间与当时的时间差，如果相差60s就报警
+			#检测最新更新时间与当时的时间差，如果相差70s就报警
 			sql="SELECT time  FROM [future].[dbo].[Program_night] where name='%s'" % (symbol)
 			res=ms1.find_sql(sql)
 			if res:
@@ -136,7 +154,7 @@ def monitor_Thunder():
 				if chayi>70 or chayi<-70:
 					subject='%s Thunder程序出错' % (symbol)
 					msg='%s Thunder程序出错' % (symbol)
-					sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime) values('%s','%s','%s',%s,getdate())" % (subject,mailtolist,msg,0)
+					sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,msg,0,sendmessage)
 					ms.insert_sql(sql)
 			else:
 				subject='%s Thunder程序出错' % (symbol)
@@ -148,7 +166,7 @@ def monitor_Thunder():
 		else:	
 			# print starttime
 			# print endtime
-			# print nowtime
+			# print nowtim
 			pass
 
 
@@ -193,9 +211,10 @@ while(1):
 		pass
 	try:
 		monitor_Thunder()
-	except:
+	except Exception,e:
+		print e
 		pass
-	time.sleep(60)
+	time.sleep(50)
 	i=i+1
 	if i>240:
 		break
