@@ -25,6 +25,7 @@ def input_temp_table(ac,symbol,type,D):
 	except:
 		pass
 	sql="select * into  #temp_quanyi_new from (select '%s' as ac,'%s' as symbol,'%s' as type,temp.id,p,PP,p_size,ratio,st,o.stockdate from tsymbol o inner join (select st_report.id,st_report.p,st_report.pp,p.symbol,st_report.stockdate,st_report.st,p.p_size,p.ac,p.ratio,st_report.type from st_report  inner join p_log p on p.st=st_report.st and p.ac='%s' and p.symbol='%s' and p.d=%s and st_report.type=%s ) temp on temp.stockdate=o.stockdate and o.symbol=temp.symbol where o.symbol='%s' ) temp " % (ac,symbol,type,ac,symbol,D,type,symbol)
+
 	ms.insert_sql(sql)
 	#如果有记录才进行
 	sql="select count(1) from #temp_quanyi_new"
@@ -74,7 +75,6 @@ def main_calculate(symbol,ac):
 		pass
 	sql="select deltaposition,0 as position,C,0 as deltaquanyi,0 as comm, D,stockdate into %s from (select ISNULL(b.position,0) AS deltaposition ,a.StockDate,a.C,a.D from TSymbol a left outer join [quanyi_log_groupby] b on a.Symbol=b.symbol  and b.symbol='%s' and b.type=0  and b.ac='%s' and a.StockDate=b.stockdate where a.Symbol='%s' ) temp " % (tablename,symbol,ac,symbol)
 	# sql="insert into tempquanyiinfo select deltaposition,0 as position,C,0 as deltaquayi,0 as comm, D,stockdate from (select ISNULL(b.position,0) AS deltaposition ,a.StockDate,a.C,a.D from TSymbol a left outer join [quanyi_log_groupby] b on a.Symbol=b.symbol  and b.symbol='%s' and b.type=0  and b.ac='%s' and a.StockDate=b.stockdate where a.Symbol='%s' ) temp " % (symbol,ac,symbol)
-	# print sql
 	ms.insert_sql(sql)
 	sql="select * from %s order by stockdate" % (tablename)
 	res=ms.dict_sql(sql)
@@ -237,7 +237,7 @@ def pre_quanyi_data(ac,symbol,type):
 	# print nowD
 	# exit()
 	sql="select distinct D from st_report where D=%s  order by D" % (nowD)
-	# sql="select distinct D from st_report  order by D"
+	sql="select distinct D from st_report  where D>160606 order by D"
 	res=ms.dict_sql(sql)
 	for item1 in res:
 		print item1['D']
@@ -298,4 +298,5 @@ def main_pre_quanyi():
 # print res
 main_pre_quanyi()
 # pre_data_for_ac(['RBQGstrev_TG','RBQGTR_TG'],'RB')
-
+# pre_quanyi_data('9DUD1','IF',0)
+#main_calculate('IF','9DUD1')

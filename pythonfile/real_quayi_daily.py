@@ -17,60 +17,12 @@ def myround(num):
 	if num<=0:
 		return round(num+0.000000001)
 
-#将记录放入临时表(14秒)
-def input_temp_table(ac,symbol,type,D):
-	try:
-		sql="drop table #real_quanyi_position"
-		ms.insert_sql(sql)
-	except:
-		pass
-	sql="select * into  #real_quanyi_position from (select '%s' as ac,'%s' as symbol,'%s' as type,temp.id,p,PP,p_size,ratio,st,o.stockdate from tsymbol o inner join (select real_st_report.id,real_st_report.p,real_st_report.pp,p.symbol,real_st_report.stockdate,real_st_report.st,p.p_size,p.ac,p.ratio,real_st_report.type from real_st_report  inner join p_log p on p.st=real_st_report.st and p.ac='%s' and p.symbol='%s' and p.d=%s and real_st_report.type=%s ) temp on temp.stockdate=o.stockdate and o.symbol=temp.symbol where o.symbol='%s' ) temp " % (ac,symbol,type,ac,symbol,D,type,symbol)
-	ms.insert_sql(sql)
-	##删除重复的项
-	sql="delete from #real_quanyi_position where ID not in(select MAX(id) as id from #real_quanyi_position group by st,Stockdate)"
-	ms.insert_sql(sql)
-
-	##结束
-	#如果有记录才进行
-	sql="select count(1) from #real_quanyi_position"
-	res=ms.find_sql(sql)[0][0]
-	if res>0:
-		sql="select top 1 totalposition,stockdate from [real_quanyi_log_groupby] where ac='%s' and symbol='%s' and TYPE=%s order by stockdate desc " % (ac,symbol,type)
-		res=ms.dict_sql(sql)
-		if res:
-			lastP=res[0]['totalposition']
-			laststockdate=res[0]['stockdate']
-		else:
-			lastP=0
-			laststockdate='2010-01-01'
-		tempD='20'+str(D)[0:2]+'/'+str(D)[2:4]+'/'+str(D)[4:6]
-		sql="select distinct stockdate from Tsymbol where symbol='%s' and D='%s' and stockdate >'%s' order by stockdate " % (symbol,tempD,laststockdate)
-		res=ms.find_sql(sql)
-		sql="truncate table real_temp_position"
-		ms.insert_sql(sql)
-		for item in res:
-			sql="select SUM(a.p*a.p_size*a.ratio/100) as P from #real_quanyi_position a inner join(  select MAX(StockDate) as stockdate,st from #real_quanyi_position where StockDate<='%s'  group by st  ) temp  on a.ST=temp.ST and a.StockDate=temp.stockdate" % (item[0])
-			position=ms.find_sql(sql)[0][0]
-			if position is None:
-				position=0
-			deltaposition=(position-lastP)
-			lastP=position
-			sql="insert into [real_temp_position](deltaposition,position,stockdate) values(%s,%s,'%s')" % (deltaposition,position,item[0])
-			ms.insert_sql(sql)
-		sql="insert into [real_quanyi_log_groupby] select '%s','%s',%s,deltaposition,stockdate,position from [real_temp_position] where deltaposition!=0 and stockdate>'%s'" % (ac,symbol,type,laststockdate)
-		ms.insert_sql(sql)
-	sql="drop table #real_quanyi_position"
-	ms.insert_sql(sql)
-	print "OK"
-
-
-
 
 def main_calculate(symbol,ac):
 	pointvalue={'IF':300,'CU':5,'RB':10,'AG':15,'IC':200,'RU':10,'TA':5}
 	#commvalue={'IF':60,'CU':50,'RB':10,'AG':20,'IC':60,'RU':50,'TA':10}
 	commvalue={'IF':60,'CU':20,'RB':10,'AG':8,'IC':60,'RU':20,'TA':10}
-	tablename="#tempinfo_%s" % (ac)
+	tablename="#realtempinfo_%s" % (ac)
 	# tablename='tempquanyiinfo'
 	try:		
 		sql="drop table %s" % (tablename)
@@ -101,6 +53,12 @@ def main_calculate(symbol,ac):
 		deltaposition=item['deltaposition']
 		##开始计算
 		deltaquanyi=myround(position)*float((C-lastClose))*float(pointvalue[symbol])
+		# if tempD>160615:
+		# 	print item['stockdate']
+		# 	print 'deltaquanyi',deltaquanyi
+		# 	print 'myround(position)',myround(position)
+		# 	print 'float((C-lastClose))',float((C-lastClose))
+		# 	print 'float(pointvalue[symbol])',float(pointvalue[symbol])
 		comm=abs(myround(position+deltaposition)-myround(position))*commvalue[symbol]
 		times=times+abs(myround(position+deltaposition)-myround(position))
 		if changeD!=tempD:
@@ -148,14 +106,14 @@ def main_calculate(symbol,ac):
 	except:
 		pass
 
-# main_calculate(symbol,ac)
+
 
 
 def main_calculate_distinc(symbolfrom,symbolto,ac):
 	pointvalue={'IF':300,'CU':5,'RB':10,'AG':15,'IC':200,'RU':10,'TA':5}
 	#commvalue={'IF':60,'CU':50,'RB':10,'AG':20,'IC':60,'RU':50,'TA':10}
 	commvalue={'IF':60,'CU':20,'RB':10,'AG':8,'IC':60,'RU':20,'TA':10}
-	tablename="#tempinfo_%s" % (ac)
+	tablename="#realtempinfo_%s" % (ac)
 	# tablename='tempquanyiinfo'
 	try:		
 		sql="drop table %s" % (tablename)
@@ -230,36 +188,13 @@ def main_calculate_distinc(symbolfrom,symbolto,ac):
 
 
 
-
-
-
-
-
-def pre_quanyi_data(ac,symbol,type):
-	sql="select (year(getdate())-2000)*10000+month(getdate())*100+day(getdate())"
-	# print sql
-	nowD=ms.find_sql(sql)[0][0]
-	# print nowD
-	# exit()
-	sql="select distinct D from real_st_report where D=%s  order by D" % (nowD)
-	sql="select distinct D from real_st_report  order by D"
-	res=ms.dict_sql(sql)
-	for item1 in res:
-		print item1['D']
-		input_temp_table(ac,symbol,type,item1['D'])
-
-
-
 def pre_data_for_ac(itemlist,symbol):
 	i=0
 	for item in itemlist:
 		i=i+1
 		ac=item
 		print i,ac,symbol
-		pre_quanyi_data(ac,symbol,0)
-		# pre_quanyi_data(ac,symbol,1)
-		# main_calculate(symbol,ac)
-
+		main_calculate(symbol,ac)
 
 
 
@@ -274,13 +209,13 @@ def main_pre_quanyi():
 	IFlist=('9CPPUD','DayBrIF','9Distance','9DUD1','9DUDHL','9DUDRV','9EXR1410','9EXV1410','9FORCE','9FQS1','9HAL','9HAL2','9HAL3','9HALMA','9HUITIAO','9HUITIAO2','9HUITIAO3','9HUITIAO4','9KDHDAY','9KDHPM','9Linerate','9RATE','9MALONGK','9MiddayTrend','9MinVolPbuy','9MONDAY','9MORNINGOUT','9MT','9MVRATE','9NHL','9NOON','9OpenBet','9QMA','9QPMIF','9Reversal','9Reversal2','9Reversal3','9V4EIV','9VK1','9VK3','9VPINVOl_L','9VPINVOl_S','9VPINVOl_S2','9wb','9weipan','9WeipanREV','9WeipanStatics','9YAP01','9YY2','9YYMA','9LUD','9LUD2CH','9LUD3','9LUD4','9LUD5','9LUD6','9LUD7','9LUD8','9LUD10','9LUD11V2','9LUD13','9LUD14','9LUD16','LUDch1','LUDch4','LUDch5','LUDch6','LUDch8','LUD52015','LUD62015','LUD72015','LUD82015','TimeV2Pm','TimeV3DtaPm','TimeV3HLAm','TimeV3HLPm','V4EIVelements','V4EIVNEW','IFQG1310','IFQGEX','IFQGOT','9QGBombma2','IFQGTB','IFQGTR','IFQGWB','YEQGTR','YEQGEX','YEQGOT','YEQGZH211')
 	ICIFlist=('YEQGEX','YEQGOT','YEQGTR')
 
-	pre_data_for_ac(RBlist,'RB')
-	pre_data_for_ac(CUlist,'CU')
-	pre_data_for_ac(AGlist,'AG')
-	pre_data_for_ac(IClist,'IC')
+	# pre_data_for_ac(RBlist,'RB')
+	# pre_data_for_ac(CUlist,'CU')
+	# pre_data_for_ac(AGlist,'AG')
+	# pre_data_for_ac(IClist,'IC')
 	pre_data_for_ac(IFlist,'IF')
-	pre_data_for_ac(RUlist,'RU')
-	pre_data_for_ac(TAlist,'TA')
+	# pre_data_for_ac(RUlist,'RU')
+	# pre_data_for_ac(TAlist,'TA')
 	# pre_data_for_ac_distinc(ICIFlist,'IF','IC')
 
 
@@ -289,7 +224,8 @@ def main_pre_quanyi():
 # sql="select 1"
 # res=ms.dict_sql(sql)
 # print res
-main_pre_quanyi()
+# main_pre_quanyi()
+main_calculate('IF','9DUD1')
 # input_temp_table('YEQGOT','IF',0,160615)
 # pre_data_for_ac(['RBQGstrev_TG','RBQGTR_TG'],'RB')
-# pre_quanyi_data('9DUD1','IF',0)
+
