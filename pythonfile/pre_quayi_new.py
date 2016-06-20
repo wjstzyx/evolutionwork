@@ -45,6 +45,12 @@ def input_temp_table(ac,symbol,type,D):
 		sql="truncate table temp_position"
 		ms.insert_sql(sql)
 		for item in res:
+			##去除IF IC 9:15-9:29信号
+			timestr=item[0].strftime("%H%M")
+			timestr=int(timestr)
+			if symbol in ('IC','IF') and timestr>=915 and  timestr<=929:
+				continue
+			##--------------end
 			sql="select SUM(a.p*a.p_size*a.ratio/100) as P from #temp_quanyi_new a inner join(  select MAX(StockDate) as stockdate,st from #temp_quanyi_new where StockDate<='%s'  group by st  ) temp  on a.ST=temp.ST and a.StockDate=temp.stockdate" % (item[0])
 			position=ms.find_sql(sql)[0][0]
 			if position is None:
@@ -237,7 +243,7 @@ def pre_quanyi_data(ac,symbol,type):
 	# print nowD
 	# exit()
 	sql="select distinct D from st_report where D=%s  order by D" % (nowD)
-	sql="select distinct D from st_report  where D>160606 order by D"
+	#sql="select distinct D from st_report  where D>160606 order by D"
 	res=ms.dict_sql(sql)
 	for item1 in res:
 		print item1['D']

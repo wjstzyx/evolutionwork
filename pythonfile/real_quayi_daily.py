@@ -197,6 +197,15 @@ def pre_data_for_ac(itemlist,symbol):
 		main_calculate(symbol,ac)
 
 
+def pre_data_for_ac_distinc(itemlist,symbolfrom,symbolto):
+	i=0
+	for item in itemlist:
+		i=i+1
+		ac=item
+		print i,ac,symbolto
+		main_calculate_distinc(symbolfrom,symbolto,ac)
+
+
 
 def main_pre_quanyi():
 	i=0
@@ -209,14 +218,14 @@ def main_pre_quanyi():
 	IFlist=('9CPPUD','DayBrIF','9Distance','9DUD1','9DUDHL','9DUDRV','9EXR1410','9EXV1410','9FORCE','9FQS1','9HAL','9HAL2','9HAL3','9HALMA','9HUITIAO','9HUITIAO2','9HUITIAO3','9HUITIAO4','9KDHDAY','9KDHPM','9Linerate','9RATE','9MALONGK','9MiddayTrend','9MinVolPbuy','9MONDAY','9MORNINGOUT','9MT','9MVRATE','9NHL','9NOON','9OpenBet','9QMA','9QPMIF','9Reversal','9Reversal2','9Reversal3','9V4EIV','9VK1','9VK3','9VPINVOl_L','9VPINVOl_S','9VPINVOl_S2','9wb','9weipan','9WeipanREV','9WeipanStatics','9YAP01','9YY2','9YYMA','9LUD','9LUD2CH','9LUD3','9LUD4','9LUD5','9LUD6','9LUD7','9LUD8','9LUD10','9LUD11V2','9LUD13','9LUD14','9LUD16','LUDch1','LUDch4','LUDch5','LUDch6','LUDch8','LUD52015','LUD62015','LUD72015','LUD82015','TimeV2Pm','TimeV3DtaPm','TimeV3HLAm','TimeV3HLPm','V4EIVelements','V4EIVNEW','IFQG1310','IFQGEX','IFQGOT','9QGBombma2','IFQGTB','IFQGTR','IFQGWB','YEQGTR','YEQGEX','YEQGOT','YEQGZH211')
 	ICIFlist=('YEQGEX','YEQGOT','YEQGTR')
 
-	# pre_data_for_ac(RBlist,'RB')
-	# pre_data_for_ac(CUlist,'CU')
-	# pre_data_for_ac(AGlist,'AG')
-	# pre_data_for_ac(IClist,'IC')
+	pre_data_for_ac(RBlist,'RB')
+	pre_data_for_ac(CUlist,'CU')
+	pre_data_for_ac(AGlist,'AG')
+	pre_data_for_ac(IClist,'IC')
 	pre_data_for_ac(IFlist,'IF')
-	# pre_data_for_ac(RUlist,'RU')
-	# pre_data_for_ac(TAlist,'TA')
-	# pre_data_for_ac_distinc(ICIFlist,'IF','IC')
+	pre_data_for_ac(RUlist,'RU')
+	pre_data_for_ac(TAlist,'TA')
+	pre_data_for_ac_distinc(ICIFlist,'IF','IC')
 
 
 
@@ -224,8 +233,8 @@ def main_pre_quanyi():
 # sql="select 1"
 # res=ms.dict_sql(sql)
 # print res
-# main_pre_quanyi()
-main_calculate('IF','9DUD1')
+main_pre_quanyi()
+# main_calculate('IF','9DUD1')
 # input_temp_table('YEQGOT','IF',0,160615)
 # pre_data_for_ac(['RBQGstrev_TG','RBQGTR_TG'],'RB')
 

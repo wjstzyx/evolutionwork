@@ -9,13 +9,13 @@ ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 # print resList
 
 def testquanyi():
-	sql="select distinct ac,symbol from [Future].[dbo].[real_quanyi_log_groupby]"
+	sql="select distinct ac,symbol from [Future].[dbo].[quanyi_log_groupby]"
 	res=ms.dict_sql(sql)
 	isss=0
 	for iitem in res:
 		ac=iitem['ac']
 		symbol=iitem['symbol']
-		sql="select * from [Future].[dbo].[real_quanyi_log_groupby] where ac='%s' and symbol='%s' order by stockdate" %(ac,symbol)
+		sql="select * from [Future].[dbo].[quanyi_log_groupby] where ac='%s' and symbol='%s' order by stockdate" %(ac,symbol)
 		print sql
 		res1=ms.dict_sql(sql)
 		lastposition=res1[0]['totalposition']

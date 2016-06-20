@@ -18,7 +18,7 @@ def myround(num):
 		return round(num+0.000000001)
 
 #将记录放入临时表(14秒)
-def input_temp_table(ac,symbol,type,D):
+def input_temp_table(ac,symbol,type,D):	
 	try:
 		sql="drop table #real_quanyi_position"
 		ms.insert_sql(sql)
@@ -29,6 +29,10 @@ def input_temp_table(ac,symbol,type,D):
 	##删除重复的项
 	sql="delete from #real_quanyi_position where ID not in(select MAX(id) as id from #real_quanyi_position group by st,Stockdate)"
 	ms.insert_sql(sql)
+
+	##将9:15-9:29记录换成9:30时间戳
+
+
 
 	##结束
 	#如果有记录才进行
@@ -49,6 +53,15 @@ def input_temp_table(ac,symbol,type,D):
 		sql="truncate table real_temp_position"
 		ms.insert_sql(sql)
 		for item in res:
+			##去除IF IC 9:15-9:29信号
+			timestr=item[0].strftime("%H%M")
+			timestr=int(timestr)
+			if symbol in ('IC','IF') and timestr>=915 and  timestr<=929:
+				print "find in 9:15 "
+				print item[0]
+				continue
+			##--------------end
+
 			sql="select SUM(a.p*a.p_size*a.ratio/100) as P from #real_quanyi_position a inner join(  select MAX(StockDate) as stockdate,st from #real_quanyi_position where StockDate<='%s'  group by st  ) temp  on a.ST=temp.ST and a.StockDate=temp.stockdate" % (item[0])
 			position=ms.find_sql(sql)[0][0]
 			if position is None:
@@ -281,7 +294,6 @@ def main_pre_quanyi():
 	pre_data_for_ac(IFlist,'IF')
 	pre_data_for_ac(RUlist,'RU')
 	pre_data_for_ac(TAlist,'TA')
-	# pre_data_for_ac_distinc(ICIFlist,'IF','IC')
 
 
 
