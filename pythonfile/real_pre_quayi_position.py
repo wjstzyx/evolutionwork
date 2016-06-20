@@ -3,6 +3,7 @@
 ###检测real_st_report 和P_LOG 的联合记录是否连续
 
 import sys
+import os
 import threading
 reload(sys)
 sys.setdefaultencoding('utf8')
@@ -300,6 +301,8 @@ def main_pre_quanyi():
 # res=ms.dict_sql(sql)
 # print res
 main_pre_quanyi()
+cmd="python /home/yuyang/myfile/evolutionwork/pythonfile/real_quayi_daily.py"
+os.system(cmd)
 # input_temp_table('YEQGOT','IF',0,160615)
 # pre_data_for_ac(['RBQGstrev_TG','RBQGTR_TG'],'RB')
 # pre_quanyi_data('9DUD1','IF',0)

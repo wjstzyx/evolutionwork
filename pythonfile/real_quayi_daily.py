@@ -240,6 +240,7 @@ def main_pre_quanyi():
 # res=ms.dict_sql(sql)
 # print res
 main_pre_quanyi()
+
 # main_calculate('IF','9DUD1')
 # input_temp_table('YEQGOT','IF',0,160615)
 # pre_data_for_ac(['RBQGstrev_TG','RBQGTR_TG'],'RB')
