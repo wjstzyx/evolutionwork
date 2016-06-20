@@ -57,8 +57,6 @@ def input_temp_table(ac,symbol,type,D):
 			timestr=item[0].strftime("%H%M")
 			timestr=int(timestr)
 			if symbol in ('IC','IF') and timestr>=915 and  timestr<=929:
-				print "find in 9:15 "
-				print item[0]
 				continue
 			##--------------end
 
