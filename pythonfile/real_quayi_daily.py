@@ -210,7 +210,7 @@ def pre_data_for_ac_distinc(itemlist,symbolfrom,symbolto):
 def main_pre_quanyi():
 	i=0
 	TAlist=('CH4tazs','DayBrTA','DayTALineRrate')
-	RUlist=('RUDTA','RUMY','RUV4E','RUv4ehc','RUV7','RUWEEKLY')
+	RUlist=('RU2v7','RUDTA','RUMY','RUV4E','RUv4ehc','RUV7','RUWEEKLY')
 	RBlist=('RBQGSTTR_TG','Rb_QGpLud','RbCX_QGRev','RbCX_QGtr','RB_CXVolume','RB_Daybreaker','RB_LiangtuPipei','RB_LRC_Trend','RB_LUD','RB_MT','RB_RBreaker','RB_RSI','RB_ST_Reversal','RB_ST_Trend','RB_VPIN','RB_ZhixianPipei','CH4RBZS','DAYGAPRB','RBHAL','RBPUD','RBSV','UDKRB','V7RB','RBQGstrev_TG','RBQGTR_TG')
 	CUlist=('CUDUDHL','ESPcu','LKVCU1','LKVCU2','PUDCU','QCU18MIN','QPMCU','Vk2CU','CUVK3')
 	AGlist=('9AGOLD','9AGVD05','9AGVD06','AGNEW4','AGNEW6','AGNEW8','AGNEW19','AGNEWLVO')
@@ -243,5 +243,5 @@ main_pre_quanyi()
 
 # main_calculate('IF','9DUD1')
 # input_temp_table('YEQGOT','IF',0,160615)
-# pre_data_for_ac(['RBQGstrev_TG','RBQGTR_TG'],'RB')
+# pre_data_for_ac(['RU2v7'],'RU')
 

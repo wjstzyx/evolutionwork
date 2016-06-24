@@ -248,12 +248,17 @@ def main_calculate_distinc(symbolfrom,symbolto,ac):
 
 
 def pre_quanyi_data(ac,symbol,type):
-	sql="select (year(getdate())-2000)*10000+month(getdate())*100+day(getdate())"
-	# print sql
-	nowD=ms.find_sql(sql)[0][0]
-	# print nowD
-	# exit()
-	sql="select distinct D from real_st_report where D=%s  order by D" % (nowD)
+	nowD=151020
+	sql="select max(stockdate) as stockdate FROM [Future].[dbo].[real_quanyi_log_groupby] where ac='%s' and symbol='%s'" % (ac,symbol)
+	res=ms.dict_sql(sql)[0]
+	if res['stockdate'] == None:
+		nowD=151020
+		print "NONENONENNOE"
+	else:
+		nowD=res['stockdate'].strftime("%Y%m%d")[2:]
+		nowD=int(nowD)
+
+	sql="select distinct D from real_st_report where D>=%s  order by D" % (nowD)
 	#sql="select distinct D from real_st_report  where D>160618 order by D"
 	res=ms.dict_sql(sql)
 	for item1 in res:
@@ -278,7 +283,7 @@ def pre_data_for_ac(itemlist,symbol):
 def main_pre_quanyi():
 	i=0
 	TAlist=('CH4tazs','DayBrTA','DayTALineRrate')
-	RUlist=('RUDTA','RUMY','RUV4E','RUv4ehc','RUV7','RUWEEKLY')
+	RUlist=('RU2v7','RUDTA','RUMY','RUV4E','RUv4ehc','RUV7','RUWEEKLY')
 	RBlist=('RBQGSTTR_TG','Rb_QGpLud','RbCX_QGRev','RbCX_QGtr','RB_CXVolume','RB_Daybreaker','RB_LiangtuPipei','RB_LRC_Trend','RB_LUD','RB_MT','RB_RBreaker','RB_RSI','RB_ST_Reversal','RB_ST_Trend','RB_VPIN','RB_ZhixianPipei','CH4RBZS','DAYGAPRB','RBHAL','RBPUD','RBSV','UDKRB','V7RB','RBQGstrev_TG','RBQGTR_TG')
 	CUlist=('CUDUDHL','ESPcu','LKVCU1','LKVCU2','PUDCU','QCU18MIN','QPMCU','Vk2CU','CUVK3')
 	AGlist=('9AGOLD','9AGVD05','9AGVD06','AGNEW4','AGNEW6','AGNEW8','AGNEW19','AGNEWLVO')
@@ -301,8 +306,10 @@ def main_pre_quanyi():
 # res=ms.dict_sql(sql)
 # print res
 main_pre_quanyi()
+# pre_data_for_ac(['RU2v7'],'RU')
+
 cmd="python /home/yuyang/myfile/evolutionwork/pythonfile/real_quayi_daily.py"
 os.system(cmd)
 # input_temp_table('YEQGOT','IF',0,160615)
-# pre_data_for_ac(['RBQGstrev_TG','RBQGTR_TG'],'RB')
+
 # pre_quanyi_data('9DUD1','IF',0)

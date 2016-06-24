@@ -80,7 +80,6 @@ def main_calculate(symbol,ac):
 	except:
 		pass
 	sql="select deltaposition,0 as position,C,0 as deltaquanyi,0 as comm, D,stockdate into %s from (select ISNULL(b.position,0) AS deltaposition ,a.StockDate,a.C,a.D from TSymbol a left outer join [quanyi_log_groupby] b on a.Symbol=b.symbol  and b.symbol='%s' and b.type=0  and b.ac='%s' and a.StockDate=b.stockdate where a.Symbol='%s' ) temp " % (tablename,symbol,ac,symbol)
-	# sql="insert into tempquanyiinfo select deltaposition,0 as position,C,0 as deltaquayi,0 as comm, D,stockdate from (select ISNULL(b.position,0) AS deltaposition ,a.StockDate,a.C,a.D from TSymbol a left outer join [quanyi_log_groupby] b on a.Symbol=b.symbol  and b.symbol='%s' and b.type=0  and b.ac='%s' and a.StockDate=b.stockdate where a.Symbol='%s' ) temp " % (symbol,ac,symbol)
 	ms.insert_sql(sql)
 	sql="select * from %s order by stockdate" % (tablename)
 	res=ms.dict_sql(sql)
@@ -281,7 +280,7 @@ def pre_data_for_ac_distinc(itemlist,symbolfrom,symbolto):
 def main_pre_quanyi():
 	i=0
 	TAlist=('CH4tazs','DayBrTA','DayTALineRrate')
-	RUlist=('RUDTA','RUMY','RUV4E','RUv4ehc','RUV7','RUWEEKLY')
+	RUlist=('RU2v7','RUDTA','RUMY','RUV4E','RUv4ehc','RUV7','RUWEEKLY')
 	RBlist=('RBQGSTTR_TG','Rb_QGpLud','RbCX_QGRev','RbCX_QGtr','RB_CXVolume','RB_Daybreaker','RB_LiangtuPipei','RB_LRC_Trend','RB_LUD','RB_MT','RB_RBreaker','RB_RSI','RB_ST_Reversal','RB_ST_Trend','RB_VPIN','RB_ZhixianPipei','CH4RBZS','DAYGAPRB','RBHAL','RBPUD','RBSV','UDKRB','V7RB','RBQGstrev_TG','RBQGTR_TG')
 	CUlist=('CUDUDHL','ESPcu','LKVCU1','LKVCU2','PUDCU','QCU18MIN','QPMCU','Vk2CU','CUVK3')
 	AGlist=('9AGOLD','9AGVD05','9AGVD06','AGNEW4','AGNEW6','AGNEW8','AGNEW19','AGNEWLVO')
