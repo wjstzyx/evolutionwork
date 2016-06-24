@@ -85,14 +85,24 @@ def main_calculate(symbol,ac):
 	res=res.strftime("%Y-%m-%d %H:%M:%S")
 	newD=res[2:4]+res[5:7]+res[8:10]
 	print newD
+	print 'lastrecordday',lastrecordday
 	if newD>lastrecordday:
 		sql="SELECT round(sum(p_size*ratio/100),0) FROM p_log where type=1 and st<>123456 and ac='%s' and symbol='%s' and d=%s" % (ac,symbol,newD)
 		d_max=ms.find_sql(sql)[0][0]
 		if d_max is None or d_max==0:
 			d_max=0.0001
-		sql="select top 1 d fROM TSymbol ORDER BY id desc"
+
+
+		# sql="select top 1 d from TSymbol ORDER BY id desc"
+		# refD=ms.find_sql(sql)[0][0]
+		# refD=refD[2:4]+refD[5:7]+refD[8:10]
+		#####
+		sql="select top 1 stockdate fROM TSymbol ORDER BY id desc"
 		refD=ms.find_sql(sql)[0][0]
-		refD=refD[2:4]+refD[5:7]+refD[8:10]
+		refD=refD.strftime("%Y%m%d")[2:]
+
+		print 'newD',newD
+		print 'refD',refD
 		if newD==refD:
 			sql="insert into real_dailyquanyi(ac,symbol,position,quanyi,comm,D,d_max,times) values('%s','%s',%s,%s,%s,%s,%s,%s)" % (ac,symbol,myround(position),lastdayquanyi,lastdaycomm,newD,d_max,times)
 			ms.insert_sql(sql)
@@ -172,9 +182,9 @@ def main_calculate_distinc(symbolfrom,symbolto,ac):
 		d_max=ms.find_sql(sql)[0][0]
 		if d_max is None or d_max==0:
 			d_max=0.0001
-		sql="select top 1 d fROM TSymbol ORDER BY id desc"
+		sql="select top 1 stockdate fROM TSymbol ORDER BY id desc"
 		refD=ms.find_sql(sql)[0][0]
-		refD=refD[2:4]+refD[5:7]+refD[8:10]
+		refD=refD.strftime("%Y%m%d")[2:]
 		if newD==refD:
 			sql="insert into real_dailyquanyi(ac,symbol,position,quanyi,comm,D,d_max,times) values('%s','%s',%s,%s,%s,%s,%s,%s)" % (ac,symbolto,myround(position),lastdayquanyi,lastdaycomm,newD,d_max,times)
 			ms.insert_sql(sql)
@@ -223,25 +233,24 @@ def main_pre_quanyi():
 	res=res.strftime("%Y-%m-%d %H:%M:%S")
 	newD=res[2:4]+res[5:7]+res[8:10]
 	sql="delete from real_dailyquanyi where D=%s" % (newD)
+	print sql
 	ms.insert_sql(sql)
-	pre_data_for_ac(RBlist,'RB')
-	pre_data_for_ac(CUlist,'CU')
-	pre_data_for_ac(AGlist,'AG')
-	pre_data_for_ac(IClist,'IC')
-	pre_data_for_ac(IFlist,'IF')
-	pre_data_for_ac(RUlist,'RU')
-	pre_data_for_ac(TAlist,'TA')
-	pre_data_for_ac_distinc(ICIFlist,'IF','IC')
+	# pre_data_for_ac(RBlist,'RB')
+	# pre_data_for_ac(CUlist,'CU')
+	# pre_data_for_ac(AGlist,'AG')
+	# pre_data_for_ac(IClist,'IC')
+	# pre_data_for_ac(IFlist,'IF')
+	# pre_data_for_ac(RUlist,'RU')
+	# pre_data_for_ac(TAlist,'TA')
+	# pre_data_for_ac_distinc(ICIFlist,'IF','IC')
+	pre_data_for_ac(['RU2v7'],'RU')
 
 
 
-# print "ddd"
-# sql="select 1"
-# res=ms.dict_sql(sql)
-# print res
+
 main_pre_quanyi()
 
 # main_calculate('IF','9DUD1')
 # input_temp_table('YEQGOT','IF',0,160615)
-# pre_data_for_ac(['RU2v7'],'RU')
+
 
