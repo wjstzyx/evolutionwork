@@ -237,13 +237,15 @@ def main_calculate_distinc(symbolfrom,symbolto,ac):
 
 
 def pre_quanyi_data(ac,symbol,type):
-	sql="select (year(getdate())-2000)*10000+month(getdate())*100+day(getdate())"
-	# print sql
-	nowD=ms.find_sql(sql)[0][0]
-	# print nowD
-	# exit()
-	sql="select distinct D from st_report where D=%s  order by D" % (nowD)
-	#sql="select distinct D from st_report  where D>160606 order by D"
+	sql="select max(stockdate) as stockdate FROM [Future].[dbo].[quanyi_log_groupby] where ac='%s' and symbol='%s'" % (ac,symbol)
+	res=ms.dict_sql(sql)[0]
+	if res['stockdate'] == None:
+		nowD=151020
+		print "NONENONENNOE"
+	else:
+		nowD=res['stockdate'].strftime("%Y%m%d")[2:]
+		nowD=int(nowD)
+	sql="select distinct D from st_report where D>=%s  order by D" % (nowD)
 	res=ms.dict_sql(sql)
 	for item1 in res:
 		print item1['D']
@@ -303,6 +305,6 @@ def main_pre_quanyi():
 # res=ms.dict_sql(sql)
 # print res
 main_pre_quanyi()
-# pre_data_for_ac(['RBQGstrev_TG','RBQGTR_TG'],'RB')
+# pre_data_for_ac(['RU2v7'],'RU')
 # pre_quanyi_data('9DUD1','IF',0)
 #main_calculate('IF','9DUD1')
