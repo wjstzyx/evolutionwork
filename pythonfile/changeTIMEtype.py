@@ -12,7 +12,7 @@ ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 
 
 def changeTimetype():
-	sql="select id,D,T,stockdate,symbol from Tsymbol where stockdate>'2016-05-20 13:00:00.000'"
+	sql="select id,D,T,stockdate,symbol from Tsymbol where stockdate>'2015-05-20 13:00:00.000'"
 	res=ms.dict_sql(sql)
 	for item in res:
 		stockdate=str(item['stockdate'])

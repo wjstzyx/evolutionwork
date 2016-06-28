@@ -10,10 +10,34 @@ from dbconn import MSSQL
 ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 # resList = ms.find_sql("select top 2 * from st_report")
 # print resList
-sql="select max(stockdate) as stockdate FROM [Future].[dbo].[quanyi_log_groupby] where ac='RU2v7' and symbol='RU1'"
-res=ms.dict_sql(sql)[0]
-print res
-if res['stockdate'] == None:
-	print 111
-else:
-	print 22
+D=160628
+mynewD=str(D+20000000)
+
+
+todaytime=datetime.datetime.now().strftime("%Y-%m-%d")
+todaytime=int(datetime.datetime.now().strftime("%Y%m%d"))-20000000
+print todaytime
+acname='YEQGOT'
+symbol='IF'
+sql="select distinct ac,symbol from dailyquanyi where symbol='IF' and D>151020  and ac='YEQGOT' order by ac"
+res=ms.dict_sql(sql)
+for item in res:
+	acname=item['ac']
+	symbol=item['symbol']
+	sql="select D,(quanyi-comm)/d_max as quanyia from dailyquanyi where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+	res1=ms.find_sql(sql)
+	sql="select D,(quanyi-comm)/d_max as quanyia from real_dailyquanyi where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+	res2=ms.find_sql(sql)		
+	nesres1=[]
+	for item in res1:
+		D=int(item[0])+20000000
+		D1=str(D)[0:4]
+		D2=str(D)[4:6]
+		D3=str(D)[6:8]		
+		tmp=[int(D1),int(D2),int(D3),item[1]]
+		print tmp
+		nesres1.append(tmp)
+
+
+
+	print nesres1

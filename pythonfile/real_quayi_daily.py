@@ -235,14 +235,14 @@ def main_pre_quanyi():
 	sql="delete from real_dailyquanyi where D=%s" % (newD)
 	print sql
 	ms.insert_sql(sql)
-	# pre_data_for_ac(RBlist,'RB')
-	# pre_data_for_ac(CUlist,'CU')
-	# pre_data_for_ac(AGlist,'AG')
-	# pre_data_for_ac(IClist,'IC')
-	# pre_data_for_ac(IFlist,'IF')
-	# pre_data_for_ac(RUlist,'RU')
-	# pre_data_for_ac(TAlist,'TA')
-	# pre_data_for_ac_distinc(ICIFlist,'IF','IC')
+	pre_data_for_ac(RBlist,'RB')
+	pre_data_for_ac(CUlist,'CU')
+	pre_data_for_ac(AGlist,'AG')
+	pre_data_for_ac(IClist,'IC')
+	pre_data_for_ac(IFlist,'IF')
+	pre_data_for_ac(RUlist,'RU')
+	pre_data_for_ac(TAlist,'TA')
+	pre_data_for_ac_distinc(ICIFlist,'IF','IC')
 	pre_data_for_ac(['RU2v7'],'RU')
 
 
