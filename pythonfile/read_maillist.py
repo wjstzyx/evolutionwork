@@ -27,6 +27,8 @@ def read_maillist():
 		ms.insert_sql(sql)
 		mailtolist=item['mailtolist'].split(',')
 		sendmessage=item['sendmessage']
+		if len(sendmessage)<8:
+			sendmessage='13764504303'
 		msg=item['msg']
 		totalsubject=totalsubject+'\r\n'+item['subject']
 		totalmsg=totalmsg+'<br>'+item['msg']+'</br>'

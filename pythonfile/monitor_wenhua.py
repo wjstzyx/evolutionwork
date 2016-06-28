@@ -16,17 +16,7 @@ ms1 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="future")
 
 def monitor_wenhua():
 	#查询发件人
-	sql="select email from [LogRecord].[dbo].[mailtolist] where istomail=1"
-	reslist=ms.find_sql(sql)
-	mailtolist=''
-	sendmessage=''
-	for item in reslist:
-		if "@" in item[0]:
-			mailtolist=mailtolist+','+item[0]
-		else:
-			sendmessage=sendmessage+','+item[0]
-	mailtolist=mailtolist.strip(',')
-	sendmessage=sendmessage.strip(',')
+	(mailtolist,sendmessage)=get_messagelist()
 	# print mailtolist
 	#待检测的ABmachine列表
 	sql="select item,starttime,endtime from [LogRecord].[dbo].[monitorconfig] where type='wenhua' and ismonitor=1"
@@ -64,17 +54,7 @@ def monitor_wenhua():
 
 def monitor_AB():
 	#查询发件人
-	sql="select email from [LogRecord].[dbo].[mailtolist] where istomail=1"
-	reslist=ms.find_sql(sql)
-	mailtolist=''
-	sendmessage=''
-	for item in reslist:
-		if "@" in item[0]:
-			mailtolist=mailtolist+','+item[0]
-		else:
-			sendmessage=sendmessage+','+item[0]
-	mailtolist=mailtolist.strip(',')
-	sendmessage=sendmessage.strip(',')
+	(mailtolist,sendmessage)=get_messagelist()
 	# print mailtolist
 	#待检测的ABmachine列表
 	sql="select item,starttime,endtime from [LogRecord].[dbo].[monitorconfig] where type='AB' and ismonitor=1"
@@ -113,18 +93,8 @@ def monitor_AB():
 
 def monitor_Thunder():
 	#查询发件人
-	sql="select email from [LogRecord].[dbo].[mailtolist] where istomail=1"
-	reslist=ms.find_sql(sql)
-	mailtolist=''
-	sendmessage=''
-	for item in reslist:
-		if "@" in item[0]:
-			mailtolist=mailtolist+','+item[0]
-		else:
-			sendmessage=sendmessage+','+item[0]
-	mailtolist=mailtolist.strip(',')
-	sendmessage=sendmessage.strip(',')
-	# print mailtolist
+	(mailtolist,sendmessage)=get_messagelist()
+	print sendmessage
 	#待检测的ABmachine列表
 	sql="select item,starttime,endtime from [LogRecord].[dbo].[monitorconfig] where type='Thunder' and ismonitor=1"
 	res=ms.dict_sql(sql)
@@ -159,7 +129,7 @@ def monitor_Thunder():
 			else:
 				subject='%s Thunder程序出错' % (symbol)
 				msg='%s Thunder程序出错' % (symbol)
-				sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime) values('%s','%s','%s',%s,getdate())" % (subject,mailtolist,msg,0)
+				sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,msg,0,sendmessage)
 				ms.insert_sql(sql)
 
 
@@ -181,6 +151,20 @@ def minusmin(time1,time2):
 	return (hour2-hour1)*3600+(min2-min1)*60+(sec2-sec1)
 
 
+
+def get_messagelist():
+	sql="select email from [LogRecord].[dbo].[mailtolist] where istomail=1"
+	reslist=ms.find_sql(sql)
+	mailtolist=''
+	sendmessage=''
+	for item in reslist:
+		if "@" in item[0]:
+			mailtolist=mailtolist+','+item[0]
+		else:
+			sendmessage=sendmessage+','+item[0]
+	mailtolist=mailtolist.strip(',')
+	sendmessage=sendmessage.strip(',')
+	return mailtolist,sendmessage
 
 
 def ismonitorday():

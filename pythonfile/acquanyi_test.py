@@ -238,16 +238,17 @@ def pre_quanyi_data(ac,symbol,type):
 
 def main_fun():
 	#获取需要处理的列表
-	sql="SELECT [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where isforbacktest=0"
-	sql="SELECT [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where isforbacktest=0 and positionsymbol='JD'"
+	sql="SELECT [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1 and isforbacktest=1 and isyepan=0 "
+	# sql="SELECT [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where isforbacktest=0 and positionsymbol='JD'"
 	res=ms.dict_sql(sql)
 	for item in res:
 		print item['acname']
 		positionsymbol=item['positionsymbol']
 		quanyisymbol=item['quanyisymbol']
-		# pre_quanyi_data(item['acname'],item['positionsymbol'],0)
-		daylycaculate(positionsymbol,quanyisymbol,item['acname'])
+		pre_quanyi_data(item['acname'],item['positionsymbol'],0)
+		# daylycaculate(positionsymbol,quanyisymbol,item['acname'])
 
 
-main_fun()
+# main_fun()
+pre_quanyi_data(item['acname'],item['positionsymbol'],0)
 # daylycaculate('IF','IC','YEQGEX')
