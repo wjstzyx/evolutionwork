@@ -94,7 +94,6 @@ def monitor_AB():
 def monitor_Thunder():
 	#查询发件人
 	(mailtolist,sendmessage)=get_messagelist()
-	print sendmessage
 	#待检测的ABmachine列表
 	sql="select item,starttime,endtime from [LogRecord].[dbo].[monitorconfig] where type='Thunder' and ismonitor=1"
 	res=ms.dict_sql(sql)
