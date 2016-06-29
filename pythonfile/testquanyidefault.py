@@ -29,6 +29,6 @@ def testquanyi():
 				isss=1
 			lastposition=totalposition
 		if isss==1:
-			break
+			exit()
 
 testquanyi()

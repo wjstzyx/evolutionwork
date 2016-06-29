@@ -11,7 +11,13 @@ ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 # resList = ms.find_sql("select top 2 * from st_report")
 # print resList
 D=160628
-mynewD=str(D+20000000)
-
-mobile='13764504303,21212,121212'
-print len(mobile)
+myDbegin=str(D+20000000)
+myDbegin=datetime.datetime.strptime(myDbegin,'%Y%m%d')
+myDbegin=myDbegin+datetime.timedelta(minutes=1260)
+myDend=myDbegin+datetime.timedelta(hours=6)
+print myDbegin,myDend
+todaytime=datetime.datetime.now().strftime("%Y-%m-%d")
+todaytime=datetime.datetime.strptime(todaytime,"%Y-%m-%d")
+deltime=todaytime+datetime.timedelta(hours=8)
+print todaytime
+print deltime
