@@ -258,7 +258,7 @@ def main_fun():
 		daylycaculate(positionsymbol,quanyisymbol,item['acname'])
 
 
-# main_fun()
-input_groupbyquanyi('9AGOLD','AG',0,160628)
+main_fun()
+# input_groupbyquanyi('9AGOLD','AG',0,160628)
 # pre_quanyi_data('9AGOLD','AG',0)
 # daylycaculate('pythonRun-TF-CH-rev-right','TF','TF')
