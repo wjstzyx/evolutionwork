@@ -229,7 +229,6 @@ def pre_quanyi_data(ac,symbol,type):
 	else:
 		nowD=res['stockdate'].strftime("%Y%m%d")[2:]
 		nowD=int(nowD)
-	nowD=160601
 	sql="select distinct D from st_report where D>=%s  order by D" % (nowD)
 	res=ms.dict_sql(sql)
 	for item1 in res:

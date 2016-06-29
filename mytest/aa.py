@@ -21,3 +21,14 @@ todaytime=datetime.datetime.strptime(todaytime,"%Y-%m-%d")
 deltime=todaytime+datetime.timedelta(hours=8)
 print todaytime
 print deltime
+
+
+D=datetime.datetime.now()
+print D
+D=D.strftime('%Y%m%d')
+D=datetime.datetime.strptime(D,'%Y%m%d')
+Dcenter=D+datetime.timedelta(hours=24)
+print D
+print Dcenter
+timedelta = Dcenter - D
+print timedelta

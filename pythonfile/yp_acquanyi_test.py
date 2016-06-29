@@ -23,6 +23,7 @@ def daylycaculate(symbolfrom,symbolto,ac):
 	#todaytime=160628
 	sql="delete from dailyquanyi_test where ac='%s' and symbol='%s' and D=%s" % (ac,symbolto,todaytime)
 	ms.insert_sql(sql)
+	#--end指将这个日期前一天21点之后计算的收益全部删除
 	#获取Pointvalue
 	sql="SELECT [symbol]  ,[pointvalue]  ,[commision] FROM [LogRecord].[dbo].[symbolpointvalue] where Symbol='%s'" % (symbolto)
 	res=ms.dict_sql(sql)
@@ -47,62 +48,68 @@ def daylycaculate(symbolfrom,symbolto,ac):
 	sql="select * from %s order by stockdate" % (tablename)
 	# print sql 
 	res=ms.dict_sql(sql)
+	#开始计算
 	# print res[1]
 	lastposition=0
 	lastClose=res[0]['C']
-	position=res[0]['deltaposition']
-	changeD=0
-	lastdaypostiion=0
+
+
+	# position=res[0]['deltaposition']
+	# changeD=0
+	# lastdaypostiion=0
 	lastdayquanyi=0
-	lastdaycomm=0
-	times=0
+	# lastdaycomm=0
+	# times=0
 	sql="select max(D) from dailyquanyi_test where ac='%s' and symbol='%s'" % (ac,symbolto)
 	lastrecordday=ms.find_sql(sql)[0][0]
 	if lastrecordday is None:
 		lastrecordday=151001
-	for item in res[1:]:
+	for item in res:
+		D=item['stockdate']
+		Dcenter=
+
 		D=int(item['stockdate'].strftime("%Y%m%d"))-20000000
 		C=item['C']
 		tempD=str(D)
 		deltaposition=item['deltaposition']
-		##开始计算
-		deltaquanyi=myround(position)*float((C-lastClose))*float(pointvalue)
-		comm=abs(myround(position+deltaposition)-myround(position))*commvalue
-		times=times+abs(myround(position+deltaposition)-myround(position))
-		if changeD!=tempD:
-			#每天第一根
-			print int(changeD),int(lastrecordday)
-			if int(changeD)>int(lastrecordday):
-				sql="SELECT round(sum(p_size*ratio/100),0) FROM p_log where type=1 and st<>123456 and ac='%s' and symbol='%s' and d=%s" % (ac,symbolfrom,changeD)
-				d_max=ms.find_sql(sql)[0][0]
-				if d_max is None or d_max==0:
-					d_max=0.0001
-				sql="insert into dailyquanyi_test(ac,symbol,position,quanyi,comm,D,d_max,times) values('%s','%s',%s,%s,%s,%s,%s,%s)" % (ac,symbolto,myround(position),lastdayquanyi,lastdaycomm,changeD,d_max,times)
-				# print sql
-				ms.insert_sql(sql)
-			changeD=tempD
-			lastdayquanyi=0
-			lastdaycomm=0
-			times=0
-		lastdayquanyi=lastdayquanyi+deltaquanyi
-		lastdaycomm=lastdaycomm+comm
-		position=position+deltaposition
-		lastClose=C
-	sql="select getdate()"
-	res=ms.find_sql(sql)[0][0]
-	res=res.strftime("%Y-%m-%d %H:%M:%S")
-	newD=res[2:4]+res[5:7]+res[8:10]
-	if newD>lastrecordday:
-		sql="SELECT round(sum(p_size*ratio/100),0) FROM p_log where type=1 and st<>123456 and ac='%s' and symbol='%s' and d=%s" % (ac,symbolfrom,newD)
-		d_max=ms.find_sql(sql)[0][0]
-		if d_max is None or d_max==0:
-			d_max=0.0001
-		sql="select top 1 stockdate fROM TSymbol ORDER BY id desc"
-		refD=ms.find_sql(sql)[0][0]
-		refD=refD.strftime("%Y%m%d")[2:]
-		if newD==refD:
-			sql="insert into dailyquanyi_test(ac,symbol,position,quanyi,comm,D,d_max,times) values('%s','%s',%s,%s,%s,%s,%s,%s)" % (ac,symbolto,myround(position),lastdayquanyi,lastdaycomm,newD,d_max,times)
-			ms.insert_sql(sql)
+	# 	##开始计算
+	# 	deltaquanyi=myround(position)*float((C-lastClose))*float(pointvalue)
+	# 	comm=abs(myround(position+deltaposition)-myround(position))*commvalue
+	# 	times=times+abs(myround(position+deltaposition)-myround(position))
+	# 	if changeD!=tempD:
+	# 		#每天第一根
+	# 		print int(changeD),int(lastrecordday)
+	# 		if int(changeD)>int(lastrecordday):
+	# 			sql="SELECT round(sum(p_size*ratio/100),0) FROM p_log where type=1 and st<>123456 and ac='%s' and symbol='%s' and d=%s" % (ac,symbolfrom,changeD)
+	# 			d_max=ms.find_sql(sql)[0][0]
+	# 			if d_max is None or d_max==0:
+	# 				d_max=0.0001
+	# 			sql="insert into dailyquanyi_test(ac,symbol,position,quanyi,comm,D,d_max,times) values('%s','%s',%s,%s,%s,%s,%s,%s)" % (ac,symbolto,myround(position),lastdayquanyi,lastdaycomm,changeD,d_max,times)
+	# 			# print sql
+	# 			ms.insert_sql(sql)
+	# 		changeD=tempD
+	# 		lastdayquanyi=0
+	# 		lastdaycomm=0
+	# 		times=0
+	# 	lastdayquanyi=lastdayquanyi+deltaquanyi
+	# 	lastdaycomm=lastdaycomm+comm
+	# 	position=position+deltaposition
+	# 	lastClose=C
+	# sql="select getdate()"
+	# res=ms.find_sql(sql)[0][0]
+	# res=res.strftime("%Y-%m-%d %H:%M:%S")
+	# newD=res[2:4]+res[5:7]+res[8:10]
+	# if newD>lastrecordday:
+	# 	sql="SELECT round(sum(p_size*ratio/100),0) FROM p_log where type=1 and st<>123456 and ac='%s' and symbol='%s' and d=%s" % (ac,symbolfrom,newD)
+	# 	d_max=ms.find_sql(sql)[0][0]
+	# 	if d_max is None or d_max==0:
+	# 		d_max=0.0001
+	# 	sql="select top 1 stockdate fROM TSymbol ORDER BY id desc"
+	# 	refD=ms.find_sql(sql)[0][0]
+	# 	refD=refD.strftime("%Y%m%d")[2:]
+	# 	if newD==refD:
+	# 		sql="insert into dailyquanyi_test(ac,symbol,position,quanyi,comm,D,d_max,times) values('%s','%s',%s,%s,%s,%s,%s,%s)" % (ac,symbolto,myround(position),lastdayquanyi,lastdaycomm,newD,d_max,times)
+	# 		ms.insert_sql(sql)
 
 
 	try:		
