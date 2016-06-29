@@ -211,8 +211,6 @@ def input_groupbyquanyi(ac,symbol,type,D):
 						valueslist=valueslist+","+"('%s','%s','%s','%s','%s','%s')" % (ac,symbol,type,item[1],item[0],lastP)
 			valueslist=valueslist.strip(',')
 			if firststockdate>laststockdate:
-				print firststockdate
-				print laststockdate
 				sql="insert into [Future].[dbo].[quanyi_log_groupby](ac,symbol,[type],[position],[stockdate],[totalposition]) values "+valueslist
 				ms.insert_sql(sql)
 				print 7,datetime.datetime.now()
