@@ -9,26 +9,21 @@ sys.setdefaultencoding('utf8')
 from dbconn import MSSQL
 ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 # resList = ms.find_sql("select top 2 * from st_report")
-# print resList
-D=160628
-myDbegin=str(D+20000000)
-myDbegin=datetime.datetime.strptime(myDbegin,'%Y%m%d')
-myDbegin=myDbegin+datetime.timedelta(minutes=1260)
-myDend=myDbegin+datetime.timedelta(hours=6)
-print myDbegin,myDend
-todaytime=datetime.datetime.now().strftime("%Y-%m-%d")
-todaytime=datetime.datetime.strptime(todaytime,"%Y-%m-%d")
-deltime=todaytime+datetime.timedelta(hours=8)
-print todaytime
-print deltime
-
-
-D=datetime.datetime.now()
-print D
-D=D.strftime('%Y%m%d')
-D=datetime.datetime.strptime(D,'%Y%m%d')
-Dcenter=D+datetime.timedelta(hours=24)
-print D
-print Dcenter
-timedelta = Dcenter - D
-print timedelta
+a='160828'
+stockdate='2016-06-28 00:00:00'
+stockdate=datetime.datetime.strptime(stockdate,'%Y-%m-%d %H:%M:%S')
+def range_quanyi_byyepan(stockdate):
+	D=stockdate.strftime('%Y%m%d')
+	thisday=str(int(D)-20000000)
+	D=datetime.datetime.strptime(D,'%Y%m%d')
+	beforeday=D-datetime.timedelta(hours=10)
+	beforeday=beforeday.strftime('%Y%m%d')
+	beforeday=str(int(beforeday)-20000000)
+	Dcenter=D+datetime.timedelta(hours=24)
+	timedelta1 = Dcenter - stockdate
+	timedelta1=abs(timedelta1.total_seconds())
+	if timedelta1<3600*5:
+		return thisday
+	else:
+		return beforeday
+print range_quanyi_byyepan(stockdate)
