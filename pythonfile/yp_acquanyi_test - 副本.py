@@ -298,4 +298,4 @@ def main_fun():
 # main_fun()
 # input_groupbyquanyi('RBQGSTREVYP_TG','RBnight',0,160628)
 # pre_quanyi_data('RBNtrend2','RBnight',0)
-daylycaculate('JD','JD','JDQGOpen_TG')
+daylycaculate('RB','RB','RBQGSTTR_TG')

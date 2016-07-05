@@ -284,7 +284,7 @@ def pre_quanyi_data(ac,symbol,type):
 
 def main_fun():
 	#获取需要处理的列表
-	sql="SELECT [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1  and isyepan=1 and positionsymbol!='RBnight'"
+	sql="SELECT [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1  and isyepan=1"
 	# sql="SELECT [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where isforbacktest=0 and positionsymbol='JD'"
 	res=ms.dict_sql(sql)
 	for item in res:
@@ -298,4 +298,4 @@ def main_fun():
 # main_fun()
 # input_groupbyquanyi('RBQGSTREVYP_TG','RBnight',0,160628)
 # pre_quanyi_data('RBNtrend2','RBnight',0)
-daylycaculate('RBnight','RBnight','RBNtrend2')
+# daylycaculate('RBnight','RBnight','RBNtrend2')

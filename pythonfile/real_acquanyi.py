@@ -244,7 +244,7 @@ def pre_quanyi_data(ac,symbol,type):
 
 def main_fun():
 	#获取需要处理的列表
-	sql="SELECT [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1  and isyepan=0 and [isforbacktest]=1"
+	sql="SELECT [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1  and isyepan=0 and [isforbacktest]=0 and positionsymbol=0"
 	# sql="SELECT [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where isforbacktest=0 and positionsymbol='JD'"
 	res=ms.dict_sql(sql)
 	for item in res:
@@ -257,5 +257,5 @@ def main_fun():
 
 # main_fun()
 # input_groupbyquanyi('JDQGOpen_TG','JD',0,160628)
-# pre_quanyi_data('JDQGOpen_TG','JD',0)
-daylycaculate('JD','JD','JDQGOpen_TG')
+pre_quanyi_data('PP2cxvolumefast','PP',0)
+daylycaculate('PP','PP','PP2cxvolumefast')
