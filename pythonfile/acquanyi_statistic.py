@@ -44,7 +44,7 @@ def daylycaculate(symbolfrom,symbolto,ac):
 	except:
 		pass
 	sql="select deltaposition,0 as position,C,0 as deltaquanyi,0 as comm, D,stockdate into %s from (select ISNULL(b.position,0) AS deltaposition ,a.StockDate,a.C,a.D from TSymbol a left outer join [quanyi_log_groupby] b on a.Symbol='%s'  and b.symbol='%s' and b.type=0  and b.ac='%s' and a.StockDate=b.stockdate where a.Symbol='%s' ) temp " % (tablename,symbolto,symbolfrom,ac,symbolto)
-	# print sql
+	#print sql
 	ms.insert_sql(sql)
 	sql="select * from %s order by stockdate" % (tablename)
 	# print sql 
@@ -72,6 +72,7 @@ def daylycaculate(symbolfrom,symbolto,ac):
 
 
 	sql="select distinct CONVERT(varchar(10), stockdate, 120 ) as datename from %s where stockdate>='%s' order by datename" % (tablename,lastdaytime)
+	#print sql
 	datelist=ms.dict_sql(sql)
 	dayquanyilist={}
 	for item in datelist:
@@ -87,7 +88,7 @@ def daylycaculate(symbolfrom,symbolto,ac):
 		C=item['C']
 		deltaposition=item['deltaposition']
 		# if stockdate>=datetime.datetime.strptime('2016-06-15','%Y-%m-%d') and stockdate<=datetime.datetime.strptime('2016-06-16','%Y-%m-%d'):
-		# 	print stockdate, myround(lastposition),float((C-lastClose)),C,lastClose
+		
 		deltaquanyi=myround(lastposition)*float((C-lastClose))*float(pointvalue)
 		deltatime=abs(myround(lastposition+deltaposition)-myround(lastposition))
 		deltacomm=deltatime*commvalue
@@ -97,8 +98,10 @@ def daylycaculate(symbolfrom,symbolto,ac):
 
 		###########插入日期分类
 		if stockdate>=lastdaytime:
+			#print stockdate, myround(lastposition),float((C-lastClose)),C,lastClose
 			#dayindex=range_quanyi_byyepan(stockdate,daylists)			
 			dayindex=range_quanyi_bydaily(stockdate,daylists)
+
 			dayquanyilist[dayindex][0]=dayquanyilist[dayindex][0]+deltaquanyi
 			dayquanyilist[dayindex][1]=dayquanyilist[dayindex][1]+deltacomm
 			dayquanyilist[dayindex][2]=dayquanyilist[dayindex][2]+deltatime
@@ -110,6 +113,7 @@ def daylycaculate(symbolfrom,symbolto,ac):
 
 	####写入数据库
 	newlist=[(k,dayquanyilist[k]) for k in sorted(dayquanyilist.keys())]
+	# print newlist
 	for item in newlist:
 		position=item[1][3]
 		lastdayquanyi=item[1][0]
