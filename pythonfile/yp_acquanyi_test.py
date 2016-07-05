@@ -22,7 +22,7 @@ def daylycaculate(symbolfrom,symbolto,ac):
 	print "start daily"
 	todaytime=int(datetime.datetime.now().strftime("%Y%m%d"))-20000000
 	#todaytime=160628
-	sql="delete from dailyquanyi_test where ac='%s' and symbol='%s' and D=%s" % (ac,symbolto,todaytime)
+	sql="delete from dailyquanyi where ac='%s' and symbol='%s' and D=%s" % (ac,symbolto,todaytime)
 	ms.insert_sql(sql)
 	#--end指将这个日期计算的收益（当天21:00信号后才逐渐由收益，21:00之前都是0）
 	#获取Pointvalue
@@ -59,7 +59,7 @@ def daylycaculate(symbolfrom,symbolto,ac):
 	deltacommlist={}
 	deltaroundplist={}
 
-	sql="select max(D) from dailyquanyi_test where ac='%s' and symbol='%s'" % (ac,symbolto)
+	sql="select max(D) from dailyquanyi where ac='%s' and symbol='%s'" % (ac,symbolto)
 	lastrecordday=ms.find_sql(sql)[0][0]
 	#lastrecordday记录的是这天21:00之后的收益
 	if lastrecordday is None:
@@ -119,7 +119,7 @@ def daylycaculate(symbolfrom,symbolto,ac):
 		if d_max is None or d_max==0:
 			d_max=0.0001
 		if changeD>lastrecordday:
-			sql="insert into dailyquanyi_test(ac,symbol,position,quanyi,comm,D,d_max,times) values('%s','%s',%s,%s,%s,%s,%s,%s)" % (ac,symbolto,myround(position),lastdayquanyi,lastdaycomm,changeD,d_max,times)
+			sql="insert into dailyquanyi(ac,symbol,position,quanyi,comm,D,d_max,times) values('%s','%s',%s,%s,%s,%s,%s,%s)" % (ac,symbolto,myround(position),lastdayquanyi,lastdaycomm,changeD,d_max,times)
 			ms.insert_sql(sql)
 
 
@@ -278,9 +278,7 @@ def pre_quanyi_data(ac,symbol,type):
 
 
 
-# input_groupbyquanyi('JDQGST_TG','JD',0,160627)
 
-# pre_quanyi_data('9AGOLD','AG',0)
 
 def main_fun():
 	#获取需要处理的列表
@@ -295,7 +293,7 @@ def main_fun():
 		daylycaculate(positionsymbol,quanyisymbol,item['acname'])
 
 
-# main_fun()
+main_fun()
 # input_groupbyquanyi('RBQGSTREVYP_TG','RBnight',0,160628)
 # pre_quanyi_data('RBNtrend2','RBnight',0)
 # daylycaculate('RBnight','RBnight','RBNtrend2')
