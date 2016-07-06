@@ -292,8 +292,6 @@ def main_fun():
 
 
 main_fun()
-# input_groupbyquanyi('9AGOLD','AG',0,160628)
-# pre_quanyi_data('9AGOLD','AG',0)
 # daylycaculate('pythonRun-TF-CH-rev-right','TF','TF')
 # pre_quanyi_data('PPwave','PP',0)
 # daylycaculate('AG','AG','9AGOLD')
