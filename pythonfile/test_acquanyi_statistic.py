@@ -7,7 +7,7 @@ reload(sys)
 sys.setdefaultencoding('utf8')
 from dbconn import MSSQL
 ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
-# resList = ms.find_sql("select top 2 * from real_st_report")
+# resList = ms.find_sql("select top 2 * from st_report")
 # print resList
 def myround(num):
 	if num>=0:
@@ -19,11 +19,12 @@ def myround(num):
 
 
 
+
 def daylycaculate(symbolfrom,symbolto,ac):
 	print "start daily"
 	todaytime=int(datetime.datetime.now().strftime("%Y%m%d"))-20000000
 	#todaytime=160628
-	sql="delete from real_dailyquanyi where ac='%s' and symbol='%s' and D=%s" % (ac,symbolto,todaytime)
+	sql="delete from dailyquanyi where ac='%s' and symbol='%s' and D=%s" % (ac,symbolto,todaytime)
 	ms.insert_sql(sql)
 	#--end指将这个日期计算的收益（当天21:00信号后才逐渐由收益，21:00之前都是0）
 	#获取Pointvalue
@@ -42,8 +43,8 @@ def daylycaculate(symbolfrom,symbolto,ac):
 		ms.insert_sql(sql)
 	except:
 		pass
-	sql="select deltaposition,0 as position,C,0 as deltaquanyi,0 as comm, D,stockdate into %s from (select ISNULL(b.position,0) AS deltaposition ,a.StockDate,a.C,a.D from TSymbol a left outer join [real_quanyi_log_groupby] b on a.Symbol='%s'  and b.symbol='%s' and b.type=0  and b.ac='%s' and a.StockDate=b.stockdate where a.Symbol='%s' ) temp " % (tablename,symbolto,symbolfrom,ac,symbolto)
-	# print sql
+	sql="select deltaposition,0 as position,C,0 as deltaquanyi,0 as comm, D,stockdate into %s from (select ISNULL(b.position,0) AS deltaposition ,a.StockDate,a.C,a.D from TSymbol a left outer join [quanyi_log_groupby] b on a.Symbol='%s'  and b.symbol='%s' and b.type=0  and b.ac='%s' and a.StockDate=b.stockdate where a.Symbol='%s' ) temp " % (tablename,symbolto,symbolfrom,ac,symbolto)
+	#print sql
 	ms.insert_sql(sql)
 	sql="select * from %s order by stockdate" % (tablename)
 	# print sql 
@@ -60,7 +61,7 @@ def daylycaculate(symbolfrom,symbolto,ac):
 	deltacommlist={}
 	deltaroundplist={}
 
-	sql="select max(D) from real_dailyquanyi where ac='%s' and symbol='%s'" % (ac,symbolto)
+	sql="select max(D) from dailyquanyi where ac='%s' and symbol='%s'" % (ac,symbolto)
 	lastrecordday=ms.find_sql(sql)[0][0]
 	#lastrecordday记录的是这天21:00之后的收益
 	if lastrecordday is None:
@@ -71,6 +72,7 @@ def daylycaculate(symbolfrom,symbolto,ac):
 
 
 	sql="select distinct CONVERT(varchar(10), stockdate, 120 ) as datename from %s where stockdate>='%s' order by datename" % (tablename,lastdaytime)
+	#print sql
 	datelist=ms.dict_sql(sql)
 	dayquanyilist={}
 	for item in datelist:
@@ -86,7 +88,7 @@ def daylycaculate(symbolfrom,symbolto,ac):
 		C=item['C']
 		deltaposition=item['deltaposition']
 		# if stockdate>=datetime.datetime.strptime('2016-06-15','%Y-%m-%d') and stockdate<=datetime.datetime.strptime('2016-06-16','%Y-%m-%d'):
-		# 	print stockdate, myround(lastposition),float((C-lastClose)),C,lastClose
+		
 		deltaquanyi=myround(lastposition)*float((C-lastClose))*float(pointvalue)
 		deltatime=abs(myround(lastposition+deltaposition)-myround(lastposition))
 		deltacomm=deltatime*commvalue
@@ -96,8 +98,10 @@ def daylycaculate(symbolfrom,symbolto,ac):
 
 		###########插入日期分类
 		if stockdate>=lastdaytime:
+			#print stockdate, myround(lastposition),float((C-lastClose)),C,lastClose
 			#dayindex=range_quanyi_byyepan(stockdate,daylists)			
 			dayindex=range_quanyi_bydaily(stockdate,daylists)
+
 			dayquanyilist[dayindex][0]=dayquanyilist[dayindex][0]+deltaquanyi
 			dayquanyilist[dayindex][1]=dayquanyilist[dayindex][1]+deltacomm
 			dayquanyilist[dayindex][2]=dayquanyilist[dayindex][2]+deltatime
@@ -109,6 +113,7 @@ def daylycaculate(symbolfrom,symbolto,ac):
 
 	####写入数据库
 	newlist=[(k,dayquanyilist[k]) for k in sorted(dayquanyilist.keys())]
+	# print newlist
 	for item in newlist:
 		position=item[1][3]
 		lastdayquanyi=item[1][0]
@@ -120,7 +125,7 @@ def daylycaculate(symbolfrom,symbolto,ac):
 		if d_max is None or d_max==0:
 			d_max=0.0001
 		if changeD>lastrecordday:
-			sql="insert into real_dailyquanyi(ac,symbol,position,quanyi,comm,D,d_max,times) values('%s','%s',%s,%s,%s,%s,%s,%s)" % (ac,symbolto,myround(position),lastdayquanyi,lastdaycomm,changeD,d_max,times)
+			sql="insert into dailyquanyi(ac,symbol,position,quanyi,comm,D,d_max,times) values('%s','%s',%s,%s,%s,%s,%s,%s)" % (ac,symbolto,myround(position),lastdayquanyi,lastdaycomm,changeD,d_max,times)
 			ms.insert_sql(sql)
 
 
@@ -160,53 +165,49 @@ def input_groupbyquanyi(ac,symbol,type,D):
 	#删除当日已经存在的记录
 	todaytime=datetime.datetime.now().strftime("%Y-%m-%d")
 	todaytime=datetime.datetime.strptime(todaytime,"%Y-%m-%d")
-	sql="delete from real_quanyi_log_groupby where ac='%s' and symbol='%s' and type=%s and stockdate>'%s'" % (ac,symbol,type,todaytime)
+	sql="delete from quanyi_log_groupby where ac='%s' and symbol='%s' and type=%s and stockdate>'%s'" % (ac,symbol,type,todaytime)
 	ms.insert_sql(sql)
 	#--end
 	try:
-		sql="drop table #temp_real_quanyi_new"
+		sql="drop table #temp_quanyi_new"
 		ms.insert_sql(sql)
 	except:
 		pass
-	sql="select * into  #temp_real_quanyi_new from (select '%s' as ac,'%s' as symbol,'%s' as type,temp.id,p,PP,p_size,ratio,st,o.stockdate from tsymbol o inner join (select real_st_report.id,real_st_report.p,real_st_report.pp,p.symbol,real_st_report.stockdate,real_st_report.st,p.p_size,p.ac,p.ratio,real_st_report.type from real_st_report  inner join p_log p on p.st=real_st_report.st and p.ac='%s' and p.symbol='%s' and p.d=%s and real_st_report.type=%s ) temp on temp.stockdate=o.stockdate and o.symbol=temp.symbol where o.symbol='%s' ) temp " % (ac,symbol,type,ac,symbol,D,type,symbol)
+	sql="select * into  #temp_quanyi_new from (select '%s' as ac,'%s' as symbol,'%s' as type,temp.id,p,PP,p_size,ratio,st,o.stockdate from tsymbol o inner join (select st_report.id,st_report.p,st_report.pp,p.symbol,st_report.stockdate,st_report.st,p.p_size,p.ac,p.ratio,st_report.type from st_report  inner join p_log p on p.st=st_report.st and p.ac='%s' and p.symbol='%s' and p.d=%s and st_report.type=%s ) temp on temp.stockdate=o.stockdate and o.symbol=temp.symbol where o.symbol='%s' ) temp " % (ac,symbol,type,ac,symbol,D,type,symbol)
 	ms.insert_sql(sql)
 	print 2,datetime.datetime.now()
-	sql="select count(1) from #temp_real_quanyi_new"
+	sql="select count(1) from #temp_quanyi_new"
 	res=ms.find_sql(sql)[0][0]
 	if res>0:
 		#如果有记录才进行
 		#初始化每个时刻的仓位为0
 		deltepositionlist={}
-		sql="SELECT distinct stockdate from #temp_real_quanyi_new"
+		sql="SELECT distinct stockdate from #temp_quanyi_new"
 		res1=ms.dict_sql(sql)
 		for item in res1:
 			deltepositionlist[item['stockdate']]=0
 		#初始化每个策略的初始位置为0
 		laststlistposition={}
-		sql="select distinct st from #temp_real_quanyi_new"
+		sql="select distinct st from #temp_quanyi_new"
 		res1=ms.dict_sql(sql)
 		for item in res1:
 			laststlistposition[item['st']]=0
 		#开始计算每个时刻的仓位
 		print 4,datetime.datetime.now()
-		sql="select (p*p_size*ratio/100) as p,st,stockdate from #temp_real_quanyi_new  order by stockdate"
+		sql="select (p*p_size*ratio/100) as p,st,stockdate from #temp_quanyi_new  order by stockdate"
 		res1=ms.dict_sql(sql)
 		for item in res1:
 			#赋值laststlistposition
-			# if item['stockdate']>=datetime.datetime.strptime('2016-07-06 09:00',"%Y-%m-%d %H:%M") and item['stockdate']<=datetime.datetime.strptime('2016-07-06 09:49',"%Y-%m-%d %H:%M"):
-			# 	print item
-			# 	print deltepositionlist[item['stockdate']]
 			deltepositionlist[item['stockdate']]=deltepositionlist[item['stockdate']]+(item['p']-laststlistposition[item['st']])
 			laststlistposition[item['st']]=item['p']
 		print 5,datetime.datetime.now()
 		newlist=[(k,deltepositionlist[k]) for k in sorted(deltepositionlist.keys())]
-		# print newlist
 
 		#选出数据库中最新的记录
 		mynewD=str(D+20000000)
 		mynewD=datetime.datetime.strptime(mynewD,'%Y%m%d')
 		endday=mynewD+datetime.timedelta(days=1)
-		sql="select top 1 totalposition,stockdate from [real_quanyi_log_groupby] where ac='%s' and symbol='%s' and TYPE=%s order by stockdate desc " % (ac,symbol,type)
+		sql="select top 1 totalposition,stockdate from [quanyi_log_groupby] where ac='%s' and symbol='%s' and TYPE=%s order by stockdate desc " % (ac,symbol,type)
 		res=ms.dict_sql(sql)
 		if res:
 			#lastdayP=res[0]['totalposition']
@@ -215,7 +216,7 @@ def input_groupbyquanyi(ac,symbol,type,D):
 			#lastdayP=0
 			laststockdate=datetime.datetime.strptime('2010-01-01','%Y-%m-%d')
 		#计算昨天的总仓位
-		sql="select top 1 totalposition,stockdate from [real_quanyi_log_groupby] where ac='%s' and symbol='%s' and TYPE=%s and stockdate<'%s' order by stockdate desc " % (ac,symbol,type,mynewD)
+		sql="select top 1 totalposition,stockdate from [quanyi_log_groupby] where ac='%s' and symbol='%s' and TYPE=%s and stockdate<'%s' order by stockdate desc " % (ac,symbol,type,mynewD)
 		res=ms.dict_sql(sql)
 		if res:
 			lastdayP=res[0]['totalposition']
@@ -239,7 +240,7 @@ def input_groupbyquanyi(ac,symbol,type,D):
 						newlist.remove(item)
 				#--end
 			#开始计算当天仓位
-			sql="select SUM(a.p*a.p_size*a.ratio/100) as P from #temp_real_quanyi_new a inner join(  select MAX(id) as id,st from #temp_real_quanyi_new where StockDate<='%s'  group by st  ) temp  on a.ST=temp.ST and a.id=temp.id" % (firststockdate)
+			sql="select SUM(a.p*a.p_size*a.ratio/100) as P from #temp_quanyi_new a inner join(  select MAX(StockDate) as stockdate,st from #temp_quanyi_new where StockDate<='%s'  group by st  ) temp  on a.ST=temp.ST and a.StockDate=temp.stockdate" % (firststockdate)
 			lastP=ms.find_sql(sql)[0][0]
 			if lastP is None:
 				lastP=0
@@ -254,17 +255,17 @@ def input_groupbyquanyi(ac,symbol,type,D):
 						valueslist=valueslist+","+"('%s','%s','%s','%s','%s','%s')" % (ac,symbol,type,item[1],item[0],lastP)
 			valueslist=valueslist.strip(',')
 			if firststockdate>laststockdate:
-				sql="insert into [Future].[dbo].[real_quanyi_log_groupby](ac,symbol,[type],[position],[stockdate],[totalposition]) values "+valueslist
+				sql="insert into [Future].[dbo].[quanyi_log_groupby](ac,symbol,[type],[position],[stockdate],[totalposition]) values "+valueslist
 				ms.insert_sql(sql)
 				print 7,datetime.datetime.now()
 
-	sql="drop table #temp_real_quanyi_new"
+	sql="drop table #temp_quanyi_new"
 	ms.insert_sql(sql)
 	print "OK"
 
 
 def pre_quanyi_data(ac,symbol,type):
-	sql="select max(stockdate) as stockdate FROM [Future].[dbo].[real_quanyi_log_groupby] where ac='%s' and symbol='%s'" % (ac,symbol)
+	sql="select max(stockdate) as stockdate FROM [Future].[dbo].[quanyi_log_groupby] where ac='%s' and symbol='%s'" % (ac,symbol)
 	res=ms.dict_sql(sql)[0]
 	if res['stockdate'] == None:
 		nowD=151020
@@ -272,7 +273,7 @@ def pre_quanyi_data(ac,symbol,type):
 	else:
 		nowD=res['stockdate'].strftime("%Y%m%d")[2:]
 		nowD=int(nowD)
-	sql="select distinct D from real_st_report where D>=%s  order by D" % (nowD)
+	sql="select distinct D from st_report where D>=%s  order by D" % (nowD)
 	res=ms.dict_sql(sql)
 	for item1 in res:
 		print item1['D']
@@ -295,8 +296,9 @@ def main_fun():
 		daylycaculate(positionsymbol,quanyisymbol,item['acname'])
 
 
-main_fun()
+# main_fun()
+# input_groupbyquanyi('9AGOLD','AG',0,160628)
+# pre_quanyi_data('9AGOLD','AG',0)
 # daylycaculate('pythonRun-TF-CH-rev-right','TF','TF')
-# input_groupbyquanyi('RB2trendorig','RB',0,160706)
-# pre_quanyi_data('RB2trendorig','RB',0)
-# daylycaculate('AG','AG','9AGOLD')
+# pre_quanyi_data('RB2uprev','RB',0)
+# daylycaculate('RB','RB','RB2uprev')
