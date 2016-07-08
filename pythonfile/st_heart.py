@@ -34,4 +34,4 @@ def st_heart():
 while(1):
 	st_heart()
 	print 1
-	time.sleep(60)
+	time.sleep(90)
