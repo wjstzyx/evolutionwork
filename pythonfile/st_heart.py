@@ -16,7 +16,7 @@ def st_heart():
 	sql="SELECT  [id]     ,[st]    ,DATEDIFF(MINUTE, [stockdate], getdate()) as timediff   FROM [LogRecord].[dbo].[ST_heart]   where DATEDIFF(MINUTE, [stockdate], getdate())>=3  order by timediff desc"
 	res=ms.dict_sql(sql)
 	message=''
-	mailtolist=['yuyang@evolutionlabs.com.cn','yuyang@evolutionlabs.com.cn']
+	mailtolist=['yuyang@evolutionlabs.com.cn','beilei@evolutionlabs.com.cn']
 	totalsubject='AB策略卡死报警'+datetime.datetime.now().strftime("%H:%M:%S")
 	if res:
 		for item in res:
@@ -27,9 +27,6 @@ def st_heart():
 		totalmsg=message
 		mailreslut=send_mail(mailtolist,totalsubject,totalmsg)
 		print mailreslut
-
-
-
 
 while(1):
 	st_heart()
