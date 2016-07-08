@@ -193,14 +193,15 @@ def input_groupbyquanyi(ac,symbol,type,D):
 		res1=ms.dict_sql(sql)
 		for item in res1:
 			#赋值laststlistposition
-			# if item['stockdate']>=datetime.datetime.strptime('2016-07-06 09:00',"%Y-%m-%d %H:%M") and item['stockdate']<=datetime.datetime.strptime('2016-07-06 09:49',"%Y-%m-%d %H:%M"):
-			# 	print item
+			# if item['stockdate']>=datetime.datetime.strptime('2016-07-05 09:32',"%Y-%m-%d %H:%M") and item['stockdate']<=datetime.datetime.strptime('2016-07-05 09:59',"%Y-%m-%d %H:%M"):
+			# 	print item['p'],laststlistposition[item['st']]
 			# 	print deltepositionlist[item['stockdate']]
 			deltepositionlist[item['stockdate']]=deltepositionlist[item['stockdate']]+(item['p']-laststlistposition[item['st']])
 			laststlistposition[item['st']]=item['p']
 		print 5,datetime.datetime.now()
 		newlist=[(k,deltepositionlist[k]) for k in sorted(deltepositionlist.keys())]
-		# print newlist
+		for item in newlist:
+			print item
 
 		#选出数据库中最新的记录
 		mynewD=str(D+20000000)
@@ -216,6 +217,7 @@ def input_groupbyquanyi(ac,symbol,type,D):
 			laststockdate=datetime.datetime.strptime('2010-01-01','%Y-%m-%d')
 		#计算昨天的总仓位
 		sql="select top 1 totalposition,stockdate from [real_quanyi_log_groupby] where ac='%s' and symbol='%s' and TYPE=%s and stockdate<'%s' order by stockdate desc " % (ac,symbol,type,mynewD)
+		print sql
 		res=ms.dict_sql(sql)
 		if res:
 			lastdayP=res[0]['totalposition']
@@ -240,10 +242,12 @@ def input_groupbyquanyi(ac,symbol,type,D):
 				#--end
 			#开始计算当天仓位
 			sql="select SUM(a.p*a.p_size*a.ratio/100) as P from #temp_real_quanyi_new a inner join(  select MAX(id) as id,st from #temp_real_quanyi_new where StockDate<='%s'  group by st  ) temp  on a.ST=temp.ST and a.id=temp.id" % (firststockdate)
+			print sql 
 			lastP=ms.find_sql(sql)[0][0]
 			if lastP is None:
 				lastP=0
 			deltaposition=lastP-lastdayP
+			print lastP,lastdayP,deltaposition
 			#插入数据库
 			valueslist="('%s','%s','%s','%s','%s','%s')" % (ac,symbol,type,deltaposition,firststockdate,lastP)
 			for item in newlist:
@@ -295,8 +299,8 @@ def main_fun():
 		daylycaculate(positionsymbol,quanyisymbol,item['acname'])
 
 
-main_fun()
+# main_fun()
 # daylycaculate('pythonRun-TF-CH-rev-right','TF','TF')
-# input_groupbyquanyi('RB2trendorig','RB',0,160706)
-# pre_quanyi_data('RB2trendorig','RB',0)
+input_groupbyquanyi('JDQGOpen_TG','JD',0,160706)
+# pre_quanyi_data('JDQGOpen_TG','JD',0)
 # daylycaculate('AG','AG','9AGOLD')

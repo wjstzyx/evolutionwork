@@ -9,28 +9,20 @@ sys.setdefaultencoding('utf8')
 from dbconn import MSSQL
 ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 # resList = ms.find_sql("select top 2 * from st_report")
-a='160828'
-stockdate='2016-06-28 00:00:01'
-stockdate=datetime.datetime.strptime(stockdate,'%Y-%m-%d %H:%M:%S')
+#sql="SELECT distinct st  FROM [LogRecord].[dbo].[Trading_logTrade] where  systemtime>'2016-07-07 15:31:00.000' "
+sql="select distinct st from   [LogRecord].[dbo].[Trading_logTrade] where   systemtime>'2016-07-07 15:31:00.000' and systemtime<'2016-07-07 18:31:00.000' "
+res=ms.dict_sql(sql)
+for item in res:
+	sql="select p from [LogRecord].[dbo].[Trading_logTrade] where st='%s' and systemtime <'2016-07-07 16:00:03.000' order by  systemtime desc" % (item['st'])
+	res1=ms.dict_sql(sql)
+	if res1:
+		sql="select top 1 p from [Future].[dbo].[Trading_logSymbol] where st='%s'" % (item['st'])
+		res2=ms.dict_sql(sql)[0]['p']
+		if res1[0]['p']!=res2:
+			print item['st']
 
-aa=time.mktime(stockdate.timetuple())
-print aa
-
-
-def test():
-
-	bb=0
-	i=0
-	sum=0
-	sql="SELECT id,[AC]  ,[inserttime]  FROM [LogRecord].[dbo].[errorstlist] order by id "
-	res=ms.dict_sql(sql)
-	for item in res:
-		stockdate=item['inserttime']
-		aa=time.mktime(stockdate.timetuple())
-		print aa-bb
-		bb=aa
+		# sql="update [Future].[dbo].[Trading_logSymbol] set P=%s where st=%s" % (res1[0]['p'],item['st'])
+		# print sql 
+		#ms.insert_sql(sql)
 
 
-test()
-
-#1467043200.0
