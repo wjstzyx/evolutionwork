@@ -168,14 +168,8 @@ def input_groupbyquanyi(ac,symbol,type,D):
 		ms.insert_sql(sql)
 	except:
 		pass
-	sql="select * into  #temp_real_quanyi_new from ( select p.ac,p.symbol,real_st_report.type,real_st_report.id,real_st_report.p,real_st_report.pp,p.p_size,p.ratio ,real_st_report.st,real_st_report.stockdate from real_st_report  inner join p_log p on p.st=real_st_report.st and p.ac='%s' and p.symbol='%s' and p.d=%s and real_st_report.type=%s )temp " % (ac,symbol,D,type)
-	print sql
+	sql="select * into  #temp_real_quanyi_new from (select '%s' as ac,'%s' as symbol,'%s' as type,temp.id,p,PP,p_size,ratio,st,o.stockdate from tsymbol o inner join (select real_st_report.id,real_st_report.p,real_st_report.pp,p.symbol,real_st_report.stockdate,real_st_report.st,p.p_size,p.ac,p.ratio,real_st_report.type from real_st_report  inner join p_log p on p.st=real_st_report.st and p.ac='%s' and p.symbol='%s' and p.d=%s and real_st_report.type=%s ) temp on temp.stockdate=o.stockdate and o.symbol=temp.symbol where o.symbol='%s' ) temp " % (ac,symbol,type,ac,symbol,D,type,symbol)
 	ms.insert_sql(sql)
-	#删除重复项
-	sql="delete from #temp_real_quanyi_new where ID not in(select MAX(id) as id from #temp_real_quanyi_new group by st,Stockdate)"
-	# print sql
-	ms.insert_sql(sql)
-	##---end
 	print 2,datetime.datetime.now()
 	sql="select count(1) from #temp_real_quanyi_new"
 	res=ms.find_sql(sql)[0][0]
@@ -206,8 +200,8 @@ def input_groupbyquanyi(ac,symbol,type,D):
 			laststlistposition[item['st']]=item['p']
 		print 5,datetime.datetime.now()
 		newlist=[(k,deltepositionlist[k]) for k in sorted(deltepositionlist.keys())]
-		# for item in newlist:
-		# 	print item
+		for item in newlist:
+			print item
 
 		#选出数据库中最新的记录
 		mynewD=str(D+20000000)
@@ -223,7 +217,7 @@ def input_groupbyquanyi(ac,symbol,type,D):
 			laststockdate=datetime.datetime.strptime('2010-01-01','%Y-%m-%d')
 		#计算昨天的总仓位
 		sql="select top 1 totalposition,stockdate from [real_quanyi_log_groupby] where ac='%s' and symbol='%s' and TYPE=%s and stockdate<'%s' order by stockdate desc " % (ac,symbol,type,mynewD)
-		# print sql
+		print sql
 		res=ms.dict_sql(sql)
 		if res:
 			lastdayP=res[0]['totalposition']
@@ -248,12 +242,12 @@ def input_groupbyquanyi(ac,symbol,type,D):
 				#--end
 			#开始计算当天仓位
 			sql="select SUM(a.p*a.p_size*a.ratio/100) as P from #temp_real_quanyi_new a inner join(  select MAX(id) as id,st from #temp_real_quanyi_new where StockDate<='%s'  group by st  ) temp  on a.ST=temp.ST and a.id=temp.id" % (firststockdate)
-			# print sql 
+			print sql 
 			lastP=ms.find_sql(sql)[0][0]
 			if lastP is None:
 				lastP=0
 			deltaposition=lastP-lastdayP
-			# print lastP,lastdayP,deltaposition
+			print lastP,lastdayP,deltaposition
 			#插入数据库
 			valueslist="('%s','%s','%s','%s','%s','%s')" % (ac,symbol,type,deltaposition,firststockdate,lastP)
 			for item in newlist:
@@ -307,6 +301,6 @@ def main_fun():
 
 # main_fun()
 # daylycaculate('pythonRun-TF-CH-rev-right','TF','TF')
-# input_groupbyquanyi('JDQGST_TG','JD',0,160706)
-pre_quanyi_data('RU2v7','RU',0)
+input_groupbyquanyi('JDQGOpen_TG','JD',0,160706)
+# pre_quanyi_data('JDQGOpen_TG','JD',0)
 # daylycaculate('AG','AG','9AGOLD')
