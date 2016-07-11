@@ -33,6 +33,7 @@ def test_issignal():
 	sql="SELECT id,p,st,systemtime  FROM [Future].[dbo].[Trading_logSymbol] where ((DATEPART(hour,systemtime)>15 and DATEPART(hour,systemtime)<=20) or (DATEPART(hour,systemtime)=15 and DATEPART(MINUTE,systemtime)>30)) and systemtime>'2016-07-09' order by systemtime desc"
 	res=ms.dict_sql(sql)
 	if res:
+		returnnum=0
 		for item in res:
 			id=item['id']
 			p=item['p']
@@ -44,10 +45,12 @@ def test_issignal():
 			res1=ms.dict_sql(sql)
 			if res1:
 				originP=res1[0]['P']
-				todosql="update [Future].[dbo].[Trading_logSymbol] set p=%s where id=%s and st='%s'" % (originP,id,st)
-				ms.insert(todosql)
-				print backupsql
-		return 1
+				if originP!=p:
+					returnnum=1
+					todosql="update [Future].[dbo].[Trading_logSymbol] set p=%s where id=%s and st='%s'" % (originP,id,st)
+					ms.insert(todosql)
+					print backupsql
+		return returnnum
 	else:
 		return 0
 
