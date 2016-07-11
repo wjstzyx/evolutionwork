@@ -58,7 +58,8 @@ def test_issignal():
 def sendmsgfun():
 	(mailtolist,sendmessage)=get_messagelist()
 	subject='收盘后有信号写入'+datetime.datetime.now().strftime("%H:%M:%S")
-	message="收盘后有信号写入,具体请参考日志"
+	refsql="SELECT id,p,st,systemtime  FROM [Future].[dbo].[Trading_logSymbol] where ((DATEPART(hour,systemtime)>15 and DATEPART(hour,systemtime)<=20) or (DATEPART(hour,systemtime)=15 and DATEPART(MINUTE,systemtime)>30)) and systemtime>2016-07-09 order by systemtime desc"
+	message="收盘后有信号写入,具体请参考日志\r\n"+refsql
 	sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,message,0,sendmessage)
 	ms.insert_sql(sql)
 
