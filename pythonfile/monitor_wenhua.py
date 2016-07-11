@@ -39,8 +39,8 @@ def monitor_AB_st_night():
 				st=item['st']
 				timediff=item['timediff']
 				message=message+'策略号 '+str(st)+': '+' 卡死时间: '+str(timediff)+'(分钟)'
-				sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,message,0,sendmessage)
-				ms.insert_sql(sql)
+			sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,message,0,sendmessage)
+			ms.insert_sql(sql)
 		else:	
 			# print starttime
 			# print endtime
@@ -79,8 +79,8 @@ def monitor_AB_st_day():
 				st=item['st']
 				timediff=item['timediff']
 				message=message+'策略号 '+str(st)+': '+' 卡死时间: '+str(timediff)+'(分钟)'
-				sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,message,0,sendmessage)
-				ms.insert_sql(sql)
+			sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,message,0,sendmessage)
+			ms.insert_sql(sql)
 		else:	
 			# print starttime
 			# print endtime
