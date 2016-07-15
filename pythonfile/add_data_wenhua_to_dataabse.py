@@ -129,7 +129,6 @@ if os.path.exists(_dfrom):
     pass
 else:
     _dfrom =r'/home/yuyang/myfile'
-exit()
 date = sys.argv[1] 
 #date=20160513
 if len(sys.argv)>2:
