@@ -296,10 +296,10 @@ def main_fun():
 		daylycaculate(positionsymbol,quanyisymbol,item['acname'])
 
 
-# main_fun()
+main_fun()
 # input_groupbyquanyi('9AGOLD','AG',0,160628)
 # pre_quanyi_data('9AGOLD','AG',0)
 # daylycaculate('pythonRun-TF-CH-rev-right','TF','TF')
 # input_groupbyquanyi('RB2trendorig','RB',0,160706)
-pre_quanyi_data('QCU18MIN','CU',0)
-# daylycaculate('CU','CU','QCU18MIN')
+# pre_quanyi_data('Mcxvolume','M',0)
+# # daylycaculate('CU','CU','QCU18MIN')
