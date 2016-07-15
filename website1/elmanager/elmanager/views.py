@@ -20,6 +20,28 @@ def index(request):
 	html = t.render(Context({'current_date': now}))
 	return HttpResponse(html)
 
+def adddata(request):
+	data=""
+	defualtdate=datetime.datetime.now().strftime("%Y%m%d")[2:]
+	if request.POST:
+		print request.POST
+		newD=request.POST.get('datevalue','')
+		if len(newD)!=6:
+			newD=defualtdate
+		defualtdate=newD
+		ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+		sql="select a.ac,Convert(decimal(18,1),abs(a.quanyi-a.comm-b.quanyi+b.comm)/(c.pointvalue+0.000001)) as dianshu,a.D,(a.quanyi-a.comm) as backequity,(b.quanyi-b.comm) as realequity from dailyquanyi a left join real_dailyquanyi b on a.ac=b.ac and a.symbol=b.symbol and a.D=b.D and a.D='%s'  inner join [LogRecord].[dbo].[symbolpointvalue] c on a.symbol=c.symbol where a.D='%s' order by dianshu desc" % (newD,newD)
+		res=ms.dict_sql(sql)
+		data=res
+	return render_to_response('realcompare.html',{
+		'data':data,
+		'defualtdate':defualtdate,
+	})	
+
+
+
+
+
 def acwantedequlitybacktest(request):
 	if request.POST:
 		id=request.POST.get('id','')
