@@ -101,7 +101,7 @@ def read_date_write_to_database(targetfile,date,mysymbol=''):
         for line in lines:
             line=line.strip('\n')
             linelist=line.split(',')
-            if linelist[7]==date and (mysymbol=='' or mysymbol.lower()==linelist[0].lower()):
+            if linelist[7]==date and (mysymbol=='' or mysymbol.lower()==linelist[0].lower()) and  linelist[0] not in ('CMXGLD','SG@A50','BRENTOIL','CMXSLV','UK@CU'):
                 sql="insert into Tsymbol ([Symbol],[O],[C],[H],[L],[V],[OPI],[D],[T],[StockDate],[refc])values('%s',%s,%s,%s,%s,%s,%s,'%s','%s','%s',%s)" % (linelist[0],linelist[1],linelist[2],linelist[3],linelist[4],linelist[5],linelist[6],linelist[7],linelist[8],linelist[9],linelist[10])
                 try:
                     ms.insert_sql(sql)
