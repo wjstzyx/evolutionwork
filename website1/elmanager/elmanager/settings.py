@@ -1,5 +1,5 @@
 # Django settings for elmanager project.
-
+import os
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -67,13 +67,37 @@ STATIC_ROOT = ''
 STATIC_URL = '/static/'
 
 # Additional locations of static files
-STATICFILES_DIRS = (
-    # Put strings here, like "/home/html/static" or "C:/www/django/static".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    "/home/yuyang/myfile/evolutionwork/website1/elmanager/elmanager/static",
-    # 'D:/website1/elmanager/elmanager/static',
-)
+
+if os.path.exists('C:/YYfiles/evolutionwork/website1/'):    
+    STATICFILES_DIRS = (
+        # Put strings here, like "/home/html/static" or "C:/www/django/static".
+        # Always use forward slashes, even on Windows.
+        # Don't forget to use absolute paths, not relative paths.
+        #"/home/yuyang/myfile/evolutionwork/website1/elmanager/elmanager/static",
+        'C:/YYfiles/evolutionwork/website1/elmanager/elmanager/static',
+    )
+    TEMPLATE_DIRS = (
+        # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
+        # Always use forward slashes, even on Windows.
+        # Don't forget to use absolute paths, not relative paths.
+        #"/home/yuyang/myfile/evolutionwork/website1/elmanager/elmanager/templates",
+        "C:/YYfiles/evolutionwork/website1/elmanager/elmanager/templates",
+    )
+else:
+    STATICFILES_DIRS = (
+        # Put strings here, like "/home/html/static" or "C:/www/django/static".
+        # Always use forward slashes, even on Windows.
+        # Don't forget to use absolute paths, not relative paths.
+        "/home/yuyang/myfile/evolutionwork/website1/elmanager/elmanager/static",
+        # 'C:\YYfiles\evolutionwork\website1\elmanager\elmanager\static',
+    )
+    TEMPLATE_DIRS = (
+        # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
+        # Always use forward slashes, even on Windows.
+        # Don't forget to use absolute paths, not relative paths.
+        "/home/yuyang/myfile/evolutionwork/website1/elmanager/elmanager/templates",
+        #"D:/website1/elmanager/elmanager/templates",
+    )
 
 # List of finder classes that know how to find static files in
 # various locations.
@@ -108,13 +132,7 @@ ROOT_URLCONF = 'elmanager.urls'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'elmanager.wsgi.application'
 
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    "/home/yuyang/myfile/evolutionwork/website1/elmanager/elmanager/templates",
-    #"D:/website1/elmanager/elmanager/templates",
-)
+
 
 INSTALLED_APPS = (
     'django.contrib.auth',
