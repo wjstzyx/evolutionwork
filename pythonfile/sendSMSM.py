@@ -74,5 +74,6 @@ def sendsms(mobile='',content=''):
 	except:
 		return 0
 
-# result=sendsms('17091925075','17091925075')
-# print result
+result=sendsms('17091925075','huhuuhu')
+print "ddd"
+print result
