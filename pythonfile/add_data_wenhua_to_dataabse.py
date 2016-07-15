@@ -128,7 +128,7 @@ _dfrom =r'Y:\data_wenhua'
 if os.path.exists(_dfrom):
     pass
 else:
-    _dfrom =r'/home/yuyang/myfile/data_wenhua/'
+    _dfrom =r'/home/yuyang/myfile/data_wenhua'
 date = sys.argv[1] 
 #date=20160513
 if len(sys.argv)>2:
