@@ -74,6 +74,7 @@ def monitor_AB_st_day():
 		message=''
 		subject='AB策略卡死报警'+datetime.datetime.now().strftime("%H:%M:%S")
 		if res:
+			subject=str(res[0]['st'])+"策略卡死"+datetime.datetime.now().strftime("%H:%M:%S")
 			
 		if res:
 			print "have waring"
