@@ -174,6 +174,7 @@ def input_groupbyquanyi(ac,symbol,type,D):
 	except:
 		pass
 	sql="select * into  #temp_quanyi_new from (select '%s' as ac,'%s' as symbol,'%s' as type,temp.id,p,PP,p_size,ratio,st,o.stockdate from tsymbol o inner join (select st_report.id,st_report.p,st_report.pp,p.symbol,st_report.stockdate,st_report.st,p.p_size,p.ac,p.ratio,st_report.type from st_report  inner join p_log p on p.st=st_report.st and p.ac='%s' and p.symbol='%s' and p.d=%s and st_report.type=%s ) temp on temp.stockdate=o.stockdate and o.symbol=temp.symbol where o.symbol='%s' ) temp " % (ac,symbol,type,ac,symbol,D,type,symbol)
+	print sql
 	ms.insert_sql(sql)
 	print 2,datetime.datetime.now()
 	sql="select count(1) from #temp_quanyi_new"
@@ -296,10 +297,10 @@ def main_fun():
 		daylycaculate(positionsymbol,quanyisymbol,item['acname'])
 
 
-main_fun()
+# main_fun()
 # input_groupbyquanyi('9AGOLD','AG',0,160628)
 # pre_quanyi_data('9AGOLD','AG',0)
 # daylycaculate('pythonRun-TF-CH-rev-right','TF','TF')
 # input_groupbyquanyi('RB2trendorig','RB',0,160706)
-# pre_quanyi_data('Mcxvolume','M',0)
-# # daylycaculate('CU','CU','QCU18MIN')
+pre_quanyi_data('cfzh','CF',0)
+# daylycaculate('CF','CF','cfzh')

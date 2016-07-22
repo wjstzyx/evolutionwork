@@ -202,9 +202,7 @@ def acwantedequlity(request):
 		res1=ms.find_sql(sql)
 		sql="select (quanyi-comm)/d_max as quanyia,D from real_dailyquanyi where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
 		res2=ms.find_sql(sql)
-		print 'res2',res2
 		if res2==[]:
-			print 11
 			tmp=[0,res1[-1][1]]
 			res2.append(tmp)
 
@@ -310,6 +308,20 @@ def acwantedequlity(request):
 		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
 		Idata.append(tempdict)
 
+	Mdata=[]
+	sql="select distinct ac,symbol from dailyquanyi where symbol in ('M','Mnight') and D>151020"
+	res=ms.dict_sql(sql)
+	for item in res:
+		acname=item['ac']
+		symbol=item['symbol']
+		sql="select (quanyi-comm)/d_max as quanyia,D from dailyquanyi where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res1=ms.find_sql(sql)
+		sql="select (quanyi-comm)/d_max as quanyia,D from real_dailyquanyi where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res2=ms.find_sql(sql)
+		(tempday,lilunquanyi,realquanyi)=change_delta_toaccumu(res1,res2)
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
+		Mdata.append(tempdict)
+
 	return render_to_response('acwantedequlity.html',{
 		'rbdata':rbdata,
 		'AGdata':AGdata,
@@ -324,7 +336,39 @@ def acwantedequlity(request):
 		'PPdata':PPdata,
 		'NIdata':NIdata,
 		'Idata':Idata,
+		'Mdata':Mdata,
 	})	
+
+
+
+def acwantedequlityforqiu(request):
+	if request.POST:
+		id=request.POST.get('id','')
+	newD=160621
+	RBlist=[]
+
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	rbdata=[]
+	sql="select distinct ac,symbol from dailyquanyi where ac in ('mtr','pzh','cfzh') and D>151020 order by symbol"
+	res=ms.dict_sql(sql)
+	for item in res:
+		acname=item['ac']
+		symbol=item['symbol']
+		sql="select (quanyi-comm)/d_max as quanyia,D from dailyquanyi where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res1=ms.find_sql(sql)
+		sql="select (quanyi-comm)/d_max as quanyia,D from real_dailyquanyi where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res2=ms.find_sql(sql)		
+		(tempday,lilunquanyi,realquanyi)=change_delta_toaccumu(res1,res2)
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
+		rbdata.append(tempdict)
+
+
+
+
+	return render_to_response('acwantedequlityforqiu.html',{
+		'rbdata':rbdata,
+	})	
+
 
 
 
