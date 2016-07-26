@@ -5,6 +5,8 @@ import datetime
 reload(sys)
 sys.setdefaultencoding('utf8')
 from dbconn import MSSQL
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.pylab as pl
 from matplotlib.dates import DayLocator, HourLocator, DateFormatter, drange
@@ -239,7 +241,7 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto):
 	plt.title('%s---%s' % (ac,symbolto))
 	plt.ylabel(u'平均每手净收益',fontproperties='SimHei')
 	pl.savefig('..\\myimage\\%s' % (ac))
-	#pl.show() 
+	pl.show() 
 
 
 
