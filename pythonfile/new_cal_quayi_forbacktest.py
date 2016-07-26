@@ -239,7 +239,8 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto):
 	#ax.xaxis.set_major_formatter(pl.DateFormatter('%Y-%m-%d')) 
 	pl.grid()
 	plt.title('%s---%s' % (ac,symbolto))
-	plt.ylabel(u'平均每手净收益',fontproperties='SimHei')
+	#plt.ylabel(u'平均每手净收益',fontproperties='SimHei')
+	plt.ylabel(u'Profit Per Hand')
 	pl.savefig('..\\myimage\\%s' % (ac))
 	pl.show() 
 
