@@ -239,7 +239,7 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto):
 	plt.title('%s---%s' % (ac,symbolto))
 	plt.ylabel(u'平均每手净收益',fontproperties='SimHei')
 	pl.savefig('..\\myimage\\%s' % (ac))
-	pl.show() 
+	#pl.show() 
 
 
 
