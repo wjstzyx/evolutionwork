@@ -252,7 +252,7 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto):
 
 
 
-(myquotes,totalsum)=input_groupbyquanyi('RB_cvk_strong','RB')
+(myquotes,totalsum)=input_groupbyquanyi('RBQGSTTR_TG','RB')
 #仓位信息OK
 # print totalsum
-cal_quanyi('RB_cvk_strong',myquotes,totalsum,'RB')
+cal_quanyi('RBQGSTTR_TG',myquotes,totalsum,'RB')

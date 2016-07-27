@@ -2,11 +2,12 @@
 #!/usr/bin/env python
 import sys
 import datetime
+from collections import Counter
 reload(sys)
 sys.setdefaultencoding('utf8')
 from dbconn import MSSQL
-import matplotlib
-matplotlib.use('Agg')
+# import matplotlib
+# matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.pylab as pl
 from matplotlib.dates import DayLocator, HourLocator, DateFormatter, drange
@@ -29,13 +30,13 @@ def input_groupbyquanyi(ac,symbol):
 	except:
 		pass
 	sql="select SUM(p_size*ratio/100) as totalsum from [Future].[dbo].[backtest_ac_psize] where ac='%s'" % (ac)
-	print sql 
+	#print sql 
 	res=ms.dict_sql(sql)
 	totalsum=res[0]['totalsum']
 
 	#产生临时整个虚拟组st_report_backtest
 	sql="select * into  #temp_quanyi_new from ( select p.ac,p.symbol,st_report_backtest.type,st_report_backtest.id,st_report_backtest.p,st_report_backtest.pp,p.p_size,p.ratio ,st_report_backtest.st,st_report_backtest.stockdate from st_report_backtest  inner join [Future].[dbo].[backtest_ac_psize] p on p.st=st_report_backtest.st and p.ac='%s' and p.symbol='%s')temp " % (ac,symbol)
-	print sql
+	#print sql
 	ms.insert_sql(sql)
 	#print 1,datetime.datetime.now()
 	sql="select count(1) from #temp_quanyi_new"
@@ -181,7 +182,7 @@ def input_groupbyquanyi(ac,symbol):
 	#--end
 
 
-def cal_quanyi(ac,myquotes,totalsum,symbolto):
+def cal_quanyi(ac,myquotes,totalsum,symbolto,isshow=1):
 	if totalsum<=0:
 		totalsum=1000000
 	#totalsum=10
@@ -203,9 +204,15 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto):
 	lastdate=tempquotes[0][0]
 	totalquanyi=0
 	i=0
+	totalchangetime=0
+	##回撤相关
+	lasthighquanyi=0
+	lasthighhuiche=0
+	nowhuiche=0
 	for item in tempquotes:
 		datetime=item[0]
 		deltatime=abs(myround(item[2])-myround(lastposition))
+		totalchangetime=totalchangetime+deltatime
 		totalquanyi=(myround(lastposition)*(item[1]-lastC)*float(pointvalue)-deltatime*commvalue)/totalsum+totalquanyi
 		lastposition=item[2]
 		lastC=item[1]
@@ -213,11 +220,18 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto):
 		i=i+1
 		avalue.append(datetime)
 		yvalue.append(totalquanyi)
+		#计算回撤相关
+		nowhuiche=lasthighquanyi-totalquanyi
+		if totalquanyi>lasthighquanyi:
+			lasthighquanyi=totalquanyi
+		if nowhuiche>lasthighhuiche:
+			lasthighhuiche=nowhuiche
+		##--end
+	if lasthighhuiche<0:
+		lasthighhuiche=0
 	# for i in range(10):
 	# 	print avalue[i],yvalue[i]
 	plt.figure(figsize=(16,8))
-	# plt.plot(avalue, yvalue, 'r')
-	# plt.show()
 	lenx=len(avalue)
 	pl.plot(myindex, yvalue, 'r') 
 	 
@@ -238,19 +252,182 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto):
 	pl.xticks(numx, labvalue) 
 	#ax.xaxis.set_major_formatter(pl.DateFormatter('%Y-%m-%d')) 
 	pl.grid()
-	plt.title('%s---%s' % (ac,symbolto))
+	plt.title('%s--%s--Tradeingtimes:%s--MaxDrawDown:%s' % (ac,symbolto,int(totalchangetime/totalsum),int(lasthighhuiche)))
 	#plt.ylabel(u'平均每手净收益',fontproperties='SimHei')
 	plt.ylabel(u'Profit Per Hand')
 	pl.savefig('..\\myimage\\%s' % (ac))
+	if isshow==1:
+		pl.show() 
+
+
+def cal_quanyi_foraccount(ac,myquotes,totalsum,symbolto,ratio):
+	if totalsum<=0:
+		totalsum=1000000
+	#totalsum=10
+	commvalue=1
+	pointvalue=1
+	sql="SELECT [symbol]  ,[pointvalue]  ,[commision] FROM [LogRecord].[dbo].[symbolpointvalue] where Symbol='%s'" % (symbolto)
+	res=ms.dict_sql(sql)
+	if res:
+		pointvalue=res[0]['pointvalue']
+		commvalue=res[0]['commision']
+
+	#直接计算
+	tempquotes=myquotes[:]
+	avalue=[]
+	yvalue=[]
+	myindex=[]
+	lastC=tempquotes[0][1]
+	lastposition=tempquotes[0][2]
+	lastdate=tempquotes[0][0]
+	totalquanyi=0
+	i=0
+	totalchangetime=0
+	oneacquanyidict={}
+
+	for item in tempquotes:
+		datetime=item[0]
+		deltatime=abs(myround(item[2])-myround(lastposition))
+		totalchangetime=totalchangetime+deltatime
+		totalquanyi=(myround(lastposition)*(item[1]-lastC)*float(pointvalue)-deltatime*commvalue)/totalsum*ratio +totalquanyi
+		lastposition=item[2]
+		lastC=item[1]
+		myindex.append(i)
+		i=i+1
+		avalue.append(datetime)
+		yvalue.append(totalquanyi)
+		oneacquanyidict[datetime]=totalquanyi
+	return oneacquanyidict
+
+
+def add_acquanyi(acquanyi1,acquanyi2):
+	newquanyi=dict(Counter(acquanyi1)+Counter(acquanyi2))
+	alltime=[ k for k in sorted(newquanyi.keys())]
+	allquanyi=[]
+	acquanyi1keys=acquanyi1.keys()
+	acquanyi2keys=acquanyi2.keys()
+	acquanyi1value=0
+	acquanyi2value=0
+	for item in alltime:
+		if item in acquanyi1keys:
+			acquanyi1value=acquanyi1[item]
+			lastvalue=acquanyi2value+acquanyi1value
+			allquanyi.append(lastvalue)
+		else:
+			if item in acquanyi2keys:
+				acquanyi2value=acquanyi2[item]
+				lastvalue=acquanyi2value+acquanyi1value
+				allquanyi.append(lastvalue)
+			else:
+				allquanyi.append(lastvalue)
+	#print dict(zip(alltime,allquanyi))
+	return dict(zip(alltime,allquanyi))
+
+
+
+
+
+
+
+
+
+
+
+
+def show_account(accountname):
+	sql="select ac,ratio from [Future].[dbo].[backtest_account_ac] where [accountname]='%s'" % (accountname)
+	res=ms.dict_sql(sql)
+	myqanyi=[]
+	mydatetime=[]
+	totalquanyidict={}
+	sql="select sum(ratio) as ratio from [Future].[dbo].[backtest_account_ac] where [accountname]='%s'" % (accountname)
+	i=ms.dict_sql(sql)[0]['ratio']
+	for item in res:
+		ratio=item['ratio']
+		sql="SELECT distinct ac,symbol   FROM [Future].[dbo].[backtest_ac_psize] where ac='%s'" % (item['ac'])
+		res1=ms.dict_sql(sql)[0]
+		ac=res1['ac']
+		symbol=res1['symbol']
+		(myquotes,totalsum)=input_groupbyquanyi(ac,symbol)
+		oneacquanyidict=cal_quanyi_foraccount(ac,myquotes,totalsum,symbol,ratio)
+		#totalquanyidict=dict(Counter(totalquanyidict)+Counter(oneacquanyidict))
+		totalquanyidict=add_acquanyi(totalquanyidict,oneacquanyidict)
+	#totalquanyidict对此排序
+	temptotalquanyidict=[(k,totalquanyidict[k]) for k in sorted(totalquanyidict.keys())]
+	avalue=[]
+	yvalue=[]
+	myindex=[]
+	indexnum=0
+	#最大回撤相关
+	lasthighquanyi=0
+	lasthighhuiche=0
+	nowhuiche=0
+	if i==0:
+		i=1
+	for item in temptotalquanyidict:
+		itemquanyi=item[1]/i
+		avalue.append(item[0])
+		yvalue.append(itemquanyi)
+		myindex.append(indexnum)
+		indexnum=indexnum+1
+		#计算回撤相关
+		nowhuiche=lasthighquanyi-itemquanyi
+		if itemquanyi>lasthighquanyi:
+			lasthighquanyi=itemquanyi
+		if nowhuiche>lasthighhuiche:
+			lasthighhuiche=nowhuiche
+		##--end
+	if lasthighhuiche<0:
+		lasthighhuiche=0
+	#开始画图
+	# print myindex
+	# print yvalue
+	plt.figure(figsize=(16,8))
+	lenx=len(avalue)
+	pl.plot(myindex, yvalue, 'r') 	 
+	pl.subplots_adjust(bottom=0.3) 	 
+	ax = pl.gca() 
+	ax.fmt_xdata = pl.DateFormatter('%Y-%m-%d') 
+	pl.xticks(rotation=75) 	 
+	#生成x轴的间隔
+	aa=int(lenx/30)
+	numx=[]
+	labvalue=[]
+	for i in range(0,lenx-aa,aa):
+		numx.append(i)
+		labvalue.append(avalue[i].strftime("%Y-%m-%d"))
+	numx.append(myindex[-1])
+	labvalue.append(avalue[myindex[-1]].strftime("%Y-%m-%d"))
+	pl.xticks(numx, labvalue) 
+	pl.grid()
+	plt.title('%s--MaxDrawDown:%s' % (accountname,int(lasthighhuiche)))
+	#plt.ylabel(u'平均每手净收益',fontproperties='SimHei')
+	plt.ylabel(u'Profit Per Hand')
+	pl.savefig('..\\myimage\\%s' % (accountname))
 	pl.show() 
 
 
 
 
+def show_all_ac(acname=''):
+	if acname=='':
+		sql="SELECT distinct ac,symbol   FROM [Future].[dbo].[backtest_ac_psize]"
+		isshow=0
+	else:
+		sql="SELECT distinct ac,symbol   FROM [Future].[dbo].[backtest_ac_psize] where ac='%s'" % (acname)
+		isshow=1
+	res=ms.dict_sql(sql)
+	for item in res:
+		ac=item['ac']
+		symbol=item['symbol']
+		print ac
+		(myquotes,totalsum)=input_groupbyquanyi(ac,symbol)
+		cal_quanyi(ac,myquotes,totalsum,symbol,isshow)
 
 
 
-(myquotes,totalsum)=input_groupbyquanyi('userdefinac','RB')
-#仓位信息OK
-# print totalsum
-cal_quanyi('userdefinac',myquotes,totalsum,'RB')
+#如果括号中是空,则计算所有虚拟组，到文件夹查看图片
+#如果括号中制定特定虚拟组，组只计算单个，并展示
+# show_all_ac('rbgroup1')
+
+show_account('myacount')
