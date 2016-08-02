@@ -86,7 +86,7 @@ def  add_data_wenhua(rawroot,date, timestart, timeend,mysymbol=''):
 
 
 ##读取数据写入数据库
-def read_date_write_to_database_day(targetfile,date,mysymbol=''):
+def read_date_write_to_database(targetfile,date,mysymbol=''):
     ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
     #date=20160428
     date=str(date)
@@ -101,8 +101,7 @@ def read_date_write_to_database_day(targetfile,date,mysymbol=''):
         for line in lines:
             line=line.strip('\n')
             linelist=line.split(',')
-            timeint=int(linelist[8][0:2])*100+int(linelist[8][3:])
-            if linelist[7]==date and (timeint>=900 and timeint<=1530) and (mysymbol=='' or mysymbol.lower()==linelist[0].lower()) and  linelist[0] not in ('CMXGLD','SG@A50','BRENTOIL','CMXSLV','UK@CU'):
+            if linelist[7]==date and (mysymbol=='' or mysymbol.lower()==linelist[0].lower()) and  linelist[0] not in ('CMXGLD','SG@A50','BRENTOIL','CMXSLV','UK@CU'):
                 sql="insert into Tsymbol ([Symbol],[O],[C],[H],[L],[V],[OPI],[D],[T],[StockDate],[refc])values('%s',%s,%s,%s,%s,%s,%s,'%s','%s','%s',%s)" % (linelist[0],linelist[1],linelist[2],linelist[3],linelist[4],linelist[5],linelist[6],linelist[7],linelist[8],linelist[9],linelist[10])
                 try:
                     ms.insert_sql(sql)
@@ -113,79 +112,6 @@ def read_date_write_to_database_day(targetfile,date,mysymbol=''):
                         pass                
                     else:
                         break
-    file.close()
-    print "Finish"
-    print "Success Insert Num :",successnum
-
-def read_date_write_to_database_night(targetfile,date,mysymbol=''):
-    ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
-    #date=20160428
-    date=str(date)
-    date=date[0:4]+'/'+date[4:6]+'/'+date[6:8]
-    print "Starting..."
-    file = open(targetfile)
-    successnum=0
-    while 1:
-        lines = file.readlines(100000)
-        if not lines:
-            break
-        for line in lines:
-            line=line.strip('\n')
-            linelist=line.split(',')
-            isnight=0
-            timeint=int(linelist[8][0:2])*100+int(linelist[8][3:])
-            # print timeint
-
-            if ((timeint>=2100 and timeint<=2359) or (timeint>=0000 and timeint<=400)) and  (mysymbol=='' or mysymbol.lower()==linelist[0].lower()) and  linelist[0] not in ('CMXGLD','SG@A50','BRENTOIL','CMXSLV','UK@CU'):
-                
-                if linelist[0]=='RB':
-                    linelist[0]='RBnight'
-                    isnight=1
-                if linelist[0]=='P':
-                    linelist[0]='Rnight'
-                    isnight=1
-                if linelist[0]=='RU':
-                    linelist[0]='RUnight'
-                    isnight=1
-                if linelist[0]=='TA':
-                    linelist[0]='TAnight'
-                    isnight=1
-                if linelist[0]=='NI':
-                    linelist[0]='NInight'
-                    isnight=1
-                if linelist[0]=='L':
-                    linelist[0]='Lnight'
-                    isnight=1
-                if linelist[0]=='J':
-                    linelist[0]='Jnight'
-                    isnight=1
-                if linelist[0]=='I':
-                    linelist[0]='Inight'
-                    isnight=1
-                if linelist[0]=='HC':
-                    linelist[0]='HCnight'
-                    isnight=1
-                if linelist[0]=='CS':
-                    linelist[0]='CSnight'
-                    isnight=1
-                if linelist[0]=='BU':
-                    linelist[0]='BUnight'
-                    isnight=1
-                if linelist[0]=='AL':
-                    linelist[0]='ALnight'
-                    isnight=1
-                if isnight==1:
-                    sql="insert into Tsymbol ([Symbol],[O],[C],[H],[L],[V],[OPI],[D],[T],[StockDate],[refc])values('%s',%s,%s,%s,%s,%s,%s,'%s','%s','%s',%s)" % (linelist[0],linelist[1],linelist[2],linelist[3],linelist[4],linelist[5],linelist[6],linelist[7],linelist[8],linelist[9],linelist[10])
-                    #print sql 
-                    try:
-                        ms.insert_sql(sql)
-                        successnum=successnum+1
-                        print successnum
-                    except Exception,e:
-                        if "Cannot insert duplicate key row" in str(e):
-                            pass                
-                        else:
-                            break
     file.close()
     print "Finish"
     print "Success Insert Num :",successnum
@@ -209,8 +135,8 @@ if len(sys.argv)>2:
     mysymbol=sys.argv[2]
 else:
     mysymbol=''
-timestart ='0000'
-timeend = 2359
+timestart ='2100'
+timeend = 2350
 print date,mysymbol
 
 
@@ -221,11 +147,10 @@ if not os.path.isfile(targetfile):
     newtargetfile.close()
 
 
-#downresult=ftp_down(_dfrom,date)# down from ftp
-downresult=1
+downresult=ftp_down(_dfrom,date)# down from ftp
+#downresult=1
 if downresult==1:
     targetfilename=add_data_wenhua(_dfrom,date, timestart, timeend,mysymbol )  #  extrct  data from timestart to timeend
-    read_date_write_to_database_night(targetfilename,date,mysymbol) # targetfile=r'Y:\data_wenhua\20160427_0_2359.csv'
-    read_date_write_to_database_day(targetfilename,date,mysymbol)
+    #read_date_write_to_database(targetfilename,date,mysymbol) # targetfile=r'Y:\data_wenhua\20160427_0_2359.csv'
 
 

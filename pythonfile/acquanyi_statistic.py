@@ -285,16 +285,16 @@ def pre_quanyi_data(ac,symbol,type):
 def main_fun():
 	#获取需要处理的列表
 	sql="SELECT [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1  and isyepan=0"
-	sql="SELECT top 17 [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('RB') and iscaculate=1 order by sortnum"
+	#sql="SELECT top 17 [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('RB') and iscaculate=1 order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
 		print item['acname']
 		positionsymbol=item['positionsymbol']
 		quanyisymbol=item['quanyisymbol']
-		sql="delete from [Future].[dbo].[quanyi_log_groupby] where ac='%s'" % (item['acname'])
-		ms.insert_sql(sql)
-		sql="delete from [Future].[dbo].[dailyquanyi] where ac='%s'" % (item['acname'])
-		ms.insert_sql(sql)
+		# sql="delete from [Future].[dbo].[quanyi_log_groupby] where ac='%s'" % (item['acname'])
+		# ms.insert_sql(sql)
+		# sql="delete from [Future].[dbo].[dailyquanyi] where ac='%s'" % (item['acname'])
+		# ms.insert_sql(sql)
 		pre_quanyi_data(item['acname'],item['positionsymbol'],0)
 		daylycaculate(positionsymbol,quanyisymbol,item['acname'])
 
