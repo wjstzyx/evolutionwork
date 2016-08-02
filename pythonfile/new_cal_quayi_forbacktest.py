@@ -145,6 +145,16 @@ def input_groupbyquanyi(ac,symbol):
 				if timestr>=900 and  timestr<=929:
 					mymewquote.remove(item)
 			#--end
+		print mymewquote[0:3]
+		#将仓位写文件
+		positionpath="..\\positionfile\\%s-%s.csv" % (totalsum,ac)
+		with open(positionpath,'w') as f:
+			for item in mymewquote:
+				line=item[0].strftime("%Y-%m-%d %H:%M:%S")+","+str(item[1])+","+str(item[2])+"\n"
+				f.write(line)
+
+
+		##--end
 		return mymewquote,totalsum
 	else:
 		return 0,0.0001
@@ -240,7 +250,6 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto,isshow=1):
 	ax.fmt_xdata = pl.DateFormatter('%Y-%m-%d') 
 	pl.xticks(rotation=75) 	 
 	#生成x轴的间隔
-
 	aa=int(lenx/30)
 	numx=[]
 	labvalue=[]
@@ -257,7 +266,17 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto,isshow=1):
 	plt.ylabel(u'Profit Per Hand')
 	pl.savefig('..\\myimage\\%s' % (ac))
 	if isshow==1:
-		pl.show() 
+		pl.show()
+	#权益写入文件
+	filepath="..\\file\\%s.csv" % (ac)
+	with open(filepath,'w') as f:
+		for i in range(len(avalue)):
+			line=avalue[i].strftime("%Y-%m-%d %H:%M:%S")+','+str(round(yvalue[i],0))+'\n'
+			f.write(line)
+	#--end
+
+		
+
 
 
 def cal_quanyi_foraccount(ac,myquotes,totalsum,symbolto,ratio):
@@ -428,6 +447,6 @@ def show_all_ac(acname=''):
 
 #如果括号中是空,则计算所有虚拟组，到文件夹查看图片
 #如果括号中制定特定虚拟组，组只计算单个，并展示
-# show_all_ac('rbgroup1')
+show_all_ac()
 
-show_account('myacount')
+# show_account('myacount')

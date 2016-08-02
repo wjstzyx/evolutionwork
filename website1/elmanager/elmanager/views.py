@@ -340,6 +340,234 @@ def acwantedequlity(request):
 	})	
 
 
+def acwantedequlitynew(request):
+	if request.POST:
+		id=request.POST.get('id','')
+	newD=160621
+	RBlist=[]
+
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	rbdata=[]
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('RB','RBnight') and iscaculate=1 order by sortnum"
+	res=ms.dict_sql(sql)
+	for item in res:
+		acname=item['ac']
+		symbol=item['symbol']
+		sql="select quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res1=ms.find_sql(sql)
+		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res2=ms.find_sql(sql)		
+		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
+		rbdata.append(tempdict)
+
+	AGdata=[]
+	sql="select distinct ac,symbol from dailyquanyi_V2 where symbol='AG' and D>151020"
+	res=ms.dict_sql(sql)
+	for item in res:
+		acname=item['ac']
+		symbol=item['symbol']
+		sql="select quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res1=ms.find_sql(sql)
+		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res2=ms.find_sql(sql)		
+		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
+		AGdata.append(tempdict)
+
+	CUdata=[]
+	sql="select distinct ac,symbol from dailyquanyi_V2 where symbol='CU' and D>151020"
+	res=ms.dict_sql(sql)
+	for item in res:
+		acname=item['ac']
+		symbol=item['symbol']
+		sql="select quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res1=ms.find_sql(sql)
+		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res2=ms.find_sql(sql)		
+		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
+		CUdata.append(tempdict)
+
+	RUdata=[]
+	sql="select distinct ac,symbol from dailyquanyi_V2 where symbol='RU' and D>151020"
+	res=ms.dict_sql(sql)
+	for item in res:
+		acname=item['ac']
+		symbol=item['symbol']
+		sql="select quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res1=ms.find_sql(sql)
+		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res2=ms.find_sql(sql)		
+		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
+		RUdata.append(tempdict)
+
+	TAdata=[]
+	sql="select distinct ac,symbol from dailyquanyi_V2 where symbol='TA' and D>151020"
+	res=ms.dict_sql(sql)
+	for item in res:
+		acname=item['ac']
+		symbol=item['symbol']
+		sql="select quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res1=ms.find_sql(sql)
+		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res2=ms.find_sql(sql)		
+		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
+		TAdata.append(tempdict)
+
+	JDdata=[]
+	sql="select distinct ac,symbol from dailyquanyi_V2 where symbol='JD' and D>151020"
+	res=ms.dict_sql(sql)
+	for item in res:
+		acname=item['ac']
+		symbol=item['symbol']
+		sql="select quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res1=ms.find_sql(sql)
+		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res2=ms.find_sql(sql)
+		if res2==[]:
+			tmp=[0,res1[-1][1]]
+			res2.append(tmp)
+
+		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
+		JDdata.append(tempdict)
+
+	BUdata=[]
+	sql="select distinct ac,symbol from dailyquanyi_V2 where symbol='BU' and D>151020"
+	res=ms.dict_sql(sql)
+	for item in res:
+		acname=item['ac']
+		symbol=item['symbol']
+		sql="select quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res1=ms.find_sql(sql)
+		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res2=ms.find_sql(sql)
+		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
+		BUdata.append(tempdict)
+
+	CSdata=[]
+	sql="select distinct ac,symbol from dailyquanyi_V2 where symbol='CS' and D>151020"
+	res=ms.dict_sql(sql)
+	for item in res:
+		acname=item['ac']
+		symbol=item['symbol']
+		sql="select quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res1=ms.find_sql(sql)
+		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res2=ms.find_sql(sql)
+		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
+		CSdata.append(tempdict)
+
+	HCdata=[]
+	sql="select distinct ac,symbol from dailyquanyi_V2 where symbol='HC' and D>151020"
+	res=ms.dict_sql(sql)
+	for item in res:
+		acname=item['ac']
+		symbol=item['symbol']
+		sql="select quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res1=ms.find_sql(sql)
+		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res2=ms.find_sql(sql)
+		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
+		HCdata.append(tempdict)
+
+	Pdata=[]
+	sql="select distinct ac,symbol from dailyquanyi_V2 where symbol in ('P','Pnight') and D>151020"
+	res=ms.dict_sql(sql)
+	for item in res:
+		acname=item['ac']
+		symbol=item['symbol']
+		sql="select quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res1=ms.find_sql(sql)
+		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res2=ms.find_sql(sql)
+		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
+		Pdata.append(tempdict)
+
+	PPdata=[]
+	sql="select distinct ac,symbol from dailyquanyi_V2 where symbol='PP' and D>151020"
+	res=ms.dict_sql(sql)
+	for item in res:
+		acname=item['ac']
+		symbol=item['symbol']
+		sql="select quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res1=ms.find_sql(sql)
+		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res2=ms.find_sql(sql)
+		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
+		PPdata.append(tempdict)
+
+	NIdata=[]
+	sql="select distinct ac,symbol from dailyquanyi_V2 where symbol='NI' and D>151020"
+	res=ms.dict_sql(sql)
+	for item in res:
+		acname=item['ac']
+		symbol=item['symbol']
+		sql="select quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res1=ms.find_sql(sql)
+		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res2=ms.find_sql(sql)
+		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
+		NIdata.append(tempdict)
+	
+	Idata=[]
+	sql="select distinct ac,symbol from dailyquanyi_V2 where symbol in ('I','Inight') and D>151020"
+	res=ms.dict_sql(sql)
+	for item in res:
+		acname=item['ac']
+		symbol=item['symbol']
+		sql="select quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res1=ms.find_sql(sql)
+		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res2=ms.find_sql(sql)
+		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
+		Idata.append(tempdict)
+
+	Mdata=[]
+	sql="select distinct ac,symbol from dailyquanyi_V2 where symbol in ('M','Mnight') and D>151020"
+	res=ms.dict_sql(sql)
+	for item in res:
+		acname=item['ac']
+		symbol=item['symbol']
+		sql="select quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res1=ms.find_sql(sql)
+		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res2=ms.find_sql(sql)
+		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
+		Mdata.append(tempdict)
+
+	return render_to_response('acwantedequlity.html',{
+		'rbdata':rbdata,
+		'AGdata':AGdata,
+		'CUdata':CUdata,
+		'RUdata':RUdata,
+		'TAdata':TAdata,
+		'JDdata':JDdata,
+		'BUdata':BUdata,
+		'CSdata':CSdata,
+		'HCdata':HCdata,
+		'Pdata':Pdata,
+		'PPdata':PPdata,
+		'NIdata':NIdata,
+		'Idata':Idata,
+		'Mdata':Mdata,
+	})	
+
+
+
+
+
 
 def acwantedequlityforqiu(request):
 	if request.POST:
@@ -611,4 +839,41 @@ def change_delta_toaccumu(datalist1,datalist2):
 		realquanyi[i]=totalvalue
 		lastvalue=totalvalue
 	return (daylist,lilunquanyi,realquanyi)
+
+
+#对齐两个时间序列
+def range_series(datalist1,datalist2):
+	datalist1day=[k[1] for k in datalist1]
+	datalist2day=[k[1] for k in datalist2]
+	data1list={}
+	for item in datalist1:
+		data1list[item[1]]=item[0]
+	data2list={}
+	for item in datalist2:
+		data2list[item[1]]=item[0]
+	daylist=list(set(datalist1day).union(set(datalist2day)))
+	daylist=sorted(daylist)
+	realquanyi=[]
+	lilunquanyi=[]
+	datalist1last=0
+	datalist2last=0
+	for item in daylist:
+		if item in datalist1day:
+			lilunquanyi.append(data1list[item])
+			datalist1last=data1list[item]
+		else:
+			lilunquanyi.append(datalist1last)
+
+		if item in datalist2day:
+			realquanyi.append(data2list[item])
+			datalist2last=data2list[item]
+		else:
+			realquanyi.append(datalist2last)
+	daylist=[int(k) for k in daylist]
+	# print daylist
+	# print realquanyi
+	# print  lilunquanyi
+	return (daylist,lilunquanyi,realquanyi)
+
+
 

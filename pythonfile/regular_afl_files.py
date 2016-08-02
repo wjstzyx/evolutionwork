@@ -51,7 +51,7 @@ def del_head_info(testlist,StrategyID):
 				if 'plotperformance(bsig,ssig,csig);' in line.lower():
 					isbsig=1			
 			#ADD tailf info
-			g.write('StrategyName = "%s";\r' % (testlist.split('.')[0]))
+			g.write('\rStrategyName = "%s";\r' % (testlist.split('.')[0]))
 			g.write('StrategyID = "%s";\r' % (StrategyID))
 			g.write('ProType = 1;\r')
 			g.write('Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);\r')
@@ -68,15 +68,15 @@ def all_file():
 	res=ms.dict_sql(sql)
 	StrategyID=int(res[0]['st'])+1
 	print StrategyID
-	StrategyID=99210166
+	#StrategyID=99210166
 	filelists=get_filename_list()
 	for item in filelists:
 		if item.split('.')[1]=='afl':
 			del_head_info(item,str(StrategyID))
 			listname=item.split('.')[0].replace("'","")
-			sql="insert into [Future].[dbo].[P_backtest_st_name](st,name,[inserttime]) values('%s','%s',getdate())" % (str(StrategyID),listname)
-			print sql 
-			ms.insert_sql(sql)
+			# sql="insert into [Future].[dbo].[P_backtest_st_name](st,name,[inserttime]) values('%s','%s',getdate())" % (str(StrategyID),listname)
+			# print sql 
+			# ms.insert_sql(sql)
 			StrategyID=StrategyID+1
 
 

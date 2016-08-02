@@ -26,7 +26,6 @@ def daylycaculate(symbolfrom,symbolto,ac):
 	#todaytime=160628
 	sql="delete from dailyquanyi where ac='%s' and symbol='%s' and D=%s" % (ac,symbolto,todaytime)
 	ms.insert_sql(sql)
-	#--end指将这个日期计算的收益（当天21:00信号后才逐渐由收益，21:00之前都是0）
 	#获取Pointvalue
 	sql="SELECT [symbol]  ,[pointvalue]  ,[commision] FROM [LogRecord].[dbo].[symbolpointvalue] where Symbol='%s'" % (symbolto)
 	res=ms.dict_sql(sql)
@@ -286,7 +285,7 @@ def pre_quanyi_data(ac,symbol,type):
 def main_fun():
 	#获取需要处理的列表
 	sql="SELECT [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1  and isyepan=0"
-	# sql="SELECT [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where isforbacktest=0 and positionsymbol='JD'"
+	sql="SELECT [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1 and isyepan=0 and positionsymbol in ('RB','RBnight')"
 	res=ms.dict_sql(sql)
 	for item in res:
 		print item['acname']

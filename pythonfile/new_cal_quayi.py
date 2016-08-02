@@ -2,6 +2,7 @@
 #!/usr/bin/env python
 import sys
 import datetime
+from collections import Counter
 reload(sys)
 sys.setdefaultencoding('utf8')
 from dbconn import MSSQL
@@ -246,13 +247,150 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto):
 	pl.savefig('..\\myimage\\%s' % (ac))
 	pl.show() 
 
+def cal_quanyi_foraccount(ac,myquotes,totalsum,symbolto,ratio):
+	if totalsum<=0:
+		totalsum=1000000
+	#totalsum=10
+	commvalue=1
+	pointvalue=1
+	sql="SELECT [symbol]  ,[pointvalue]  ,[commision] FROM [LogRecord].[dbo].[symbolpointvalue] where Symbol='%s'" % (symbolto)
+	res=ms.dict_sql(sql)
+	if res:
+		pointvalue=res[0]['pointvalue']
+		commvalue=res[0]['commision']
+
+	#直接计算
+	tempquotes=myquotes[:]
+	avalue=[]
+	yvalue=[]
+	myindex=[]
+	lastC=tempquotes[0][1]
+	lastposition=tempquotes[0][2]
+	lastdate=tempquotes[0][0]
+	totalquanyi=0
+	i=0
+	totalchangetime=0
+	oneacquanyidict={}
+
+	for item in tempquotes:
+		datetime=item[0]
+		deltatime=abs(myround(item[2])-myround(lastposition))
+		totalchangetime=totalchangetime+deltatime
+		totalquanyi=(myround(lastposition)*(item[1]-lastC)*float(pointvalue)-deltatime*commvalue)/totalsum*ratio +totalquanyi
+		lastposition=item[2]
+		lastC=item[1]
+		myindex.append(i)
+		i=i+1
+		avalue.append(datetime)
+		yvalue.append(totalquanyi)
+		oneacquanyidict[datetime]=totalquanyi
+	return oneacquanyidict
+
+def add_acquanyi(acquanyi1,acquanyi2):
+	newquanyi=dict(Counter(acquanyi1)+Counter(acquanyi2))
+	alltime=[ k for k in sorted(newquanyi.keys())]
+	allquanyi=[]
+	acquanyi1keys=acquanyi1.keys()
+	acquanyi2keys=acquanyi2.keys()
+	acquanyi1value=0
+	acquanyi2value=0
+	for item in alltime:
+		if item in acquanyi1keys:
+			acquanyi1value=acquanyi1[item]
+			lastvalue=acquanyi2value+acquanyi1value
+			allquanyi.append(lastvalue)
+		else:
+			if item in acquanyi2keys:
+				acquanyi2value=acquanyi2[item]
+				lastvalue=acquanyi2value+acquanyi1value
+				allquanyi.append(lastvalue)
+			else:
+				allquanyi.append(lastvalue)
+	#print dict(zip(alltime,allquanyi))
+	return dict(zip(alltime,allquanyi))
+
+
+
+def show_account(accountname):
+	sql="select ac,ratio,symbol from [Future].[dbo].[backtest_account_ac] where [accountname]='%s'" % (accountname)
+	res=ms.dict_sql(sql)
+	myqanyi=[]
+	mydatetime=[]
+	totalquanyidict={}
+	sql="select sum(ratio) as ratio from [Future].[dbo].[backtest_account_ac] where [accountname]='%s'" % (accountname)
+	i=ms.dict_sql(sql)[0]['ratio']
+	for item in res:
+		ratio=item['ratio']
+		ac=item['ac']
+		symbol=item['symbol']
+		(myquotes,totalsum)=input_groupbyquanyi(ac,symbol)
+		oneacquanyidict=cal_quanyi_foraccount(ac,myquotes,totalsum,symbol,ratio)
+		#totalquanyidict=dict(Counter(totalquanyidict)+Counter(oneacquanyidict))
+		totalquanyidict=add_acquanyi(totalquanyidict,oneacquanyidict)
+	#totalquanyidict对此排序
+	temptotalquanyidict=[(k,totalquanyidict[k]) for k in sorted(totalquanyidict.keys())]
+	avalue=[]
+	yvalue=[]
+	myindex=[]
+	indexnum=0
+	#最大回撤相关
+	lasthighquanyi=0
+	lasthighhuiche=0
+	nowhuiche=0
+	if i==0:
+		i=1
+	for item in temptotalquanyidict:
+		itemquanyi=item[1]/i
+		avalue.append(item[0])
+		yvalue.append(itemquanyi)
+		myindex.append(indexnum)
+		indexnum=indexnum+1
+		#计算回撤相关
+		nowhuiche=lasthighquanyi-itemquanyi
+		if itemquanyi>lasthighquanyi:
+			lasthighquanyi=itemquanyi
+		if nowhuiche>lasthighhuiche:
+			lasthighhuiche=nowhuiche
+		##--end
+	if lasthighhuiche<0:
+		lasthighhuiche=0
+	#开始画图
+	# print myindex
+	# print yvalue
+	plt.figure(figsize=(16,8))
+	lenx=len(avalue)
+	pl.plot(myindex, yvalue, 'r') 	 
+	pl.subplots_adjust(bottom=0.3) 	 
+	ax = pl.gca() 
+	ax.fmt_xdata = pl.DateFormatter('%Y-%m-%d') 
+	pl.xticks(rotation=75) 	 
+	#生成x轴的间隔
+	aa=int(lenx/30)
+	numx=[]
+	labvalue=[]
+	for i in range(0,lenx-aa,aa):
+		numx.append(i)
+		labvalue.append(avalue[i].strftime("%Y-%m-%d"))
+	numx.append(myindex[-1])
+	labvalue.append(avalue[myindex[-1]].strftime("%Y-%m-%d"))
+	pl.xticks(numx, labvalue) 
+	pl.grid()
+	plt.title('%s--MaxDrawDown:%s' % (accountname,int(lasthighhuiche)))
+	#plt.ylabel(u'平均每手净收益',fontproperties='SimHei')
+	plt.ylabel(u'Profit Per Hand')
+	pl.savefig('..\\myimage\\%s' % (accountname))
+	pl.show() 
 
 
 
 
 
 
-(myquotes,totalsum)=input_groupbyquanyi('RBQGSTTR_TG','RB')
+
+
+(myquotes,totalsum)=input_groupbyquanyi('RB2supportresistance','RB')
 #仓位信息OK
 # print totalsum
-cal_quanyi('RBQGSTTR_TG',myquotes,totalsum,'RB')
+cal_quanyi('RB2supportresistance',myquotes,totalsum,'RB')
+
+# show_account('myaccount2')
