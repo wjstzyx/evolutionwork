@@ -123,7 +123,7 @@ def acwantedequlity(request):
 
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 	rbdata=[]
-	sql="select distinct ac,symbol from dailyquanyi where symbol in ('RB','RBnight') and D>151020"
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('RB','RBnight') and iscaculate=1 order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
 		acname=item['ac']
