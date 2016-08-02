@@ -98,7 +98,7 @@ def input_groupbyquanyi(ac,symbol):
 			C=lastquote['C']
 			if StockDate.strftime("%Y%m%d")!=item['StockDate'].strftime("%Y%m%d"):
 				# print 'StockDate is the last day'
-				# print 'StockDate',StockDate
+				
 				iskeep=1
 			else:
 				iskeep=0
@@ -107,13 +107,11 @@ def input_groupbyquanyi(ac,symbol):
 			templastposition=[]
 			for item1 in temppositionlist:
 				if StockDate<=item1[0]:
-					# if item1[0]==datetime.datetime(2016, 8, 01, 10, 47):
-					# 	print item1
 					#如果行情日期和仓位日期一直，直接插入
 					if StockDate==item1[0]:
 						temp=[StockDate,C,item1[2]]
 						mymewquote.append(temp)
-						if StockDate==datetime.datetime(2016, 8, 01, 10, 47):
+						if StockDate==datetime.datetime(2016, 8, 01, 14, 59):
 							print "1--item1",item1,lastpostiion
 						lastappend=temp
 						lastpostiion=item1
@@ -125,18 +123,21 @@ def input_groupbyquanyi(ac,symbol):
 						if iskeep==1:
 							mymewquote.append(temp)
 							lastappend=temp
-							if StockDate==datetime.datetime(2016, 8, 01, 10, 47):
+							if StockDate==datetime.datetime(2016, 8, 01, 14, 59):
 								print "2--iskeep",iskeep,StockDate
 						else:
 							if lastappend==[] or lastappend[2]!=temp[2]:
 								mymewquote.append(temp)
-								if StockDate==datetime.datetime(2016, 8, 01, 10, 47):
+								if StockDate==datetime.datetime(2016, 8, 01, 14, 59):
 									print "3--lastappend",lastappend,templastposition,temp
 								lastappend=temp	
 						lastpostiion=item1
 					break
-
 				templastposition=item1
+			if iskeep==1 and StockDate>temppositionlist[-1][0]:
+				temp=[StockDate,C,temppositionlist[-1][2]]
+				mymewquote.append(temp)
+				# lastappend=temp
 		#插入当天行情的最后一根bar
 		lastClose=res[-1]['C']
 		lastdatetime=res[-1]['StockDate']
@@ -419,7 +420,9 @@ def show_account(accountname):
 
 
 
-# (myquotes,totalsum)=input_groupbyquanyi('Tcxvolume','T')
+# (myquotes,totalsum)=input_groupbyquanyi('RB3trend','RB')
+# for item in myquotes:
+# 	print item 
 
 #仓位信息OK
 # print totalsum
@@ -430,7 +433,7 @@ def show_account(accountname):
 def main_fun():
 	#获取需要处理的列表
 	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1  and isyepan=0 order by id"
-	# sql="SELECT [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where isforbacktest=0 and positionsymbol='JD'"
+	sql="SELECT top 17 id,[acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('RB') and iscaculate=1 order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
 
