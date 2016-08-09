@@ -1,0 +1,23 @@
+_test_xxxxxx 为测试用，其中的参数会经常修改
+acquanyi_statistic.py 					V1版本理论权益计算
+new_cal_quayi_V2.py 					做成定时任务，V2版本权益计算（按照配置表轮询）
+new_cal_quayi.py 						可以查看 st_report 中单个虚拟组的权益图
+new_cal_quayi_V3_account.py 			按照配置的账号信息显示权益 st_report （只能是一个品种）
+new_cal_quayi_forbacktest.py 			在虚拟组上生产前的测试（ st_report_backtest）
+new_cal_quayi_V3_account_limit.py 		阶梯状限制手数（测试效果感觉没有不限制好）
+
+add_data_wenhua_to_dataabse.py			从甘博的FTP将数据添加到数据库（日盘和夜盘同时添加）使用方法： python add_data_wenhua_to_dataabse.py 20160802
+changepsig_V3.py						(基本废弃)检测st_report 和P_LOG 和Tsymbol的联合记录是否连续
+changeTIMEtype.py 						根据Tsymbol表中stockdate日期修复 D 和 T
+dbconn.py 								数据库连接模块
+fix_TradingSymbol_after1700.py 			尾盘收盘后如果有信号写入则报警（如果新加入策略怎么处理？）
+get_afl_by_acname.py 					此功能为通过acname获得ac相关的st号及所在的机器
+handle_machine_alf_st.py 				将机器采集到的afl文件信息 进行处理，获得st 和机器号的关系
+monitor_wenhua.py 						（检查是否延迟）定时脚本，报警巡逻（配合配置表）
+read_maillist.py 						定时报警中 发送邮件的脚本
+real_acquanyi_statistic.py 				实际交易信号 权益统计
+regular_afl_files.py 					backtest afl时候统一添加 策略号等信息
+sendmail.py 							发送邮件模块
+sendmailshouhu.py   					报警守护进程
+sendSMSM.py 							短信发送平台
+

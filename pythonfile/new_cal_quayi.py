@@ -30,10 +30,11 @@ def input_groupbyquanyi(ac,symbol):
 	except:
 		pass
 	# 产生临时p_log
-	sql="select * into #temp_p_log from (SELECT   aa.*, sid.Symbol, (YEAR(GETDATE()) - 2000) * 10000 + MONTH(GETDATE()) * 100 + DAY(GETDATE()) AS D from (select  p.AC, p.STOCK, p.type, p.ST, p.P_size, a.ratio from P_BASIC p inner join AC_RATIO a on p.AC=a.AC and p.STOCK=a.Stock and p.type=a.type and p.AC='%s') as aa inner join Symbol_ID AS sid ON sid.S_ID = aa.STOCK where Symbol='%s') temp" % (ac,symbol)
+	#sql="select * into #temp_p_log from (SELECT   aa.*, sid.Symbol, (YEAR(GETDATE()) - 2000) * 10000 + MONTH(GETDATE()) * 100 + DAY(GETDATE()) AS D from (select  p.AC, p.STOCK, p.type, p.ST, p.P_size, a.ratio from P_BASIC p inner join AC_RATIO a on p.AC=a.AC and p.STOCK=a.Stock and p.type=a.type and p.AC='%s') as aa inner join Symbol_ID AS sid ON sid.S_ID = aa.STOCK where Symbol='%s') temp" % (ac,symbol)
+	sql ="select * into #temp_p_log from (select '%s' as ac,temp1.STOCK,temp1.type,temp1.ST,temp1.P_size as P_size,temp1.ratio,temp1.Symbol,temp1.num from (select p.*,a.ratio,sid.Symbol,isnull(n.num,1)as num from P_BASIC p inner join AC_RATIO a on p.AC=a.AC and p.AC='%s' inner join Symbol_ID  AS sid ON p.STOCK=sid.S_ID left join [LogRecord].[dbo].[Ninone_config] n on n.st=p.st) temp1 where Symbol='%s' )aaa"% (ac,ac,symbol)
 	#print sql
 	ms.insert_sql(sql)
-	sql="select SUM(p_size*ratio/100) as totalsum from #temp_p_log"
+	sql="select SUM(p_size*ratio/100*num) as totalsum from #temp_p_log"
 	res=ms.dict_sql(sql)
 	totalsum=res[0]['totalsum']
 
@@ -185,7 +186,7 @@ def input_groupbyquanyi(ac,symbol):
 	#--end
 
 
-def cal_quanyi(ac,myquotes,totalsum,symbolto):
+def cal_quanyi(ac,myquotes,totalsum,symbolto,isshow=1):
 	if totalsum<=0:
 		totalsum=1000000
 	#totalsum=10
@@ -207,9 +208,15 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto):
 	lastdate=tempquotes[0][0]
 	totalquanyi=0
 	i=0
+	##回撤相关
+	totalchangetime=0
+	lasthighquanyi=0
+	lasthighhuiche=0
+	nowhuiche=0
 	for item in tempquotes:
 		datetime=item[0]
 		deltatime=abs(myround(item[2])-myround(lastposition))
+		totalchangetime=totalchangetime+deltatime
 		totalquanyi=(myround(lastposition)*(item[1]-lastC)*float(pointvalue)-deltatime*commvalue)/totalsum+totalquanyi
 		lastposition=item[2]
 		lastC=item[1]
@@ -217,6 +224,13 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto):
 		i=i+1
 		avalue.append(datetime)
 		yvalue.append(totalquanyi)
+		#计算回撤相关
+		nowhuiche=lasthighquanyi-totalquanyi
+		if totalquanyi>lasthighquanyi:
+			lasthighquanyi=totalquanyi
+		if nowhuiche>lasthighhuiche:
+			lasthighhuiche=nowhuiche
+		##--end
 	# for i in range(10):
 	# 	print avalue[i],yvalue[i]
 	plt.figure(figsize=(16,8))
@@ -242,10 +256,11 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto):
 	pl.xticks(numx, labvalue) 
 	#ax.xaxis.set_major_formatter(pl.DateFormatter('%Y-%m-%d')) 
 	pl.grid()
-	plt.title('%s---%s' % (ac,symbolto))
+	plt.title('%s--%s--Tradeingtimes:%s--MaxDrawDown:%s' % (ac,symbolto,int(totalchangetime/totalsum),int(lasthighhuiche)))
 	plt.ylabel(u'平均每手净收益',fontproperties='SimHei')
 	pl.savefig('..\\myimage\\%s' % (ac))
-	pl.show() 
+	if isshow==1:
+		pl.show()
 
 def cal_quanyi_foraccount(ac,myquotes,totalsum,symbolto,ratio):
 	if totalsum<=0:
@@ -383,14 +398,31 @@ def show_account(accountname):
 
 
 
+def show_all_ac(acname=''):
+	if acname=='':
+		sql="SELECT id, acname as ac,[positionsymbol] as symbol   FROM [LogRecord].[dbo].[quanyicaculatelist] where [iscaculate] =1 and [isyepan]=0 and positionsymbol in ('RB')  order by id "
+		isshow=0
+	else:
+		sql="SELECT distinct acname as ac,[positionsymbol] as symbol   FROM [LogRecord].[dbo].[quanyicaculatelist] where acname='%s'" % (acname)
+		isshow=1
+	res=ms.dict_sql(sql)
+	for item in res:
+		ac=item['ac']
+		symbol=item['symbol']
+		print ac,item['id']
+		(myquotes,totalsum)=input_groupbyquanyi(ac,symbol)
+		cal_quanyi(ac,myquotes,totalsum,symbol,isshow)
 
 
 
 
 
-(myquotes,totalsum)=input_groupbyquanyi('RB2supportresistance','RB')
+# show_all_ac('RU3v4e')
+
+
+(myquotes,totalsum)=input_groupbyquanyi('CU3v4e','CU')
 #仓位信息OK
-# print totalsum
-cal_quanyi('RB2supportresistance',myquotes,totalsum,'RB')
+print totalsum
+cal_quanyi('CU3v4e',myquotes,10,'CU')
 
 # show_account('myaccount2')

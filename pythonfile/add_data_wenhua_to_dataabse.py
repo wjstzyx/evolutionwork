@@ -221,7 +221,7 @@ if not os.path.isfile(targetfile):
     newtargetfile.close()
 
 
-#downresult=ftp_down(_dfrom,date)# down from ftp
+downresult=ftp_down(_dfrom,date)# down from ftp
 downresult=1
 if downresult==1:
     targetfilename=add_data_wenhua(_dfrom,date, timestart, timeend,mysymbol )  #  extrct  data from timestart to timeend

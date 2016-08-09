@@ -46,7 +46,7 @@ def sendsms(mobile='',content=''):
 		user_agent = 'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)'
 		encode = 'UTF-8'									#页面编码和短信内容编码为GBK。重要说明：如提交短信后收到乱码，请将GBK改为UTF-8测试。如本程序页面为编码格式为：ASCII/GB2312/GBK则该处为GBK。如本页面编码为UTF-8或需要支持繁体，阿拉伯文等Unicode，请将此处写为：UTF-8
 		username = 'yuanlan'									#用户名
-		password_md5 = '200820E3227815ED1756A6B531E7E0D2'	#32位MD5密码加密，不区分大小写
+		password_md5 = '200820E3227815ED1756A6B531E7E0D2'	#32位MD5密码加密，不区分大小写（qwe123）
 		apikey = 'b4679c42c3712dfa214aa88cad90cd9d';		#apikey秘钥（请登录 http://m.5c.com.cn 短信平台-->账号管理-->我的信息 中复制apikey）
 		# mobile='17091925075'								#手机号,只发一个号码：13800000001。发多个号码：13800000001,13800000002,...N 。使用半角逗号分隔。					
 		# content = '【Thunder】\r\nasas1程序出错2016-09-08 14:51:12\r\nasas1程序出错2016-09-08 14:51:12\r\nasas1程序出错2016-09-08 14:51:12\r\n'		# 要发送的短信内容，特别注意：签名必须设置，网页验证码应用需要加添加【图形识别码】。

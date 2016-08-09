@@ -11,7 +11,7 @@ import datetime
 
 filepath="C:\\Users\\YuYang\\Documents\\Tencent Files\\794513386\\FileRecv\\00009206.csv"
 
-def write_to_database(tablename,lastquotes,n):
+def write_to_database1(tablename,lastquotes,n):
 	#Date  0,Time1,Open2,High3,Low4,Close5,Volume6,OpenInterest7,SettlementPrice
 	insertdate=lastquotes
 	Date=insertdate[0]
@@ -29,6 +29,24 @@ def write_to_database(tablename,lastquotes,n):
 
 
 
+def write_to_database(tablename,lastquotes,n):
+	#Date  0,Time1,Open2,High3,Low4,Close5,Volume6,OpenInterest7,SettlementPrice
+	insertdate=lastquotes
+	Date=insertdate[0]
+	stockdate=Date[0:4]+'-'+Date[4:6]+'-'+Date[6:9]+' '+insertdate[1]
+	Date=Date[0:4]+'/'+Date[4:6]+'/'+Date[6:9]
+	Time=insertdate[1][0:5]
+	Open=insertdate[2]
+	High=insertdate[3]
+	Low=insertdate[4]
+	Close=insertdate[5]
+	Volume=insertdate[6]
+	OpenInterest=insertdate[7]
+	sql="Insert_quotes '%s',%s,%s,%s,%s,%s,%s,'%s','%s','%s'" % (tablename,Open,Close,High,Low,Volume,OpenInterest,Date,Time,stockdate)
+	ms.insert_sql(sql)
+
+
+
 
 def read_to_datanbase(filepath,tablename,n):
 	csvfile = file(filepath, 'rb')
@@ -42,8 +60,9 @@ def read_to_datanbase(filepath,tablename,n):
 	if line0==line1:
 		newquotes=line1	
 		lastquotes=line2
-	write_to_database(tablename,lastquotes,n)
-	write_to_database(tablename,newquotes,n)
+		write_to_database(tablename,lastquotes,n)
+		write_to_database(tablename,newquotes,n)
+
 
 
 
@@ -53,18 +72,19 @@ while(1):
 	wenhuapath=""
 	isdone1=0
 	try:
-		cmd="C:\\catchquotes\\readwenhua.exe"
+		cmd="readwenhua.exe"
 		os.system(cmd)
 		isdone1=1
 	except:
 		pass
-	if isdone1=1:
-		quoteslist=["\\CZCE\\min1\\00020140.csv"]
+	if isdone1==1 or 1==1:
+		time.sleep(1)
+		quoteslist=[filepath]
 		for item in quoteslist:
 			filepath=wenhuapath+item
 			read_to_datanbase(filepath,'AG001_test',2)
-	time.sleep(10)
-	
+	time.sleep(8)
+
 
 
 
