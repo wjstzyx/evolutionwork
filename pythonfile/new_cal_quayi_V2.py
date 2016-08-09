@@ -589,8 +589,8 @@ def real_account_groupbyquanyi(ac,symbol):
 
 
 
-# (myquotes,totalsum)=input_groupbyquanyi('RBrangel','RB')
-# cal_quanyi('RBrangel',myquotes,totalsum,'RB')
+(myquotes,totalsum)=input_groupbyquanyi('rbchoosel','RB')
+cal_quanyi('rbchoosel',myquotes,totalsum,'RB')
 
 # show_account('myaccount2')
 
@@ -609,4 +609,4 @@ def main_fun():
 		cal_quanyi(item['acname'],myquotes,totalsum,quanyisymbol)
 
 
-main_fun()
+# main_fun()

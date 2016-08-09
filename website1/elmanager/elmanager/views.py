@@ -360,7 +360,7 @@ def acwantedequlitynew(request):
 			tempquanyi=0
 		else:
 			tempquanyi=tempquanyi[0][0]
-		sql="select quanyi-%s as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (tempquanyi,acname,symbol)
+		sql="select quanyi-(%s) as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (tempquanyi,acname,symbol)
 		res1=ms.find_sql(sql)
 		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
 		res2=ms.find_sql(sql)		
