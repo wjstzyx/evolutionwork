@@ -118,8 +118,12 @@ def monitor_wenhua():
 			if res:
 				lasttime=res[0][0]
 				print "wenhua"
-				print (getnow-lasttime).seconds
-				if (getnow-lasttime).seconds>180:
+				if getnow>lasttime:
+					deltatime=(getnow-lasttime).seconds
+				else:
+					deltatime=(lasttime-getnow).seconds
+				print deltatime
+				if deltatime>180:
 					subject='%s文华数据采集产生延迟' % (symbol)
 					msg='%s 文华数据采集产生延迟' % (symbol)
 					sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,msg,0,sendmessage)
