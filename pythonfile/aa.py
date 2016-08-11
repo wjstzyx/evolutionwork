@@ -12,7 +12,7 @@ aa=datetime.datetime(2016,8,9,22,24,20)
 bb=datetime.datetime(2016,8,9,22,24,16,997000)
 print aa
 print bb
-print (aa-bb).seconds
+print aa.hour
 
 
 
