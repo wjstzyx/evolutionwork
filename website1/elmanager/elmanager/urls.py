@@ -32,4 +32,5 @@ urlpatterns = patterns('',
     url(r'^index/quanyi/acwantedequlitystock/$', acwantedequlitystock),
     url(r'^index/quanyi/acwantedequlitybacktest/$', acwantedequlitybacktest),
     url(r'^index/dataacquire/adddata/$', adddata),
+    url(r'^index/quanyi/account_equity/$', account_equity),
 )

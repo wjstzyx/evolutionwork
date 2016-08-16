@@ -51,7 +51,7 @@ def sendsms(mobile='',content=''):
 		# mobile='17091925075'								#手机号,只发一个号码：13800000001。发多个号码：13800000001,13800000002,...N 。使用半角逗号分隔。					
 		# content = '【Thunder】\r\nasas1程序出错2016-09-08 14:51:12\r\nasas1程序出错2016-09-08 14:51:12\r\nasas1程序出错2016-09-08 14:51:12\r\n'		# 要发送的短信内容，特别注意：签名必须设置，网页验证码应用需要加添加【图形识别码】。
 		if len(mobile)<7:
-			mobile='13764504303'
+			mobile='13764504303'  #如果手机号不符合规范，则默认发送到13764504303
 		values = {'username' : username,    
 		         'password_md5' : password_md5,    
 		         'apikey' : apikey,

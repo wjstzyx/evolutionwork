@@ -92,7 +92,7 @@ function showaccompare(acname){
 {% endblock %}
 
 {% block extrabodyscript %}
-  <script type="text/javascript" src="http://cdn.hcharts.cn/highcharts/highcharts.js"></script>
+<script src="{% static 'js/highcharts.js' %}"></script>
   {% for item in ICdata %}
   <script>
       $(function () {

@@ -35,10 +35,13 @@ def monitor_AB_st_night():
 		subject='AB策略卡死报警'+datetime.datetime.now().strftime("%H:%M:%S")
 		if res:
 			print "have waring"
+			stringnum=0
 			for item in res:
+				stringnum=stringnum+1
 				st=item['st']
 				timediff=item['timediff']
-				message=message+'策略号 '+str(st)+': '+' 卡死时间: '+str(timediff)+'(分钟)'
+				if stringnum<50:
+					message=message+'策略号 '+str(st)+': '+' 卡死时间: '+str(timediff)+'(分钟)'
 			sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,message,0,sendmessage)
 			ms.insert_sql(sql)
 		else:	
@@ -78,10 +81,15 @@ def monitor_AB_st_day():
 			
 		if res:
 			print "have waring"
+			stringnum=0
 			for item in res:
+				stringnum=stringnum+1
 				st=item['st']
 				timediff=item['timediff']
-				message=message+'策略号 '+str(st)+': '+' 卡死时间: '+str(timediff)+'(分钟)'
+				if stringnum<30:
+					message=message+'策略号 '+str(st)+': '+' 卡死时间: '+str(timediff)+'(分钟)'
+			# if len(message)>1800:
+			# 	message=message[:1000]
 			sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,message,0,sendmessage)
 			ms.insert_sql(sql)
 		else:	
@@ -283,7 +291,8 @@ while(1):
 	try:
 		monitor_AB_st_day()
 		monitor_AB_st_night()
-	except:
+	except Exception,e:
+		print e
 		pass
 	try:
 		monitor_Thunder()

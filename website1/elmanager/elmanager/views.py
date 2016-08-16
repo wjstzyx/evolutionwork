@@ -13,6 +13,57 @@ from dbconn import MSSQL
 # ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 # ms1 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="future")
 
+def account_equity(request):
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	sql="SELECT [id],[type],[item],[ismonitor],[starttime],[endtime] FROM [LogRecord].[dbo].[monitorconfig]"
+	sql="select distinct ac from p_follow order by ac"
+	res=ms.dict_sql(sql)
+	aclist=res
+	ICdata=[]
+	#开始查询
+	if request.POST:
+		account=request.POST.get('acname','')
+		print account
+		totalquanyiresult=get_dailyquanyi(account,150521)
+		if totalquanyiresult['ispass']==0:
+			result=totalquanyiresult['result']
+			return render_to_response('account_equity.html',{
+				'aclist':aclist,
+				'ispass':ispass,
+				'result':result
+			})
+		else:
+			result=totalquanyiresult['result']
+			
+			
+			(tempday,lilunquanyi,realquanyi)=range_series(result,[])
+			tempdict={'acname':account,'symbol':"",'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
+			ICdata.append(tempdict)
+	return render_to_response('account_equity.html',{
+		'aclist':aclist,
+		'ICdata':ICdata
+	})	
+
+
+
+
+
+	# ICdata=[]
+	# sql="select distinct ac,symbol from dailyquanyi where symbol='IC' and D>151020"
+	# res=ms.dict_sql(sql)
+	# for item in res:
+	# 	acname=item['ac']
+	# 	symbol=item['symbol']
+	# 	sql="select (quanyi-comm)/d_max as quanyia,D from dailyquanyi where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+	# 	res1=ms.find_sql(sql)
+	# 	sql="select (quanyi-comm)/d_max as quanyia,D from real_dailyquanyi where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+	# 	res2=ms.find_sql(sql)		
+	# 	(tempday,lilunquanyi,realquanyi)=change_delta_toaccumu(res1,res2)
+	# 	tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
+	# 	ICdata.append(tempdict)
+
+
+
 
 def index(request):
 	now = datetime.datetime.now()
@@ -37,7 +88,6 @@ def adddata(request):
 		'data':data,
 		'defualtdate':defualtdate,
 	})	
-
 
 
 
@@ -68,8 +118,6 @@ def acwantedequlitybacktest(request):
 	return render_to_response('acwantedequlitybacktest.html',{
 		'RBdata':RBdata,
 	})	
-
-
 
 
 
@@ -883,4 +931,91 @@ def range_series(datalist1,datalist2):
 	return (daylist,lilunquanyi,realquanyi)
 
 
+#获得一个账号配置的所有虚拟组
+def get_ac_ratio(account):
+	#获取总账户配置的虚拟组的ratio
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+	sql="WITH Emp AS ( SELECT ac,F_ac,ratio FROM  p_follow WHERE   ac='%s' UNION ALL  SELECT   D.AC,D.F_ac,D.ratio*emp.ratio/100 FROM   Emp         INNER JOIN p_follow d ON d.ac = Emp.F_ac)SELECT AC,f_AC,ratio FROM  Emp" % (account)
+	res=ms.dict_sql(sql)
+	accountlist=[]
+	aclist=[]
+	for item in res:
+		accountlist.append(item['AC'])
+		aclist.append(item['f_AC'])
+	accountlist=list(set(accountlist))
+	aclist=list(set(aclist))
+	# print accountlist
+	# print aclist
+	ac_ratio={}
+	for item in aclist:
+		ac_ratio[item]=0
+	for item in res:
+		ac_ratio[item['f_AC']]=ac_ratio[item['f_AC']]+item['ratio']
+	# print ac_ratio
+	for key in accountlist:
+		if ac_ratio.has_key(key):
+			del ac_ratio[key]
+	# print ac_ratio
+	return ac_ratio
+
+#计算总权益
+def get_dailyquanyi(account,fromDdy):
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+	ac_ratio=get_ac_ratio(account)
+	totalquanyi=[]
+	for key in ac_ratio:
+		ratio=ac_ratio[key]
+		if ratio>0:
+			sql="SELECT [quanyisymbol]  FROM [LogRecord].[dbo].[quanyicaculatelist] where acname='%s'" % (key)
+			res=ms.dict_sql(sql)
+			if not res:
+				# print {"ispass":0,"result":"%s does not has equity" % (key)}
+				return {"ispass":0,"result":"%s does not has equity" % (key)}
+			else:
+				symbol=res[0]['quanyisymbol']
+				acname=key
+				sql="select top 1 D,quanyi as  quanyia from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=%s order by D" % (acname,symbol,fromDdy)
+				tempres=ms.find_sql(sql)
+				if tempres==[]:
+					initoalquanyi=0
+				else:
+					initoalquanyi=tempres[0][1]
+				sql="select D,(quanyi-%s) as  quanyia from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=%s order by D" % (initoalquanyi,acname,symbol,fromDdy)
+				res1=ms.find_sql(sql)
+				#乘以ratio
+				newres1=[]
+				for item in res1:
+					newres1.append([item[0],item[1]*ratio/10.0])
+				totalquanyi=add_time_series(totalquanyi,newres1)
+				totalquanyi=sorted(totalquanyi,key=lambda a :a[0])
+				totalquanyi=[[item[1],item[0]] for item in totalquanyi]
+				# for item in totalquanyi:
+				# 	print item 
+				return {"ispass":1,"result":totalquanyi}
+
+#两个时间序列相加
+def add_time_series(totalquanyi,res1):
+	totalquanyitime=[k[0] for k in totalquanyi]
+	res1time=[k[0] for k in res1]
+	totalquanyidict={}
+	for item in totalquanyi:
+		totalquanyidict[item[0]]=item[1]
+	res1dict={}
+	for item in res1:
+		res1dict[item[0]]=item[1]
+	daylist=list(set(totalquanyitime).union(set(res1time)))
+	daylist=sorted(daylist)
+	totalquanyilastvalue=0
+	res1lastvalues=0
+	result={}
+	for item in daylist:
+		tempvalue=0
+		if item in totalquanyitime:
+			totalquanyilastvalue=totalquanyidict[item]
+		if item in res1time:
+			res1lastvalues=res1dict[item]
+		tempvalue=totalquanyilastvalue+res1lastvalues
+		result[item]=tempvalue
+	result=sorted(result.iteritems(), key=lambda d:d[1], reverse = False)
+	return result
 
