@@ -100,6 +100,7 @@ function add_new_mailto(){
   <hr>
     </div>
 <div>
+    {% if ispass == 1 %}
       <div class="panel panel-default"> 
        <div class="panel-heading"> 
         <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>账号权益KPI  </h3> 
@@ -107,39 +108,58 @@ function add_new_mailto(){
        <div class="panel-body"> 
         <div class="table-responsive"> 
          <table class="table table-bordered table-hover table-striped"> 
-          <thead> 
-           <tr> 
-            <th align=center width=180px>指标名字</th> 
-            <th align=center width=400px>值</th> 
-            <th align=center width=180px>指标名字</th> 
-            <th align=center width=400px>值</th>
-           </tr> 
-          </thead> 
           <tbody id="mailtotable"> 
           <tr>
-          <td>111</td>
-          <td>111</td>
-          <td>111</td>
-          <td>111</td>
+          <td>Net_Profit</td>
+          <td>{{tongji.Net_Profit}}</td>
+          <td>Daily_Std</td>
+          <td>{{tongji.Daily_Std}}</td>
+          <td>Day_Winrate</td>
+          <td>{{tongji.Day_Winrate}}</td>
+          <td>Max_Day_Profit</td>
+          <td>{{tongji.Max_Day_Profit}}</td>
+          </tr>
+          <tr>
+          <td>Max_Drawdown</td>
+          <td>{{tongji.Max_Drawdown}}</td>
+          <td>Ann_Sharpe</td>
+          <td>{{tongji.Ann_Sharpe}}</td>
+          <td>Days</td>
+          <td>{{tongji.Days}}</td>
+          <td>Max_Loss_Days</td>
+          <td>{{tongji.Max_Loss_Days}}</td>
+          </tr>
+          <tr>
+          <td>Max_Day_to_New_High</td>
+          <td>{{tongji.Max_Day_to_New_High}}</td>
+          <td>Max_Win_Days</td>
+          <td>{{tongji.Max_Win_Days}}</td>
+          <td>Max_Day_Loss</td>
+          <td>{{tongji.Max_Day_Loss}}</td>
+          <td> </td>
+          <td> </td>
           </tr>
           </tbody> 
          </table> 
         </div> 
        </div> 
       </div> 
-权益指标表格
+    {% endif %}
+    {% if ispass == 0 %}
+    {{result}}
+    {% endif %}
+
 </div>
 <div>
   <div>
-      <h4>Settings Tab</h4>
-      <div class="row">
       {% for item in ICdata %} 
+      <h4>权益曲线图</h4>
+      <div class="row">
+
         <div class="col-md-12"><div id='{{item.acname}}' style="min-width:700px;height:400px"></div></div>
       {% endfor %}                                    
       </div>
   </div>
-
-图标
 </div>
 
 
@@ -155,7 +175,7 @@ function add_new_mailto(){
 
           $('#{{item.acname}}').highcharts({
               title: {
-                  text: '{{item.acname}}--{{item.symbol}}',
+                  text: '{{item.acname}}',
                   x: -20 //center
               },
               xAxis: {
@@ -163,7 +183,7 @@ function add_new_mailto(){
               },
               yAxis: {
                   title: {
-                      text: '每手净收益'
+                      text: '账号总权益'
                   },
                   plotLines: [{
                       value: 0,

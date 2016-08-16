@@ -10,84 +10,6 @@ ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 # print resList
 
 
-#	account=11801666,return {u'995': 5.0, u'906': 5.0, u'9B7': 10.0, u'9ZA': 5.0, u'11803593': 25.0}
-# def get_ac_ratio(account):
-# 	#获取总账户配置的虚拟组的ratio
-# 	sql="WITH Emp AS ( SELECT ac,F_ac,ratio FROM  p_follow WHERE   ac='%s' UNION ALL  SELECT   D.AC,D.F_ac,D.ratio*emp.ratio/100 FROM   Emp         INNER JOIN p_follow d ON d.ac = Emp.F_ac)SELECT AC,f_AC,ratio FROM  Emp" % (account)
-# 	res=ms.dict_sql(sql)
-# 	accountlist=[]
-# 	aclist=[]
-# 	for item in res:
-# 		accountlist.append(item['AC'])
-# 		aclist.append(item['f_AC'])
-# 	accountlist=list(set(accountlist))
-# 	aclist=list(set(aclist))
-# 	# print accountlist
-# 	# print aclist
-# 	ac_ratio={}
-# 	for item in aclist:
-# 		ac_ratio[item]=0
-# 	for item in res:
-# 		ac_ratio[item['f_AC']]=ac_ratio[item['f_AC']]+item['ratio']
-# 	# print ac_ratio
-# 	for key in accountlist:
-# 		if ac_ratio.has_key(key):
-# 			del ac_ratio[key]
-# 	# print ac_ratio
-# 	return ac_ratio
-
-
-# def get_dailyquanyi(account):
-# 	ac_ratio=get_ac_ratio(account)
-# 	totalquanyi=[]
-# 	for key in ac_ratio:
-# 		ratio=ac_ratio[key]
-# 		if ratio>0:
-# 			sql="SELECT [quanyisymbol]  FROM [LogRecord].[dbo].[quanyicaculatelist] where acname='%s'" % (key)
-# 			res=ms.dict_sql(sql)
-# 			if not res:
-# 				# print {"ispass":0,"result":"%s does not has equity" % (key)}
-# 				return {"ispass":0,"result":"%s does not has equity" % (key)}
-# 			else:
-# 				symbol=res[0]['quanyisymbol']
-# 				acname=key
-# 				sql="select D,quanyi as  quanyia from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=160801 order by D" % (acname,symbol)
-# 				res1=ms.find_sql(sql)
-# 				#乘以ratio
-# 				newres1=[]
-# 				for item in res1:
-# 					newres1.append([item[0],item[1]*ratio/10.0])
-# 				totalquanyi=add_time_series(totalquanyi,newres1)
-# 				totalquanyi=sorted(totalquanyi,key=lambda a :a[0])
-# 				# for item in totalquanyi:
-# 				# 	print item 
-# 				return {"ispass":1,"result":totalquanyi}
-
-
-# def add_time_series(totalquanyi,res1):
-# 	totalquanyitime=[k[0] for k in totalquanyi]
-# 	res1time=[k[0] for k in res1]
-# 	totalquanyidict={}
-# 	for item in totalquanyi:
-# 		totalquanyidict[item[0]]=item[1]
-# 	res1dict={}
-# 	for item in res1:
-# 		res1dict[item[0]]=item[1]
-# 	daylist=list(set(totalquanyitime).union(set(res1time)))
-# 	daylist=sorted(daylist)
-# 	totalquanyilastvalue=0
-# 	res1lastvalues=0
-# 	result={}
-# 	for item in daylist:
-# 		tempvalue=0
-# 		if item in totalquanyitime:
-# 			totalquanyilastvalue=totalquanyidict[item]
-# 		if item in res1time:
-# 			res1lastvalues=res1dict[item]
-# 		tempvalue=totalquanyilastvalue+res1lastvalues
-# 		result[item]=tempvalue
-# 	result=sorted(result.iteritems(), key=lambda d:d[1], reverse = False)
-# 	return result
 
 
 def get_ac_ratio(account):
@@ -212,8 +134,8 @@ def range_series(datalist1,datalist2):
 	# print  lilunquanyi
 	return (daylist,lilunquanyi,realquanyi)
 
-
-def kpi_tongji(result,lilunquanyi):
+#统计计算
+def kpi_tongji(lilunquanyi):
 	Net_Profit=0
 	Max_Drawdown=0
 	Days=0
@@ -283,6 +205,7 @@ def kpi_tongji(result,lilunquanyi):
 			Max_Day_to_New_High=tempi
 	result={"Net_Profit":Net_Profit,"Max_Drawdown":Max_Drawdown,"Days":Days,"Day_Winrate":Day_Winrate,"Daily_Std":Daily_Std,"Ann_Sharpe":Ann_Sharpe,"Max_Day_Profit":Max_Day_Profit,"Max_Day_Loss":Max_Day_Loss,"Max_Win_Days":Max_Win_Days,"Max_Loss_Days":Max_Loss_Days,"Max_Day_to_New_High":Max_Day_to_New_High}
 	print result
+	return result
 
 
 
@@ -307,4 +230,4 @@ def kpi_tongji(result,lilunquanyi):
 result=get_dailyquanyi('70700132',150101)
 result=result["result"]
 (tempday,lilunquanyi,realquanyi)=range_series(result,[])
-kpi_tongji(result,lilunquanyi)
+kpi_tongji(lilunquanyi)

@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from django.shortcuts import render_to_response
 import datetime
 import time
+import math
 from django.utils import simplejson
 import sys
 reload(sys)
@@ -20,6 +21,8 @@ def account_equity(request):
 	res=ms.dict_sql(sql)
 	aclist=res
 	ICdata=[]
+	ispass=0
+	tongji={}
 	#开始查询
 	if request.POST:
 		account=request.POST.get('acname','')
@@ -33,15 +36,20 @@ def account_equity(request):
 				'result':result
 			})
 		else:
+			ispass=1
 			result=totalquanyiresult['result']
-			
+
 			
 			(tempday,lilunquanyi,realquanyi)=range_series(result,[])
 			tempdict={'acname':account,'symbol':"",'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
 			ICdata.append(tempdict)
+			tongji=kpi_tongji(lilunquanyi)
+
 	return render_to_response('account_equity.html',{
+		'ispass':ispass,
 		'aclist':aclist,
-		'ICdata':ICdata
+		'ICdata':ICdata,
+		'tongji':tongji
 	})	
 
 
@@ -1018,4 +1026,81 @@ def add_time_series(totalquanyi,res1):
 		result[item]=tempvalue
 	result=sorted(result.iteritems(), key=lambda d:d[1], reverse = False)
 	return result
+
+#统计计算
+def kpi_tongji(lilunquanyi):
+	Net_Profit=0
+	Max_Drawdown=0
+	Days=0
+	Day_Winrate=0
+	Daily_Std=0
+	Ann_Sharpe=0
+	Max_Day_Profit=0
+	Max_Day_Loss=0
+	Max_Win_Days=0
+	Max_Loss_Days=0
+	Max_Day_to_New_High=0
+	deltavalue=[]
+	lastvalue=0
+	for item in lilunquanyi:
+		tempdelta=item-lastvalue
+		deltavalue.append(tempdelta)
+		lastvalue=item
+	Net_Profit=lilunquanyi[-1]
+	Days=len(lilunquanyi)
+	meandayliay=lilunquanyi[-1]/Days
+	total2=0
+	windays=0
+	lossdays=0
+	winlength=0
+	losslength=0
+	lastvalue=0
+	for item in deltavalue:
+		temp1=(meandayliay-item)*(meandayliay-item)
+		total2=total2+temp1
+		if item>=0:
+			windays=windays+1
+			losslength=0
+			winlength=winlength+1
+		else:
+			lossdays=lossdays+1
+			winlength=0
+			losslength=losslength+1
+		if winlength>Max_Win_Days:
+			Max_Win_Days=winlength
+		if losslength>Max_Loss_Days:
+			Max_Loss_Days=losslength
+	if Days<=2:
+		totalday=1
+	sharpeA=meandayliay
+	sharpeB=total2/float(Days)
+	Ann_Sharpe=sharpeA/math.sqrt(sharpeB-sharpeA*sharpeA)
+	Ann_Sharpe=round(Ann_Sharpe,3)
+	Daily_Std=math.sqrt(total2/(Days-1))
+	Daily_Std=round(Daily_Std,2)
+	Max_Day_Profit=max(deltavalue)
+	Max_Day_Loss=min(deltavalue)
+	Day_Winrate=windays/float(windays+lossdays)
+	Day_Winrate=round(Day_Winrate,3)
+	highvalue=0
+	tempi=0
+	tempdrowdown=0
+	temphigh=0
+	for item in lilunquanyi:
+		if item>temphigh:
+			temphigh=item
+		tempdrowdown=temphigh-item
+		if tempdrowdown>Max_Drawdown:
+			Max_Drawdown=tempdrowdown
+		if item>highvalue:
+			highvalue=item
+			tempi=0
+		tempi=tempi+1
+		if tempi>Max_Day_to_New_High:
+			Max_Day_to_New_High=tempi
+	result={"Net_Profit":Net_Profit,"Max_Drawdown":Max_Drawdown,"Days":Days,"Day_Winrate":Day_Winrate,"Daily_Std":Daily_Std,"Ann_Sharpe":Ann_Sharpe,"Max_Day_Profit":Max_Day_Profit,"Max_Day_Loss":Max_Day_Loss,"Max_Win_Days":Max_Win_Days,"Max_Loss_Days":Max_Loss_Days,"Max_Day_to_New_High":Max_Day_to_New_High}
+	print result
+	return result
+
+
 

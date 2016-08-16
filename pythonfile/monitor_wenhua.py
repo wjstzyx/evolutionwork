@@ -29,7 +29,7 @@ def monitor_AB_st_night():
 	endtime=datetime.datetime.strptime(endtime,'%H:%M:%S')
 	if nowtime>starttime and nowtime<=endtime:
 		##报警超过3分钟的st(type 字段说明：默认0 不报警，1位白天监控，2为夜盘监控)
-		sql="SELECT  [id]     ,[st]    ,DATEDIFF(MINUTE, [stockdate], getdate()) as timediff   FROM [LogRecord].[dbo].[ST_heart]   where DATEDIFF(MINUTE, [stockdate], getdate())>=3   and type=2 order by timediff desc"
+		sql="SELECT  [id]     ,[st]    ,DATEDIFF(MINUTE, [stockdate], getdate()) as timediff   FROM [LogRecord].[dbo].[ST_heart]   where DATEDIFF(MINUTE, [stockdate], getdate())>=3   and type in (2,12) order by timediff desc"
 		res=ms.dict_sql(sql)
 		message=''
 		subject='AB策略卡死报警'+datetime.datetime.now().strftime("%H:%M:%S")
@@ -72,7 +72,7 @@ def monitor_AB_st_day():
 	endtime=datetime.datetime.strptime(endtime,'%H:%M:%S')
 	if nowtime>starttime and nowtime<=endtime:
 		##报警超过3分钟的st(type 字段说明：默认0 不报警，1位白天监控，2为夜盘监控)
-		sql="SELECT  [id]     ,[st]    ,DATEDIFF(MINUTE, [stockdate], getdate()) as timediff   FROM [LogRecord].[dbo].[ST_heart]   where DATEDIFF(MINUTE, [stockdate], getdate())>=3   and type=1 order by timediff desc"
+		sql="SELECT  [id]     ,[st]    ,DATEDIFF(MINUTE, [stockdate], getdate()) as timediff   FROM [LogRecord].[dbo].[ST_heart]   where DATEDIFF(MINUTE, [stockdate], getdate())>=3   and type in (1,12)  order by timediff desc"
 		res=ms.dict_sql(sql)
 		message=''
 		subject='AB策略卡死报警'+datetime.datetime.now().strftime("%H:%M:%S")
