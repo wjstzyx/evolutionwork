@@ -560,8 +560,8 @@ def real_account_groupbyquanyi(ac,symbol):
 # cal_quanyi('RB2supportresistance',myquotes,totalsum,'RB')
 
 # show_account('myaccount2')
-(myquotes,totalsum)=real_account_groupbyquanyi('70700132','RB')
+(myquotes,totalsum)=real_account_groupbyquanyi('753918','RB')
 print totalsum
 # for item in myquotes:
 # 	print item 
-cal_quanyi('70700132',myquotes,totalsum,'RB')
+cal_quanyi('753918',myquotes,totalsum,'RB')

@@ -434,14 +434,26 @@ def real_account_groupbyquanyi(ac,symbol,maxposition):
 		#print 3,datetime.datetime.now()
 		positionlist=[]
 		lastp=0
+		tempaaposition=0
+		# 触碰线立马掉头
+		# for item in newlist:
+		# 	temptotal=item[1]+lastp
+		# 	if temptotal>=maxposition:
+		# 		temptotal=maxposition
+		# 	if (temptotal+maxposition)<=0:
+		# 		temptotal=-maxposition
+		# 	lastp=temptotal
+		# 	positionlist.append([item[0],item[1],temptotal])
+		#阶梯状态
 		for item in newlist:
 			temptotal=item[1]+lastp
-			if temptotal>=maxposition:
-				temptotal=maxposition
-			if (temptotal+maxposition)<=0:
-				temptotal=-maxposition
 			lastp=temptotal
-			positionlist.append([item[0],item[1],temptotal])
+			tempaaposition=temptotal
+			if temptotal>=maxposition:
+				tempaaposition=maxposition
+			if (temptotal+maxposition)<=0:
+				tempaaposition=-maxposition
+			positionlist.append([item[0],item[1],tempaaposition])
 			# [datetime.datetime(2016, 7, 19, 14, 59), -4.0, 0.0]
 		#总仓位有部分与现有的不符合，但大多数一致，可以再找个虚拟组测试下
 		##print positionlist
@@ -564,8 +576,8 @@ def real_account_groupbyquanyi(ac,symbol,maxposition):
 # cal_quanyi('RB2supportresistance',myquotes,totalsum,'RB')
 
 # show_account('myaccount2')
-(myquotes,totalsum)=real_account_groupbyquanyi('70700132','RB',2)
+(myquotes,totalsum)=real_account_groupbyquanyi('70700132','RB',5)
 print totalsum
 # for item in myquotes:
 # 	print item 
-cal_quanyi('70700132',myquotes,2,'RB')
+cal_quanyi('70700132',myquotes,5,'RB')

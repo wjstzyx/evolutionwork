@@ -420,9 +420,9 @@ def show_all_ac(acname=''):
 # show_all_ac('RU3v4e')
 
 
-(myquotes,totalsum)=input_groupbyquanyi('RUQGOpen_TG','RU')
+(myquotes,totalsum)=input_groupbyquanyi('RB_QGplud','RB')
 #仓位信息OK
 print totalsum
-cal_quanyi('RUQGOpen_TG',myquotes,totalsum,'RU')
+cal_quanyi('RB_QGplud',myquotes,totalsum,'RB')
 
 # show_account('myaccount2')

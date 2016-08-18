@@ -82,7 +82,7 @@ def input_groupbyquanyi(ac,symbol):
 		###以上已经准备好虚拟组的仓位信息
 		fisrttime=positionlist[0][0]
 		#[datetime.datetime(2015, 10, 21, 9, 0), 6.0, 6.0]
-		sql="select	C,StockDate from TSymbol where Symbol='%s' and  stockdate >='%s' order by StockDate " % (symbol,fisrttime)
+		sql="select	C,StockDate from TSymbol_quotes_backup where Symbol='%s' and  stockdate >='%s' order by StockDate " % (symbol,fisrttime)
 		res=ms.dict_sql(sql)
 		# print res[:10]
 		#对行情日期遍历
@@ -481,7 +481,7 @@ def real_account_groupbyquanyi(ac,symbol):
 		###以上已经准备好虚拟组的仓位信息
 		fisrttime=positionlist[0][0]
 		#[datetime.datetime(2015, 10, 21, 9, 0), 6.0, 6.0]
-		sql="select	C,StockDate from TSymbol where Symbol='%s' and  stockdate >='%s' order by StockDate " % (symbol,fisrttime)
+		sql="select	C,StockDate from TSymbol_quotes_backup where Symbol='%s' and  stockdate >='%s' order by StockDate " % (symbol,fisrttime)
 		res=ms.dict_sql(sql)
 		# print res[:10]
 		#对行情日期遍历
@@ -589,8 +589,8 @@ def real_account_groupbyquanyi(ac,symbol):
 
 
 
-# (myquotes,totalsum)=input_groupbyquanyi('rbchoosel','RB')
-# cal_quanyi('rbchoosel',myquotes,totalsum,'RB')
+# (myquotes,totalsum)=input_groupbyquanyi('Rbjietiall','RB')
+# cal_quanyi('Rbjietiall',myquotes,totalsum,'RB')
 
 # show_account('myaccount2')
 
