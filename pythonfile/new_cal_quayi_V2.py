@@ -600,16 +600,16 @@ def real_account_groupbyquanyi(ac,symbol):
 
 
 
-# (myquotes,totalsum)=input_groupbyquanyi('RBNmt','RBnight')
-# for item in myquotes:
-# 	print item 
-# cal_quanyi('RBNmt',myquotes,totalsum,'RBnight')
+# (myquotes,totalsum)=input_groupbyquanyi('RBNrsi','RBnight')
+# # for item in myquotes:
+# # 	print item 
+# cal_quanyi('RBNrsi',myquotes,totalsum,'RBnight')
 
 # show_account('myaccount2')
 
 def main_fun():
 	#获取需要处理的列表
-	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1 and isyepan=0 order by sortnum desc "
+	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1 and isyepan in (0,1) order by sortnum desc "
 	#sql="SELECT top 17 id,[acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('RB') and iscaculate=1 order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
