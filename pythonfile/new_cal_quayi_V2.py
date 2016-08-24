@@ -231,7 +231,7 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto):
 	#得到总的需要计算日期的天数
 	#dayquanyilist=[quanyi,times,ref(-1)position]
 	dayquanyilist={}
-	sql="select distinct CONVERT(varchar(10), stockdate, 120 ) as datename from [Future].[dbo].[quanyi_log_groupby_v2]  order by datename"
+	sql="select distinct CONVERT(varchar(10), stockdate, 120 ) as datename from [Future].[dbo].[quanyi_log_groupby_v2] order by datename"
 	datelist=ms.dict_sql(sql)
 	for item in datelist:
 		mytime=item['datename'].replace('-','')
@@ -240,21 +240,32 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto):
 	daylists=[k for k in sorted(dayquanyilist.keys())]
 
 
-
+	#将总权益分成每天的权益，最后再合成
 	for item in tempquotes:
 		datetime=item[0]
 		D=datetime.strftime('%Y%m%d')
 		thisday=str(int(D)-20000000)
 		deltatime=abs(myround(item[2])-myround(lastposition))
 		totalquanyi=(myround(lastposition)*(item[1]-lastC)*float(pointvalue)-deltatime*commvalue)/round(totalsum,3)+totalquanyi
+		deltaquanyi=(myround(lastposition)*(item[1]-lastC)*float(pointvalue)-deltatime*commvalue)/round(totalsum,3)
 		lastposition=item[2]
 		lastC=item[1]
-		dayquanyilist[thisday][0]=totalquanyi
+		dayquanyilist[thisday][0]=dayquanyilist[thisday][0]+deltaquanyi
 		dayquanyilist[thisday][1]=dayquanyilist[thisday][1]+deltatime
 		dayquanyilist[thisday][2]=myround(lastposition)
+
 	####写入数据库
-	newlist=[(k,dayquanyilist[k]) for k in sorted(dayquanyilist.keys())]
-	# print newlist
+	newlist=[[k,dayquanyilist[k]] for k in sorted(dayquanyilist.keys())]
+
+	tempmyquanyi=0
+	for item  in newlist:
+		tempmyquanyi=tempmyquanyi+item[1][0]
+		item[1][0]=tempmyquanyi
+	# for item in newlist:
+	# 	print item 
+
+
+
 	sql="select MAX(D)  as D from [Future].[dbo].[dailyquanyi_V2] where ac='%s' and Symbol='%s'" % (ac,symbolto)
 	datelist=ms.dict_sql(sql)[0]
 	if datelist['D'] is None:
@@ -589,8 +600,10 @@ def real_account_groupbyquanyi(ac,symbol):
 
 
 
-# (myquotes,totalsum)=input_groupbyquanyi('Rbjietiall','RB')
-# cal_quanyi('Rbjietiall',myquotes,totalsum,'RB')
+# (myquotes,totalsum)=input_groupbyquanyi('RBNmt','RBnight')
+# for item in myquotes:
+# 	print item 
+# cal_quanyi('RBNmt',myquotes,totalsum,'RBnight')
 
 # show_account('myaccount2')
 
