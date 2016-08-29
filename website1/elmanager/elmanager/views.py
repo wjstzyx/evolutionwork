@@ -14,6 +14,126 @@ from dbconn import MSSQL
 # ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 # ms1 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="future")
 
+
+def delete_order_p_follow_info(request):
+	if request.POST:
+		id=request.POST.get('id','')
+		ms= MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+		sql="delete from [LogRecord].[dbo].[order_p_follow] where id=%s" % (id)
+		ms.insert_sql(sql)
+	result=1
+	result=simplejson.dumps(result,ensure_ascii = False)
+	return HttpResponse(result,mimetype='application/json')
+
+
+
+def save_order_p_basic(request):
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+
+	if request.POST:
+		print request.POST
+		data=request.POST.get("data","")
+		print data
+		data=data.strip('#')
+		data=data.split('#')
+		isdel=0
+		for item in data:
+			item=item.strip(',')
+			item=item.split(',')
+			if len(item)==3:
+				if isdel==0:
+					sql="delete from [LogRecord].[dbo].[order_p_follow] where ac='%s'" % (item[0])
+					ms.insert_sql(sql)
+					isdel=1
+				sql="insert into [LogRecord].[dbo].[order_p_follow](ac,F_ac,ratio,Pratio) values('%s','%s',%s,%s)" % (item[0],item[1],item[2],item[2])
+				ms.insert_sql(sql)
+	else:
+		print "not post"
+	result=1
+	result=simplejson.dumps(result,ensure_ascii = False)
+	return HttpResponse(result,mimetype='application/json')
+
+
+
+
+def order_account_equity(request):
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	sql="SELECT distinct ac from [LogRecord].[dbo].[order_p_follow] order by ac"
+	aclist=ms.dict_sql(sql)
+	ICdata=[]
+	ispass=0
+	tongji={}
+	account=""
+	res=""
+	F_aclist=""
+	#开始查询
+	if request.POST:
+		print request.POST
+		whichform=request.POST.get('query','')
+		print whichform
+		if whichform=='query':
+			account=request.POST.get('searchaccount','')
+			sql="select ID as myid,row_number()OVER(ORDER BY [AC] DESC) as id,ac,F_ac,ratio from [LogRecord].[dbo].[order_p_follow] where ac='%s' order by F_ac" % (account)
+			res=ms.dict_sql(sql)
+			sql="select distinct acname as ac from [LogRecord].[dbo].[quanyicaculatelist] order by acname"
+			F_aclist=ms.dict_sql(sql)
+			return render_to_response('order_account_equity.html',{
+				'account':account,
+				'res':res,
+				'F_aclist':F_aclist,
+				'aclist':aclist
+			})
+		if whichform=='equity':
+			account=request.POST.get('account','')
+			totalquanyiresult=order_get_dailyquanyi(account,150521)
+			if totalquanyiresult['ispass']==0:
+				result=totalquanyiresult['result']
+				return render_to_response('order_account_equity.html',{
+					'aclist':aclist,
+					'ispass':ispass,
+					'result':result
+				})
+			else:
+				ispass=1
+				result=totalquanyiresult['result']	
+				(tempday,lilunquanyi,realquanyi)=range_series(result,[])
+				tempdict={'acname':account,'symbol':"",'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
+				ICdata.append(tempdict)
+				tongji=kpi_tongji(lilunquanyi)
+
+
+	return render_to_response('order_account_equity.html',{
+		'ispass':ispass,
+		'aclist':aclist,
+		'ICdata':ICdata,
+		'tongji':tongji,
+		'account':account,
+		'res':res,
+		'F_aclist':F_aclist
+	})	
+
+
+
+
+
+	# ICdata=[]
+	# sql="select distinct ac,symbol from dailyquanyi where symbol='IC' and D>151020"
+	# res=ms.dict_sql(sql)
+	# for item in res:
+	# 	acname=item['ac']
+	# 	symbol=item['symbol']
+	# 	sql="select (quanyi-comm)/d_max as quanyia,D from dailyquanyi where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+	# 	res1=ms.find_sql(sql)
+	# 	sql="select (quanyi-comm)/d_max as quanyia,D from real_dailyquanyi where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+	# 	res2=ms.find_sql(sql)		
+	# 	(tempday,lilunquanyi,realquanyi)=change_delta_toaccumu(res1,res2)
+	# 	tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
+	# 	ICdata.append(tempdict)
+
+
+
+
+
 def account_equity(request):
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 	sql="SELECT [id],[type],[item],[ismonitor],[starttime],[endtime] FROM [LogRecord].[dbo].[monitorconfig]"
@@ -966,6 +1086,35 @@ def get_ac_ratio(account):
 	# print ac_ratio
 	return ac_ratio
 
+#获得账号点菜系统虚拟组
+def order_get_ac_ratio(account):
+	#获取总账户配置的虚拟组的ratio
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+	#sql="WITH Emp AS ( SELECT ac,F_ac,ratio FROM  p_follow WHERE   ac='%s' UNION ALL  SELECT   D.AC,D.F_ac,D.ratio*emp.ratio/100 FROM   Emp         INNER JOIN p_follow d ON d.ac = Emp.F_ac)SELECT AC,f_AC,ratio FROM  Emp" % (account)
+	sql="select AC,f_AC,ratio from [LogRecord].[dbo].[order_p_follow] where ac='%s'" % (account)
+	res=ms.dict_sql(sql)
+	accountlist=[]
+	aclist=[]
+	for item in res:
+		accountlist.append(item['AC'])
+		aclist.append(item['f_AC'])
+	accountlist=list(set(accountlist))
+	aclist=list(set(aclist))
+	# print accountlist
+	# print aclist
+	ac_ratio={}
+	for item in aclist:
+		ac_ratio[item]=0
+	for item in res:
+		ac_ratio[item['f_AC']]=ac_ratio[item['f_AC']]+item['ratio']
+	# print ac_ratio
+	for key in accountlist:
+		if ac_ratio.has_key(key):
+			del ac_ratio[key]
+	# print ac_ratio
+	return ac_ratio
+
+
 #计算总权益
 def get_dailyquanyi(account,fromDdy):
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
@@ -988,7 +1137,7 @@ def get_dailyquanyi(account,fromDdy):
 					initoalquanyi=0
 				else:
 					initoalquanyi=tempres[0][1]
-				sql="select D,(quanyi-%s) as  quanyia from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=%s order by D" % (initoalquanyi,acname,symbol,fromDdy)
+				sql="select D,(quanyi-(%s)) as  quanyia from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=%s order by D" % (initoalquanyi,acname,symbol,fromDdy)
 				res1=ms.find_sql(sql)
 				#乘以ratio
 				newres1=[]
@@ -1000,6 +1149,44 @@ def get_dailyquanyi(account,fromDdy):
 				# for item in totalquanyi:
 				# 	print item 
 				return {"ispass":1,"result":totalquanyi}
+
+
+#计算总权益(点菜)
+def order_get_dailyquanyi(account,fromDdy):
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+	ac_ratio=order_get_ac_ratio(account)
+	totalquanyi=[]
+	for key in ac_ratio:
+		ratio=ac_ratio[key]
+		if ratio>0:
+			sql="SELECT [quanyisymbol]  FROM [LogRecord].[dbo].[quanyicaculatelist] where acname='%s'" % (key)
+			res=ms.dict_sql(sql)
+			if not res:
+				# print {"ispass":0,"result":"%s does not has equity" % (key)}
+				return {"ispass":0,"result":"%s does not has equity" % (key)}
+			else:
+				symbol=res[0]['quanyisymbol']
+				acname=key
+				sql="select top 1 D,quanyi as  quanyia from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=%s order by D" % (acname,symbol,fromDdy)
+				tempres=ms.find_sql(sql)
+				if tempres==[]:
+					initoalquanyi=0
+				else:
+					initoalquanyi=tempres[0][1]
+				sql="select D,(quanyi-(%s)) as  quanyia from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=%s order by D" % (initoalquanyi,acname,symbol,fromDdy)
+				res1=ms.find_sql(sql)
+				#乘以ratio
+				newres1=[]
+				for item in res1:
+					newres1.append([item[0],item[1]*ratio/10.0])
+				totalquanyi=add_time_series(totalquanyi,newres1)
+				totalquanyi=sorted(totalquanyi,key=lambda a :a[0])
+	totalquanyi=[[item[1],item[0]] for item in totalquanyi]
+				# for item in totalquanyi:
+				# 	print item 
+	return {"ispass":1,"result":totalquanyi}
+
+
 
 #两个时间序列相加
 def add_time_series(totalquanyi,res1):
@@ -1022,7 +1209,7 @@ def add_time_series(totalquanyi,res1):
 			totalquanyilastvalue=totalquanyidict[item]
 		if item in res1time:
 			res1lastvalues=res1dict[item]
-		tempvalue=totalquanyilastvalue+res1lastvalues
+		tempvalue=float(totalquanyilastvalue)+float(res1lastvalues)
 		result[item]=tempvalue
 	result=sorted(result.iteritems(), key=lambda d:d[1], reverse = False)
 	return result

@@ -33,4 +33,7 @@ urlpatterns = patterns('',
     url(r'^index/quanyi/acwantedequlitybacktest/$', acwantedequlitybacktest),
     url(r'^index/dataacquire/adddata/$', adddata),
     url(r'^index/quanyi/account_equity/$', account_equity),
+    url(r'^index/quanyi/order_account_equity/$', order_account_equity),
+    url(r'^index/quanyi/order_account_equity/save_order_p_basic/$', save_order_p_basic),
+    url(r'^index/quanyi/order_account_equity/delete_order_p_follow_info/$', delete_order_p_follow_info),
 )

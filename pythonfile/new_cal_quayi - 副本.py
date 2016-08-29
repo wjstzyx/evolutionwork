@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import matplotlib.pylab as pl
 from matplotlib.dates import DayLocator, HourLocator, DateFormatter, drange
 ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
-# resList = ms.find_sql("select top 2 * from st_report")
+# resList = ms.find_sql("select top 2 * from st_report_test")
 # print resList
 # 返回行情list 或者0
 
@@ -38,8 +38,8 @@ def input_groupbyquanyi(ac,symbol):
 	res=ms.dict_sql(sql)
 	totalsum=res[0]['totalsum']
 
-	#产生临时整个虚拟组st_report
-	sql="select * into  #temp_quanyi_new from ( select p.ac,p.symbol,st_report.type,st_report.id,st_report.p,st_report.pp,p.p_size,p.ratio ,st_report.st,st_report.stockdate from st_report  inner join #temp_p_log p on p.st=st_report.st and p.ac='%s' and p.symbol='%s')temp " % (ac,symbol)
+	#产生临时整个虚拟组st_report_test
+	sql="select * into  #temp_quanyi_new from ( select p.ac,p.symbol,st_report_test.type,st_report_test.id,st_report_test.p,st_report_test.pp,p.p_size,p.ratio ,st_report_test.st,st_report_test.stockdate from st_report_test  inner join #temp_p_log p on p.st=st_report_test.st and p.ac='%s' and p.symbol='%s')temp " % (ac,symbol)
 	#print sql
 	ms.insert_sql(sql)
 	#print 1,datetime.datetime.now()

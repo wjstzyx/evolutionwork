@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+{% load i18n static %}
+{% load url from future %}
+
+{% block extrahead %}
+    <link href="{% static 'css/bootstrap-select.min.css' %}" rel="stylesheet">
+{% endblock %}
+{% block extrastyle %}
+{% endblock %}
+
+{% block content_title %}{% endblock %}
+{% block content %}
+
+<script>
+function save_mailto_info(id){
+	var id=$("#id_"+id).html();
+	var name=$("#name_"+id).val();
+	var email=$("#email_"+id).val();
+	var istomail=$("#istomail_"+id).val();
+	data={"id":id,"name":name,"email":email,"istomail":istomail};
+    $.ajax({
+        url:"{% url 'elmanager.views.save_mailto_info' %}",
+        data:data,
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+            alert("保存成功")
+        }
+
+    });
+}
+
+function delete_order_p_follow_info(r){
+  var i=r.parentNode.parentNode.rowIndex;
+  document.getElementById('mailtotable').deleteRow(i);
+
+}
+
+
+function add_new_row(r){
+  $("#mailtotable").append("<tr><td>{{account}}</td><td><input type='text' name='searchaccount' class='search' data-provide='typeahead' data-items='4'/></td><td><input type='text' value='100'/></td><td><button type='button' onclick='delete_order_p_follow_info(this)'>删除</button></td></tr>")
+
+}
+
+
+function begin_calculate(id){
+  var mytable = document.getElementById(id);
+  var data ="";
+  var tempc="";
+  var tempccc="";
+        for(var i=1,rows=mytable.rows.length; i<rows; i++){
+            tempccc=mytable.rows[i].cells[0].innerHTML;
+            tempc=tempc+','+ tempccc;
+            tempccc=mytable.rows[i].cells[1].getElementsByTagName("INPUT")[0].value;
+            tempc=tempc+','+ tempccc;
+            tempccc=mytable.rows[i].cells[2].getElementsByTagName("INPUT")[0].value;
+            tempc=tempc+','+ tempccc;
+            data=data+'#'+tempc;
+            tempc="";
+        }
+    $.ajax({
+        url:"{% url 'elmanager.views.save_order_p_basic' %}",
+        data:{"data":data},
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+            alert("保存成功,请点击查看权益")
+        }
+    });
+
+
+
+}
+
+
+
+
+</script>
+
+  <div id="page-wrapper"> 
+   <div class="container-fluid"> 
+    <!-- Page Heading --> 
+    <div class="row"> 
+     <div class="col-lg-12"> 
+      <h1 class="page-header"> 账号理论权益  </h1> 
+     </div> 
+    </div> 
+
+<form class="form" method='POST'>
+
+  <div class="col-lg-1">
+    <div class="form-group">
+      <label class="control-label" for="lunch">请输入账号名称:</label>
+    </div>
+  </div>
+  <div class="col-lg-2">
+    <div class="form-group">
+    <div class="well">
+      <input type="text" name="searchaccount"  id="search" data-provide="typeahead" data-items="4" value="{{account}}"/>
+    </div>
+    </div>
+  </div>
+  <div class="col-lg-2">
+    <button type="submit" class="btn btn-default" name="query" value="query">查询</button>
+  </div>
+  </form>
+
+  <hr>
+    </div>
+    <div class="row"> 
+     <div class="col-lg-2"></div> 
+     <div class="col-lg-8"> 
+      <div class="panel panel-default"> 
+       <div class="panel-heading"> 
+        <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>请配置账号  </h3> 
+       </div> 
+       <div class="panel-body"> 
+        <div class="row"> 
+         <table class="table table-bordered table-hover table-striped" id="mailtotable" name="tablevontent"> 
+          <thead> 
+           <tr> 
+            <th align=center>账号名</th> 
+            <th align=center>虚拟组名</th> 
+            <th align=center>比例（100%）</th> 
+            <th align=center>操作</th>
+           </tr> 
+          </thead>
+
+          <tbody >
+          {% for item in res %}
+           <tr id="{{item.myid}}"> 
+            <td >{{item.ac}}</td>
+            <td >
+            <input type="text" name="searchaccount"  class="search" data-provide="typeahead" data-items="4" value="{{item.F_ac}}"/>
+            </td>
+            <td ><input type="text" value="{{item.ratio}}"/></td> 
+            <td><button type="button" onclick="delete_order_p_follow_info(this)">删除</button></td>
+           </tr> 
+          {% endfor %} 
+          </tbody> 
+         </table> 
+        </div> 
+<form class="form" method='POST'>
+<button type="button" class="btn btn-default" onclick="begin_calculate('mailtotable')" name="dddd">保存</button>
+<button type="button" class="btn btn-default" onclick="add_new_row(this)" >新增一行</button>
+<button type="submit" class="btn btn-default" name="query" value="equity">查看权益曲线</button>
+<input type="hidden" name="account" value="{{account}}"/>
+</form>
+       </div> 
+      </div> 
+     </div> 
+     <div class="col-lg-2"></div> 
+    </div> 
+
+
+    <div class="row">
+
+<div class="col-lg-12" >
+    {% if ispass == 1 %}
+      <div class="panel panel-default"> 
+       <div class="panel-heading"> 
+        <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>账号权益KPI  </h3> 
+       </div> 
+       <div class="panel-body"> 
+        <div class="table-responsive"> 
+         <table class="table table-bordered table-hover table-striped"> 
+          <tbody id="mailtotable"> 
+          <tr>
+          <td>Net_Profit</td>
+          <td>{{tongji.Net_Profit}}</td>
+          <td>Daily_Std</td>
+          <td>{{tongji.Daily_Std}}</td>
+          <td>Day_Winrate</td>
+          <td>{{tongji.Day_Winrate}}</td>
+          <td>Max_Day_Profit</td>
+          <td>{{tongji.Max_Day_Profit}}</td>
+          </tr>
+          <tr>
+          <td>Max_Drawdown</td>
+          <td>{{tongji.Max_Drawdown}}</td>
+          <td>Ann_Sharpe</td>
+          <td>{{tongji.Ann_Sharpe}}</td>
+          <td>Days</td>
+          <td>{{tongji.Days}}</td>
+          <td>Max_Loss_Days</td>
+          <td>{{tongji.Max_Loss_Days}}</td>
+          </tr>
+          <tr>
+          <td>Max_Day_to_New_High</td>
+          <td>{{tongji.Max_Day_to_New_High}}</td>
+          <td>Max_Win_Days</td>
+          <td>{{tongji.Max_Win_Days}}</td>
+          <td>Max_Day_Loss</td>
+          <td>{{tongji.Max_Day_Loss}}</td>
+          <td> </td>
+          <td> </td>
+          </tr>
+          </tbody> 
+         </table> 
+        </div> 
+       </div> 
+      </div> 
+    {% endif %}
+    {% if ispass == 0 %}
+    {{result}}
+    {% endif %}
+
+</div>
+<div class="col-lg-12">
+  <div>
+      {% for item in ICdata %} 
+      <h4>权益曲线图</h4>
+      <div class="row">
+
+        <div class="col-md-12"><div id='{{item.acname}}' style="min-width:700px;height:400px"></div></div>
+      {% endfor %}                                    
+      </div>
+  </div>
+</div>
+
+
+   </div> 
+  </div>
+  {% endblock %}
+{% block extrabodyscript %}
+<script src="{% static 'js/bootstrap-select.min.js' %}"></script>
+<script src="{% static 'js/highcharts.js' %}"></script>
+<script src="{% static 'js/bootstrap-typeahead.js' %}"></script>
+<script>
+    var subjects = []; 
+    {% for item in aclist %}
+    subjects.push('{{item.ac}}')
+    {% endfor %}
+    $('#search').typeahead({source: subjects})
+    subjects = []; 
+    {% for item in F_aclist %}
+    subjects.push('{{item.ac}}')
+    {% endfor %}
+    $('.search').typeahead({source: subjects})
+
+
+</script>
+  {% for item in ICdata %}
+  <script>
+      $(function () {
+
+          $('#{{item.acname}}').highcharts({
+              title: {
+                  text: '{{item.acname}}',
+                  x: -20 //center
+              },
+              xAxis: {
+                  categories:{{item.xaxis}}
+              },
+              yAxis: {
+                  title: {
+                      text: '账号总权益'
+                  },
+                  plotLines: [{
+                      value: 0,
+                      width: 1,
+                      color: '#808080'
+                  }]
+              },
+              tooltip: {
+                  valueSuffix: '元'
+              },
+              legend: {
+                  layout: 'vertical',
+                  align: 'right',
+                  verticalAlign: 'middle',
+                  borderWidth: 0
+              },
+              series: [{
+                  name: '实际',
+                  data: {{item.realquanyi}}
+              }, {
+                  name: '理论',
+                  data: {{item.lilunquanyi}}             
+              
+              }]
+          });
+      });
+  </script>
+  {% endfor %}
+{% endblock %}
