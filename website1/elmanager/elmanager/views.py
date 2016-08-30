@@ -1145,10 +1145,10 @@ def get_dailyquanyi(account,fromDdy):
 					newres1.append([item[0],item[1]*ratio/10.0])
 				totalquanyi=add_time_series(totalquanyi,newres1)
 				totalquanyi=sorted(totalquanyi,key=lambda a :a[0])
-				totalquanyi=[[item[1],item[0]] for item in totalquanyi]
+	totalquanyi=[[item[1],item[0]] for item in totalquanyi]
 				# for item in totalquanyi:
 				# 	print item 
-				return {"ispass":1,"result":totalquanyi}
+	return {"ispass":1,"result":totalquanyi}
 
 
 #计算总权益(点菜)
@@ -1156,6 +1156,19 @@ def order_get_dailyquanyi(account,fromDdy):
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 	ac_ratio=order_get_ac_ratio(account)
 	totalquanyi=[]
+	#获取对齐时间
+	Dlist=[]
+	Dlist.append(fromDdy)
+	for key in ac_ratio:
+		sql="SELECT top 1  (convert(int,replace(convert(varchar(10),DATEADD(day,1,stockdate),120),'-',''))-20000000) as D  FROM [Future].[dbo].[quanyi_log_groupby_v2] where ac='%s' order by stockdate" % (key)
+		tempD=ms.dict_sql(sql)
+		if tempD:
+			Dlist.append(tempD[0]['D'])
+		else:
+			Dlist.append(200000)
+	fromDdy=max(Dlist)
+	print Dlist
+		
 	for key in ac_ratio:
 		ratio=ac_ratio[key]
 		if ratio>0:

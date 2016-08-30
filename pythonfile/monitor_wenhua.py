@@ -72,12 +72,12 @@ def monitor_AB_st_day():
 	endtime=datetime.datetime.strptime(endtime,'%H:%M:%S')
 	if nowtime>starttime and nowtime<=endtime:
 		##报警超过3分钟的st(type 字段说明：默认0 不报警，1位白天监控，2为夜盘监控)
-		sql="SELECT  [id]     ,[st]    ,DATEDIFF(MINUTE, [stockdate], getdate()) as timediff   FROM [LogRecord].[dbo].[ST_heart]   where DATEDIFF(MINUTE, [stockdate], getdate())>=3   and type in (1,12)  order by timediff desc"
+		sql="SELECT  [id]     ,[st]  ,address  ,DATEDIFF(MINUTE, [stockdate], getdate()) as timediff   FROM [LogRecord].[dbo].[ST_heart]   where DATEDIFF(MINUTE, [stockdate], getdate())>=3   and type in (1,12)  order by timediff desc"
 		res=ms.dict_sql(sql)
 		message=''
 		subject='AB策略卡死报警'+datetime.datetime.now().strftime("%H:%M:%S")
 		if res:
-			subject=str(res[0]['st'])+"策略卡死"+datetime.datetime.now().strftime("%H:%M:%S")
+			subject=str(res[0]['st'])+" "+str(res[0]['address'])+"策略卡死"+datetime.datetime.now().strftime("%H:%M:%S")
 			
 		if res:
 			print "have waring"
@@ -85,9 +85,10 @@ def monitor_AB_st_day():
 			for item in res:
 				stringnum=stringnum+1
 				st=item['st']
+				address=item['address']
 				timediff=item['timediff']
 				if stringnum<30:
-					message=message+'策略号 '+str(st)+': '+' 卡死时间: '+str(timediff)+'(分钟)'
+					message=message+'策略号 '+str(st)+' '+str(address)+' 卡死时间: '+str(timediff)+'(分钟)'
 			# if len(message)>1800:
 			# 	message=message[:1000]
 			sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,message,0,sendmessage)
@@ -301,5 +302,5 @@ while(1):
 		pass
 	time.sleep(50)
 	mytime=int(datetime.datetime.now().strftime('%H%M'))
-	if mytime>=2000 and mytime<=2010:
+	if (mytime>=2000 and mytime<=2010) or (mytime>=300 and mytime<=710):
 		break
