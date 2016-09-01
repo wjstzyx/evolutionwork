@@ -37,7 +37,7 @@ def read_maillist():
 	totalsubject=totalsubject.strip('\r\n')
 
 
-	#一小时最多发12封
+	#一小时最多发6封
 	if mailtolist!='':
 		sql="select top 1 * from [LogRecord].[dbo].[maillist] where type=1 order by id desc "
 		tempres=ms.dict_sql(sql)
@@ -45,12 +45,12 @@ def read_maillist():
 			lasttime=tempres[0]['updatetime']
 			seconds=(datetime.datetime.now()-lasttime).seconds
 			print seconds,type(seconds)
-			if seconds<310:
-				print "时间少于5分钟,不再发送"
+			if seconds<600:
+				print "时间少于10分钟,不再发送"
 				sql="update [LogRecord].[dbo].[maillist] set type=4,updatetime=getdate() where type=3"
 				ms.insert_sql(sql)
 			else:
-				print "时间大于5分钟，准备发送"
+				print "时间大于10分钟，准备发送"
 				mailreslut=send_mail(mailtolist,totalsubject,totalmsg)
 				smsresult=sendsms(sendmessage,totalsubject)
 

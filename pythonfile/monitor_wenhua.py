@@ -12,6 +12,11 @@ ms1 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="future")
 # print resList
 
 
+def cloud_database_quotes():
+	myms=MSSQL(host="139.196.190.246",user="future",pwd="K@ra0Key",db="future")
+	sql=""
+
+
 def monitor_AB_st_night():
 	#查询发件人
 	(mailtolist,sendmessage)=get_messagelist()
@@ -265,12 +270,14 @@ def get_messagelist():
 
 
 def ismonitorday():
-	sql="select top 1 D from TSymbol ORDER BY id desc"
+	sql="select top 1 D from TSymbol where T>'08:00' ORDER BY id desc"
 	lastday=ms.find_sql(sql)[0][0]
 	lastday='20'+lastday[2:4]+lastday[5:7]+lastday[8:10]
 	sql="select getdate()"
 	nowD=ms.find_sql(sql)[0][0].strftime('%Y%m%d')
-	if nowD==lastday:
+	sql="select datepart(weekday, getdate())"
+	weekday=ms.find_sql(sql)[0][0]
+	if nowD==lastday and weekday in (2,3,4,5,6):
 		return 1
 	else:
 		return 0
