@@ -207,13 +207,25 @@
                     <li>
 
                     <li>
-                        <a href="javascript:;" data-toggle="collapse" data-target="#demo1"><i class="fa fa-fw fa-arrows-v"></i> 监控报警配置 <i class="fa fa-fw fa-caret-down"></i></a>
-                        <ul id="demo1" class="collapse">
+                        <a href="javascript:;" data-toggle="collapse" data-target="#monitorconfig"><i class="fa fa-fw fa-arrows-v"></i> 监控报警配置 <i class="fa fa-fw fa-caret-down"></i></a>
+                        <ul id="monitorconfig" class="collapse">
                             <li>
                                 <a href="{% url 'elmanager.views.configmailtolist' %}">邮件收件人配置</a>
                             </li>
                             <li>
                                 <a href="{% url 'elmanager.views.configmonitorlist' %}">监控项目配置</a>
+                                
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="javascript:;" data-toggle="collapse" data-target="#monitorinfo"><i class="fa fa-fw fa-arrows-v"></i> 监控信息 <i class="fa fa-fw fa-caret-down"></i></a>
+                        <ul id="monitorinfo" class="collapse">
+                            <li>
+                                <a href="{% url 'elmanager.views.st_heart' %}">心跳存活信息</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'elmanager.views.st_information' %}">策略信号信息</a>
                                 
                             </li>
                         </ul>

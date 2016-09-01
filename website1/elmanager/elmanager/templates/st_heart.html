@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% load i18n static %}
+{% load url from future %}
+
+{% block extrahead %}
+
+{% endblock %}
+{% block extrastyle %}
+{% endblock %}
+
+{% block content_title %}{% endblock %}
+{% block content %}
+
+<script>
+function save_monitor_info(id){
+	var id=$("#id_"+id).html();
+	var type=$("#type_"+id).val();
+	var item=$("#item_"+id).val();
+	var ismonitor=$("#ismonitor_"+id).val();
+  var starttime=$("#starttime_"+id).val();
+  var endtime=$("#endtime_"+id).val();
+	data={"id":id,"type":type,"item":item,"ismonitor":ismonitor,"starttime":starttime,"endtime":endtime};
+    $.ajax({
+        url:"{% url 'elmanager.views.save_monitor_info' %}",
+        data:data,
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+            alert("保存成功")
+        }
+
+    });
+}
+
+function delete_monitor_info(id){
+	var data={"id":id};
+	if (confirm("确定删除吗")){
+    $.ajax({
+        url:"{% url 'elmanager.views.delete_monitor_info' %}",
+        data:data,
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+        	window.location.href="/index/monitor/configmonitorlist/";
+        }
+    });
+
+	}
+
+}
+
+
+function add_new_monitor(){
+    $.ajax({
+        url:"{% url 'elmanager.views.add_new_monitor' %}",
+        data:{"date":"data"},
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+        	window.location.href="/index/monitor/configmonitorlist/"
+            
+        }    
+    });
+
+
+}
+</script>
+
+  <div id="page-wrapper"> 
+   <div class="container-fluid" style="height: 900px"> 
+    <!-- Page Heading --> 
+    <div class="row"> 
+     <div class="col-lg-12"> 
+      <h1 class="page-header"> 心跳存活信息 </h1> 
+      <ol class="breadcrumb"> 
+       <li class="active"> <i class="fa fa-dashboard"></i> 监控信息-->心跳存活信息</li> 
+      </ol> 
+     </div> 
+    </div>
+
+<form class="form" method='POST'>
+<div class="form-group">
+<button class="btn" name="sttype" value="day">日盘僵死策略</button>
+<button class="btn" name="sttype" value="night">夜盘僵死策略</button>
+</div>
+</form>
+
+    <div class="row"> 
+     <div class="col-lg-2"></div> 
+     <div class="col-lg-8"> 
+      <div class="panel panel-default"> 
+       <div class="panel-heading"> 
+        <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>心跳存活信息	(显示15行)</h3> 
+       </div>
+       {% if isres == 2 %} 
+       <div>
+       没有信号僵死
+       </div>
+       {% endif %}
+       {% if isres == 1 %}
+       <div class="panel-body"> 
+        <div class="table-responsive"> 
+         <table class="table table-bordered table-hover table-striped"> 
+          <thead> 
+           <tr> 
+            <th align=center width=180px>策略号</th> 
+            <th align=center width=300px>策略名</th> 
+            <th align=center width=100px>所在机器</th>
+            <th align=center width=120px>最新更新时间</th>
+           </tr> 
+          </thead>  
+          <tbody id="mailtotable"> 
+            {% for item in data %}
+           <tr> 
+            <td align=center >{{item.st}}</td> 
+            <td align=center >{{item.TradName}}</td> 
+            <td align=center >{{item.address}}</td> 
+            <td align=center >{{item.stockdate}}</td> 
+           </tr> 
+
+            {% endfor %}
+          </tbody> 
+         </table>          
+        </div> 
+
+       </div> 
+       {% endif %}
+      </div> 
+     </div> 
+     <div class="col-lg-2"></div> 
+    </div> 
+   </div> 
+  </div>
+
+{% endblock %}

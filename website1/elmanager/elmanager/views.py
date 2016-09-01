@@ -15,6 +15,42 @@ from dbconn import MSSQL
 # ms1 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="future")
 
 
+
+def st_heart(request):
+	data=""
+	isres=0
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	if request.POST:
+		sttype=request.POST.get("sttype","")
+		print sttype
+		if sttype=='day':
+			sql="SELECT top 15 a.st,a.TradName,b.address,b.stockdate  FROM [Future].[dbo].[Trading_logSymbol] a  inner join(  SELECT [st],address,stockdate   FROM [LogRecord].[dbo].[ST_heart]   where DATEDIFF(MINUTE, [stockdate], getdate())>=3 and type in (1,12)  ) b on a.ST=b.st"
+		else:
+			sql="SELECT top 15 a.st,a.TradName,b.address,b.stockdate  FROM [Future].[dbo].[Trading_logSymbol] a  inner join(  SELECT [st],address,stockdate   FROM [LogRecord].[dbo].[ST_heart]   where DATEDIFF(MINUTE, [stockdate], getdate())>=3 and type in (2,12)  ) b on a.ST=b.st"
+		res=ms.dict_sql(sql)
+		data=res
+		if data:
+			isres=1
+		else:
+			isres=2
+
+	return render_to_response('st_heart.html',{
+		'data':data,
+		'isres':isres
+	})	
+
+
+def st_information(request):
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	sql="SELECT [id],[type],[item],[ismonitor],[starttime],[endtime] FROM [LogRecord].[dbo].[monitorconfig]"
+	res=ms.dict_sql(sql)
+	data=res
+	return render_to_response('st_information.html',{
+		'data':data
+	})	
+
+
+
 def delete_order_p_follow_info(request):
 	if request.POST:
 		id=request.POST.get('id','')
