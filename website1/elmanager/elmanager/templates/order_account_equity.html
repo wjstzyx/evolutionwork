@@ -53,6 +53,8 @@ function begin_calculate(id){
             tempccc=mytable.rows[i].cells[0].innerHTML;
             tempc=tempc+','+ tempccc;
             tempccc=mytable.rows[i].cells[1].getElementsByTagName("INPUT")[0].value;
+            aaaa=mytable.rows[i].cells[1].getElementsByTagName("select")[0].value;
+            alert(aaaa);
             tempc=tempc+','+ tempccc;
             tempccc=mytable.rows[i].cells[2].getElementsByTagName("INPUT")[0].value;
             tempc=tempc+','+ tempccc;
@@ -133,7 +135,14 @@ function begin_calculate(id){
            <tr id="{{item.myid}}"> 
             <td >{{item.ac}}</td>
             <td >
-            <input type="text" name="searchaccount"  class="search" data-provide="typeahead" data-items="4" value="{{item.F_ac}}"/>
+            <div class="form-group">
+              <select id="lunch" name="acname" class="selectpicker" data-live-search="true" title="请输入账号">
+                <option value="{{item.F_ac}}" selected="selected">{{item.F_ac}}</option>
+                {% for item in aclist %}
+                <option value="{{item.ac}}">{{item.ac}}</option>
+                {% endfor %}
+              </select>
+            </div>
             </td>
             <td ><input type="text" value="{{item.ratio}}"/></td> 
             <td><button type="button" onclick="delete_order_p_follow_info(this)">删除</button></td>

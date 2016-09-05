@@ -3,6 +3,7 @@
 import sys
 import datetime
 import time
+import sys, urllib, urllib2, json
 reload(sys)
 sys.setdefaultencoding('utf8')
 from dbconn import MSSQL
@@ -270,6 +271,18 @@ def get_messagelist():
 
 
 def ismonitorday():
+	# refer to http://apistore.baidu.com/apiworks/servicedetail/1116.html
+	url = 'http://apis.baidu.com/xiaogg/holiday/holiday?d=20160902'
+	req = urllib2.Request(url)
+	req.add_header("apikey", "6677fe3debefda50dd040fbf98d0d38b")
+	resp = urllib2.urlopen(req)
+	content = resp.read()
+	if(content):
+	    print(content)
+
+
+
+
 	sql="select top 1 D from TSymbol where T>'05:00' ORDER BY id desc"
 	lastday=ms.find_sql(sql)[0][0]
 	lastday='20'+lastday[2:4]+lastday[5:7]+lastday[8:10]

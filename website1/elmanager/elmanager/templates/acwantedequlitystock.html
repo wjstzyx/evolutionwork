@@ -62,7 +62,7 @@ function showaccompare(acname){
                                     <h4>Settings Tab</h4>
                                     <div class="row">
                                     {% for item in ICdata %} 
-                                      <div class="col-md-6"><div id='{{item.acname}}' style="min-width:700px;height:400px"></div></div>
+                                      <div class="col-md-6"><div id='{{item.acname}}_{{item.symbol}}' style="min-width:700px;height:400px"></div></div>
                                     {% endfor %}                                    
                                     </div>
                                 </div>
@@ -70,7 +70,7 @@ function showaccompare(acname){
                                     <h4>Settings Tab</h4>
                                     <div class="row">
                                     {% for item in IFdata %} 
-                                      <div class="col-md-6"><div id='{{item.acname}}' style="min-width:700px;height:400px"></div></div>
+                                      <div class="col-md-6"><div id='{{item.acname}}_{{item.symbol}}' style="min-width:700px;height:400px"></div></div>
                                     {% endfor %}                                    
                                     </div>
                                 </div>
@@ -97,7 +97,7 @@ function showaccompare(acname){
   <script>
       $(function () {
 
-          $('#{{item.acname}}').highcharts({
+          $('#{{item.acname}}_{{item.symbol}}').highcharts({
               title: {
                   text: '{{item.acname}}--{{item.symbol}}',
                   x: -20 //center
@@ -140,7 +140,7 @@ function showaccompare(acname){
   {% for item in IFdata %}
   <script>
       $(function () {
-          $('#{{item.acname}}').highcharts({
+          $('#{{item.acname}}_{{item.symbol}}').highcharts({
               title: {
                   text: '{{item.acname}}--{{item.symbol}}',
                   x: -20 //center

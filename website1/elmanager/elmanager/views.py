@@ -319,7 +319,6 @@ def acwantedequlitystock(request):
 		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
 		ICdata.append(tempdict)
 
-
 	return render_to_response('acwantedequlitystock.html',{
 		'ICdata':ICdata,
 		'IFdata':IFdata,
