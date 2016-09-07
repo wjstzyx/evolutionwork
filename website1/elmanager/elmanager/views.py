@@ -73,16 +73,31 @@ def save_order_p_basic(request):
 		data=data.strip('#')
 		data=data.split('#')
 		isdel=0
+		sql="select distinct acname as ac from [LogRecord].[dbo].[quanyicaculatelist] union all select distinct ac from [LogRecord].[dbo].order_p_follow order by ac"
+		order_p_follow_res=ms.find_sql(sql)
+		order_p_follow_res=[str(a[0]) for a in order_p_follow_res]
 		for item in data:
-			item=item.strip(',')
-			item=item.split(',')
+			item=item.strip(';')
+			item=item.split(';')
 			if len(item)==3:
 				if isdel==0:
 					sql="delete from [LogRecord].[dbo].[order_p_follow] where ac='%s'" % (item[0])
 					ms.insert_sql(sql)
 					isdel=1
-				sql="insert into [LogRecord].[dbo].[order_p_follow](ac,F_ac,ratio,Pratio) values('%s','%s',%s,%s)" % (item[0],item[1],item[2],item[2])
-				ms.insert_sql(sql)
+				#将一行中的多个“ss,ff,f”拆分
+				F_aclist=item[1].split(',')
+				for temitem in F_aclist:
+					#检查temitem是否是 order_p_follow 中的项目，如果是则继续，如果不是，则检查是否是p_follow中的ac
+					if temitem in order_p_follow_res:
+						sql="insert into [LogRecord].[dbo].[order_p_follow](ac,F_ac,ratio,Pratio) values('%s','%s',%s,%s)" % (item[0],temitem,item[2],item[2])
+						ms.insert_sql(sql)
+						print sql 
+					else:
+						#temitem 在p_follow中，需要执行copy
+						sql="insert into [LogRecord].[dbo].[order_p_follow](ac,F_ac,ratio,Pratio) select '%s',F_ac,%s,%s from [Future].[dbo].[p_follow] where ac='%s'" % (item[0],item[2],item[2],temitem)
+						ms.insert_sql(sql)
+						print sql 
+
 	else:
 		print "not post"
 	result=1
@@ -106,15 +121,18 @@ def order_account_equity(request):
 	configinfo=0
 	#开始查询
 	if request.POST:
-		print request.POST
 		whichform=request.POST.get('query','')
-		print whichform
 		if whichform=='query':
 			account=request.POST.get('searchaccount','')
 			sql="select ID as myid,row_number()OVER(ORDER BY [AC] DESC) as id,ac,F_ac,ratio from [LogRecord].[dbo].[order_p_follow] where ac='%s' order by F_ac" % (account)
 			res=ms.dict_sql(sql)
+			#监测account名字是否与p_basic或者p_foloow一致 
+			sql="select 1 from [Future].[dbo].[P_BASIC] where ac='%s' union all select 2 from [Future].[dbo].[P_follow] where ac='%s'" % (account,account)
+			testres=ms.dict_sql(sql)
+			if testres:
+				account="Test_"+account
 			#sql="select distinct acname as ac from [LogRecord].[dbo].[quanyicaculatelist] order by acname"
-			sql="select distinct acname as ac,'虚拟组' as type from [LogRecord].[dbo].[quanyicaculatelist] union all select distinct ac,'测试账户' as type from [LogRecord].[dbo].order_p_follow order by type,ac"
+			sql="select distinct acname as ac,'虚拟组' as type from [LogRecord].[dbo].[quanyicaculatelist] union all select distinct ac,'测试账户' as type from [LogRecord].[dbo].order_p_follow   union all  select distinct ac,'真实账户' as type from [Future].[dbo].[p_follow] order by type,ac"
 			F_aclist=ms.dict_sql(sql)
 			return render_to_response('order_account_equity.html',{
 				'account':account,
@@ -1271,7 +1289,7 @@ def order_get_dailyquanyi(account,fromDdy):
 			res=ms.dict_sql(sql)
 			if not res:
 				# print {"ispass":0,"result":"%s does not has equity" % (key)}
-				return {"ispass":0,"result":"%s does not has equity" % (key)}
+				return {"ispass":0,"result":"%s 不在配置表 quanyicaculatelist 中，请加上并获得历史信号" % (key),"configinfo":configinfo}
 			else:
 				symbol=res[0]['quanyisymbol']
 				acname=key

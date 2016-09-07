@@ -51,11 +51,19 @@ function begin_calculate(id){
   var tempccc="";
         for(var i=1,rows=mytable.rows.length; i<rows; i++){
             tempccc=mytable.rows[i].cells[0].innerHTML;
-            tempc=tempc+','+ tempccc;
-            tempccc=mytable.rows[i].cells[1].getElementsByTagName("select")[0].value;
-            tempc=tempc+','+ tempccc;
-            tempccc=mytable.rows[i].cells[2].getElementsByTagName("INPUT")[0].value;
-            tempc=tempc+','+ tempccc;
+            tempc=tempc+';'+ tempccc;
+            o=mytable.rows[i].cells[1].getElementsByTagName("select")[0];
+            var str = "";
+            for(var j=0;j<o.length;j++){   
+                          if(o.options[j].selected){
+                              str+=o.options[j].value+",";
+                          }
+                      }
+            tempccc=str.substr(0,str.length-1);
+
+            tempc=tempc+';'+ tempccc;
+            tempccc=mytable.rows[i].cells[2].getElementsByTagName("input")[0].value;
+            tempc=tempc+';'+ tempccc;
             data=data+'#'+tempc;
             tempc="";
         }
@@ -105,7 +113,7 @@ function begin_calculate(id){
   <div class="col-lg-2">
     <button type="submit" class="btn btn-default" name="query" value="query">查询</button>
   </div>
-  </form>
+</form>
 
   <hr>
     </div>
@@ -132,8 +140,9 @@ function begin_calculate(id){
            <tr id="{{item.myid}}"> 
             <td >{{item.ac}}</td>
             <td >
+
             <div class="form-group">
-              <select id="lunch" name="acname" class="selectpicker" data-live-search="true" title="请输入账号">
+              <select class="selectpicker" name="acname" multiple data-live-search="true" data-live-search-placeholder="Search" data-actions-box="true">
                 <option value="{{item.F_ac}}" selected="selected">{{item.F_ac}}</option>
                 {% for item in F_aclist %}
                 <option value="{{item.ac}}">{{item.type}}--{{item.ac}}</option>
