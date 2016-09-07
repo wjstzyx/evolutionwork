@@ -159,7 +159,7 @@ function begin_calculate(id){
         </div> 
 <form class="form" method='POST'>
 <button type="button" class="btn btn-default" onclick="begin_calculate('mailtotable')" name="dddd">保存</button>
-<button type="button" class="btn btn-default" onclick="add_new_row(this)" >新增一行</button>
+<button type="submit" class="btn btn-default" name="add_new_line" value="query"" >新增一行</button>
 <button type="submit" class="btn btn-default" name="query" value="equity">查看权益曲线</button>
 <input type="hidden" name="account" value="{{account}}"/>
 </form>
@@ -243,7 +243,9 @@ function begin_calculate(id){
       </div> 
     {% endif %}
     {% if ispass == 0 %}
-    {{result}}
+      {% autoescape off %}
+      {{result}}
+      {% endautoescape %}
     {% endif %}
 
 </div>

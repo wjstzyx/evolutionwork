@@ -259,7 +259,7 @@ def order_get_dailyquanyi(account,fromDdy):
 			sql="select ac from [LogRecord].[dbo].[order_p_follow]  where F_ac='%s'" % (key)
 			tempres=ms.dict_sql(sql)
 			tempresult=tempresult+" 基本账户 %s 中 %s 没有产生过信号,请补全近两年策略信号" % (tempres[0]['ac'],key)
-			configinfo.append([key,ac_ratio['key'],200000])
+			configinfo.append([key,ac_ratio[key],200000])
 	fromDdy=max(Dlist)
 	print Dlist
 	if 200000 in Dlist:
@@ -400,4 +400,4 @@ def kpi_tongji(lilunquanyi):
 	return result
 
 
-print order_get_dailyquanyi('13',150521)
+print order_get_dailyquanyi('7777',150521)

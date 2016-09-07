@@ -94,7 +94,7 @@ def save_order_p_basic(request):
 						print sql 
 					else:
 						#temitem 在p_follow中，需要执行copy
-						sql="insert into [LogRecord].[dbo].[order_p_follow](ac,F_ac,ratio,Pratio) select '%s',F_ac,%s,%s from [Future].[dbo].[p_follow] where ac='%s'" % (item[0],item[2],item[2],temitem)
+						sql="insert into [LogRecord].[dbo].[order_p_follow](ac,F_ac,ratio,Pratio) select '%s',F_ac,sum(ratio)*(%s),100 from [Future].[dbo].[p_follow]  where ac='%s' group by F_ac" % (item[0],float(item[2])/100.0,temitem)
 						ms.insert_sql(sql)
 						print sql 
 
@@ -121,6 +121,7 @@ def order_account_equity(request):
 	configinfo=0
 	#开始查询
 	if request.POST:
+		print request.POST
 		whichform=request.POST.get('query','')
 		if whichform=='query':
 			account=request.POST.get('searchaccount','')
@@ -164,6 +165,31 @@ def order_account_equity(request):
 				tempdict={'acname':account,'symbol':"",'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
 				ICdata.append(tempdict)
 				tongji=kpi_tongji(lilunquanyi)
+		isadd_new_line=request.POST.get('add_new_line','')
+		print "@@@@@@@@@@@@@@@@"
+		print "isadd_new_line",isadd_new_line
+		if isadd_new_line=='query':
+			account=request.POST.get('account','')
+			sql="insert into [LogRecord].[dbo].[order_p_follow](ac,F_ac,ratio,Pratio) values('%s','请选择',100,100)" % (account)
+			ms.insert_sql(sql)
+			sql="select ID as myid,row_number()OVER(ORDER BY [AC] DESC) as id,ac,F_ac,ratio from [LogRecord].[dbo].[order_p_follow] where ac='%s' order by F_ac" % (account)
+			res=ms.dict_sql(sql)
+			#监测account名字是否与p_basic或者p_foloow一致 
+			sql="select 1 from [Future].[dbo].[P_BASIC] where ac='%s' union all select 2 from [Future].[dbo].[P_follow] where ac='%s'" % (account,account)
+			testres=ms.dict_sql(sql)
+			if testres:
+				account="Test_"+account
+			#sql="select distinct acname as ac from [LogRecord].[dbo].[quanyicaculatelist] order by acname"
+			sql="select distinct acname as ac,'虚拟组' as type from [LogRecord].[dbo].[quanyicaculatelist] union all select distinct ac,'测试账户' as type from [LogRecord].[dbo].order_p_follow   union all  select distinct ac,'真实账户' as type from [Future].[dbo].[p_follow] order by type,ac"
+			F_aclist=ms.dict_sql(sql)
+			return render_to_response('order_account_equity.html',{
+				'account':account,
+				'res':res,
+				'F_aclist':F_aclist,
+				'aclist':aclist,
+				'ishowconfig':ishowconfig
+			})
+
 
 
 	return render_to_response('order_account_equity.html',{
@@ -1274,8 +1300,8 @@ def order_get_dailyquanyi(account,fromDdy):
 			Dlist.append(200000)
 			sql="select ac from [LogRecord].[dbo].[order_p_follow]  where F_ac='%s'" % (key)
 			tempres=ms.dict_sql(sql)
-			tempresult=tempresult+" 基本账户 %s 中 %s 没有产生过信号,请补全近两年策略信号" % (tempres[0]['ac'],key)
-			configinfo.append([key,ac_ratio['key'],200000])
+			tempresult=tempresult+" 基本账户 %s 中 %s 没有产生过信号,请补全近两年策略信号</br>" % (tempres[0]['ac'],key)
+			configinfo.append([key,ac_ratio[key],200000])
 	fromDdy=max(Dlist)
 	print Dlist
 	if 200000 in Dlist:
