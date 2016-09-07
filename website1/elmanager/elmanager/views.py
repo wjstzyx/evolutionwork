@@ -103,6 +103,7 @@ def order_account_equity(request):
 	account=""
 	res=""
 	F_aclist=""
+	configinfo=0
 	#开始查询
 	if request.POST:
 		print request.POST
