@@ -636,12 +636,19 @@ def acwantedequlitynew(request):
 		rbdata.append(tempdict)
 
 	AGdata=[]
-	sql="select distinct ac,symbol from dailyquanyi_V2 where symbol='AG' and D>151020"
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('AG') and iscaculate in (1,2) order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
 		acname=item['ac']
 		symbol=item['symbol']
-		sql="select quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		#第一个价格
+		sql="select top 1 quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		tempquanyi=ms.find_sql(sql)
+		if tempquanyi==[]:
+			tempquanyi=0
+		else:
+			tempquanyi=tempquanyi[0][0]
+		sql="select quanyi-(%s) as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (tempquanyi,acname,symbol)
 		res1=ms.find_sql(sql)
 		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
 		res2=ms.find_sql(sql)		
@@ -650,12 +657,19 @@ def acwantedequlitynew(request):
 		AGdata.append(tempdict)
 
 	CUdata=[]
-	sql="select distinct ac,symbol from dailyquanyi_V2 where symbol='CU' and D>151020"
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('CU') and iscaculate in (1,2) order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
 		acname=item['ac']
 		symbol=item['symbol']
-		sql="select quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		#第一个价格
+		sql="select top 1 quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		tempquanyi=ms.find_sql(sql)
+		if tempquanyi==[]:
+			tempquanyi=0
+		else:
+			tempquanyi=tempquanyi[0][0]
+		sql="select quanyi-(%s) as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (tempquanyi,acname,symbol)
 		res1=ms.find_sql(sql)
 		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
 		res2=ms.find_sql(sql)		
@@ -664,12 +678,19 @@ def acwantedequlitynew(request):
 		CUdata.append(tempdict)
 
 	RUdata=[]
-	sql="select distinct ac,symbol from dailyquanyi_V2 where symbol='RU' and D>151020"
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('RU') and iscaculate in (1,2) order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
 		acname=item['ac']
 		symbol=item['symbol']
-		sql="select quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		#第一个价格
+		sql="select top 1 quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		tempquanyi=ms.find_sql(sql)
+		if tempquanyi==[]:
+			tempquanyi=0
+		else:
+			tempquanyi=tempquanyi[0][0]
+		sql="select quanyi-(%s) as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (tempquanyi,acname,symbol)
 		res1=ms.find_sql(sql)
 		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
 		res2=ms.find_sql(sql)		
@@ -678,12 +699,19 @@ def acwantedequlitynew(request):
 		RUdata.append(tempdict)
 
 	TAdata=[]
-	sql="select distinct ac,symbol from dailyquanyi_V2 where symbol='TA' and D>151020"
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('TA') and iscaculate in (1,2) order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
 		acname=item['ac']
 		symbol=item['symbol']
-		sql="select quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		#第一个价格
+		sql="select top 1 quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		tempquanyi=ms.find_sql(sql)
+		if tempquanyi==[]:
+			tempquanyi=0
+		else:
+			tempquanyi=tempquanyi[0][0]
+		sql="select quanyi-(%s) as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (tempquanyi,acname,symbol)
 		res1=ms.find_sql(sql)
 		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
 		res2=ms.find_sql(sql)		
@@ -692,131 +720,190 @@ def acwantedequlitynew(request):
 		TAdata.append(tempdict)
 
 	JDdata=[]
-	sql="select distinct ac,symbol from dailyquanyi_V2 where symbol='JD' and D>151020"
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('JD') and iscaculate in (1,2) order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
 		acname=item['ac']
 		symbol=item['symbol']
-		sql="select quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		#第一个价格
+		sql="select top 1 quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		tempquanyi=ms.find_sql(sql)
+		if tempquanyi==[]:
+			tempquanyi=0
+		else:
+			tempquanyi=tempquanyi[0][0]
+		sql="select quanyi-(%s) as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (tempquanyi,acname,symbol)
 		res1=ms.find_sql(sql)
 		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
-		res2=ms.find_sql(sql)
-		if res2==[]:
-			tmp=[0,res1[-1][1]]
-			res2.append(tmp)
-
+		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
 		JDdata.append(tempdict)
 
 	BUdata=[]
-	sql="select distinct ac,symbol from dailyquanyi_V2 where symbol='BU' and D>151020"
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('BU') and iscaculate in (1,2) order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
 		acname=item['ac']
 		symbol=item['symbol']
-		sql="select quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		#第一个价格
+		sql="select top 1 quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		tempquanyi=ms.find_sql(sql)
+		if tempquanyi==[]:
+			tempquanyi=0
+		else:
+			tempquanyi=tempquanyi[0][0]
+		sql="select quanyi-(%s) as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (tempquanyi,acname,symbol)
 		res1=ms.find_sql(sql)
 		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
-		res2=ms.find_sql(sql)
+		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
 		BUdata.append(tempdict)
 
 	CSdata=[]
-	sql="select distinct ac,symbol from dailyquanyi_V2 where symbol='CS' and D>151020"
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('CS') and iscaculate in (1,2) order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
 		acname=item['ac']
 		symbol=item['symbol']
-		sql="select quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		#第一个价格
+		sql="select top 1 quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		tempquanyi=ms.find_sql(sql)
+		if tempquanyi==[]:
+			tempquanyi=0
+		else:
+			tempquanyi=tempquanyi[0][0]
+		sql="select quanyi-(%s) as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (tempquanyi,acname,symbol)
 		res1=ms.find_sql(sql)
 		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
-		res2=ms.find_sql(sql)
+		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
 		CSdata.append(tempdict)
 
 	HCdata=[]
-	sql="select distinct ac,symbol from dailyquanyi_V2 where symbol='HC' and D>151020"
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('HC') and iscaculate in (1,2) order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
 		acname=item['ac']
 		symbol=item['symbol']
-		sql="select quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		#第一个价格
+		sql="select top 1 quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		tempquanyi=ms.find_sql(sql)
+		if tempquanyi==[]:
+			tempquanyi=0
+		else:
+			tempquanyi=tempquanyi[0][0]
+		sql="select quanyi-(%s) as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (tempquanyi,acname,symbol)
 		res1=ms.find_sql(sql)
 		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
-		res2=ms.find_sql(sql)
+		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
 		HCdata.append(tempdict)
 
 	Pdata=[]
-	sql="select distinct ac,symbol from dailyquanyi_V2 where symbol in ('P','Pnight') and D>151020"
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('P') and iscaculate in (1,2) order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
 		acname=item['ac']
 		symbol=item['symbol']
-		sql="select quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		#第一个价格
+		sql="select top 1 quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		tempquanyi=ms.find_sql(sql)
+		if tempquanyi==[]:
+			tempquanyi=0
+		else:
+			tempquanyi=tempquanyi[0][0]
+		sql="select quanyi-(%s) as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (tempquanyi,acname,symbol)
 		res1=ms.find_sql(sql)
 		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
-		res2=ms.find_sql(sql)
+		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
 		Pdata.append(tempdict)
 
 	PPdata=[]
-	sql="select distinct ac,symbol from dailyquanyi_V2 where symbol='PP' and D>151020"
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('PP') and iscaculate in (1,2) order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
 		acname=item['ac']
 		symbol=item['symbol']
-		sql="select quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		#第一个价格
+		sql="select top 1 quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		tempquanyi=ms.find_sql(sql)
+		if tempquanyi==[]:
+			tempquanyi=0
+		else:
+			tempquanyi=tempquanyi[0][0]
+		sql="select quanyi-(%s) as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (tempquanyi,acname,symbol)
 		res1=ms.find_sql(sql)
 		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
-		res2=ms.find_sql(sql)
+		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
 		PPdata.append(tempdict)
 
 	NIdata=[]
-	sql="select distinct ac,symbol from dailyquanyi_V2 where symbol='NI' and D>151020"
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('NI') and iscaculate in (1,2) order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
 		acname=item['ac']
 		symbol=item['symbol']
-		sql="select quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		#第一个价格
+		sql="select top 1 quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		tempquanyi=ms.find_sql(sql)
+		if tempquanyi==[]:
+			tempquanyi=0
+		else:
+			tempquanyi=tempquanyi[0][0]
+		sql="select quanyi-(%s) as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (tempquanyi,acname,symbol)
 		res1=ms.find_sql(sql)
 		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
-		res2=ms.find_sql(sql)
+		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
 		NIdata.append(tempdict)
 	
 	Idata=[]
-	sql="select distinct ac,symbol from dailyquanyi_V2 where symbol in ('I','Inight') and D>151020"
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('I') and iscaculate in (1,2) order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
 		acname=item['ac']
 		symbol=item['symbol']
-		sql="select quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		#第一个价格
+		sql="select top 1 quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		tempquanyi=ms.find_sql(sql)
+		if tempquanyi==[]:
+			tempquanyi=0
+		else:
+			tempquanyi=tempquanyi[0][0]
+		sql="select quanyi-(%s) as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (tempquanyi,acname,symbol)
 		res1=ms.find_sql(sql)
 		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
-		res2=ms.find_sql(sql)
+		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
 		Idata.append(tempdict)
 
 	Mdata=[]
-	sql="select distinct ac,symbol from dailyquanyi_V2 where symbol in ('M','Mnight') and D>151020"
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('M') and iscaculate in (1,2) order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
 		acname=item['ac']
 		symbol=item['symbol']
-		sql="select quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		#第一个价格
+		sql="select top 1 quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		tempquanyi=ms.find_sql(sql)
+		if tempquanyi==[]:
+			tempquanyi=0
+		else:
+			tempquanyi=tempquanyi[0][0]
+		sql="select quanyi-(%s) as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (tempquanyi,acname,symbol)
 		res1=ms.find_sql(sql)
 		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
-		res2=ms.find_sql(sql)
+		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
 		Mdata.append(tempdict)

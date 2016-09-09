@@ -607,19 +607,33 @@ def real_account_groupbyquanyi(ac,symbol):
 
 # show_account('myaccount2')
 
-def main_fun():
+def main_fun_sumps():
 	#获取需要处理的列表
-	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1 and isyepan in (0,1) order by sortnum desc "
+	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1 and issumps=1 and isyepan in (0,1,12) order by sortnum desc "
 	#sql="SELECT top 17 id,[acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('RB') and iscaculate=1 order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
-
 		print item['acname'],item['id']
 		positionsymbol=item['positionsymbol']
 		quanyisymbol=item['quanyisymbol']
 		(myquotes,totalsum)=input_groupbyquanyi(item['acname'],positionsymbol)
 		# print 'myquotes',myquotes
+		#直接设置数字 10
+		cal_quanyi(item['acname'],myquotes,10,quanyisymbol)
+
+def main_fun():
+	#获取需要处理的列表
+	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1 and issumps=0 and isyepan in (0,1,12) order by sortnum desc "
+	#sql="SELECT top 17 id,[acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('RB') and iscaculate=1 order by sortnum"
+	res=ms.dict_sql(sql)
+	for item in res:
+		print item['acname'],item['id']
+		positionsymbol=item['positionsymbol']
+		quanyisymbol=item['quanyisymbol']
+		(myquotes,totalsum)=input_groupbyquanyi(item['acname'],positionsymbol)
+		# print 'myquotes',myquotes
+		#直接设置数字 10
 		cal_quanyi(item['acname'],myquotes,totalsum,quanyisymbol)
 
-
-main_fun()
+main_fun_sumps()
+# main_fun()
