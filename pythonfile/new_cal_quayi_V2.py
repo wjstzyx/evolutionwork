@@ -636,4 +636,4 @@ def main_fun():
 		cal_quanyi(item['acname'],myquotes,totalsum,quanyisymbol)
 
 main_fun_sumps()
-# main_fun()
+main_fun()

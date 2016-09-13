@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import matplotlib.pylab as pl
 from matplotlib.dates import DayLocator, HourLocator, DateFormatter, drange
 ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
-# resList = ms.find_sql("select top 2 * from st_report")
+# resList = ms.find_sql("select top 2 * from real_st_report")
 # print resList
 # 返回行情list 或者0
 
@@ -38,8 +38,8 @@ def input_groupbyquanyi(ac,symbol):
 	res=ms.dict_sql(sql)
 	totalsum=res[0]['totalsum']
 
-	#产生临时整个虚拟组st_report
-	sql="select * into  #temp_quanyi_new from ( select p.ac,p.symbol,st_report.type,st_report.id,st_report.p,st_report.pp,p.p_size,p.ratio ,st_report.st,st_report.stockdate from st_report  inner join #temp_p_log p on p.st=st_report.st and p.ac='%s' and p.symbol='%s')temp " % (ac,symbol)
+	#产生临时整个虚拟组real_st_report
+	sql="select * into  #temp_quanyi_new from ( select p.ac,p.symbol,real_st_report.type,real_st_report.id,real_st_report.p,real_st_report.pp,p.p_size,p.ratio ,real_st_report.st,real_st_report.stockdate from real_st_report  inner join #temp_p_log p on p.st=real_st_report.st and p.ac='%s' and p.symbol='%s')temp " % (ac,symbol)
 	#print sql
 	ms.insert_sql(sql)
 	#print 1,datetime.datetime.now()
@@ -443,7 +443,7 @@ print totalsum
 for item in myquotes:
 	print item 
 ratio=1
-myquotes=multiple_ratio(myquotes,ratio)
+# myquotes=multiple_ratio(myquotes,ratio)
 cal_quanyi('RBQGYP_TG',myquotes,ratio*totalsum,'rbnight')
 
 # show_account('myaccount2')
