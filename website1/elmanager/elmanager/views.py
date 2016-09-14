@@ -135,12 +135,38 @@ def order_account_equity(request):
 			#sql="select distinct acname as ac from [LogRecord].[dbo].[quanyicaculatelist] order by acname"
 			sql="select distinct acname as ac,'虚拟组' as type from [LogRecord].[dbo].[quanyicaculatelist] union all select distinct ac,'测试账户' as type from [LogRecord].[dbo].order_p_follow   union all  select distinct ac,'真实账户' as type from [Future].[dbo].[p_follow] order by type,ac"
 			F_aclist=ms.dict_sql(sql)
+			# amount_list
+			aclistresult=order_get_ac_ratio_two(account)
+			newaclistresult={}
+			for key in aclistresult:
+				newaclistresult[key.lower()]=aclistresult[key]
+			aclistresult=newaclistresult
+			keylist=""
+			for key in aclistresult:
+				keylist=keylist+",'"+key+"'"
+			keylist=keylist.strip(",")
+			sql="select kk.acname,quanyisymbol,case when issumps=0 then pp.position when issumps=1 then 10 end as position from LogRecord.dbo.quanyicaculatelist kk inner join (select round(SUM(p.P_size*a.ratio/100.0),0) as position,p.ac,p.STOCK from p_basic p inner join AC_RATIO a on p.AC=a.AC and p.STOCK=a.Stock and p.AC in (%s) where p.ac in (%s) group by p.ac,p.STOCK) pp on kk.acname=pp.AC" % (keylist,keylist)
+			tmpres11=ms.dict_sql(sql)
+			resultlist={}
+			for item in tmpres11:
+				resultlist[item['quanyisymbol']]=0
+			for item in tmpres11:
+				resultlist[item['quanyisymbol']]=resultlist[item['quanyisymbol']]+item['position']*aclistresult[item['acname'].lower()]/100.0
+				del aclistresult[item['acname'].lower()]
+			for key in aclistresult:
+				resultlist[key]="此虚拟组没有找到对应手数"
+			resultlist=[(key,resultlist[key]) for key in resultlist]
+			resultlist.sort(key=lambda x:x[0]) 
+			print resultlist
+
+
 			return render_to_response('order_account_equity.html',{
 				'account':account,
 				'res':res,
 				'F_aclist':F_aclist,
 				'aclist':aclist,
-				'ishowconfig':ishowconfig
+				'ishowconfig':ishowconfig,
+				'resultlist':resultlist
 			})
 		if whichform=='equity':
 			ishowconfig=1
