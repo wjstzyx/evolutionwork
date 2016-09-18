@@ -4,7 +4,8 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
 from dbconn import MSSQL
-ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+# ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+ms = MSSQL(host="139.196.190.246",user="future",pwd="K@ra0Key",db="future")
 # resList = ms.find_sql("select top 2 * from st_report")
 # print resList
 
@@ -20,13 +21,13 @@ def test_replicate():
 		for i in range(1,item['num']):
 			if record[i][1:]==cankao:
 				sql='delete from Tsymbol where id=%s' % (record[i][0])
-				print sql
+				#print sql
 				ms.insert_sql(sql)
 			else:
 				print "--NOT SAME"
 				print record[i]
 				sql='delete from Tsymbol where id=%s' % (record[i][0])
-				print sql
+				#print sql
 				ms.insert_sql(sql)
 
 

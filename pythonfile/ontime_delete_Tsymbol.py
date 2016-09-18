@@ -5,13 +5,17 @@ reload(sys)
 sys.setdefaultencoding('utf8')
 from dbconn import MSSQL
 import datetime
-ms = MSSQL(host="192.168.0.3",user="future",pwd="K@ra0Key",db="future")
+ms03 = MSSQL(host="192.168.0.3",user="future",pwd="K@ra0Key",db="future")
+ms07 = MSSQL(host="192.168.0.7",user="future",pwd="K@ra0Key",db="future")
+mscloud = MSSQL(host="139.196.190.246",user="future",pwd="K@ra0Key",db="future")
 # resList = ms.find_sql("select top 2 * from st_report")
 # print resList
 # -*- coding: utf-8 -*-
 try:
 	sql="delete from [Future].[dbo].[TSymbol] where DATEDIFF(day,[StockDate],GETDATE())>130"
-	ms.insert_sql(sql)
+	ms03.insert_sql(sql)
+	ms07.insert_sql(sql)
+	mscloud.insert_sql(sql)
 except Exception,e:
 	ms1 = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 	subject="清理Tsymbol定时任务出错"+datetime.datetime.now().strftime("%H:%M:%S")

@@ -143,7 +143,9 @@ function begin_calculate(id){
 
               <div class="form-group">
                 <select class="selectpicker" name="acname" multiple data-live-search="true" data-live-search-placeholder="Search" data-actions-box="true">
+                  {% if item.F_ac != '请选择' %}
                   <option value="{{item.F_ac}}" selected="selected">{{item.F_ac}}</option>
+                  {% endif %}
                   {% for item in F_aclist %}
                   <option value="{{item.ac}}">{{item.type}}--{{item.ac}}</option>
                   {% endfor %}
