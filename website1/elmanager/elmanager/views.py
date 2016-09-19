@@ -643,7 +643,7 @@ def acwantedequlitynew(request):
 
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 	rbdata=[]
-	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('RB','RBnight') and iscaculate in (1,2) order by sortnum"
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('RB','RBnight') and iscaculate in (1,2)  and [isstatistic] =1 order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
 		acname=item['ac']
@@ -664,7 +664,7 @@ def acwantedequlitynew(request):
 		rbdata.append(tempdict)
 
 	AGdata=[]
-	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('AG') and iscaculate in (1,2) order by sortnum"
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('AG') and iscaculate in (1,2) and [isstatistic] =1 order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
 		acname=item['ac']
@@ -685,7 +685,7 @@ def acwantedequlitynew(request):
 		AGdata.append(tempdict)
 
 	CUdata=[]
-	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('CU') and iscaculate in (1,2) order by sortnum"
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('CU') and iscaculate in (1,2) and [isstatistic] =1 order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
 		acname=item['ac']
@@ -706,7 +706,7 @@ def acwantedequlitynew(request):
 		CUdata.append(tempdict)
 
 	RUdata=[]
-	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('RU') and iscaculate in (1,2) order by sortnum"
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('RU') and iscaculate in (1,2) and [isstatistic] =1 order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
 		acname=item['ac']
@@ -727,7 +727,7 @@ def acwantedequlitynew(request):
 		RUdata.append(tempdict)
 
 	TAdata=[]
-	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('TA') and iscaculate in (1,2) order by sortnum"
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('TA') and iscaculate in (1,2) and [isstatistic] =1 order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
 		acname=item['ac']
@@ -748,7 +748,7 @@ def acwantedequlitynew(request):
 		TAdata.append(tempdict)
 
 	JDdata=[]
-	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('JD') and iscaculate in (1,2) order by sortnum"
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('JD') and iscaculate in (1,2) and [isstatistic] =1  order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
 		acname=item['ac']
@@ -769,7 +769,7 @@ def acwantedequlitynew(request):
 		JDdata.append(tempdict)
 
 	BUdata=[]
-	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('BU') and iscaculate in (1,2) order by sortnum"
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('BU') and iscaculate in (1,2) and [isstatistic] =1  order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
 		acname=item['ac']
@@ -790,7 +790,7 @@ def acwantedequlitynew(request):
 		BUdata.append(tempdict)
 
 	CSdata=[]
-	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('CS') and iscaculate in (1,2) order by sortnum"
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('CS') and iscaculate in (1,2) and [isstatistic] =1  order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
 		acname=item['ac']
@@ -811,7 +811,7 @@ def acwantedequlitynew(request):
 		CSdata.append(tempdict)
 
 	HCdata=[]
-	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('HC') and iscaculate in (1,2) order by sortnum"
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('HC') and iscaculate in (1,2) and [isstatistic] =1  order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
 		acname=item['ac']
@@ -832,7 +832,7 @@ def acwantedequlitynew(request):
 		HCdata.append(tempdict)
 
 	Pdata=[]
-	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('P') and iscaculate in (1,2) order by sortnum"
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('P') and iscaculate in (1,2) and [isstatistic] =1 order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
 		acname=item['ac']
@@ -853,7 +853,7 @@ def acwantedequlitynew(request):
 		Pdata.append(tempdict)
 
 	PPdata=[]
-	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('PP') and iscaculate in (1,2) order by sortnum"
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('PP') and iscaculate in (1,2) and [isstatistic] =1 order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
 		acname=item['ac']
@@ -874,7 +874,7 @@ def acwantedequlitynew(request):
 		PPdata.append(tempdict)
 
 	NIdata=[]
-	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('NI') and iscaculate in (1,2) order by sortnum"
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('NI') and iscaculate in (1,2) and [isstatistic] =1 order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
 		acname=item['ac']
@@ -895,7 +895,7 @@ def acwantedequlitynew(request):
 		NIdata.append(tempdict)
 	
 	Idata=[]
-	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('I') and iscaculate in (1,2) order by sortnum"
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('I') and iscaculate in (1,2) and [isstatistic] =1 order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
 		acname=item['ac']
@@ -916,7 +916,7 @@ def acwantedequlitynew(request):
 		Idata.append(tempdict)
 
 	Mdata=[]
-	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('M') and iscaculate in (1,2) order by sortnum"
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('M') and iscaculate in (1,2) and [isstatistic] =1 order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
 		acname=item['ac']
