@@ -33,7 +33,7 @@ def input_groupbyquanyi(ac,symbol):
 	# 产生临时p_log
 	#sql="select * into #temp_p_log from (SELECT   aa.*, sid.Symbol, (YEAR(GETDATE()) - 2000) * 10000 + MONTH(GETDATE()) * 100 + DAY(GETDATE()) AS D from (select  p.AC, p.STOCK, p.type, p.ST, p.P_size, a.ratio from P_BASIC p inner join AC_RATIO a on p.AC=a.AC and p.STOCK=a.Stock and p.type=a.type and p.AC='%s') as aa inner join Symbol_ID AS sid ON sid.S_ID = aa.STOCK where Symbol='%s') temp" % (ac,symbol)
 	sql ="select * into #temp_p_log from (select '%s' as ac,temp1.STOCK,temp1.type,temp1.ST,temp1.P_size as P_size,temp1.ratio,temp1.Symbol,temp1.num from (select p.*,a.ratio,sid.Symbol,isnull(n.num,1)as num from P_BASIC p inner join AC_RATIO a on p.AC=a.AC and p.AC='%s' inner join Symbol_ID  AS sid ON p.STOCK=sid.S_ID left join [LogRecord].[dbo].[Ninone_config] n on n.st=p.st) temp1 where Symbol='%s' )aaa"% (ac,ac,symbol)
-	#print sql 
+	# print sql 
 	ms.insert_sql(sql)
 	sql="select SUM(p_size*ratio/100*num) as totalsum from #temp_p_log"
 	res=ms.dict_sql(sql)
@@ -41,7 +41,7 @@ def input_groupbyquanyi(ac,symbol):
 
 	#产生临时整个虚拟组st_report
 	sql="select * into  #temp_quanyi_new from ( select p.ac,p.symbol,st_report.type,st_report.id,st_report.p,st_report.pp,p.p_size,p.ratio ,st_report.st,st_report.stockdate from st_report  inner join #temp_p_log p on p.st=st_report.st and p.ac='%s' and p.symbol='%s')temp " % (ac,symbol)
-	#print sql 
+	# print sql 
 	ms.insert_sql(sql)
 	#print 1,datetime.datetime.now()
 	sql="select count(1) from #temp_quanyi_new"
@@ -600,10 +600,11 @@ def real_account_groupbyquanyi(ac,symbol):
 
 
 
-(myquotes,totalsum)=input_groupbyquanyi('IN3choose','Inight')
-# # for item in myquotes:
-# # 	print item 
-cal_quanyi('IN3choose',myquotes,totalsum,'Inight')
+# (myquotes,totalsum)=input_groupbyquanyi('906','IF')
+# # # for item in myquotes:
+# # # 	print item 
+# print "myquotes",myquotes
+# cal_quanyi('906',myquotes,totalsum,'IF')
 
 # show_account('myaccount2')
 
@@ -623,7 +624,7 @@ def main_fun_sumps():
 
 def main_fun():
 	#获取需要处理的列表
-	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=0 and issumps=0 and isyepan in (0,1,12) order by id desc "
+	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=22 and issumps=0 and isyepan in (0,1,12) order by id desc "
 	#sql="SELECT top 17 id,[acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('RB') and iscaculate=1 order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
@@ -633,7 +634,10 @@ def main_fun():
 		(myquotes,totalsum)=input_groupbyquanyi(item['acname'],positionsymbol)
 		# print 'myquotes',myquotes
 		#直接设置数字 10
+		if myquotes==0:
+			print "###################","  没有信号"
+			continue
 		cal_quanyi(item['acname'],myquotes,totalsum,quanyisymbol)
 
 # main_fun_sumps()
-# main_fun()
+main_fun()

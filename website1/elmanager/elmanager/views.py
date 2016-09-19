@@ -15,6 +15,54 @@ from dbconn import MSSQL
 # ms1 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="future")
 
 
+def acname_p_basic(request):
+	data=""
+	whichtype=0
+	res1=""
+	res2=""
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	if request.GET:
+		acname=request.GET.get("acname","")
+		sql="select p.AC,p.ST,t.TradName,isnull(ss.Symbol,p.stock) as stock , ISNULL(convert(nvarchar,t.tradetime,120),'0未产生信号') as tradetime from P_BASIC p left join Trading_logSymbol t on p.ST=t.ST left join Symbol_ID ss on p.STOCK=ss.S_ID where p.ac='%s' order by tradetime " % (acname)
+		res=ms.dict_sql(sql)
+
+	return render_to_response('acname_p_basic.html',{
+		'data':data,
+		'whichtype':whichtype,
+		'res':res
+	})	
+
+
+
+def lasttime_p_basic(request):
+	data=""
+	whichtype=0
+	res1=""
+	res2=""
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	if request.POST:
+		print "request.POST",request.POST
+		sttype=request.POST.get("sttype","")
+		print sttype
+		if sttype=="day":
+			#策略上线未产生信号
+			sql="select distinct ac from (select p.AC,p.ST,p.STOCK from P_BASIC p left join Trading_logSymbol t on p.ST=t.ST where t.id is null and p.P_size<>0) a order by ac"
+			res1=ms.dict_sql(sql)
+			whichtype=1
+		if sttype=="night":
+			period=request.POST.get("period","")
+			sql="select distinct ac from (select p.AC,p.P_size,p.ST,p.STOCK,t.tradetime,t.TradName from P_BASIC p left join Trading_logSymbol t on p.ST=t.ST where p.P_size<>0 and DATEDIFF(day,t.tradetime,GETDATE())>%s) a order by ac" % (period)
+			res2=ms.dict_sql(sql)
+			whichtype=2
+	return render_to_response('lasttime_p_basic.html',{
+		'data':data,
+		'whichtype':whichtype,
+		'res1':res1,
+		'res2':res2
+	})	
+
+
+
 
 def st_heart(request):
 	data=""
@@ -158,8 +206,10 @@ def order_account_equity(request):
 				for key in aclistresult:
 					resultlist[key]="此虚拟组没有找到对应手数"
 				resultlist=[(key,resultlist[key]) for key in resultlist]
-				resultlist.sort(key=lambda x:x[0]) 
+				resultlist.sort(key=lambda x:x[0])
 				print resultlist
+			else:
+				resultlist=[('没有配置虚拟组','或虚拟组配置手数为0')]
 
 
 			return render_to_response('order_account_equity.html',{
@@ -174,10 +224,10 @@ def order_account_equity(request):
 			ishowconfig=1
 			account=request.POST.get('account','')
 			totalquanyiresult=order_get_dailyquanyi(account,150521)
+			print 'totalquanyiresult',totalquanyiresult
 			if totalquanyiresult['ispass']==0:
 				result=totalquanyiresult['result']
 				configinfo=totalquanyiresult['configinfo']
-				print "22222222",configinfo
 				return render_to_response('order_account_equity.html',{
 					'aclist':aclist,
 					'ispass':ispass,
@@ -189,13 +239,14 @@ def order_account_equity(request):
 				ispass=1
 				result=totalquanyiresult['result']
 				configinfo=totalquanyiresult['configinfo']
+				print "1######################################################"
 				(tempday,lilunquanyi,realquanyi)=range_series(result,[])
+				print "2######################################################"
 				tempdict={'acname':account,'symbol':"",'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
 				ICdata.append(tempdict)
+				print 3,lilunquanyi
 				tongji=kpi_tongji(lilunquanyi)
 		isadd_new_line=request.POST.get('add_new_line','')
-		print "@@@@@@@@@@@@@@@@"
-		print "isadd_new_line",isadd_new_line
 		if isadd_new_line=='query':
 			account=request.POST.get('account','')
 			sql="insert into [LogRecord].[dbo].[order_p_follow](ac,F_ac,ratio,Pratio) values('%s','请选择',100,100)" % (account)
@@ -234,21 +285,6 @@ def order_account_equity(request):
 
 
 
-
-
-	# ICdata=[]
-	# sql="select distinct ac,symbol from dailyquanyi where symbol='IC' and D>151020"
-	# res=ms.dict_sql(sql)
-	# for item in res:
-	# 	acname=item['ac']
-	# 	symbol=item['symbol']
-	# 	sql="select (quanyi-comm)/d_max as quanyia,D from dailyquanyi where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
-	# 	res1=ms.find_sql(sql)
-	# 	sql="select (quanyi-comm)/d_max as quanyia,D from real_dailyquanyi where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
-	# 	res2=ms.find_sql(sql)		
-	# 	(tempday,lilunquanyi,realquanyi)=change_delta_toaccumu(res1,res2)
-	# 	tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
-	# 	ICdata.append(tempdict)
 
 
 
@@ -1332,7 +1368,7 @@ def order_get_ac_ratio_two(account):
 	if res:
 		return []
 
-	sql="WITH Emp AS ( SELECT ac,F_ac,ratio FROM  [LogRecord].[dbo].[order_p_follow] WHERE   ac='%s' UNION ALL  SELECT   D.AC,D.F_ac,D.ratio*emp.ratio/100 FROM   Emp         INNER JOIN [LogRecord].[dbo].[order_p_follow] d ON d.ac = Emp.F_ac)     select '%s' as AC,f_AC,SUM(ratio) as ratio from Emp where  f_ac not in (select ac from Emp) group by F_ac" % (account,account)
+	sql="WITH Emp AS ( SELECT ac,F_ac,ratio FROM  [LogRecord].[dbo].[order_p_follow] WHERE   ac='%s' UNION ALL  SELECT   D.AC,D.F_ac,D.ratio*emp.ratio/100 FROM   Emp         INNER JOIN [LogRecord].[dbo].[order_p_follow] d ON d.ac = Emp.F_ac)     select '%s' as AC,f_AC,SUM(ratio) as ratio from Emp where  f_ac not in (select ac from Emp)  and ratio<>0 group by F_ac" % (account,account)
 	res=ms.dict_sql(sql)
 	accountlist=[]
 	aclist=[]
@@ -1496,62 +1532,63 @@ def kpi_tongji(lilunquanyi):
 	Max_Day_to_New_High=0
 	deltavalue=[]
 	lastvalue=0
-	for item in lilunquanyi:
-		tempdelta=item-lastvalue
-		deltavalue.append(tempdelta)
-		lastvalue=item
-	Net_Profit=lilunquanyi[-1]
-	Days=len(lilunquanyi)
-	meandayliay=lilunquanyi[-1]/Days
-	total2=0
-	windays=0
-	lossdays=0
-	winlength=0
-	losslength=0
-	lastvalue=0
-	for item in deltavalue:
-		temp1=(meandayliay-item)*(meandayliay-item)
-		total2=total2+temp1
-		if item>=0:
-			windays=windays+1
-			losslength=0
-			winlength=winlength+1
-		else:
-			lossdays=lossdays+1
-			winlength=0
-			losslength=losslength+1
-		if winlength>Max_Win_Days:
-			Max_Win_Days=winlength
-		if losslength>Max_Loss_Days:
-			Max_Loss_Days=losslength
-	if Days<=2:
-		totalday=1
-	sharpeA=meandayliay
-	sharpeB=total2/float(Days)
-	Ann_Sharpe=sharpeA/math.sqrt(sharpeB-sharpeA*sharpeA)
-	Ann_Sharpe=round(Ann_Sharpe,3)
-	Daily_Std=math.sqrt(total2/(Days-1))
-	Daily_Std=round(Daily_Std,2)
-	Max_Day_Profit=max(deltavalue)
-	Max_Day_Loss=min(deltavalue)
-	Day_Winrate=windays/float(windays+lossdays)
-	Day_Winrate=round(Day_Winrate,3)
-	highvalue=0
-	tempi=0
-	tempdrowdown=0
-	temphigh=0
-	for item in lilunquanyi:
-		if item>temphigh:
-			temphigh=item
-		tempdrowdown=temphigh-item
-		if tempdrowdown>Max_Drawdown:
-			Max_Drawdown=tempdrowdown
-		if item>highvalue:
-			highvalue=item
-			tempi=0
-		tempi=tempi+1
-		if tempi>Max_Day_to_New_High:
-			Max_Day_to_New_High=tempi
+	if lilunquanyi:
+		for item in lilunquanyi:
+			tempdelta=item-lastvalue
+			deltavalue.append(tempdelta)
+			lastvalue=item
+		Net_Profit=lilunquanyi[-1]
+		Days=len(lilunquanyi)
+		meandayliay=lilunquanyi[-1]/Days
+		total2=0
+		windays=0
+		lossdays=0
+		winlength=0
+		losslength=0
+		lastvalue=0
+		for item in deltavalue:
+			temp1=(meandayliay-item)*(meandayliay-item)
+			total2=total2+temp1
+			if item>=0:
+				windays=windays+1
+				losslength=0
+				winlength=winlength+1
+			else:
+				lossdays=lossdays+1
+				winlength=0
+				losslength=losslength+1
+			if winlength>Max_Win_Days:
+				Max_Win_Days=winlength
+			if losslength>Max_Loss_Days:
+				Max_Loss_Days=losslength
+		if Days<=2:
+			totalday=1
+		sharpeA=meandayliay
+		sharpeB=total2/float(Days)
+		Ann_Sharpe=sharpeA/math.sqrt(sharpeB-sharpeA*sharpeA)
+		Ann_Sharpe=round(Ann_Sharpe,3)
+		Daily_Std=math.sqrt(total2/(Days-1))
+		Daily_Std=round(Daily_Std,2)
+		Max_Day_Profit=max(deltavalue)
+		Max_Day_Loss=min(deltavalue)
+		Day_Winrate=windays/float(windays+lossdays)
+		Day_Winrate=round(Day_Winrate,3)
+		highvalue=0
+		tempi=0
+		tempdrowdown=0
+		temphigh=0
+		for item in lilunquanyi:
+			if item>temphigh:
+				temphigh=item
+			tempdrowdown=temphigh-item
+			if tempdrowdown>Max_Drawdown:
+				Max_Drawdown=tempdrowdown
+			if item>highvalue:
+				highvalue=item
+				tempi=0
+			tempi=tempi+1
+			if tempi>Max_Day_to_New_High:
+				Max_Day_to_New_High=tempi
 	result={"Net_Profit":Net_Profit,"Max_Drawdown":Max_Drawdown,"Days":Days,"Day_Winrate":Day_Winrate,"Daily_Std":Daily_Std,"Ann_Sharpe":Ann_Sharpe,"Max_Day_Profit":Max_Day_Profit,"Max_Day_Loss":Max_Day_Loss,"Max_Win_Days":Max_Win_Days,"Max_Loss_Days":Max_Loss_Days,"Max_Day_to_New_High":Max_Day_to_New_High}
 	print result
 	return result
