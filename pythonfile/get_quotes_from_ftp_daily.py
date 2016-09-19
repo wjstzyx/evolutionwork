@@ -56,6 +56,9 @@ sql="select replace(convert(nvarchar(10),getdate(),120),'-','') as mydate"
 res=ms.dict_sql(sql)
 date = res[0]['mydate']
 #date=20160918
+if len(sys.argv)>1:
+    date=sys.argv[1]
+
 if len(sys.argv)>2:
     mysymbol=sys.argv[2]
 else:
