@@ -89,8 +89,8 @@ if downresult==1:
         cmd="python /home/yuyang/myfile/evolutionwork/pythonfile/fix_quotes_to_dataabse.py %s" % (date)
     os.system(cmd)
 else:
-    msg="%s 从甘博ftp获取行情失败"% (date)
-    sql="insert into [LogRecord].[dbo].[report_daily_error](type,msg) values('%s','%s')" ('获取行情数据',msg)
+    msg="%s 从甘博ftp获取行情失败" % (date)
+    sql="insert into [LogRecord].[dbo].[report_daily_error](type,msg) values('%s','%s')" %  ('获取行情数据',msg)
     ms.insert_sql(sql)
 
 

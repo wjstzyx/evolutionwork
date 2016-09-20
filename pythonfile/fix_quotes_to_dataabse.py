@@ -199,10 +199,10 @@ try:
     read_date_write_to_database_day(ms05,targetfilename,date,mysymbol)
 except Exception,e:
     msg="05数据库 "+str(e).replace("'",'#')
-    sql="insert into [LogRecord].[dbo].[report_daily_error](type,msg) values('%s','%s')" ('定时补全数据',msg)
+    sql="insert into [LogRecord].[dbo].[report_daily_error](type,msg) values('%s','%s')" % ('定时补全数据',msg)
     ms05 = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
     ms05.insert_sql(sql)
-    
+
 try：
     print "write into 03"
     ms03 = MSSQL(host="192.168.0.3",user="future",pwd="K@ra0Key",db="future")
@@ -210,7 +210,7 @@ try：
     read_date_write_to_database_day(ms03,targetfilename,date,mysymbol)
 except Exception,e:
     msg="03数据库 "+str(e).replace("'",'#')
-    sql="insert into [LogRecord].[dbo].[report_daily_error](type,msg) values('%s','%s')" ('定时补全数据',msg)
+    sql="insert into [LogRecord].[dbo].[report_daily_error](type,msg) values('%s','%s')" %('定时补全数据',msg)
     ms05 = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
     ms05.insert_sql(sql)
 
@@ -221,7 +221,7 @@ try:
     read_date_write_to_database_day(ms07,targetfilename,date,mysymbol)
 except Exception,e:
     msg="07数据库 "+str(e).replace("'",'#')
-    sql="insert into [LogRecord].[dbo].[report_daily_error](type,msg) values('%s','%s')" ('定时补全数据',msg)
+    sql="insert into [LogRecord].[dbo].[report_daily_error](type,msg) values('%s','%s')" %('定时补全数据',msg)
     ms05 = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
     ms05.insert_sql(sql)
 
@@ -232,7 +232,7 @@ try:
     read_date_write_to_database_day(mscloud,targetfilename,date,mysymbol)
 except Exception,e:
     msg="cloud数据库 "+str(e).replace("'",'#')
-    sql="insert into [LogRecord].[dbo].[report_daily_error](type,msg) values('%s','%s')" ('定时补全数据',msg)
+    sql="insert into [LogRecord].[dbo].[report_daily_error](type,msg) values('%s','%s')" %('定时补全数据',msg)
     ms05 = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
     ms05.insert_sql(sql)
 
