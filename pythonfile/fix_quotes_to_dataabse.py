@@ -203,7 +203,7 @@ except Exception,e:
     ms05 = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
     ms05.insert_sql(sql)
 
-try：
+try:
     print "write into 03"
     ms03 = MSSQL(host="192.168.0.3",user="future",pwd="K@ra0Key",db="future")
     read_date_write_to_database_night(ms03,targetfilename,date,mysymbol) # targetfile=r'Y:\data_wenhua\20160427_0_2359.csv'
