@@ -63,6 +63,10 @@ def add_whitelist(request):
 		print computername
 		print localIP
 		print outIP
+		if request.META.has_key('HTTP_X_FORWARDED_FOR'):  
+		    localIP =  request.META['HTTP_X_FORWARDED_FOR']  
+		else:  
+		    localIP = request.META['REMOTE_ADDR']
 		sql="select 1 from [LogRecord].[dbo].[white_list] where itemname='%s' and type='%s'" % (acname,type)
 		res1=ms.dict_sql(sql)
 		if res1:
