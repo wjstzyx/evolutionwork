@@ -33,9 +33,8 @@ function save_monitor_info(id){
     });
 }
 
-function delete_monitor_info(id){
+function aaaadd_whitelist(id){
 	var data={"id":id};
-	if (confirm("确定删除吗")){
     $.ajax({
         url:"{% url 'elmanager.views.delete_monitor_info' %}",
         data:data,
@@ -47,9 +46,44 @@ function delete_monitor_info(id){
         }
     });
 
-	}
+
 
 }
+
+function add_whitelist(r,acname,type,tableid){
+  var data={"acname":acname,"type":type};
+  $.ajax({
+        url:"{% url 'elmanager.views.add_whitelist' %}",
+        data:data,
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+          var i=r.parentNode.parentNode.rowIndex;
+          document.getElementById(tableid).deleteRow(i);      
+        }
+  });
+
+}
+function remove_whitelist(r,acname,type,tableid){
+  var data={"acname":acname,"type":type};
+  $.ajax({
+        url:"{% url 'elmanager.views.remove_whitelist' %}",
+        data:data,
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+          var i=r.parentNode.parentNode.rowIndex;
+          document.getElementById(tableid).deleteRow(i);      
+        }
+  });
+
+}
+
+
+
+
 
 
 function add_new_monitor(){
@@ -92,6 +126,10 @@ function add_new_monitor(){
             <div class="col-lg-2">
             <button class="btn" name="sttype" value="day">查询</button>
             </div>
+            <div class="col-lg-2">
+            <button class="btn" name="sttype" value="day_white">白名单查询</button>
+            </div>
+
           </div>
           <br>
           <div class="row">
@@ -110,6 +148,9 @@ function add_new_monitor(){
             <div class="col-lg-2">
             <button class="btn" name="sttype" value="night">查询</button>
             </div>
+            <div class="col-lg-2">
+            <button class="btn" name="sttype" value="night_white">白名单查询</button>
+            </div>
           </div>
         </div>
       </form>
@@ -124,16 +165,20 @@ function add_new_monitor(){
        </div>
        <div class="panel-body"> 
         <div class="table-responsive"> 
-         <table class="table table-bordered table-hover table-striped"> 
+         <table class="table table-bordered table-hover table-striped" id="table1"> 
           <thead> 
            <tr> 
-            <th align=center width=30px>策略名称</th> 
+            <th align=center width=30px>策略名称</th>
+            <th align=center width=30px>操作</th> 
            </tr> 
           </thead>  
           <tbody id="mailtotable"> 
             {% for item in res1 %}
            <tr> 
             <td ><a href='/index/monitor/acname_p_basic/?acname={{item.ac}}' target="_blank">{{item.ac}}</a></td> 
+            <td>
+              <button type="button" onclick="add_whitelist(this,'{{item.ac}}','nosignal','table1')">加入白名单</button>
+            </td>
            </tr> 
             {% endfor %}
           </tbody> 
@@ -154,16 +199,20 @@ function add_new_monitor(){
        </div>
        <div class="panel-body"> 
         <div class="table-responsive"> 
-         <table class="table table-bordered table-hover table-striped"> 
+         <table class="table table-bordered table-hover table-striped" id='table2'> 
           <thead> 
            <tr> 
-            <th align=center width=30px>策略名称</th> 
+            <th align=center width=30px>策略名称</th>
+            <th align=center width=30px>操作</th> 
            </tr> 
           </thead>  
           <tbody > 
             {% for item in res2 %}
            <tr> 
             <td ><a href='/index/monitor/acname_p_basic/?acname={{item.ac}}' target="_blank">{{item.ac}}</a></td> 
+            <td>
+              <button type="button" onclick="add_whitelist(this,'{{item.ac}}','longtimenosignal','table2')">加入白名单</button>
+            </td>
            </tr> 
             {% endfor %}
           </tbody> 
@@ -174,6 +223,74 @@ function add_new_monitor(){
      </div> 
     </div> 
 {% endif %}
+{% if whichtype == 11 %}
+    <div class="row"> 
+     <div class="col-lg-4"> 
+      <div class="panel panel-default"> 
+       <div class="panel-heading"> 
+        <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>策略上线未产生信号白名单</h3> 
+       </div>
+       <div class="panel-body"> 
+        <div class="table-responsive"> 
+         <table class="table table-bordered table-hover table-striped" id="table11"> 
+          <thead> 
+           <tr> 
+            <th align=center width=30px>策略名称</th>
+            <th align=center width=30px>操作</th> 
+           </tr> 
+          </thead>  
+          <tbody id="mailtotable"> 
+            {% for item in res11 %}
+           <tr> 
+            <td ><a href='/index/monitor/acname_p_basic/?acname={{item.ac}}' target="_blank">{{item.ac}}</a></td> 
+            <td>
+              <button type="button" onclick="remove_whitelist(this,'{{item.ac}}','nosignal','table11')">移除白名单</button>
+            </td>
+           </tr> 
+            {% endfor %}
+          </tbody> 
+         </table>          
+        </div> 
+
+       </div> 
+      </div> 
+     </div> 
+    </div> 
+{% endif %}
+{% if whichtype == 21 %}
+    <div class="row"> 
+     <div class="col-lg-4"> 
+      <div class="panel panel-default"> 
+       <div class="panel-heading"> 
+        <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>策略最后更新于N天前白名单</h3> 
+       </div>
+       <div class="panel-body"> 
+        <div class="table-responsive"> 
+         <table class="table table-bordered table-hover table-striped" id='table22'> 
+          <thead> 
+           <tr> 
+            <th align=center width=30px>策略名称</th>
+            <th align=center width=30px>操作</th> 
+           </tr> 
+          </thead>  
+          <tbody > 
+            {% for item in res21 %}
+           <tr> 
+            <td ><a href='/index/monitor/acname_p_basic/?acname={{item.ac}}' target="_blank">{{item.ac}}</a></td> 
+            <td>
+              <button type="button" onclick="remove_whitelist(this,'{{item.ac}}','longtimenosignal','table22')">移除白名单</button>
+            </td>
+           </tr> 
+            {% endfor %}
+          </tbody> 
+         </table>          
+        </div> 
+       </div> 
+      </div> 
+     </div> 
+    </div> 
+{% endif %}
+
 
 
    </div> 

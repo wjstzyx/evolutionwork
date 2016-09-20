@@ -34,11 +34,58 @@ def acname_p_basic(request):
 
 
 
+def remove_whitelist(request):
+	if request.POST:
+		acname=request.POST.get('acname','')
+		type=request.POST.get('type','')
+		ms= MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+		sql="update [LogRecord].[dbo].[white_list] set isactive=0 where itemname='%s' and type='%s'" % (acname,type)
+		ms.insert_sql(sql)
+	result=1
+	result=simplejson.dumps(result,ensure_ascii = False)
+	return HttpResponse(result,mimetype='application/json')
+
+
+def add_whitelist(request):
+	if request.POST:
+		acname=request.POST.get('acname','')
+		type=request.POST.get('type','')
+		ms= MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+		import socket
+		outIP = socket.gethostbyname(socket.gethostname())#这个得到本地ip
+		ipList = socket.gethostbyname_ex(socket.gethostname())
+		computername=ipList[0]
+		iplist=ipList[2]
+		localIP=""
+		for item in iplist:
+			if item !=outIP:
+				localIP=item
+		print computername
+		print localIP
+		print outIP
+		sql="select 1 from [LogRecord].[dbo].[white_list] where itemname='%s' and type='%s'" % (acname,type)
+		res1=ms.dict_sql(sql)
+		if res1:
+			sql="update [LogRecord].[dbo].[white_list] set isactive=1,ope_person='%s',ope_localIP='%s',ope_outIP='%s' where itemname='%s' and type='%s'" % (computername,localIP,outIP,acname,type)
+			ms.insert_sql(sql)
+		else:
+			sql="insert into [LogRecord].[dbo].[white_list]([type],[itemname],[ope_person],[ope_localIP],[ope_outIP]) values('%s','%s','%s','%s','%s')" % (type,acname,computername,localIP,outIP)
+			ms.insert_sql(sql)
+	result=1
+	result=simplejson.dumps(result,ensure_ascii = False)
+	return HttpResponse(result,mimetype='application/json')
+
+
+
+
+
 def lasttime_p_basic(request):
 	data=""
 	whichtype=0
 	res1=""
 	res2=""
+	res11=""
+	res21=""
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 	if request.POST:
 		print "request.POST",request.POST
@@ -46,19 +93,31 @@ def lasttime_p_basic(request):
 		print sttype
 		if sttype=="day":
 			#策略上线未产生信号
-			sql="select distinct ac from (select p.AC,p.ST,p.STOCK from P_BASIC p left join Trading_logSymbol t on p.ST=t.ST where t.id is null and p.P_size<>0) a order by ac"
+			sql="select distinct ac from (select p.AC,p.ST,p.STOCK from P_BASIC p left join Trading_logSymbol t on p.ST=t.ST where t.id is null and p.P_size<>0) a where ac not in (select itemname from [LogRecord].[dbo].[white_list] where isactive=1 and TYPE='nosignal') order by ac"
 			res1=ms.dict_sql(sql)
 			whichtype=1
 		if sttype=="night":
 			period=request.POST.get("period","")
-			sql="select distinct ac from (select p.AC,p.P_size,p.ST,p.STOCK,t.tradetime,t.TradName from P_BASIC p left join Trading_logSymbol t on p.ST=t.ST where p.P_size<>0 and DATEDIFF(day,t.tradetime,GETDATE())>%s) a order by ac" % (period)
+			sql="select distinct ac from (select p.AC,p.P_size,p.ST,p.STOCK,t.tradetime,t.TradName from P_BASIC p left join Trading_logSymbol t on p.ST=t.ST where p.P_size<>0 and DATEDIFF(day,t.tradetime,GETDATE())>%s) a  where ac not in (select itemname from [LogRecord].[dbo].[white_list] where isactive=1 and TYPE='longtimenosignal')order by ac" % (period)
 			res2=ms.dict_sql(sql)
 			whichtype=2
+		if sttype=="day_white":
+			#策略上线未产生信号_白名单
+			sql="SELECT itemname as ac FROM [LogRecord].[dbo].[white_list] where TYPE='nosignal' and isactive=1 order by itemname"
+			res11=ms.dict_sql(sql)
+			whichtype=11
+		if sttype=="night_white":
+			#策略上线未产生信号_白名单
+			sql="SELECT itemname as ac FROM [LogRecord].[dbo].[white_list] where TYPE='longtimenosignal' and isactive=1 order by itemname"
+			res21=ms.dict_sql(sql)
+			whichtype=21
 	return render_to_response('lasttime_p_basic.html',{
 		'data':data,
 		'whichtype':whichtype,
 		'res1':res1,
-		'res2':res2
+		'res2':res2,
+		'res11':res11,
+		'res21':res21
 	})	
 
 
