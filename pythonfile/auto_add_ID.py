@@ -6,7 +6,7 @@ ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
-dir = r'C:\Users\YuYang\Desktop\test'
+dir = r'G:\add_afl\aflfiles'
 
 def get_filename_list():
 	filelists=[]
@@ -121,18 +121,60 @@ def del_head_info(testlist,StrategyID,dayornight,sum_or_one):
 
 
 def all_file(numtpe,dayornight,sum_or_one):
-	sql="select top 1 max(st) as st from [LogRecord].[dbo].[all_st_list] where st like '%s%%'" % (numtpe)
+	#get max StrategyID
+	lenth1=len(numtpe)
+	newnum=numtpe
+	for i in range(10-lenth1):
+		newnum=str(newnum)+'0'
+	print 	numtpe,newnum
+
+	sql="select top 1 max(st) as st from [LogRecord].[dbo].[all_st_list] where st like '%s%%' and st>='%s'" % (numtpe,newnum)
 	res=ms.dict_sql(sql)
 	if res[0]['st'] is not None:
-		StrategyID=int(res[0]['st'])+1
+		StrategyID1=int(res[0]['st'])+1
 	else:
+		StrategyID1='no'
+	sql="select top 1 max(st) as st from [Future].[dbo].[Trading_logSymbol] where st like '%s%%' and st>='%s'" % (numtpe,newnum)
+	res=ms.dict_sql(sql)
+	if res[0]['st'] is not None:
+		StrategyID2=int(res[0]['st'])+1
+	else:
+		StrategyID2='no'
+	sql="select top 1 max(st) as st from [Future].[dbo].[P_BASIC] where st like '%s%%' and st>='%s'" % (numtpe,newnum)
+	res=ms.dict_sql(sql)
+	if res[0]['st'] is not None:
+		StrategyID3=int(res[0]['st'])+1
+	else:
+		StrategyID3='no'
+	#get max
+	if StrategyID1=='no' and StrategyID2=='no' and StrategyID3=='no':
+		print "##########################"
 		print "this is new stnum "
+		print "##########################"
 		if len(numtpe)==10:
 			StrategyID=int(numtpe)
 		else:
-			print "error:Please input the right ST(length is 10 )"
+			print "##########################"
+			print "error:Please input the right ST(length equals 10 )"
+			print "##########################"
+			exit()
+	else:
+		if StrategyID1=='no':
+			StrategyID1=0
+		if StrategyID2=='no':
+			StrategyID2=0
+		if StrategyID3=='no':
+			StrategyID3=0
+		StrategyID=max(StrategyID1,StrategyID2,StrategyID3)
+		if len(str(StrategyID))<8:
+                        print "##########################"
+			print "Find short-lenth StrategyID %s" % (StrategyID)
+			print "Please input Number with more than 7 numbers"
+			print "##########################"
 			exit()
 	print StrategyID
+
+
 	#StrategyID=99210166
 	filelists=get_filename_list()
 	isreplicate=0
