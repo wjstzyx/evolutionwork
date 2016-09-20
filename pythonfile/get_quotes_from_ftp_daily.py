@@ -82,7 +82,11 @@ sql="insert into [LogRecord].[dbo].[get_quotes_date](date,result) values('%s',%s
 ms.insert_sql(sql)
 #如果成功自动调用补全数据功能，补全所有数据
 if downresult==1:
-    cmd="python C:\\YYfiles\\evolutionwork\\pythonfile\\fix_quotes_to_dataabse.py %s" % (date)
+    path=r'C:\YYfiles\evolutionwork\pythonfile'
+    if os.path.exists(path):
+        cmd="python C:\\YYfiles\\evolutionwork\\pythonfile\\fix_quotes_to_dataabse.py %s" % (date)
+    else:
+        cmd="python /home/yuyang/myfile/evolutionwork/pythonfile/fix_quotes_to_dataabse.py %s" % (date)
     os.system(cmd)
 
 
