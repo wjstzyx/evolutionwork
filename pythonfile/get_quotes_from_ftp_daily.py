@@ -80,3 +80,9 @@ downresult=ftp_down(_dfrom,date)# down from ftp
 
 sql="insert into [LogRecord].[dbo].[get_quotes_date](date,result) values('%s',%s)" % (date,downresult)
 ms.insert_sql(sql)
+#如果成功自动调用补全数据功能，补全所有数据
+if downresult==1:
+    cmd="python C:\\YYfiles\\evolutionwork\\pythonfile\\fix_quotes_to_dataabse.py %s" % (date)
+    os.system(cmd)
+
+
