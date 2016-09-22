@@ -23,8 +23,10 @@ def istasktodo(type):
 			cmd=item['cmd']
 			print '%s &' % (cmd)
 			os.system('%s &' % (cmd))
-
-
+			#置状态
+			id=item['id']
+			sql="update [LogRecord].[dbo].[task_todo] set status=1 where id=%s" % (id)
+			ms.insert_sql(sql)
 		print item 
 
 istasktodo('datafix')
