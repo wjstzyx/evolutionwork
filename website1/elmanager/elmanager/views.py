@@ -15,6 +15,83 @@ from dbconn import MSSQL
 # ms1 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="future")
 
 
+def fixdatacrtab(request):
+	if request.POST:
+		ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+		D=request.POST.get('D','')
+		print "##################",D
+		newD=D.replace('/','')
+		print newD
+		#查找是否已经存在
+		sql="SELECT top 1 result  FROM [LogRecord].[dbo].[get_quotes_date] where Date='%s' order by ID desc" % (newD)
+		result1=ms.dict_sql(sql)
+		if result1:
+			msg="该天数据曾经补全过，如果发现仍有缺失请联系仇蓓蕾手工补全"
+		else:
+			cmd='python /home/yuyang/myfile/evolutionwork/pythonfile/get_quotes_from_ftp_daily.py %s' % (newD)
+			sql="select * from [LogRecord].[dbo].[task_todo] where type='datafix' and cmd='%s' and status=0" % (cmd)
+			print sql 
+			res=ms.dict_sql(sql)
+			if res:
+				msg="已经插入过该补全数据任务，该任务将在16:00执行"
+			else:
+				sql="insert into [LogRecord].[dbo].[task_todo](type,cmd,todotime,status) values('datafix','%s','1550',0)" % (cmd)
+				ms.insert_sql(sql)
+				msg="成功插入定时任务，任务将在16:00执行"
+	result=msg
+	result=simplejson.dumps(result,ensure_ascii = False)
+	return HttpResponse(result,mimetype='application/json')
+
+
+
+
+def fixdata(request):
+	data=""
+	whichtype=0
+	res1=""
+	res2=""
+	res11=""
+	res21=""
+	symbollist=""
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	sql="select distinct symbol from Future.dbo.TSymbol order by symbol"
+	symbollist=ms.dict_sql(sql)
+	if request.POST:
+		print "request.POST",request.POST
+		sttype=request.POST.get("sttype","")
+		print sttype
+		if sttype=="day":
+			#策略上线未产生信号
+			sql="select distinct ac from (select p.AC,p.ST,p.STOCK from P_BASIC p left join Trading_logSymbol t on p.ST=t.ST where t.id is null and p.P_size<>0) a where ac not in (select itemname from [LogRecord].[dbo].[white_list] where isactive=1 and TYPE='nosignal') order by ac"
+			res1=ms.dict_sql(sql)
+			whichtype=1
+		if sttype=="night":
+			symbol=request.POST.get("period","")
+			sql="select '%s' as symbol,SUM(1) as sum,D from Future.dbo.TSymbol where symbol='%s' group by D order by sum(1),D " % (symbol,symbol)
+			res2=ms.dict_sql(sql)
+			whichtype=2
+		if sttype=="day_white":
+			#策略上线未产生信号_白名单
+			sql="SELECT itemname as ac FROM [LogRecord].[dbo].[white_list] where TYPE='nosignal' and isactive=1 order by itemname"
+			res11=ms.dict_sql(sql)
+			whichtype=11
+		if sttype=="night_white":
+			#策略上线未产生信号_白名单
+			sql="SELECT itemname as ac FROM [LogRecord].[dbo].[white_list] where TYPE='longtimenosignal' and isactive=1 order by itemname"
+			res21=ms.dict_sql(sql)
+			whichtype=21
+	return render_to_response('fixdata.html',{
+		'data':data,
+		'whichtype':whichtype,
+		'res1':res1,
+		'res2':res2,
+		'res11':res11,
+		'res21':res21,
+		'symbollist':symbollist
+	})	
+
+
+
 def acname_p_basic(request):
 	data=""
 	whichtype=0
@@ -78,8 +155,6 @@ def add_whitelist(request):
 	result=1
 	result=simplejson.dumps(result,ensure_ascii = False)
 	return HttpResponse(result,mimetype='application/json')
-
-
 
 
 

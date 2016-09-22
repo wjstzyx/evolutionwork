@@ -42,4 +42,6 @@ urlpatterns = patterns('',
     url(r'^index/quanyi/order_account_equity/$', order_account_equity),
     url(r'^index/quanyi/order_account_equity/save_order_p_basic/$', save_order_p_basic),
     url(r'^index/quanyi/order_account_equity/delete_order_p_follow_info/$', delete_order_p_follow_info),
+    url(r'^index/data/fixdata/$',fixdata),
+    url(r'^index/data/fixdata/fixdatacrtab/$',fixdatacrtab),
 )

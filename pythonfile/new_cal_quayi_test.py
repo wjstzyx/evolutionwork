@@ -6,13 +6,11 @@ from collections import Counter
 reload(sys)
 sys.setdefaultencoding('utf8')
 from dbconn import MSSQL
-# import matplotlib
-# matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.pylab as pl
 from matplotlib.dates import DayLocator, HourLocator, DateFormatter, drange
 ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
-# resList = ms.find_sql("select top 2 * from st_report_backtest")
+# resList = ms.find_sql("select top 2 * from st_report")
 # print resList
 # 返回行情list 或者0
 
@@ -27,15 +25,21 @@ def input_groupbyquanyi(ac,symbol):
 	try:
 		sql="drop table #temp_quanyi_new"
 		ms.insert_sql(sql)
+		sql="drop table #temp_p_log"
+		ms.insert_sql(sql)
 	except:
 		pass
-	sql="select SUM(p_size*ratio/100) as totalsum from [Future].[dbo].[backtest_ac_psize] where ac='%s'" % (ac)
-	#print sql 
+	# 产生临时p_log
+	#sql="select * into #temp_p_log from (SELECT   aa.*, sid.Symbol, (YEAR(GETDATE()) - 2000) * 10000 + MONTH(GETDATE()) * 100 + DAY(GETDATE()) AS D from (select  p.AC, p.STOCK, p.type, p.ST, p.P_size, a.ratio from P_BASIC p inner join AC_RATIO a on p.AC=a.AC and p.STOCK=a.Stock and p.type=a.type and p.AC='%s') as aa inner join Symbol_ID AS sid ON sid.S_ID = aa.STOCK where Symbol='%s') temp" % (ac,symbol)
+	sql ="select * into #temp_p_log from (select '%s' as ac,temp1.STOCK,temp1.type,temp1.ST,temp1.P_size as P_size,temp1.ratio,temp1.Symbol,temp1.num from (select p.*,a.ratio,sid.Symbol,isnull(n.num,1)as num from P_BASIC p inner join AC_RATIO a on p.AC=a.AC and p.AC='%s' inner join Symbol_ID  AS sid ON p.STOCK=sid.S_ID left join [LogRecord].[dbo].[Ninone_config] n on n.st=p.st) temp1 where Symbol='%s' )aaa"% (ac,ac,symbol)
+	#print sql
+	ms.insert_sql(sql)
+	sql="select SUM(p_size*ratio/100*num) as totalsum from #temp_p_log"
 	res=ms.dict_sql(sql)
 	totalsum=res[0]['totalsum']
 
-	#产生临时整个虚拟组st_report_backtest
-	sql="select * into  #temp_quanyi_new from ( select p.ac,p.symbol,st_report_backtest.type,st_report_backtest.id,st_report_backtest.p,st_report_backtest.pp,p.p_size,p.ratio ,st_report_backtest.st,st_report_backtest.stockdate from st_report_backtest  inner join [Future].[dbo].[backtest_ac_psize] p on p.st=st_report_backtest.st and p.ac='%s' and p.symbol='%s')temp " % (ac,symbol)
+	#产生临时整个虚拟组st_report
+	sql="select * into  #temp_quanyi_new from ( select p.ac,p.symbol,st_report.type,st_report.id,st_report.p,st_report.pp,p.p_size,p.ratio ,st_report.st,st_report.stockdate from st_report  inner join #temp_p_log p on p.st=st_report.st and p.ac='%s' and p.symbol='%s')temp " % (ac,symbol)
 	#print sql
 	ms.insert_sql(sql)
 	#print 1,datetime.datetime.now()
@@ -77,7 +81,7 @@ def input_groupbyquanyi(ac,symbol):
 		###以上已经准备好虚拟组的仓位信息
 		fisrttime=positionlist[0][0]
 		#[datetime.datetime(2015, 10, 21, 9, 0), 6.0, 6.0]
-		sql="select	C,StockDate from TSymbol where Symbol='%s' and  stockdate >='%s' order by StockDate " % (symbol,fisrttime)
+		sql="select	C,StockDate from TSymbol_quotes_backup where Symbol='%s' and  stockdate >='%s' order by StockDate " % (symbol,fisrttime)
 		res=ms.dict_sql(sql)
 		# print res[:10]
 		#对行情日期遍历
@@ -131,7 +135,16 @@ def input_groupbyquanyi(ac,symbol):
 					break
 
 				templastposition=item1
-
+			if iskeep==1 and StockDate>temppositionlist[-1][0]:
+				temp=[StockDate,C,temppositionlist[-1][2]]
+				mymewquote.append(temp)
+				# lastappend=temp
+		#插入当天行情的最后一根bar
+		lastClose=res[-1]['C']
+		lastdatetime=res[-1]['StockDate']
+		lastquoteposition=mymewquote[-1][2]
+		if lastdatetime!=mymewquote[-1][0]:
+			mymewquote.append([lastdatetime,lastClose,lastquoteposition])
 		# for item in positionlist:
 		# 	print item[0],item[2]
 		# for item in mymewquote:
@@ -145,16 +158,6 @@ def input_groupbyquanyi(ac,symbol):
 				if timestr>=900 and  timestr<=929:
 					mymewquote.remove(item)
 			#--end
-		print mymewquote[0:3]
-		#将仓位写文件
-		positionpath="..\\positionfile\\%s-%s.csv" % (totalsum,ac)
-		with open(positionpath,'w') as f:
-			for item in mymewquote:
-				line=item[0].strftime("%Y-%m-%d %H:%M:%S")+","+str(item[1])+","+str(item[2])+"\n"
-				f.write(line)
-
-
-		##--end
 		return mymewquote,totalsum
 	else:
 		return 0,0.0001
@@ -214,8 +217,8 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto,isshow=1):
 	lastdate=tempquotes[0][0]
 	totalquanyi=0
 	i=0
-	totalchangetime=0
 	##回撤相关
+	totalchangetime=0
 	lasthighquanyi=0
 	lasthighhuiche=0
 	nowhuiche=0
@@ -237,11 +240,11 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto,isshow=1):
 		if nowhuiche>lasthighhuiche:
 			lasthighhuiche=nowhuiche
 		##--end
-	if lasthighhuiche<0:
-		lasthighhuiche=0
-	# for i in range(10):
+	# for i in range(len(avalue)):
 	# 	print avalue[i],yvalue[i]
 	plt.figure(figsize=(16,8))
+	# plt.plot(avalue, yvalue, 'r')
+	# plt.show()
 	lenx=len(avalue)
 	pl.plot(myindex, yvalue, 'r') 
 	 
@@ -250,6 +253,7 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto,isshow=1):
 	ax.fmt_xdata = pl.DateFormatter('%Y-%m-%d') 
 	pl.xticks(rotation=75) 	 
 	#生成x轴的间隔
+
 	aa=int(lenx/30)
 	numx=[]
 	labvalue=[]
@@ -262,22 +266,10 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto,isshow=1):
 	#ax.xaxis.set_major_formatter(pl.DateFormatter('%Y-%m-%d')) 
 	pl.grid()
 	plt.title('%s--%s--Tradeingtimes:%s--MaxDrawDown:%s' % (ac,symbolto,int(totalchangetime/totalsum),int(lasthighhuiche)))
-	#plt.ylabel(u'平均每手净收益',fontproperties='SimHei')
-	plt.ylabel(u'Profit Per Hand')
+	plt.ylabel(u'平均每手净收益',fontproperties='SimHei')
 	pl.savefig('..\\myimage\\%s' % (ac))
 	if isshow==1:
 		pl.show()
-	#权益写入文件
-	filepath="..\\file\\%s.csv" % (ac)
-	with open(filepath,'w') as f:
-		for i in range(len(avalue)):
-			line=avalue[i].strftime("%Y-%m-%d %H:%M:%S")+','+str(round(yvalue[i],0))+'\n'
-			f.write(line)
-	#--end
-
-		
-
-
 
 def cal_quanyi_foraccount(ac,myquotes,totalsum,symbolto,ratio):
 	if totalsum<=0:
@@ -318,7 +310,6 @@ def cal_quanyi_foraccount(ac,myquotes,totalsum,symbolto,ratio):
 		oneacquanyidict[datetime]=totalquanyi
 	return oneacquanyidict
 
-
 def add_acquanyi(acquanyi1,acquanyi2):
 	newquanyi=dict(Counter(acquanyi1)+Counter(acquanyi2))
 	alltime=[ k for k in sorted(newquanyi.keys())]
@@ -344,17 +335,8 @@ def add_acquanyi(acquanyi1,acquanyi2):
 
 
 
-
-
-
-
-
-
-
-
-
 def show_account(accountname):
-	sql="select ac,ratio from [Future].[dbo].[backtest_account_ac] where [accountname]='%s'" % (accountname)
+	sql="select ac,ratio,symbol from [Future].[dbo].[backtest_account_ac] where [accountname]='%s'" % (accountname)
 	res=ms.dict_sql(sql)
 	myqanyi=[]
 	mydatetime=[]
@@ -363,10 +345,8 @@ def show_account(accountname):
 	i=ms.dict_sql(sql)[0]['ratio']
 	for item in res:
 		ratio=item['ratio']
-		sql="SELECT distinct ac,symbol   FROM [Future].[dbo].[backtest_ac_psize] where ac='%s'" % (item['ac'])
-		res1=ms.dict_sql(sql)[0]
-		ac=res1['ac']
-		symbol=res1['symbol']
+		ac=item['ac']
+		symbol=item['symbol']
 		(myquotes,totalsum)=input_groupbyquanyi(ac,symbol)
 		oneacquanyidict=cal_quanyi_foraccount(ac,myquotes,totalsum,symbol,ratio)
 		#totalquanyidict=dict(Counter(totalquanyidict)+Counter(oneacquanyidict))
@@ -427,26 +407,43 @@ def show_account(accountname):
 
 
 
-
 def show_all_ac(acname=''):
 	if acname=='':
-		sql="SELECT distinct ac,symbol   FROM [Future].[dbo].[backtest_ac_psize]"
+		sql="SELECT id, acname as ac,[positionsymbol] as symbol   FROM [LogRecord].[dbo].[quanyicaculatelist] where [iscaculate] =1 and [isyepan]=0 and positionsymbol in ('RB')  order by id "
 		isshow=0
 	else:
-		sql="SELECT distinct ac,symbol   FROM [Future].[dbo].[backtest_ac_psize] where ac='%s'" % (acname)
+		sql="SELECT distinct acname as ac,[positionsymbol] as symbol   FROM [LogRecord].[dbo].[quanyicaculatelist] where acname='%s'" % (acname)
 		isshow=1
 	res=ms.dict_sql(sql)
 	for item in res:
 		ac=item['ac']
 		symbol=item['symbol']
-		print ac
+		print ac,item['id']
 		(myquotes,totalsum)=input_groupbyquanyi(ac,symbol)
 		cal_quanyi(ac,myquotes,totalsum,symbol,isshow)
 
 
 
-#如果括号中是空,则计算所有虚拟组，到文件夹查看图片
-#如果括号中制定特定虚拟组，组只计算单个，并展示
-show_all_ac()
+def multiple_ratio(myquotes,ratio):
+	newmyquotes=[]
+	tempposition=0
+	for item in myquotes:
+		newmyquotes.append([item[0],item[1],item[2]*ratio])
+	return newmyquotes
 
-# show_account('myacount')
+
+
+
+# show_all_ac('RU3v4e')
+
+
+(myquotes,totalsum)=input_groupbyquanyi('rbjietizc','rb')
+#仓位信息OK
+print totalsum
+# for item in myquotes:
+# 	print item 
+ratio=0.1
+myquotes=multiple_ratio(myquotes,ratio)
+cal_quanyi('rbjietizc',myquotes,ratio*totalsum,'rb')
+
+# show_account('myaccount2')

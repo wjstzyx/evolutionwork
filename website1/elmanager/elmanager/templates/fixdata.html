@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% load i18n static %}
+{% load url from future %}
+
+{% block extrahead %}
+
+{% endblock %}
+{% block extrastyle %}
+{% endblock %}
+
+{% block content_title %}{% endblock %}
+{% block content %}
+
+<script>
+function save_monitor_info(id){
+	var id=$("#id_"+id).html();
+	var type=$("#type_"+id).val();
+	var item=$("#item_"+id).val();
+	var ismonitor=$("#ismonitor_"+id).val();
+  var starttime=$("#starttime_"+id).val();
+  var endtime=$("#endtime_"+id).val();
+	data={"id":id,"type":type,"item":item,"ismonitor":ismonitor,"starttime":starttime,"endtime":endtime};
+    $.ajax({
+        url:"{% url 'elmanager.views.save_monitor_info' %}",
+        data:data,
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+            alert("保存成功")
+        }
+
+    });
+}
+
+function aaaadd_whitelist(id){
+	var data={"id":id};
+    $.ajax({
+        url:"{% url 'elmanager.views.delete_monitor_info' %}",
+        data:data,
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+        	window.location.href="/index/monitor/configmonitorlist/";
+        }
+    });
+
+
+
+}
+
+function fixdata(r,D){
+  var data={"D":D};
+  $.ajax({
+        url:"{% url 'elmanager.views.fixdatacrtab' %}",
+        data:data,
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+          var i=r.parentNode.parentNode.rowIndex;
+          document.getElementById(tableid).deleteRow(i);      
+        }
+  });
+
+}
+function remove_whitelist(r,acname,type,tableid){
+  var data={"acname":acname,"type":type};
+  $.ajax({
+        url:"{% url 'elmanager.views.remove_whitelist' %}",
+        data:data,
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+          var i=r.parentNode.parentNode.rowIndex;
+          document.getElementById(tableid).deleteRow(i);      
+        }
+  });
+
+}
+
+
+
+
+
+
+function add_new_monitor(){
+    $.ajax({
+        url:"{% url 'elmanager.views.add_new_monitor' %}",
+        data:{"date":"data"},
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+        	window.location.href="/index/monitor/configmonitorlist/"
+            
+        }    
+    });
+
+
+}
+</script>
+
+  <div id="page-wrapper"> 
+   <div class="container-fluid" style="height: 260px"> 
+    <!-- Page Heading --> 
+      <div class="row"> 
+       <div class="col-lg-12"> 
+        <h1 class="page-header"> 数据补全功能 </h1> 
+        <ol class="breadcrumb"> 
+         <li class="active"> <i class="fa fa-dashboard"></i> 补全数据</li> 
+        </ol> 
+       </div> 
+      </div>
+
+      <form class="form" method='POST'>
+        <div class="form-group">
+          <br>
+          <div class="row">
+            <div class="col-lg-2">
+            <label class="control-label" for="inputSuccess4"> 请选择品种</label>
+            </div>
+            <div class="col-lg-1">
+            <select class="form-control" name="period">
+              {% for item in symbollist %}
+              <option value={{item.symbol}}>{{item.symbol}}</option>
+              {% endfor %}
+            </select>
+            </div>
+            <div class="col-lg-2">
+            <button class="btn" name="sttype" value="night">查询</button>
+            </div>
+          </div>
+        </div>
+      </form>
+  </div>
+
+{% if whichtype == 2 %}
+    <div class="row"> 
+     <div class="col-lg-4"> 
+      <div class="panel panel-default"> 
+       <div class="panel-heading"> 
+        <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>策略上线未产生信号</h3> 
+       </div>
+       <div class="panel-body"> 
+        <div class="table-responsive"> 
+         <table class="table table-bordered table-hover table-striped" id="table1"> 
+          <thead> 
+           <tr> 
+            <th align=center width=30px>品种</th>
+            <th align=center width=30px>日期</th> 
+            <th align=center width=30px>Bar个数</th>
+            <th align=center width=30px>动作</th>
+           </tr> 
+          </thead>  
+          <tbody id="mailtotable"> 
+            {% for item in res2 %}
+           <tr> 
+            <td >{{item.symbol}}</td> 
+            <td>{{item.D}}</td>
+            <td>{{item.sum}}</td>
+            <td>
+            <button type="button" onclick="fixdata(this,'{{item.D}}')">补全</button>
+            </td>
+           </tr> 
+            {% endfor %}
+          </tbody> 
+         </table>          
+        </div> 
+
+       </div> 
+      </div> 
+     </div> 
+    </div> 
+{% endif %}
+
+
+
+   </div> 
+  </div>
+
+{% endblock %}
