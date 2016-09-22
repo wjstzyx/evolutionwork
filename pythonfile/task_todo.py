@@ -3,6 +3,7 @@
 import urllib, urllib2, json
 import sys
 import datetime
+import os 
 reload(sys)
 sys.setdefaultencoding('utf8')
 from dbconn import MSSQL
