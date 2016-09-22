@@ -59,8 +59,7 @@ function fixdata(r,D){
         dataType:"json",
         async:false,
         success:function(result){
-          var i=r.parentNode.parentNode.rowIndex;
-          document.getElementById(tableid).deleteRow(i);      
+                alert(result)    
         }
   });
 
@@ -124,6 +123,9 @@ function add_new_monitor(){
             </div>
             <div class="col-lg-1">
             <select class="form-control" name="period">
+              {% if symbol != ""%}
+              <option value={{symbol}} selected="selected">{{symbol}}</option>
+              {% endif %}
               {% for item in symbollist %}
               <option value={{item.symbol}}>{{item.symbol}}</option>
               {% endfor %}

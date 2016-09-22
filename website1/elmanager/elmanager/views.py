@@ -52,6 +52,7 @@ def fixdata(request):
 	res2=""
 	res11=""
 	res21=""
+	symbol=""
 	symbollist=""
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 	sql="select distinct symbol from Future.dbo.TSymbol order by symbol"
@@ -60,26 +61,11 @@ def fixdata(request):
 		print "request.POST",request.POST
 		sttype=request.POST.get("sttype","")
 		print sttype
-		if sttype=="day":
-			#策略上线未产生信号
-			sql="select distinct ac from (select p.AC,p.ST,p.STOCK from P_BASIC p left join Trading_logSymbol t on p.ST=t.ST where t.id is null and p.P_size<>0) a where ac not in (select itemname from [LogRecord].[dbo].[white_list] where isactive=1 and TYPE='nosignal') order by ac"
-			res1=ms.dict_sql(sql)
-			whichtype=1
 		if sttype=="night":
 			symbol=request.POST.get("period","")
 			sql="select '%s' as symbol,SUM(1) as sum,D from Future.dbo.TSymbol where symbol='%s' group by D order by sum(1),D " % (symbol,symbol)
 			res2=ms.dict_sql(sql)
 			whichtype=2
-		if sttype=="day_white":
-			#策略上线未产生信号_白名单
-			sql="SELECT itemname as ac FROM [LogRecord].[dbo].[white_list] where TYPE='nosignal' and isactive=1 order by itemname"
-			res11=ms.dict_sql(sql)
-			whichtype=11
-		if sttype=="night_white":
-			#策略上线未产生信号_白名单
-			sql="SELECT itemname as ac FROM [LogRecord].[dbo].[white_list] where TYPE='longtimenosignal' and isactive=1 order by itemname"
-			res21=ms.dict_sql(sql)
-			whichtype=21
 	return render_to_response('fixdata.html',{
 		'data':data,
 		'whichtype':whichtype,
@@ -87,7 +73,8 @@ def fixdata(request):
 		'res2':res2,
 		'res11':res11,
 		'res21':res21,
-		'symbollist':symbollist
+		'symbollist':symbollist,
+		'symbol':symbol
 	})	
 
 
