@@ -599,23 +599,11 @@ def real_account_groupbyquanyi(ac,symbol):
 
 
 
-todolist=['CUcci5min',
-'CUcormacd',
-'CUcxvolume',
-'CUhuitiao',
-'CUlrctrend',
-'CUludjump15min',
-'CUludjump30min',
-'CUrevorig',
-'CUstaticrev',
-'CUv7',
-'QCU18MIN']
-for item in todolist:
-	(myquotes,totalsum)=input_groupbyquanyi(item,'CU')
+
+(myquotes,totalsum)=input_groupbyquanyi('RBN4reversaltrend','RBnight')
 # for item in myquotes:
 # 	print item 
-	cal_quanyi(item,myquotes,totalsum,'CU')
-
+cal_quanyi('RBN4reversaltrend',myquotes,totalsum,'RBnight')
 
 # show_account('myaccount2')
 
@@ -635,7 +623,7 @@ def main_fun_sumps():
 
 def main_fun():
 	#获取需要处理的列表
-	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1 and issumps=0 and isyepan in (0,1,12) order by sortnum desc "
+	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1 and issumps=0 and isyepan in (0,1,12) order by id desc "
 	#sql="SELECT top 17 id,[acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('RB') and iscaculate=1 order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
@@ -647,5 +635,4 @@ def main_fun():
 		#直接设置数字 10
 		cal_quanyi(item['acname'],myquotes,totalsum,quanyisymbol)
 
-# main_fun_sumps()
-# main_fun()
+

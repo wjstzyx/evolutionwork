@@ -184,14 +184,14 @@
                     <li>
                         <a href="javascript:;" data-toggle="collapse" data-target="#equlity"><i class="fa fa-fw fa-arrows-v"></i> 权益统计 <i class="fa fa-fw fa-caret-down"></i></a>
                         <ul id="equlity" class="collapse">
-                            <li>
+<!--                             <li>
                                 <a href="{% url 'elmanager.views.realcompare' %}">理论实际收益对比列表</a>
+                            </li> -->
+                            <li>
+                                <a href="{% url 'elmanager.views.acwantedequlitynew' %}">(热点)商品虚拟组</a>                                
                             </li>
                             <li>
-                                <a href="{% url 'elmanager.views.acwantedequlity' %}">商品虚拟组理论日收益</a>                                
-                            </li>
-                            <li>
-                                <a href="{% url 'elmanager.views.acwantedequlitynew' %}">(新)商品虚拟组理论日收益</a>                                
+                                <a href="{% url 'elmanager.views.acwantedequlityhistory' %}">历史商品虚拟组</a>                                
                             </li>
                             <li>
                                 <a href="{% url 'elmanager.views.acwantedequlitystock' %}">股指虚拟组理论日收益</a>                                
