@@ -1,0 +1,150 @@
+_SECTION_BEGIN("Export Signal");
+SetBarsRequired( sbrAll );
+exportSignal = 1;//ParamToggle("Export Signal", "No|Yes", 0 );
+Product= ParamList("Product","Merchandise|IF",0);
+ODBCStr = "ODBC;DSN=ODBCAB05;UID=future;APP=AmiBroker for Win32;WSID=TJ64;DATABASE=future;pwd=K@ra0Key;DRIVER={SQL Server};SERVER=192.168.0.5";
+
+
+function Trading_log(BSIG,SSIG,CSIG,st,TradName,ProDT)
+{
+
+
+if(exportSignal)
+{
+signBS=0;
+signCON=0;
+ProTypeStr="" ;
+switch ( ProDT) 
+{ 
+	case 0 : ProTypeStr="IF" ;
+	break; 
+	case 1 : ProTypeStr="Merchandise" ;
+	break; 
+	default : ProTypeStr="IF" ;
+	break; 
+
+} 
+
+BS=IIf(IsEmpty(Ref(BarsSince(bsig),-1)),999,Ref(BarsSince(Bsig),-1)+1);
+SS=IIf(IsEmpty(Ref(BarsSince(ssig),-1)),999,Ref(BarsSince(Ssig),-1)+1);
+CS=IIf(IsEmpty(Ref(BarsSince(csig),-1)),999,Ref(BarsSince(Csig),-1)+1);
+
+
+signcon=IIf(BS<SS AND BS<CS ,1,IIf(SS<BS AND SS<CS,-1,2));
+signBS=IIf(BSIG >0 AND NOT(CSIG>0),1,IIf(SSIG >0 AND NOT(CSIG>0),-1,IIf(CSIG >0,2,0)));
+//Plot(signcon,"signcon",colorred);
+//Plot(signBS,"signBS",coloryellow);
+odbcOpenDatabase(ODBCStr);
+
+	PS=signcon;
+	sig=IIf(bsig && NOT(Csig) && ps!=1,1,IIf(ssig && NOT(Csig) && ps!=-1,-1,IIf(Csig AND ps!=2,2,0)));
+         Nowt=Now(4);
+         if (NowT>=151700 AND NowT<163000 OR 1==1)
+         {
+                   flag=odbcGetValueSQL("SELECT D FROM st_report_test WHERE ST='"+ST+"' order by stockdate desc");
+                   flagT=odbcGetValueSQL("SELECT T FROM st_report_test WHERE ST='"+ST+"' order by stockdate desc");
+                   if( IsEmpty(flag) || flag!=LastValue(DateNum()-1000000))
+                   {
+						D=DateNum()-1000000;
+						newdeltahours=int((Minute()+Interval()/60-1)/60);
+						T=IIf(Minute()+Interval()/60-1>=60,(Hour()+newdeltahours)*10000+(Minute()+Interval()/60-1-newdeltahours*60)*100,TimeNum()+(Interval()/60-1)*100);
+	
+						//T=IIf(Minute()+Interval()/60-1>=60,(Hour()+1)*10000+(Minute()+Interval()/60-1)*100-6000,TimeNum()+(Interval()/60-1)*100);
+						t=IIf((t>112900) && (t<130000),112900,IIf((t>151400) && (t<200000),151400,t));
+						t=IIf(newdeltahours>7,151400,t);
+						//_TRACE(""+t);
+						
+						if (ProDT==1){
+							t=IIf((t>101400) && (t<103000),101400,t);
+						}
+						kn=IIf(IsEmpty(flag),BarsSince(Day()!=Ref(Day(),-1)),BarsSince(Day()!=Ref(Day(),-1)));
+					if (IsEmpty(flag)){flag=150101;}
+					if (IsEmpty(flagT)){flagT=000001;}
+                   for( k = 1; k < BarCount ; k++ ) 
+                   {
+						sd="20"+NumToStr(int(d[k]/10000),2.0)+"/"+NumToStr(int(d[k] % 10000 /100),2.0)+"/"+NumToStr(d[k] %100,2.0)+" "+NumToStr(int(t[k]/10000),2.0)+":"+NumToStr(int(t[k] % 10000 /100),2.0)+":00";
+							
+                            if(SIG[K]!=0 AND ((D[K]==flag AND  T[K]>flagT)  OR D[K]>flag))
+                            {
+                                     bstemp[k]=IIf(SIG[k]==2,0,SIG[k]);
+                                     Contemp[k]=IIf(PS[k]==2,0,PS[k]);
+                                    odbcExecuteSQL ("insert into [LogRecord].[dbo].[errorstlist](st) values("+Interval()+")");
+									odbcExecuteSQL("INSERT INTO st_report_test (P,PP,ST,D,T,stockdate) VALUES ( "+bstemp[K]+","+Contemp[K]+","+st+","+D[K]+","+T[K]+",'"+sd+"' )");
+
+                            }                 
+                   }
+                   }
+
+         }
+
+}
+} 
+
+
+
+function Trading_night_log(BSIG,SSIG,CSIG,st,TradName,ProDT)
+{
+
+
+if(exportSignal)
+{
+signBS=0;
+signCON=0;
+ProTypeStr="" ;
+switch ( ProDT) 
+{ 
+	case 0 : ProTypeStr="IF" ;
+	break; 
+	case 1 : ProTypeStr="Merchandise" ;
+	break; 
+	default : ProTypeStr="IF" ;
+	break; 
+
+} 
+
+BS=IIf(IsEmpty(Ref(BarsSince(bsig),-1)),999,Ref(BarsSince(Bsig),-1)+1);
+SS=IIf(IsEmpty(Ref(BarsSince(ssig),-1)),999,Ref(BarsSince(Ssig),-1)+1);
+CS=IIf(IsEmpty(Ref(BarsSince(csig),-1)),999,Ref(BarsSince(Csig),-1)+1);
+
+
+signcon=IIf(BS<SS AND BS<CS ,1,IIf(SS<BS AND SS<CS,-1,2));
+signBS=IIf(BSIG >0 AND NOT(CSIG>0),1,IIf(SSIG >0 AND NOT(CSIG>0),-1,IIf(CSIG >0,2,0)));
+odbcOpenDatabase(ODBCStr);
+
+	PS=signcon;
+	sig=IIf(bsig && NOT(Csig) && ps!=1,1,IIf(ssig && NOT(Csig) && ps!=-1,-1,IIf(Csig AND ps!=2,2,0)));
+         Nowt=Now(4);
+         if (NowT>=151700 AND NowT<163000  OR 12==1)
+         {
+                   flag=odbcGetValueSQL("SELECT D FROM st_report_test WHERE ST='"+ST+"' order by stockdate desc");
+                   flagT=odbcGetValueSQL("SELECT T FROM st_report_test WHERE ST='"+ST+"' order by stockdate desc");
+                   if( IsEmpty(flag) || flag!=LastValue(DateNum()-1000000))
+                   {
+						D=DateNum()-1000000;
+						T=IIf(Minute()+Interval()/60-1>=60,(Hour()+1)*10000+(Minute()+Interval()/60-1)*100-6000,TimeNum()+(Interval()/60-1)*100);
+						t=IIf((t>=230000),225900,t);
+						kn=IIf(IsEmpty(flag),BarsSince(Day()!=Ref(Day(),-1)),BarsSince(Day()!=Ref(Day(),-1)));
+					if (IsEmpty(flag)){flag=150101;}
+					if (IsEmpty(flagT)){flagT=000001;}
+                   for( k = 1; k < BarCount ; k++ ) 
+                   {	
+						sd="20"+NumToStr(int(d[k]/10000),2.0)+"/"+NumToStr(int(d[k] % 10000 /100),2.0)+"/"+NumToStr(d[k] %100,2.0)+" "+NumToStr(int(t[k]/10000),2.0)+":"+NumToStr(int(t[k] % 10000 /100),2.0)+":00";
+							
+                            if(SIG[K]!=0 AND ((D[K]==flag AND  T[K]>flagT)  OR D[K]>flag))
+                            {
+                                     bstemp[k]=IIf(SIG[k]==2,0,SIG[k]);
+                                     Contemp[k]=IIf(PS[k]==2,0,PS[k]);
+									odbcExecuteSQL("INSERT INTO st_report_test (P,PP,ST,D,T,stockdate) VALUES ( "+bstemp[K]+","+Contemp[K]+","+st+","+D[K]+","+T[K]+",'"+sd+"' )");
+
+                            }                 
+                   }
+                   }
+
+         }
+
+}
+} 
+
+
+
+_SECTION_END();

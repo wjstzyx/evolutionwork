@@ -1,0 +1,674 @@
+_SECTION_BEGIN("General Settings");
+ShowBacktest= ParamToggle("ShowBacktest","No|Yes",1);
+DisplayMode= ParamList("DisplayMode","Equity|Month|Day|Trade",0);
+EntryMode= ParamList("EntryMode","Close|Passive|Aggressive|Open",0);
+ExitMode= ParamList("ExitMode","Close|Passive|Aggressive|Open",0);
+PerformanceIndicator= ParamToggle("PerformanceIndicator","No|Yes",1);
+CommissionParam= Param("Commission",0,0,600,1);
+_SECTION_END();
+_SECTION_BEGIN("Win OR Loss Stop Settings");
+SLTicks= Param("SLTicks",0,0,100,1);
+SWTicks= Param("SWTicks",0,0,100,1);
+TSTicks= Param("TSTicks",0,0,100,1);
+NBar= Param("NBar",0,0,100,1);
+_SECTION_END();
+_SECTION_BEGIN("Zoom Jump Settings");
+ZoomWidth = Param("Window Width",300,2,1000,1);
+ZoomPrevTrigger= ParamTrigger("Go to Next","NEXT");// Jump to next event
+ZoomNextTrigger= ParamTrigger("Go to Previous","PREVIOUS");// Jump to previous event
+_SECTION_END();
+
+////////////////////////////////////////
+SetChartOptions(2, chartWrapTitle ); 
+
+SetBarsRequired(-2,-2);
+Commission= 0;
+Bid=Low;
+Ask=High;
+Last=Close;
+First=Open;
+global Event;
+Event  = 0;
+
+if (DisplayMode =="Month") show = 3;
+else if (DisplayMode =="Day") show = 2;
+else if (DisplayMode =="Trade") show = 1;
+else Show = 0;
+
+if (EntryMode=="Passive")EntryModeValue = 1;
+else if (EntryMode=="Aggressive")EntryModeValue = 2;
+else if (EntryMode=="Open")EntryModeValue = 3;
+else EntryModeValue = 0;
+
+if (ExitMode=="Passive")ExitModeValue= 1;
+else if (ExitMode=="Aggressive")ExitModeValue= 2;
+else if (ExitMode=="Open")ExitModeValue= 3;
+else ExitModeValue= 0;
+
+/*function GetLastK(TickerName)
+{	TickerName = StrMid(TickerName,0, 2 );
+	return IIf(TickerName=="if" OR TickerName=="IF",(TimeNum()+Interval()*100/60)>=151500,(TimeNum()+Interval()*100/60)>=146000);
+}*/
+
+function PlotStrategyName(strategyname)
+{
+	Plot(0,strategyname,colorWhite);
+}
+
+function GetLastK(TickerName)
+{	
+	TickerName = StrMid(TickerName,0, 2 );
+	//return IIf(TickerName=="if" OR TickerName=="IF" OR TickerName=="tf" OR TickerName=="TF",(TimeNum()+Interval()*100/60)>=151500,(TimeNum()+Interval()*100/60)>=146000);
+	return IIf( TickerName=="tf" OR TickerName=="TF",(TimeNum()+Interval()*100/60)>=151500,(TimeNum()+Interval()*100/60)>=146000);
+}
+
+function CloseBS(types)
+{   closebsc=0;
+	timeclose = (TimeNum()+Interval()*100/60);
+	/*switch(types)
+	{
+		case 54:	closebsc=timeclose>=145400;break;
+		case 55:	closebsc=timeclose>=145500;break;
+		case 56:	closebsc=timeclose>=145600;break;
+		case 57:	closebsc=timeclose>=145700;break;
+		case 58:	closebsc=timeclose>=145800;break;	
+		case 59:	closebsc=timeclose>=145900;break;											
+		default:closebsc=timeclose>=146000;
+	}*/
+	closebsc = timeclose>int(146000-types*100);
+	
+	return closebsc;
+}
+function getCS(bsig,ssig,Csig)
+{
+	//sig=IIf(bsig && NOT(Csig),1,IIf(ssig && NOT(Csig),-1,IIf(Csig,2,0)));
+	LSTBSIG = BarsSince(BSIG);
+	LSTSSIG = BarsSince(SSIG);
+	LSTCSIG = BarsSince(CSIG);
+
+	CONDB = (BSIG OR (LSTBSIG<LSTSSIG AND LSTBSIG<LSTCSIG)) AND  NOT(SSIG) AND NOT(CSIG);
+	CONDS = (SSIG OR (LSTSSIG<LSTBSIG AND LSTSSIG<LSTCSIG)) AND NOT(BSIG) AND NOT(CSIG);
+	CONDC = NOT(CONDB) AND NOT(CONDS);	
+
+	sig=IIf(CONDB && NOT(CONDC),1,IIf(CONDS && NOT(CONDC),-1,0));
+	return sig;
+}
+function GetCSSLEveryNBars(BSIG,SSIG,CSIG,NBars)
+{
+BarsSinceBSIG= IIf(IsEmpty(BarsSince(BSIG)),999999,BarsSince(BSIG));
+BarsSinceSSIG= IIf(IsEmpty(BarsSince(SSIG)),999999,BarsSince(SSIG));
+BarsSinceCSIG= IIf(IsEmpty(BarsSince(CSIG)),999999,BarsSince(CSIG));
+BPeriod= BarsSinceBSIG<BarsSinceSSIG AND BarsSinceBSIG<BarsSinceCSIG;
+SPeriod= BarsSinceSSIG<BarsSinceBSIG AND BarsSinceSSIG<BarsSinceCSIG;
+BPoint= BPeriod AND NOT Ref(BPeriod,-1);
+SPoint= SPeriod AND NOT Ref(SPeriod,-1);
+BPrice= Ref(Close,-BarsSince(BPoint));
+SPrice= Ref(Close,-BarsSince(SPoint));
+ 
+BInLoss= BPeriod AND Close<BPrice;
+SInLoss= SPeriod AND Close>SPrice;
+BSL= BPeriod AND NOT BPoint AND CPPEvery(BInLoss)>=NBars;
+SSL= SPeriod AND NOT SPoint AND CPPEvery(SInLoss)>=NBars;
+ 
+BSIG= BPoint;
+SSIG= SPoint;
+CSIG= CSIG OR BSL OR SSL;
+return getCS(BSIG,SSIG,CSIG);
+}
+
+
+function GetLastKMINs(TickerName,Mins)
+{	TickerName = StrMid(TickerName,0, 2 );
+
+	return IIf(TickerName=="if" OR TickerName=="IF",(TimeNum()+Interval()*100/60)>=151500-Mins*100,(TimeNum()+Interval()*100/60)>=146000-Mins*100);
+}
+function Openlastk(TickerName,Mins)
+{	TickerName = StrMid(TickerName,0, 2 );
+
+	return IIf(TickerName=="if" OR TickerName=="IF",(TimeNum()+Interval()*100/60)<151500-Mins*100,(TimeNum()+Interval()*100/60)<146000-Mins*100);
+}
+function Calctime()
+{
+	if(Name()=="IF" OR Name()=="TF")
+	{
+		switchday= Day()!=Ref(Day(),1);
+		switchnoon= Ref(TimeNum(),1)>=130000 AND TimeNum()<=113000;
+		decimaltime= Hour()*3600+Minute()*60+Second();
+		diffnormal= Ref(decimaltime,1)-decimaltime;
+		diffday= diffnormal+21600;
+		diffnoon= diffnormal-5400;
+		timediff= IIf(switchday,diffday,IIf(switchnoon,diffnoon,diffnormal));
+	}
+	else
+	{
+		switchday= Day()!=Ref(Day(),1);
+		switch1015= Ref(TimeNum(),1)>=103000 AND TimeNum()<=101500;
+		switchnoon= Ref(TimeNum(),1)>=133000 AND TimeNum()<=113000;
+		decimaltime= Hour()*3600+Minute()*60+Second();
+		diffnormal= Ref(decimaltime,1)-decimaltime;
+		diffday= diffnormal+21600;
+		diff1015= diffnormal-900;
+		diffnoon= diffnormal-7200;
+		timediff= IIf(switchday,diffday,IIf(switch1015,diff1015,IIf(switchnoon,diffnoon,diffnormal)));
+	}
+	return timediff;
+}
+function GetCSSW(BSIG,SSIG,CSIG,SL,SW)
+{
+    LSTBSIG1XY=BarsSince(BSIG);
+    LSTSSIG1XY=BarsSince(SSIG);
+    LSTCSIG1XY=BarsSince(CSIG);
+    //------------------------------------------------------;
+    LSTBSIG1XY = IIf(IsEmpty(LSTBSIG1XY),999,LSTBSIG1XY);
+    LSTSSIG1XY = IIf(IsEmpty(LSTSSIG1XY),999,LSTSSIG1XY);
+    LSTCSIG1XY = IIf(IsEmpty(LSTCSIG1XY),999,LSTCSIG1XY);
+    //------------------------------------------------------;
+
+    CONDB1XY=(BSIG  OR  (LSTBSIG1XY<LSTSSIG1XY    AND  LSTBSIG1XY<LSTCSIG1XY))  AND  NOT(SSIG)  AND  NOT(CSIG);
+    CONDS1XY=(SSIG  OR  (LSTSSIG1XY<LSTBSIG1XY    AND  LSTSSIG1XY<LSTCSIG1XY))  AND  NOT(BSIG)  AND  NOT(CSIG);
+    CONDC1XY=NOT(CONDB1XY)  AND  NOT(CONDS1XY);
+
+    V1X=IIf(CONDB1XY!=Ref(CONDB1XY,-1),Ref(BarsSince(NOT(CONDB1XY)),-1)+1,BarsSince(NOT(CONDB1XY)));
+    BPRICEX=Ref(Close,-V1X+1);
+    V2X=IIf(CONDS1XY!=Ref(CONDS1XY,-1),Ref(BarsSince(NOT(CONDS1XY)),-1)+1,BarsSince(NOT(CONDS1XY)));
+    SPRICEX=Ref(Close,-V2X+1);
+    T11=(Close-SPRICEX>SPRICEX*SL/10000);
+    T21=(BPRICEX-Close>BPRICEX*SL/10000);
+    T1101=(SPRICEX-Close>SPRICEX*SW/10000);
+    T2102=(Close-BPRICEX>BPRICEX*SW/10000);
+
+
+
+	CSIGXY=CSIG OR (CONDB1XY AND T21) OR (CONDS1XY AND T11) OR (CONDB1XY AND T2102) OR (CONDS1XY AND T1101);
+
+    LSTCSIGXY = BarsSince(CSIGXY);
+    LSTCSIGXY= IIf(IsEmpty(LSTCSIGXY),999,LSTCSIGXY);
+
+
+    CONDBX=(BSIG  OR  (LSTBSIG1XY<LSTSSIG1XY   AND  LSTBSIG1XY<LSTCSIGXY))  AND  NOT(SSIG)  AND  NOT(CSIGXY);
+    CONDSX=(SSIG  OR  (LSTSSIG1XY<LSTBSIG1XY   AND  LSTSSIG1XY<LSTCSIGXY))  AND  NOT(BSIG)  AND  NOT(CSIGXY);
+    CONDCX=NOT(CONDBX)  AND  NOT(CONDSX);
+    CSIG=CONDCX;
+    BSIG= CONDBX AND NOT(Ref(CONDBX,-1)) ;
+    SSIG= CONDSX AND NOT(Ref(CONDSX,-1)) ;
+	return getCS(bsig,ssig,Csig);
+
+}
+function SetContractOption(PV,CM,Com,tk)
+{
+	if(CommissionParam==0)
+		Commission= Com;
+	else
+		Commission= CommissionParam;
+	PointValue= PV;
+	TickSize= tk;
+	SetOption("InitialEquity", 100000);
+	SetOption("CommissionMode", CM);
+	SetOption("CommissionAmount", Com);
+//Plot(Com,"pv",colorRed);
+}
+function getCSL(bsig,ssig,Csig)
+{
+	BarsSinceBSIG= IIf(IsEmpty(BarsSince(BSIG)),999999,BarsSince(BSIG));
+	BarsSinceSSIG= IIf(IsEmpty(BarsSince(SSIG)),999999,BarsSince(SSIG));
+	BarsSinceCSIG= IIf(IsEmpty(BarsSince(CSIG)),999999,BarsSince(CSIG));
+	BPeriod= BarsSinceBSIG<BarsSinceSSIG AND BarsSinceBSIG<BarsSinceCSIG;
+	SPeriod= BarsSinceSSIG<BarsSinceBSIG AND BarsSinceSSIG<BarsSinceCSIG;
+
+	sig=IIf(BPeriod,1,IIf(SPeriod,-1,0));
+	return sig;
+}
+function Initial()
+{
+	PositionSize= MarginDeposit= 1;
+	TickerName= Name();
+	switch(StrMid(TickerName,0,3))
+	{
+		//case "IF":	SetContractOption(300,2,100,0.2);break;
+		case "IF":	SetContractOption(300,2,60,0.2);break;
+		case "IC":	SetContractOption(200,2,170,0.2);break;
+
+		//case "IF":SetContractOption(10,2,160,1);break;//cu
+		//case "IF":SetContractOption(150,2,210,1);break;//rb
+		case "CU":	SetContractOption(5,2,50,10);break;//50
+		case "cu":	SetContractOption(5,2,50,10);break;//50
+		case "cuz":	SetContractOption(5,2,20,10);break;//50
+		case "zn":	SetContractOption(5,2,25,5);break;
+		case "c":	SetContractOption(10,2,15,1);break;
+		case "ru":	SetContractOption(10,2,30,5);break;
+		case "RU":	SetContractOption(10,2,50,5);break;
+        case "RU1506":SetContractOption(10,2,30,5);break;
+		case "CF":	SetContractOption(5,2,30,5);break;
+		case "I":	SetContractOption(100,2,25,0.5);break;
+		case "cs":	SetContractOption(10,2,15,1);break;
+		case "au":	SetContractOption(1,2,50,0.05);break;
+		case "ag":	SetContractOption(15,2,20,1);break;
+		case "bu":	SetContractOption(10,2,25,2);break;
+		case "rb":	SetContractOption(10,2,10,1);break;
+       case "RB":	SetContractOption(10,2,10,1);break;
+		case "hc":	SetContractOption(10,2,15,1);break;
+		case "pp":	SetContractOption(5,2,10,1);break;
+		case "NI":	SetContractOption(1,2,15,10);break;
+		case "niz":	SetContractOption(1,2,15,10);break;
+		case "ME":	SetContractOption(10,2,10,1);break;
+		case "MA":	SetContractOption(10,2,10,1);break;
+		case "M":	SetContractOption(10,2,10,1);break;
+	case "mzs":	SetContractOption(10,2,10,1);break;
+	case "M15":	SetContractOption(10,2,10,1);break;
+		case "y":	SetContractOption(10,2,20,2);break;
+		case "P":	SetContractOption(10,2,20,2);break;
+case "P14":	SetContractOption(10,2,20,2);break;
+case "P15":	SetContractOption(10,2,20,2);break;
+case "pzs":	SetContractOption(10,2,20,2);break;
+case "czs":	SetContractOption(10,2,10,1);break;
+		case "L":	SetContractOption(5,2,25,5);break;
+		case "j":	SetContractOption(100,2,50,1);break;
+		case "jzs":	SetContractOption(100,2,50,1);break;
+		case "zn":	SetContractOption(5,2,50,5);break;
+		case "ZN":	SetContractOption(5,2,25,5);break;
+		case "SR":	SetContractOption(10,2,10,1);break;
+		case "TA":	SetContractOption(5,2,10,2);break;
+		case "FG":	SetContractOption(20,2,10,1);break;
+       case "RMZ":	SetContractOption(10,2,10,1);break;
+		case "RM":	SetContractOption(10,2,10,1);break;
+		//se "TF":	SetContractOption(10000,2,40,0.002);break;
+		case "TF":	SetContractOption(10000,2,170,0.005);break;
+case "Tzl":	SetContractOption(10000,2,75,0.005);break;
+case "Tzs":	SetContractOption(10000,2,75,0.005);break;
+        //case "T???????????????????????????????????????????????????????????????????????????????????????????━??????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????：???????????????????????????????????????????||????????????????????????????????????????????????????????????????????????????????????????━??????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????：???????????????????????????????????????????|?D?":	SetContractOption(10000,2,75,0.005);break;
+		case "TF-":	SetContractOption(10000,2,170,0.005);break;
+		case "AUD":	SetContractOption(100000,2,4,1);break;	
+		case "EUR":	SetContractOption(100000,2,4,1);break;	
+		case "GBP":	SetContractOption(100000,2,4,1);break;
+		case "pp":	SetContractOption(5,2,10,1);break;
+
+		//default:SetContractOption(10000,2,75,0.005);
+//default:SetContractOption(5,2,50,5);break;
+default:	SetContractOption(10,2,10,1);break;
+
+	}
+}
+
+function SL(BscBPoint,BscSPoint,SIG,SLTicks)
+{
+	if(SLTicks==0)
+		result= 0;
+	else
+	{
+		BStop= SIG==1 AND C<Ref(C,-BscBPoint)-SLTicks*TickSize;
+		SStop= SIG==-1 AND C>Ref(C,-BscSPoint)+SLTicks*TickSize;
+	
+		result= (BStop+SStop)>0;
+	}
+	return result;
+}
+
+function SW(BscBPoint,BscSPoint,SIG,SWTicks)
+{
+	if(SWTicks==0)
+		result= 0;
+	else
+	{
+		BStop= SIG==1 AND C>Ref(C,-BscBPoint)+SWTicks*TickSize;
+		SStop= SIG==-1 AND C<Ref(C,-BscSPoint)-SWTicks*TickSize;
+
+		result= (BStop+SStop)>0;
+	}
+	return result;
+}
+
+function TrailingStop(SIG,TSTicks)
+{
+	if(TSTicks==0)
+		result= 0;
+	else
+	{
+		HHVBscBPoint= GHLV(SIG,C,1);
+		LLVBscSPoint= GHLV(SIG,C,0);
+
+		BStop= SIG==1 AND C<HHVBscBPoint-TSTicks*TickSize;
+		SStop= SIG==-1 AND C>LLVBscSPoint+TSTicks*TickSize;
+		result= (BStop+SStop)>0;
+	}
+	return result;
+}
+
+function NBarSL(BscBPoint,BscSPoint,SIG,NBar)
+{
+	if(NBar==0)
+		result= 0;
+	else
+	{
+		BStop= SIG==1 AND C<Ref(C,-BscBPoint) AND BscBPoint>=NBar;
+		SStop= SIG==-1 AND C>Ref(C,-BscSPoint) AND BscSPoint>=NBar;
+
+		result= (BStop+SStop)>0;
+	}
+	return result;
+}
+
+function ParamOptimize( pname, defaultval, minv, maxv, step )
+{
+	return Optimize(pname, Param(pname, defaultval, minv, maxv, step), minv, maxv, step);
+}
+
+function GetSig(BSIG,SSIG,CSIG)
+{
+	ps = GetPs(BSIG,SSIG,CSIG);
+	BPoint= ps==1 AND Ref(ps,-1)!=1;
+	SPoint= ps==-1 AND Ref(ps,-1)!=-1;
+	CPoint= ps==0 AND Ref(ps,-1)!=0;
+	//ZPoint = (Ref(ps,-1)==ps)*2;
+	ZPoint = (Ref(ps,-1)==ps)*ps;
+	sig=BPoint+SPoint+CPoint+ZPoint;
+	return sig;
+}
+
+function ZoomToIndex( FirstBarIndex, LastBarIndex)
+{
+	StaticVarSet("FirstBarIndex",FirstBarIndex );
+	StaticVarSet("LastBarIndex",LastBarIndex);
+	DT = DateTime();
+	BI = BarIndex();
+	LastDateTime = LastValue(ValueWhen( LastBarIndex == BI, DT ));
+	FirstDateTime = LastValue(ValueWhen( FirstBarIndex == BI, DT ));
+	LastDateTimestr = DateTimeToStr( LastDateTime );
+	FirstDateTimestr = DateTimeToStr( FirstDateTime );
+	AB = CreateObject("Broker.Application");
+	AW = AB.ActiveWindow;
+	AW.ZoomToRange( FirstDateTimestr, LastDateTimestr );
+}
+
+function ZoomToPrev(  Event, ZoomWidth )
+{
+	local Event, Zoomwidth;
+	EventNum = Cum(Event);
+	BI = BarIndex();
+	LBI = LastValue(BI);
+	LastEventNum = LastValue(EventNum);
+	NextEventNum = Max(0,Nz(StaticVarGet("EventNumber"))-1);
+	NextEventIndex = LastValue(ValueWhen(EventNum == NextEventNum, BI,1));
+	StaticVarSet("EventNumber",NextEventNum);
+	FirstBarIndex = Max( 0, NextEventIndex - ZoomWidth );
+	LastBarIndex = Min( BarCount-1, NextEventIndex);
+	if(LastBarIndex - FirstBarIndex < ZoomWidth)
+		ZoomToIndex( 0, ZoomWidth);
+	else
+		ZoomToIndex( FirstBarIndex+ZoomWidth/2, LastBarIndex+ZoomWidth/2 );
+	StaticVarSet("FocusIndex",NextEventIndex);
+}
+
+function ZoomToNext( Event, ZoomWidth )
+{
+	local Event, Zoomwidth;
+	EventNum = Cum(Event);
+	BI = BarIndex();
+	LBI = LastValue(BI);
+	//DT=DateTime();
+	//NextEventNum = Min(Nz(StaticVarGet("EventNumber"))+1, LastValue(EventNum));
+	NextEventNum = Min(SelectedValue(EventNum), LastValue(EventNum));
+	NextEventIndex = LastValue(ValueWhen(EventNum == NextEventNum, BI))+1;
+	StaticVarSet("EventNumber",Max(1, NextEventNum));
+	FirstBarIndex = Max( 0, NextEventIndex - ZoomWidth );
+	LastBarIndex = Min( BarCount-1, NextEventIndex);
+	if(LastBarIndex - FirstBarIndex < ZoomWidth)
+		ZoomToIndex( 0, ZoomWidth);
+	else
+		ZoomToIndex( FirstBarIndex+ZoomWidth/2, LastBarIndex+ZoomWidth/2 );
+	StaticVarSet("FocusIndex",NextEventIndex);
+}
+
+function ZoomJump(Event)
+{
+	ZoomAction = ZoomNextTrigger OR ZoomPrevTrigger;
+	BI = BarIndex();
+	SBI = SelectedValue(BI);
+	LBI = LastValue(BI); 
+
+	if( GetCursorMouseButtons() == 1 ) 
+	{
+		StaticVarSet("CursorIndex",SBI);
+		EventNum = Cum(Event);
+		StaticVarSet("EventNumber",SelectedValue(EventNum));
+		StaticVarSet("FocusIndex",SBI-1);
+	}
+	CursorIndex= Nz(StaticVarGet("CursorIndex")); 
+	if(ZoomAction )
+	{
+		if( ZoomNextTrigger ) ZoomToPrev( Event, ZoomWidth );
+		else if( ZoomPrevTrigger ) ZoomToNext( Event, ZoomWidth );
+	}
+}
+function PlotPerformance2(SIG)
+{
+	Initial();
+	//GetPerformanceCounter( True );
+	bar= BarIndex();
+	islastbar= Status("lastbarintest");
+	isfirstbar= Status("firstbarintest");
+	firstbar= LastValue(ValueWhen(isfirstbar,bar));
+	lastbar= LastValue(ValueWhen(islastbar,bar));
+	intest= bar>=FIRstbar AND bar<=Lastbar;
+	barday= Day();
+	barmonth= Month();
+	//printf("time0: %f ms\n", GetPerformanceCounter(True));
+	//SIG= GetPs(BSIG,SSIG,CSIG);
+	BPoint= SIG==1 AND Ref(SIG,-1)!=1;
+	SPoint= SIG==-1 AND Ref(SIG,-1)!=-1;
+	BscBPoint= BarsSince(BPoint);
+	BscSPoint= BarsSince(SPoint);
+	SIGSL= SL(BscBPoint,BscSPoint,SIG,SLTicks);
+	SIGSW= SW(BscBPoint,BscSPoint,SIG,SWTicks);
+	SIGNBarSL= NBarSL(BscBPoint,BscSPoint,SIG,NBar);
+	SIGTrailingStop= TrailingStop(SIG,TSTicks);
+
+	stopSIG= (SIGSL + SIGSW + SIGTrailingStop + SIGNBarSL)>0;
+	SIG= GetStopSig(SIG,stopSIG);
+	Diff= GetDiff(Bid,Ask,Last,First,SIG,EntryModeValue,ExitModeValue);
+	NetDiff= GetNetDiff(SIG,Diff,Commission/PointValue);
+	TradeEnd= (SIG!=1 AND Ref(SIG,-1)==1) OR (SIG!=-1 AND Ref(SIG,-1)==-1);
+//Plot(tradeend,"a",colorBlue);
+//Plot(SIG,"s",colorRed);
+	ZoomJump(TradeEnd);
+
+DrawdownDuration = 0;
+	if(showbacktest)
+	{
+		
+		if (Show ==1)
+		{
+			PSumTrade= GetTradeSum(SIG,NetDiff)*PointValue;
+			BPoint= SIG==1 AND Ref(SIG,-1)!=1;
+			SPoint= SIG==-1 AND Ref(SIG,-1)!=-1;
+			CPoint= SIG==0 AND Ref(SIG,-1)!=0;
+			SBPoint= SIG==1 AND Ref(SIG,-1)==0;
+			SSPoint= SIG==-1 AND Ref(SIG,-1)==0;
+			PlotTexts(PSumTrade,(BPoint+SPoint+CPoint)-(SBPoint+SSPoint),colorRed,colorGreen,colorBlack,0);
+			Plot( 0,"", colorDefault,styleNoLine);
+			PlotShapes( SPoint*shapeSmallDownTriangle+BPoint*shapeSmallUpTriangle+CPoint*shapeSmallCircle, colorBlue);
+			Plot((BPoint+SPoint+CPoint)*PSumTrade,"",IIf(PSumTrade>0,colorRed,colorGreen), styleHistogram,0,0,0,0,10);
+			Plot(IIf(sig!=0 OR CPoint ,PSumTrade,Null), "SumTrade", IIf(SIG>0 OR SPoint ,colorRed,colorGreen),styleLine);
+		}
+		else if (Show ==2)
+		{
+			PSumDay = GetDaySum(NetDiff)*PointValue;
+			PlotTexts(PSumDay ,barday!=Ref(barday,1),colorRed,colorGreen,colorWhite,0);
+			Plot((barday!=Ref(barday,1))*PSumDay,"",IIf(PSumDay>0,colorRed,colorGreen), styleHistogram,0,0,0,0,10);
+			Plot(PSumDay, "SumDay", colorTeal,styleLine);
+		}
+		else if (Show ==3)
+		{
+			PSumMonth= GetMonthSum(NetDiff)*PointValue; 
+
+
+		Plot((barmonth!=Ref(barmonth,1))*PSumMonth,"",IIf(PSumMonth>0,colorRed,colorGreen), styleHistogram,0,0,0,0,10);
+			//Plot(barmonth!=Ref(barmonth,1),"",ColorRGB(255,0,0),styleHistogram | styleThick|styleArea, maskHistogram,0,1,0,-5);
+
+
+		PlotTexts(PSumMonth,barmonth!=Ref(barmonth,1),colorRed,colorGreen,colorWhite,0);
+			
+			Plot(PSumMonth,"SumMonth",colorGreen,styleLine);
+		}
+		else
+		{
+			//GetPerformanceCounter( True );
+			PSumMonth= GetMonthSum(NetDiff)*PointValue;
+			ProfitNoComm= Cum(Diff*PointValue);
+			Profit= Cum(NetDiff*PointValue);
+			//	Plot(barmonth!=Ref(barmonth,1),"",ColorRGB(255,0,0),styleHistogram | styleThick|styleArea, maskHistogram,0,1,0,-5);
+
+			Drawdown= Profit-Highest(Profit);
+			//printf("time2: %f ms\n", GetPerformanceCounter(True));
+			//Plot(barmonth!=Ref(barmonth,1),"",ColorRGB(255,0,0),styleHistogram|styleDashed|styleOwnScale|styleNoLabel,0,1,0,-5);
+			
+			//////////////////////////////
+			DrawDownDuration = BarsSince(Drawdown==0);
+			ThisIsLastBar = BarIndex() == LastValue(BarIndex());
+			if( LastValue(ThisIsLastBar) == 1)
+			{
+				//LineSlope= LastValue(LinRegIntercept(Profit,BarIndex())) + (BarIndex()+1)  * LastValue(LinRegSlope(Profit, BarIndex()) );
+			//Plot( LineSlope,"SlopeLine",colorRed,styleLine,Null,Null,0,0,3);
+				//KRatio= LastValue( LineSlope )/BarCount/StdErr(LineSlope,BarCount)/BarCount;
+			}
+else
+{
+			//LineSlope = 0;
+			//KRatio = 0;
+}
+
+			
+
+			Plot(barmonth!=Ref(barmonth,1),"",colorGrey50,1|styleHistogram|styleOwnScale|styleNoLabel,0,1);
+			PlotTexts(PSumMonth,barmonth!=Ref(barmonth,1),colorBlue,colorBlack,colorDefault,0);
+			Plot(Profit,"Net Profit",colorGreen,styleArea);	
+			Plot(ProfitNoComm,"Gross Profit",colorYellow,styleArea);
+			Plot(Drawdown,"Drawdown",colorRed,styleArea);
+			//Plot(DrawdownDuration,"DrawdownDuration", colorPink,styleLine);
+
+			Plot(PSumMonth,"",colorWhite,styleNoLine);
+		}
+
+		if (PerformanceIndicator ==1)
+		{
+			
+			SumTrade= GetTradeSum(SIG,NetDiff)*PointValue;
+			Tradingtimes= Cum(TradeEnd );//
+			
+			//wintrade= Cum(TradeEnd AND SumTrade>0 AND intest);
+			wintrade= Cum(TradeEnd AND SumTrade>0 );// AND SumTrade>0 AND intest);
+			WinRate= (Wintrade/tradingtimes*100)/100;
+			Gross= Cum(TradeEnd*Sumtrade);
+			ProfitPerTrade= Gross/TradingTimes;
+			Profit= Cum(NetDiff*PointValue);
+			ProfitFactor= abs(Cum((TradeEnd AND SumTrade>0)*SumTrade)/Cum((TradeEnd AND SumTrade<0)*SumTrade));
+			MaxDrawdown= Lowest(Profit-Highest(Profit));
+			////////////////////////////////////////////////////////
+
+			MaxDrawdownDuration = Highest( DrawdownDuration );
+
+			
+
+				//Plot(KRatio,"KRatio",colorPink,16|2048);
+						//===
+			FSTK=Month()!=Ref(Month(),-1);
+			abc=Cum(fstk)+1;
+			Avgmonth=profit/abc;
+			//===
+			FSTy=Year()!=Ref(Year(),-1);
+			Lstyear=BarsSince(FSTy);
+			yeyearmont=Ref(profit,-Lstyear-1);
+			toyearmonth=profit-yeyearmont;
+
+			Avgmonthlastyear=toyearmonth/(Month());//4490;//-3480;//4490;//Sum(Ref(PSumMonth,0),1)/1;
+		
+			//Plot(psummonth,"p",colorRed);
+			Plot(Tradingtimes,"Tradingtimes",colorTurquoise,16|2048);
+			Plot(WinRate,"WinRate",colorGreen,16|2048);
+			Plot(ProfitPerTrade,"ProfitPerTrade",colorSkyblue,16|2048);
+			Plot(ProfitFactor,"ProfitFactor",colorYellow,16|2048);
+			Plot(MaxDrawdown,"MaxDrawdown",colorRed,16|2048);
+////////////////////////////////////////////////////////
+			//Plot(MaxDrawdownDuration,"MaxDrawdownDuraion",colorPink,16|2048);
+
+			
+
+			
+			Plot(Avgmonth,"Avgmonth",colorGreen,16|2048);
+			Plot(Avgmonthlastyear,"Avgmonthlastyear",colorGreen,16|2048);
+
+
+		}
+	}
+}
+
+
+function GetSig123(CondO)
+{
+	for(i=0;i<BarCount;i++)
+	{
+		if(CondO[i]>0)
+			Cond[i] = 1;
+		if(CondO[i]<0)
+			Cond[i] = -1;
+		if(CondO[i]==0)
+			Cond[i] = 0;
+	}
+	return Cond;
+}
+function getdrawdown2(SIG)
+{
+	Initial();
+	//GetPerformanceCounter( True );
+	bar= BarIndex();
+	islastbar= Status("lastbarintest");
+	isfirstbar= Status("firstbarintest");
+	firstbar= LastValue(ValueWhen(isfirstbar,bar));
+	lastbar= LastValue(ValueWhen(islastbar,bar));
+	intest= bar>=FIRstbar AND bar<=Lastbar;
+	barday= Day();
+	barmonth= Month();
+	//printf("time0: %f ms\n", GetPerformanceCounter(True));
+	//SIG= GetPs(BSIG,SSIG,CSIG);
+	BPoint= SIG==1 AND Ref(SIG,-1)!=1;
+	SPoint= SIG==-1 AND Ref(SIG,-1)!=-1;
+	BscBPoint= BarsSince(BPoint);
+	BscSPoint= BarsSince(SPoint);
+	SIGSL= SL(BscBPoint,BscSPoint,SIG,SLTicks);
+	SIGSW= SW(BscBPoint,BscSPoint,SIG,SWTicks);
+	SIGNBarSL= NBarSL(BscBPoint,BscSPoint,SIG,NBar);
+	SIGTrailingStop= TrailingStop(SIG,TSTicks);
+
+	stopSIG= (SIGSL + SIGSW + SIGTrailingStop + SIGNBarSL)>0;
+	SIG= GetStopSig(SIG,stopSIG);
+	Diff= GetDiff(Bid,Ask,Last,First,SIG,EntryModeValue,ExitModeValue);
+	NetDiff= GetNetDiff(SIG,Diff,Commission/PointValue);
+	Profit= Cum(NetDiff*PointValue);
+	Drawdown= Profit-Highest(Profit);
+
+//	Plot(Drawdown,"Drawdown",colorDarkRed,styleArea);
+return drawdown;
+}
+
+function getdrawdownduration2(SIG)
+{
+	drawdown = getdrawdown2(SIG);
+	return BarsSince(drawdown==0);
+}
+
+/////////////////////////////////////////////////
+function getdrawdownduration(BSIG,SSIG,CSIG)
+{
+	return getdrawdownduration2(GetPs(BSIG,SSIG,CSIG));
+}
+
+
+function getdrawdown(BSIG,SSIG,CSIG)
+{
+	return getdrawdown2(GetPs(BSIG,SSIG,CSIG));
+}
+function PlotPerformance(BSIG,SSIG,CSIG)
+{
+	return PlotPerformance2(GetPs(BSIG,SSIG,CSIG));
+
+
+}
