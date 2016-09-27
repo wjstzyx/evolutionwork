@@ -124,26 +124,73 @@ def main_run_afl(Ticker):
 
 
 #从数据库中将数据保存csv 并放入规定文件夹
-def gere_datafile(daynight,endtime):
-	pass
+def gere_datafile(starttime):
+	sql="select distinct symbol from TSymbol"
+	res1=ms.dict_sql(sql)
+	for symbol in res1:
+		sql="select CONVERT(varchar(20),StockDate,111) as data, CONVERT(varchar(20),StockDate,8) as time,O,H,L,C,V,OPI from TSymbol where Symbol='%s' and stockdate>='%s'  order by StockDate" % (symbol['symbol'],starttime)
+		rows=ms.dict_sql(sql)
+		datafir=ABautoroot+"\\ABautofile\\datafile"
+		import csv
+		fieldnames = ['data', 'time', 'O', 'H', 'L', 'C', 'V', 'OPI']
+		dict_writer = csv.DictWriter(file(datafir+'\\%s.csv' % (symbol['symbol']), 'wb'), fieldnames=fieldnames)
+		# dict_writer.writerow(fieldnames)
+		dict_writer.writerows(rows)
+	print "gere_datafile finished"
+
 
 #根据虚拟组名字选择规定的afl文件放入制定文件夹
 def choose_aflfile(acname):
-	pass
+	filepath=r'E:\ABautofile\totalAflfile\%s' % (acname)
+	acnamelist=os.listdir(filepath)
+	print acnamelist
+	for item in acnamelist:
+		print item
 
 
 
 
+# filepath=r'E:\ABautofile\totalAflfile'
+#afl文件重命名，加入symbol
+def rename_afl(filepath):
+	aflfiles=os.listdir(filepath)
+	for file in aflfiles:
+		print file
+		oldfilename=filepath+"\\"+file
+		temp=file.split('min-')[0]
+		if file.split('min-')>=2:
+			newfile=temp+"min-RB-"+''.join(file.split('-')[1:])
+			newfilename=filepath+"\\"+newfile
+			print oldfilename
+			print newfilename
+			os.rename(oldfilename,newfilename)
+# rename_afl(filepath)
 
+
+
+#检测st_repoet_test中的策略是不是虚拟组有且唯一的策略号
+def test_is_all_ac_st():
+	sql="select SUM(1) as sum from P_BASIC where st in (select distinct st from st_report_test)"
+	res1=ms.dict_sql(sql)
+	sql="select SUM(1) as sum from P_BASIC where ac in (select distinct ac from P_BASIC where st in (select distinct st from st_report_test))"
+	res2=ms.dict_sql(sql)
+	if res1[0]['sum']==res2[0]['sum']:
+		print "success 回测虚拟组完成"
+		
+	else:
+		print "fail 不完成，请检查"
+
+test_is_all_ac_st()
 
 ##########
-##运行步骤
+##运行步骤(有些步骤是可以每天定时做的 #1  #2 )
 ##########
-#1  gere_datafile(daynight,endtime)
+#1  gere_datafile(starttime='2016-03-01')
 #2  main_import_data()
 
 #3  choose_aflfile(acname)
-#4  main_run_afl('HC')
+#4  main_run_afl('RB')
+#5  
 
 
 

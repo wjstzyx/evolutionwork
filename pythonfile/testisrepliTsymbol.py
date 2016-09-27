@@ -4,12 +4,14 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
 from dbconn import MSSQL
-# ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
-ms = MSSQL(host="139.196.190.246",user="future",pwd="K@ra0Key",db="future")
+ms05 = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+ms03 = MSSQL(host="192.168.0.3",user="future",pwd="K@ra0Key",db="future")
+ms07 = MSSQL(host="192.168.0.7",user="future",pwd="K@ra0Key",db="future")
+mscloud = MSSQL(host="139.196.190.246",user="future",pwd="K@ra0Key",db="future")
 # resList = ms.find_sql("select top 2 * from st_report")
 # print resList
 
-def test_replicate():
+def test_replicate(ms):
 	sql="select sum(1)as num ,StockDate,symbol  from Tsymbol group by StockDate,Symbol having sum(1)!=1"
 	res=ms.dict_sql(sql)
 	for item in res:
@@ -31,6 +33,38 @@ def test_replicate():
 				ms.insert_sql(sql)
 
 
+def test_replicate_backup(ms):
+	sql="select sum(1)as num ,StockDate,symbol  from TSymbol_quotes_backup group by StockDate,Symbol having sum(1)!=1"
+	res=ms.dict_sql(sql)
+	for item in res:
+		StockDate=item['StockDate']
+		symbol=item['symbol']
+		sql="select id,O,C,H,L,V,OPI,D,T from TSymbol_quotes_backup where StockDate='%s' and symbol='%s' order by id desc " % (StockDate,symbol)
+		record=ms.find_sql(sql)
+		cankao=record[0][1:]
+		for i in range(1,item['num']):
+			if record[i][1:]==cankao:
+				sql='delete from TSymbol_quotes_backup where id=%s' % (record[i][0])
+				#print sql
+				ms.insert_sql(sql)
+			else:
+				print "--NOT SAME"
+				print record[i]
+				sql='delete from TSymbol_quotes_backup where id=%s' % (record[i][0])
+				#print sql
+				ms.insert_sql(sql)
 
-test_replicate()
 
+
+
+test_replicate(ms05)
+test_replicate_backup(ms05)
+
+test_replicate(ms03)
+test_replicate_backup(ms03)
+
+test_replicate(ms07)
+test_replicate_backup(ms07)
+
+test_replicate(mscloud)
+test_replicate_backup(mscloud)

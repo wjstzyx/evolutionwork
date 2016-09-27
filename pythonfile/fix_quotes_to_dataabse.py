@@ -10,6 +10,7 @@ reload(sys)
 sys.setdefaultencoding('utf8')
 from dbconn import MSSQL
 ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+ms05 = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 # resList = ms.find_sql("select top 2 * from st_report")
 # print resList
 
@@ -72,11 +73,21 @@ def read_date_write_to_database_day(ms,targetfile,date,mysymbol=''):
             linelist=line.split(',')
             timeint=int(linelist[8][0:2])*100+int(linelist[8][3:])
             if linelist[7]==date and (timeint>=900 and timeint<=1530) and (mysymbol=='' or mysymbol.lower()==linelist[0].lower()) and  linelist[0] not in ('CMXGLD','SG@A50','BRENTOIL','CMXSLV','UK@CU'):
-                sql="insert into Tsymbol ([Symbol],[O],[C],[H],[L],[V],[OPI],[D],[T],[StockDate],[refc])values('%s',%s,%s,%s,%s,%s,%s,'%s','%s','%s',%s)" % (linelist[0],linelist[1],linelist[2],linelist[3],linelist[4],linelist[5],linelist[6],linelist[7],linelist[8],linelist[9],linelist[10])
+                #按照表名进行插入
+                insertsql="select 1"
+                sql="SELECT tablename  FROM [LogRecord].[dbo].[catch_quotes] where Symbol='%s'" % (linelist[0])
+                tablename=ms05.dict_sql(sql)
+                if tablename:
+                    tablename=tablename[0]['tablename']
+                    insertsql="Insert_quotes '%s',%s,%s,%s,%s,%s,%s,'%s','%s','%s'" % (tablename,linelist[1],linelist[2],linelist[3],linelist[4],linelist[5],linelist[6],linelist[7],linelist[8],linelist[9]) 
+                    # print insertsql
+                else:
+                    print linelist[0]
+                #sql="insert into Tsymbol ([Symbol],[O],[C],[H],[L],[V],[OPI],[D],[T],[StockDate],[refc])values('%s',%s,%s,%s,%s,%s,%s,'%s','%s','%s',%s)" % (linelist[0],linelist[1],linelist[2],linelist[3],linelist[4],linelist[5],linelist[6],linelist[7],linelist[8],linelist[9],linelist[10])
                 try:
-                    ms.insert_sql(sql)
+                    ms.insert_sql(insertsql)
                     successnum=successnum+1
-                    print successnum
+                    # print successnum
                 except Exception,e:
                     if "Cannot insert duplicate key row" in str(e):
                         pass                
@@ -144,12 +155,20 @@ def read_date_write_to_database_night(ms,targetfile,date,mysymbol=''):
                     linelist[0]='ALnight'
                     isnight=1
                 if isnight==1:
-                    sql="insert into Tsymbol ([Symbol],[O],[C],[H],[L],[V],[OPI],[D],[T],[StockDate],[refc])values('%s',%s,%s,%s,%s,%s,%s,'%s','%s','%s',%s)" % (linelist[0],linelist[1],linelist[2],linelist[3],linelist[4],linelist[5],linelist[6],linelist[7],linelist[8],linelist[9],linelist[10])
+                    #按照表名进行插入
+                    insertsql="select 1"
+                    sql="select tablename  from [LogRecord].[dbo].[catch_quotes] where Symbol='%s'" % (linelist[0])
+                    tablename=ms05.dict_sql(sql)
+                    if tablename:
+                        tablename=tablename[0]['tablename']
+                        insertsql="Insert_quotes '%s',%s,%s,%s,%s,%s,%s,'%s','%s','%s'" % (tablename,linelist[1],linelist[2],linelist[3],linelist[4],linelist[5],linelist[6],linelist[7],linelist[8],linelist[9])
+                        # print insertsql
+                    #sql="insert into Tsymbol ([Symbol],[O],[C],[H],[L],[V],[OPI],[D],[T],[StockDate],[refc])values('%s',%s,%s,%s,%s,%s,%s,'%s','%s','%s',%s)" % (linelist[0],linelist[1],linelist[2],linelist[3],linelist[4],linelist[5],linelist[6],linelist[7],linelist[8],linelist[9],linelist[10])
                     #print sql 
                     try:
-                        ms.insert_sql(sql)
+                        ms.insert_sql(insertsql)
                         successnum=successnum+1
-                        print successnum
+                        # print successnum
                     except Exception,e:
                         if "Cannot insert duplicate key row" in str(e):
                             pass                
