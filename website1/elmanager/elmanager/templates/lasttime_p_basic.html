@@ -104,7 +104,7 @@ function add_new_monitor(){
 </script>
 
   <div id="page-wrapper"> 
-   <div class="container-fluid" style="height: 260px"> 
+   <div class="container-fluid" style="height: 320px"> 
     <!-- Page Heading --> 
       <div class="row"> 
        <div class="col-lg-12"> 
@@ -151,6 +151,21 @@ function add_new_monitor(){
             <div class="col-lg-2">
             <button class="btn" name="sttype" value="night_white">白名单查询</button>
             </div>
+          </div>
+          <br>
+          <div class="row">
+            <div class="col-lg-2">
+            <label class="control-label" for="inputSuccess4">3）  存在没有心跳策略的虚拟组</label>
+            </div>
+            <div class="col-lg-1">
+            </div>
+            <div class="col-lg-2">
+            <button class="btn" name="sttype" value="type3">查询</button>
+            </div>
+            <div class="col-lg-2">
+            <button class="btn" name="sttype" value="type3_white">白名单查询</button>
+            </div>
+
           </div>
         </div>
       </form>
@@ -291,6 +306,74 @@ function add_new_monitor(){
     </div> 
 {% endif %}
 
+{% if whichtype == 3 %}
+    <div class="row"> 
+     <div class="col-lg-4"> 
+      <div class="panel panel-default"> 
+       <div class="panel-heading"> 
+        <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>存在没有心跳策略的虚拟组</h3> 
+       </div>
+       <div class="panel-body"> 
+        <div class="table-responsive"> 
+         <table class="table table-bordered table-hover table-striped" id="table3"> 
+          <thead> 
+           <tr> 
+            <th align=center width=30px>策略名称</th>
+            <th align=center width=30px>操作</th> 
+           </tr> 
+          </thead>  
+          <tbody id="mailtotable"> 
+            {% for item in res3 %}
+           <tr> 
+            <td ><a href='/index/monitor/acname_p_basic/?acname={{item.ac}}' target="_blank">{{item.ac}}</a></td> 
+            <td>
+              <button type="button" onclick="add_whitelist(this,'{{item.ac}}','noheart','table3')">加入白名单</button>
+            </td>
+           </tr> 
+            {% endfor %}
+          </tbody> 
+         </table>          
+        </div> 
+
+       </div> 
+      </div> 
+     </div> 
+    </div> 
+{% endif %}
+{% if whichtype == 31 %}
+    <div class="row"> 
+     <div class="col-lg-4"> 
+      <div class="panel panel-default"> 
+       <div class="panel-heading"> 
+        <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>策略上线未产生信号白名单</h3> 
+       </div>
+       <div class="panel-body"> 
+        <div class="table-responsive"> 
+         <table class="table table-bordered table-hover table-striped" id="table31"> 
+          <thead> 
+           <tr> 
+            <th align=center width=30px>策略名称</th>
+            <th align=center width=30px>操作</th> 
+           </tr> 
+          </thead>  
+          <tbody id="mailtotable"> 
+            {% for item in res31 %}
+           <tr> 
+            <td ><a href='/index/monitor/acname_p_basic/?acname={{item.ac}}' target="_blank">{{item.ac}}</a></td> 
+            <td>
+              <button type="button" onclick="remove_whitelist(this,'{{item.ac}}','noheart','table31')">移除白名单</button>
+            </td>
+           </tr> 
+            {% endfor %}
+          </tbody> 
+         </table>          
+        </div> 
+
+       </div> 
+      </div> 
+     </div> 
+    </div> 
+{% endif %}
 
 
    </div> 

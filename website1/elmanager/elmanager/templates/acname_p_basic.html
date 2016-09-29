@@ -83,7 +83,7 @@ function add_new_monitor(){
   </div>
 
     <div class="row"> 
-     <div class="col-lg-8"> 
+     <div class="col-lg-10"> 
       <div class="panel panel-default"> 
        <div class="panel-heading"> 
         <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>虚拟组策略信号最新动作时间</h3> 
@@ -93,11 +93,12 @@ function add_new_monitor(){
          <table class="table table-bordered table-hover table-striped"> 
           <thead> 
            <tr> 
-            <th align=center width=14%>虚拟组名称</th>
-            <th align=center width=14%>策略号</th>
-            <th align=center width=30%>策略名称</th>
-            <th align=center width=16%>品种(日盘或者夜盘)</th>
-            <th align=center width=26%>最后动作时间</th>
+            <th align=center width=12%>虚拟组名称</th>
+            <th align=center width=12%>策略号</th>
+            <th align=center width=25%>策略名称</th>
+            <th align=center width=13%>品种(日盘或者夜盘)</th>
+            <th align=center width=23%>最后动作时间</th>
+            <th align=center width=20%>最后心跳时间</th>
            </tr> 
           </thead>  
           <tbody id="mailtotable"> 
@@ -108,6 +109,7 @@ function add_new_monitor(){
             <td >{{item.TradName}}</td> 
             <td >{{item.stock}}</td> 
             <td >{{item.tradetime}}</td> 
+            <td >{{item.heart}}</td> 
            </tr> 
             {% endfor %}
           </tbody> 

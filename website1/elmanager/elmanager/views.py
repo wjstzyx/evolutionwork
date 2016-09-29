@@ -87,7 +87,7 @@ def acname_p_basic(request):
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 	if request.GET:
 		acname=request.GET.get("acname","")
-		sql="select p.AC,p.ST,t.TradName,isnull(ss.Symbol,p.stock) as stock , ISNULL(convert(nvarchar,t.tradetime,120),'0未产生信号') as tradetime from P_BASIC p left join Trading_logSymbol t on p.ST=t.ST left join Symbol_ID ss on p.STOCK=ss.S_ID where p.ac='%s' order by tradetime " % (acname)
+		sql="select p.AC,p.ST,t.TradName,isnull(ss.Symbol,p.stock) as stock , ISNULL(convert(nvarchar,t.tradetime,120),'0未产生信号') as tradetime,ISNULL(convert(nvarchar,kk.stockdate,120),'无心跳') as heart from P_BASIC p left join Trading_logSymbol t on p.ST=t.ST left join Symbol_ID ss on p.STOCK=ss.S_ID left join LogRecord.dbo.ST_heart kk on p.ST=kk.st where p.ac='%s' order by tradetime" % (acname)
 		res=ms.dict_sql(sql)
 
 	return render_to_response('acname_p_basic.html',{
@@ -104,6 +104,7 @@ def remove_whitelist(request):
 		type=request.POST.get('type','')
 		ms= MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 		sql="update [LogRecord].[dbo].[white_list] set isactive=0 where itemname='%s' and type='%s'" % (acname,type)
+		print sql 
 		ms.insert_sql(sql)
 	result=1
 	result=simplejson.dumps(result,ensure_ascii = False)
@@ -150,8 +151,10 @@ def lasttime_p_basic(request):
 	whichtype=0
 	res1=""
 	res2=""
+	res3=""
 	res11=""
 	res21=""
+	res31=""
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 	if request.POST:
 		print "request.POST",request.POST
@@ -177,13 +180,25 @@ def lasttime_p_basic(request):
 			sql="SELECT itemname as ac FROM [LogRecord].[dbo].[white_list] where TYPE='longtimenosignal' and isactive=1 order by itemname"
 			res21=ms.dict_sql(sql)
 			whichtype=21
+		if sttype=="type3":
+			#存在没有心跳策略的虚拟组
+			sql="select distinct ac from (select distinct a.AC from P_BASIC a left join LogRecord.dbo.ST_heart b on a.ST=b.st  where b.st is null and a.P_size <>0 ) a where ac not in (select itemname from [LogRecord].[dbo].[white_list] where isactive=1 and TYPE='noheart')  order by ac"
+			res3=ms.dict_sql(sql)
+			whichtype=3
+		if sttype=="type3_white":
+			#策略上线未产生信号_白名单
+			sql="SELECT itemname as ac FROM [LogRecord].[dbo].[white_list] where TYPE='noheart' and isactive=1 order by itemname"
+			res31=ms.dict_sql(sql)
+			whichtype=31
 	return render_to_response('lasttime_p_basic.html',{
 		'data':data,
 		'whichtype':whichtype,
 		'res1':res1,
 		'res2':res2,
 		'res11':res11,
-		'res21':res21
+		'res21':res21,
+		'res3':res3,
+		'res31':res31
 	})	
 
 
