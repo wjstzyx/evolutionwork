@@ -21,7 +21,7 @@ def futureaccountone(request):
 	userid='账户为空'
 	if request.GET:
 		userid=request.GET.get("userid","")
-	sql="select date,round(CloseBalance,2)as CloseBalance ,round(Commission,2) as Commission,round((CloseProfit+PositionProfit-Commission),2) as profit,round((CloseProfit+PositionProfit-Commission)/(CloseBalance)*100,2) as ratio from  [LogRecord].[dbo].[AccountsBalance] where userid='%s' order by date" % (userid)
+	sql="select date,round(CloseBalance,2)as CloseBalance ,round(Commission,2) as Commission,round((CloseProfit+PositionProfit-Commission),2) as profit,round((CloseProfit+PositionProfit-Commission)/(CloseBalance)*100,2) as ratio from  [LogRecord].[dbo].[AccountsBalance] where userid='%s' order by date desc" % (userid)
 	res=ms.dict_sql(sql)
 	lastdayCloseBalance=res[0]['CloseBalance']
 	for item in res[1:]:
@@ -60,20 +60,22 @@ def futureaccountone(request):
 
 def futureaccounttotal(request):
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
-	sql="SELECT[primarymoney],[future_company],[userid] ,[beizhu] FROM [LogRecord].[dbo].[Future_AccountsBalance] order by Id"
+	sql="SELECT[primarymoney],[future_company],userid,[beizhu] FROM [LogRecord].[dbo].[Future_AccountsBalance]  order by [ordernum]"
 	res=ms.dict_sql(sql)
 	returnlist=[]
 	for item in res:
 		userid=item['userid']
 		#获取现在的月份
 		month=int(datetime.datetime.now().strftime('%Y%m'))*100
-		month=20160900
+		#month=20160900
 		#print 'month',month
 		#计算月初权益
-		sql="SELECT top 1 [date] ,[userid] [CloseBalance] FROM [LogRecord].[dbo].[AccountsBalance] where userid='%s'  and date< '%s' order by date desc" % (userid,month)
+		sql="SELECT top 1 [date] ,[userid],[CloseBalance] FROM [LogRecord].[dbo].[AccountsBalance] where userid='%s'  and date< '%s' order by date desc" % (userid,month)
 		temp1res=ms.dict_sql(sql)
 		if temp1res:
+			print "###########",userid,temp1res[0]['CloseBalance']
 			equity_on_month_begin=round(float(temp1res[0]['CloseBalance']),1)
+			print "@@@@@@@@@@@"
 		else:
 			equity_on_month_begin=0.1
 		if item['primarymoney']>10 and equity_on_month_begin<10:
@@ -81,9 +83,14 @@ def futureaccounttotal(request):
 
 		sql="SELECT [date] ,[userid] ,[prebalance] ,[deposit] ,[Withdraw] ,[CloseProfit]  ,[PositionProfit]  ,[Commission]  ,[CloseBalance]  FROM [LogRecord].[dbo].[AccountsBalance] where userid='%s'  and date>='%s' order by date" % (userid,month)
 		tempres=ms.dict_sql(sql)
-
+		monthly_equity=0
+		monthly_rate=0
+		equity=0
+		commission=0
+		daily_profit=0
+		daily_rate=0
 		if tempres:
-			monthly_equity=0
+			
 			for item1 in tempres:
 				monthly_equity=monthly_equity+item1['PositionProfit']+item1['CloseProfit']-item1['Commission']
 			monthly_rate=round(monthly_equity/(equity_on_month_begin+0.00002)*100,2)
@@ -96,7 +103,9 @@ def futureaccounttotal(request):
 			daily_profit=tempres[-1]['PositionProfit']+tempres[-1]['CloseProfit']-tempres[-1]['Commission']
 			daily_rate=round(daily_profit/(equity+0.00002)*100,2)
 			templist=[tempres[-1]['date'],int(item['primarymoney']),item['future_company'],item['userid'],round(equity_on_month_begin,1),round(monthly_equity,1),str(monthly_rate)+"%",round(equity,1),round(commission,1),round(daily_profit,1),str(daily_rate)+"%",item['beizhu']]
-			returnlist.append(templist)
+		else:
+			templist=[19900101,int(item['primarymoney']),item['future_company'],item['userid'],round(equity_on_month_begin,1),round(monthly_equity,1),str(monthly_rate)+"%",round(equity,1),round(commission,1),round(daily_profit,1),str(daily_rate)+"%",item['beizhu']]		
+		returnlist.append(templist)
 	return render_to_response('futureaccounttotal.html',{
 		'data':returnlist
 	})
