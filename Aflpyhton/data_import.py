@@ -76,7 +76,7 @@ def main_import_data():
 
 
 #获得afl 和配置文件的对应关系
-def main_run_afl(Ticker):
+def main_run_afl():
 	#todo:解析symbl 直接赋值给Ticker
 	aflfiledir=ABautoroot+"\\ABautofile\\aflfile"
 	aflfiles=os.listdir(aflfiledir)
@@ -86,16 +86,23 @@ def main_run_afl(Ticker):
 		fileparts = file.split(".")
 		if len(fileparts) >= 2 and fileparts[1].lower() == "afl":
 			basename = fileparts[0]
-			timeperiod=basename.split('-')[0]
+			timeperiod=basename.split('-')[1]
 			if timeperiod in ('1min','2min','3min','4min','5min'):
 				itemsettingdir=ABautoroot+"\\ABautofile\\setting\\a1_5"
 			if timeperiod in ('6min','7min','8min','9min','10min'):
 				itemsettingdir=ABautoroot+"\\ABautofile\\setting\\a6_10"
 			if timeperiod in ('11min','12min','13min','14min','15min'):
 				itemsettingdir=ABautoroot+"\\ABautofile\\setting\\a11_15"
+			if timeperiod in ('16min','17min','18min','19min','20min'):
+				itemsettingdir=ABautoroot+"\\ABautofile\\setting\\a16_20"
+			if timeperiod in ('21min','22min','23min','24min','25min'):
+				itemsettingdir=ABautoroot+"\\ABautofile\\setting\\a21_25"
+			if timeperiod in ('26min','27min','28min','29min','30min'):
+				itemsettingdir=ABautoroot+"\\ABautofile\\setting\\a26_30"
 			itemfile=aflfiledir+"\\"+file
 			settingfile=itemsettingdir+"\\"+timeperiod+".ABS"
-			totalconfig.append([itemsettingdir,itemfile,settingfile])
+			Ticker=basename.split('-')[0]
+			totalconfig.append([itemsettingdir,itemfile,settingfile,Ticker])
 
 
 
@@ -119,6 +126,7 @@ def main_run_afl(Ticker):
 			tempdir=item[0]
 		aflfle=item[1]
 		settingfile=item[2]
+		Ticker=item[3]
 		run_aflfile(database,Ticker,aflfle,settingfile)
 
 
@@ -128,7 +136,7 @@ def gere_datafile(starttime):
 	sql="select distinct symbol from TSymbol"
 	res1=ms.dict_sql(sql)
 	for symbol in res1:
-		sql="select CONVERT(varchar(20),StockDate,111) as data, CONVERT(varchar(20),StockDate,8) as time,O,H,L,C,V,OPI from TSymbol where Symbol='%s' and stockdate>='%s'  order by StockDate" % (symbol['symbol'],starttime)
+		sql="select CONVERT(varchar(20),StockDate,111) as data, CONVERT(varchar(20),StockDate,8) as time,O,H,L,C,V,OPI from TSymbol_quotes_backup where Symbol='%s' and stockdate>='%s'  order by StockDate" % (symbol['symbol'],starttime)
 		rows=ms.dict_sql(sql)
 		datafir=ABautoroot+"\\ABautofile\\datafile"
 		import csv
@@ -175,21 +183,26 @@ def test_is_all_ac_st():
 	sql="select SUM(1) as sum from P_BASIC where ac in (select distinct ac from P_BASIC where st in (select distinct st from st_report_test))"
 	res2=ms.dict_sql(sql)
 	if res1[0]['sum']==res2[0]['sum']:
+		sql="delete from st_report where st in (select distinct st from st_report_test)"
+		ms.insert_sql(sql)
+		sql="insert into st_report([P],[PP],[ST],[D],[T],[stockdate],[type]) select [P],[PP],[ST],[D],[T],[stockdate] ,0 as type  from st_report_test"
+		ms.insert_sql(sql)
+		
 		print "success 回测虚拟组完成"
 		
 	else:
 		print "fail 不完成，请检查"
 
-test_is_all_ac_st()
+# test_is_all_ac_st()
 
 ##########
 ##运行步骤(有些步骤是可以每天定时做的 #1  #2 )
 ##########
-#1  gere_datafile(starttime='2016-03-01')
-#2  main_import_data()
+# gere_datafile(starttime='2015-04-01')
+# main_import_data()
 
 #3  choose_aflfile(acname)
-#4  main_run_afl('RB')
+main_run_afl()
 #5  
 
 

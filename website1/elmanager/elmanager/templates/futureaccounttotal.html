@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% load i18n static %}
+{% load url from future %}
+
+{% block extrahead %}
+
+{% endblock %}
+{% block extrastyle %}
+{% endblock %}
+
+{% block content_title %}{% endblock %}
+{% block content %}
+
+<script>
+function save_monitor_info(id){
+	var id=$("#id_"+id).html();
+	var type=$("#type_"+id).val();
+	var item=$("#item_"+id).val();
+	var ismonitor=$("#ismonitor_"+id).val();
+  var starttime=$("#starttime_"+id).val();
+  var endtime=$("#endtime_"+id).val();
+	data={"id":id,"type":type,"item":item,"ismonitor":ismonitor,"starttime":starttime,"endtime":endtime};
+    $.ajax({
+        url:"{% url 'elmanager.views.save_monitor_info' %}",
+        data:data,
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+            alert("保存成功")
+        }
+
+    });
+}
+
+function delete_monitor_info(id){
+	var data={"id":id};
+	if (confirm("确定删除吗")){
+    $.ajax({
+        url:"{% url 'elmanager.views.delete_monitor_info' %}",
+        data:data,
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+        	window.location.href="/index/monitor/configmonitorlist/";
+        }
+    });
+
+	}
+
+}
+
+
+function add_new_monitor(){
+    $.ajax({
+        url:"{% url 'elmanager.views.add_new_monitor' %}",
+        data:{"date":"data"},
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+        	window.location.href="/index/monitor/configmonitorlist/"
+            
+        }    
+    });
+
+
+}
+</script>
+
+  <div id="page-wrapper"> 
+   <div class="container-fluid" style="height: 1100px"> 
+    <!-- Page Heading --> 
+    <div class="row"> 
+     <div class="col-lg-12"> 
+      <h1 class="page-header"> 期货账户权益信息 </h1> 
+
+     </div> 
+    </div> 
+    <div class="row"> 
+     <div class="col-lg-12"> 
+      <div class="panel panel-default"> 
+       <div class="panel-heading"> 
+        <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>期货账户权益信息------当日账户收益表现</h3> 
+       </div> 
+       <div class="panel-body"> 
+        <div class="table-responsive"> 
+         <table class="table table-bordered table-hover table-striped"> 
+          <thead> 
+           <tr> 
+            <th align=center width=6%>日期</th> 
+            <th align=center width=6%>初期本金</th> 
+            <th align=center width=10%>期货公司</th> 
+            <th align=center width=8%>账户</th> 
+            <th align=center width=6%>月初权益</th>
+            <th align=center width=6%>月盈亏</th>
+            <th align=center width=6%>月盈亏比</th>
+            <th align=center width=8%>权益</th>
+            <th align=center width=6%>手续费</th>
+            <th align=center width=6%>盈亏</th>
+            <th align=center width=6%>盈亏比例</th>
+            <th align=center width=160px>持仓品种</th>
+           </tr> 
+          </thead>  
+          <tbody id="mailtotable"> 
+          {% for item in data %}
+           <tr> 
+            <td align=center >{{item.0}}</td>
+            <td align=center >{{item.1}}</td> 
+            <td align=center >{{item.2}}</td> 
+            <td align=center ><a href='/index/quanyi/futureaccountone/?userid={{item.3}}' target="_blank">{{item.3}}</a></td> 
+            <td align=center >{{item.4}}</td> 
+            <td align=center ><font {% if item.5 < 0 %}color="#FF0000"{% endif %}>{{item.5}}</font></td> 
+            <td align=center >{{item.6}}</td> 
+            <td align=center >{{item.7}}</td> 
+            <td align=center >{{item.8}}</td> 
+            <td align=center ><font {% if item.9 < 0 %}color="#FF0000"{% endif %}>{{item.9}}</font></td> 
+            <td align=center >{{item.10}}</td> 
+            <td align=center >{{item.11}}</td> 
+           </tr> 
+
+          {% endfor %}
+          </tbody> 
+         </table> 
+        </div> 
+       </div> 
+      </div> 
+     </div> 
+    </div> 
+   </div> 
+  </div>
+
+{% endblock %}

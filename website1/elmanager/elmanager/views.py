@@ -15,6 +15,97 @@ from dbconn import MSSQL
 # ms1 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="future")
 
 
+
+def futureaccountone(request):
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+	userid='账户为空'
+	if request.GET:
+		userid=request.GET.get("userid","")
+	sql="select date,round(CloseBalance,2)as CloseBalance ,round(Commission,2) as Commission,round((CloseProfit+PositionProfit-Commission),2) as profit,round((CloseProfit+PositionProfit-Commission)/(CloseBalance)*100,2) as ratio from  [LogRecord].[dbo].[AccountsBalance] where userid='%s' order by date" % (userid)
+	res=ms.dict_sql(sql)
+	lastdayCloseBalance=res[0]['CloseBalance']
+	for item in res[1:]:
+		ratio=round(item['profit']/(lastdayCloseBalance+0.000001)*100,2)
+		lastdayCloseBalance=item['CloseBalance']
+		item['ratio']=ratio
+
+
+	data=res
+	acname=userid
+	symbol=""
+	rbdata=[]
+	#画出盈亏的每天统计图
+	#第一个价格
+	sql="select top 1 round(([CloseProfit]+[PositionProfit]-[Commission]),1) as quanyi,DATE as D from [LogRecord].[dbo].[AccountsBalance] where userid='%s'  order by date" % (userid)
+	tempquanyi=ms.find_sql(sql)
+	if tempquanyi==[]:
+		tempquanyi=0
+	else:
+		tempquanyi=tempquanyi[0][0]
+	tempquanyi=0
+	sql="select round(([CloseProfit]+[PositionProfit]-[Commission])-(%s),1) as  quanyia,DATE as D from [LogRecord].[dbo].[AccountsBalance] where userid='%s'  order by date" % (tempquanyi,userid)
+	res1=ms.find_sql(sql)
+	sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='nnnnnnnnnnnn'"
+	res2=ms.find_sql(sql)
+	print "res1",res1
+	print "res2",res2
+	(tempday,lilunquanyi,realquanyi)=change_delta_toaccumu(res1,res2)
+	tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
+	rbdata.append(tempdict)
+	print rbdata
+	return render_to_response('futureaccountone.html',{
+		'data':data,
+		'userid':userid,
+		'rbdata':rbdata
+	})
+
+
+
+def futureaccounttotal(request):
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	sql="SELECT[primarymoney],[future_company],[userid] ,[beizhu] FROM [LogRecord].[dbo].[Future_AccountsBalance] order by Id"
+	res=ms.dict_sql(sql)
+	returnlist=[]
+	for item in res:
+		userid=item['userid']
+		#获取现在的月份
+		month=int(datetime.datetime.now().strftime('%Y%m'))*100
+		month=20160900
+		#print 'month',month
+		#计算月初权益
+		sql="SELECT top 1 [date] ,[userid] [CloseBalance] FROM [LogRecord].[dbo].[AccountsBalance] where userid='%s'  and date< '%s' order by date desc" % (userid,month)
+		temp1res=ms.dict_sql(sql)
+		if temp1res:
+			equity_on_month_begin=round(float(temp1res[0]['CloseBalance']),1)
+		else:
+			equity_on_month_begin=0.1
+		if item['primarymoney']>10 and equity_on_month_begin<10:
+			equity_on_month_begin=item['primarymoney']
+
+		sql="SELECT [date] ,[userid] ,[prebalance] ,[deposit] ,[Withdraw] ,[CloseProfit]  ,[PositionProfit]  ,[Commission]  ,[CloseBalance]  FROM [LogRecord].[dbo].[AccountsBalance] where userid='%s'  and date>='%s' order by date" % (userid,month)
+		tempres=ms.dict_sql(sql)
+
+		if tempres:
+			monthly_equity=0
+			for item1 in tempres:
+				monthly_equity=monthly_equity+item1['PositionProfit']+item1['CloseProfit']-item1['Commission']
+			monthly_rate=round(monthly_equity/(equity_on_month_begin+0.00002)*100,2)
+			#计算当日盈利率：
+			if len(tempres)>=2:			
+				equity=tempres[-2]['CloseBalance']
+			else:
+				equity=tempres[-1]['CloseBalance']
+			commission=tempres[-1]['Commission']
+			daily_profit=tempres[-1]['PositionProfit']+tempres[-1]['CloseProfit']-tempres[-1]['Commission']
+			daily_rate=round(daily_profit/(equity+0.00002)*100,2)
+			templist=[tempres[-1]['date'],int(item['primarymoney']),item['future_company'],item['userid'],round(equity_on_month_begin,1),round(monthly_equity,1),str(monthly_rate)+"%",round(equity,1),round(commission,1),round(daily_profit,1),str(daily_rate)+"%",item['beizhu']]
+			returnlist.append(templist)
+	return render_to_response('futureaccounttotal.html',{
+		'data':returnlist
+	})
+
+
+
 def fixdatacrtab(request):
 	if request.POST:
 		ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
@@ -1689,7 +1780,7 @@ def change_delta_toaccumu(datalist1,datalist2):
 		lastvalue=0
 		for i in range(len(lilunquanyi)):
 			totalvalue=lilunquanyi[i]+lastvalue
-			lilunquanyi[i]=totalvalue
+			lilunquanyi[i]=round(totalvalue,2)
 			lastvalue=totalvalue
 		datalist2=[]
 		return (daylist,lilunquanyi,realquanyi)
@@ -1716,7 +1807,7 @@ def change_delta_toaccumu(datalist1,datalist2):
 	lastvalue=0
 	for i in range(len(lilunquanyi)):
 		totalvalue=lilunquanyi[i]+lastvalue
-		lilunquanyi[i]=totalvalue
+		lilunquanyi[i]=round(totalvalue,2)
 		lastvalue=totalvalue
 	lastvalue=0
 	for i in range(len(realquanyi)):

@@ -39,7 +39,7 @@ def testcanhavest(ac,symbol):
 
 
 
-sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1 order by id desc "
+sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1 order by id desc "
 res=ms.dict_sql(sql)
 for item in res:
 	positionsymbol=item['positionsymbol']
