@@ -11,10 +11,9 @@ ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 # -*- coding: utf-8 -*-
 
 #变化量变成累积量
-sql="SELECT[primarymoney],[future_company],userid,[beizhu] FROM [LogRecord].[dbo].[Future_AccountsBalance]  where userid='红松股票' order by [ordernum]"
+sql="SELECT SUM(1)as sum,userid,date  FROM [LogRecord].[dbo].[AccountsBalance] group by userid,date having SUM(1) =2"
 res=ms.dict_sql(sql)
-returnlist=[]
-print res 
 for item in res:
-	userid=item['userid']
-	print "userid",userid
+	sql="select top 2 * from [LogRecord].[dbo].[AccountsBalance] where userid='%s' and date='%s'" % (item['userid'],item['date'])
+	res1=ms.dict_sql(sql)
+	print res1

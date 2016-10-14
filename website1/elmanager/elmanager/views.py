@@ -60,7 +60,7 @@ def futureaccountone(request):
 
 def futureaccounttotal(request):
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
-	sql="SELECT[primarymoney],[future_company],userid,[beizhu] FROM [LogRecord].[dbo].[Future_AccountsBalance]  order by [ordernum]"
+	sql="SELECT[primarymoney],[future_company],userid,[beizhu] FROM [LogRecord].[dbo].[Future_AccountsBalance] order by [ordernum]"
 	res=ms.dict_sql(sql)
 	returnlist=[]
 	for item in res:
@@ -73,9 +73,7 @@ def futureaccounttotal(request):
 		sql="SELECT top 1 [date] ,[userid],[CloseBalance] FROM [LogRecord].[dbo].[AccountsBalance] where userid='%s'  and date< '%s' order by date desc" % (userid,month)
 		temp1res=ms.dict_sql(sql)
 		if temp1res:
-			print "###########",userid,temp1res[0]['CloseBalance']
 			equity_on_month_begin=round(float(temp1res[0]['CloseBalance']),1)
-			print "@@@@@@@@@@@"
 		else:
 			equity_on_month_begin=0.1
 		if item['primarymoney']>10 and equity_on_month_begin<10:
@@ -89,10 +87,10 @@ def futureaccounttotal(request):
 		commission=0
 		daily_profit=0
 		daily_rate=0
-		if tempres:
-			
+		if tempres:			
 			for item1 in tempres:
 				monthly_equity=monthly_equity+item1['PositionProfit']+item1['CloseProfit']-item1['Commission']
+				print item1['PositionProfit']+item1['CloseProfit']-item1['Commission']
 			monthly_rate=round(monthly_equity/(equity_on_month_begin+0.00002)*100,2)
 			#计算当日盈利率：
 			if len(tempres)>=2:			
@@ -102,6 +100,7 @@ def futureaccounttotal(request):
 			commission=tempres[-1]['Commission']
 			daily_profit=tempres[-1]['PositionProfit']+tempres[-1]['CloseProfit']-tempres[-1]['Commission']
 			daily_rate=round(daily_profit/(equity+0.00002)*100,2)
+			equity=tempres[-1]['CloseBalance']
 			templist=[tempres[-1]['date'],int(item['primarymoney']),item['future_company'],item['userid'],round(equity_on_month_begin,1),round(monthly_equity,1),str(monthly_rate)+"%",round(equity,1),round(commission,1),round(daily_profit,1),str(daily_rate)+"%",item['beizhu']]
 		else:
 			templist=[19900101,int(item['primarymoney']),item['future_company'],item['userid'],round(equity_on_month_begin,1),round(monthly_equity,1),str(monthly_rate)+"%",round(equity,1),round(commission,1),round(daily_profit,1),str(daily_rate)+"%",item['beizhu']]		
