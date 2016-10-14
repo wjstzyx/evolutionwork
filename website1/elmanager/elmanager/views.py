@@ -47,12 +47,9 @@ def futureaccountone(request):
 	res1=ms.find_sql(sql)
 	sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='nnnnnnnnnnnn'"
 	res2=ms.find_sql(sql)
-	print "res1",res1
-	print "res2",res2
 	(tempday,lilunquanyi,realquanyi)=change_delta_toaccumu(res1,res2)
 	tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
 	rbdata.append(tempdict)
-	print rbdata
 	return render_to_response('futureaccountone.html',{
 		'data':data,
 		'userid':userid,
