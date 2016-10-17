@@ -21,6 +21,7 @@ def futureaccountone(request):
 	userid='账户为空'
 	if request.GET:
 		userid=request.GET.get("userid","")
+		mydate=request.GET.get("mydate","")
 	# res.reverse()
 	data=0
 	acname=userid
@@ -32,7 +33,10 @@ def futureaccountone(request):
 	res=ms.dict_sql(sql)
 	allequates=[]
 	selectequates=[]
-	begintime=19901001
+	if mydate=="":
+		begintime=19901001
+	else:
+		begintime=int(mydate)
 	if res:
 		last_closebalance=res[0]['CloseBalance']
 		last_withdraw=res[0]['Withdraw']
@@ -64,7 +68,8 @@ def futureaccountone(request):
 	return render_to_response('futureaccountone.html',{
 		'data':data,
 		'userid':userid,
-		'rbdata':rbdata
+		'rbdata':rbdata,
+		'begintime':begintime
 	})
 
 
