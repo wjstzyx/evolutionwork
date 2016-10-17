@@ -85,13 +85,17 @@ def futureaccounttotal(request):
 		res=ms.dict_sql(sql)
 		print "res",res
 		if len(res)>=1:
-			todays_equity=round((res[-1]['CloseBalance']+res[-1]['Withdraw']),2)
+			todays_equity=round((res[0]['CloseBalance']+res[0]['Withdraw']),2)
+			print todays_equity
 		else:
 			todays_equity=0
 		if len(res)==2:
-			yesterdays_equity=round((res[-2]['CloseBalance']+res[-1]['Withdraw']),2)
+			yesterdays_equity=round((res[1]['CloseBalance']+res[1]['Withdraw']),2)
 		else:
 			yesterdays_equity=0
+		print todays_equity
+		print equity_on_month_begin
+		print Withdraw_on_month_begin
 		monthly_equity=todays_equity-equity_on_month_begin-Withdraw_on_month_begin
 		monthly_rate=round(monthly_equity/(equity_on_month_begin+0.00002+Withdraw_on_month_begin)*100,2)
 
@@ -113,11 +117,13 @@ def futureaccounttotal(request):
 			else:
 				yesterdays_equity=0
 			if len(tempres)>=1:
-				equity=tempres[-1]['CloseBalance']+tempres[-1]['Withdraw']
+				equity=tempres[-1]['CloseBalance']
+				todays_withdraw=tempres[-1]['Withdraw']
 			else:
-				equity=0				
+				equity=0
+				todays_withdraw=0				
 			commission=tempres[-1]['Commission']
-			daily_profit=round(equity-yesterdays_equity,2)
+			daily_profit=round(equity+todays_withdraw-yesterdays_equity,2)
 			daily_rate=round(daily_profit/(equity+0.00002)*100,2)
 			templist=[tempres[-1]['date'],int(item['primarymoney']),item['future_company'],item['userid'],round(equity_on_month_begin,1),round(monthly_equity,1),str(monthly_rate)+"%",round(equity,1),round(commission,1),round(daily_profit,1),str(daily_rate)+"%",item['beizhu']]
 		else:
