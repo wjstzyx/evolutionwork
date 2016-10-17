@@ -70,12 +70,14 @@ def futureaccounttotal(request):
 		#month=20160900
 		#print 'month',month
 		#计算月初权益
-		sql="SELECT top 1 [date] ,[userid],[CloseBalance] FROM [LogRecord].[dbo].[AccountsBalance] where userid='%s'  and date< '%s' order by date desc" % (userid,month)
+		sql="SELECT top 1 [date] ,[userid],[CloseBalance],Withdraw FROM [LogRecord].[dbo].[AccountsBalance] where userid='%s'  and date< '%s' order by date desc" % (userid,month)
 		temp1res=ms.dict_sql(sql)
 		if temp1res:
 			equity_on_month_begin=round(float(temp1res[0]['CloseBalance']),1)
+			Withdraw_on_month_begin=round(float(temp1res[0]['Withdraw']),1)
 		else:
 			equity_on_month_begin=0.1
+			Withdraw_on_month_begin=0
 		if item['primarymoney']>10 and equity_on_month_begin<10:
 			equity_on_month_begin=item['primarymoney']
 		#获得当天权益，如果有出金，则标记出来
@@ -90,8 +92,8 @@ def futureaccounttotal(request):
 			yesterdays_equity=round((res[-2]['CloseBalance']+res[-1]['Withdraw']),2)
 		else:
 			yesterdays_equity=0
-		monthly_equity=todays_equity-equity_on_month_begin
-		monthly_rate=round(monthly_equity/(equity_on_month_begin+0.00002)*100,2)
+		monthly_equity=todays_equity-equity_on_month_begin-Withdraw_on_month_begin
+		monthly_rate=round(monthly_equity/(equity_on_month_begin+0.00002+Withdraw_on_month_begin)*100,2)
 
 
 		sql="SELECT [date] ,[userid] ,[prebalance] ,[deposit] ,[Withdraw] ,[CloseProfit]  ,[PositionProfit]  ,[Commission]  ,[CloseBalance]  FROM [LogRecord].[dbo].[AccountsBalance] where userid='%s'  and date>='%s' order by date" % (userid,month)
