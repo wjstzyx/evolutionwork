@@ -10,10 +10,33 @@ ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 # print resList
 # -*- coding: utf-8 -*-
 
-#变化量变成累积量
-sql="SELECT SUM(1)as sum,userid,date  FROM [LogRecord].[dbo].[AccountsBalance] group by userid,date having SUM(1) =2"
-res=ms.dict_sql(sql)
-for item in res:
-	sql="select top 2 * from [LogRecord].[dbo].[AccountsBalance] where userid='%s' and date='%s'" % (item['userid'],item['date'])
-	res1=ms.dict_sql(sql)
-	print res1
+# sql="select * from [LogRecord].[dbo].[AccountsBalance] where [deposit]>0 and date='20161014'  order by userid"
+# res=ms.dict_sql(sql)
+# for item in res:
+# 	deposit=item['deposit']
+# 	sql="update [LogRecord].[dbo].[AccountsBalance] set [Withdraw]=Withdraw-%s,[CloseBalance]=[CloseBalance]+%s where userid='%s' and date<20161014"  % (deposit,deposit,item['userid'])
+# 	print sql 
+# 	ms.insert_sql(sql)
+
+def aaaa():
+	sql="select distinct userid from [LogRecord].[dbo].[AccountsBalance] where date<=20161013 order by userid"
+	res=ms.dict_sql(sql)
+	for item1 in res:
+		userid=item1['userid']
+		sql="select * from [LogRecord].[dbo].[AccountsBalance] where date<=20161013 and userid='%s' order by date" % (userid)
+		res1=ms.dict_sql(sql)
+		firstvalue=res1[0]['CloseBalance']
+		for item in res1[1:]:
+			numid=item['numid']
+			newdoposit=round(item['CloseBalance']+item['Withdraw']+item['Commission']-item['PositionProfit']-firstvalue,1)
+			firstvalue=item['CloseBalance']
+			sql="update [LogRecord].[dbo].[AccountsBalance] set deposit=%s where numid=%s" % (newdoposit,numid)
+			ms.insert_sql(sql)
+			print sql 
+
+
+aaaa()
+
+
+
+

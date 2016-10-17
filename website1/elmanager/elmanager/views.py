@@ -21,33 +21,44 @@ def futureaccountone(request):
 	userid='账户为空'
 	if request.GET:
 		userid=request.GET.get("userid","")
-	sql="select date,round(CloseBalance,2)as CloseBalance ,round(Commission,2) as Commission,round((CloseProfit+PositionProfit-Commission),2) as profit,round((CloseProfit+PositionProfit-Commission)/(CloseBalance)*100,2) as ratio from  [LogRecord].[dbo].[AccountsBalance] where userid='%s' order by date desc" % (userid)
-	res=ms.dict_sql(sql)
-	lastdayCloseBalance=res[0]['CloseBalance']
-	for item in res[1:]:
-		ratio=round(item['profit']/(lastdayCloseBalance+0.000001)*100,2)
-		lastdayCloseBalance=item['CloseBalance']
-		item['ratio']=ratio
-
-
-	data=res
+	# res.reverse()
+	data=0
 	acname=userid
 	symbol=""
 	rbdata=[]
 	#画出盈亏的每天统计图
-	#第一个价格
-	sql="select top 1 round(([CloseProfit]+[PositionProfit]-[Commission]),1) as quanyi,DATE as D from [LogRecord].[dbo].[AccountsBalance] where userid='%s'  order by date" % (userid)
-	tempquanyi=ms.find_sql(sql)
-	if tempquanyi==[]:
-		tempquanyi=0
-	else:
-		tempquanyi=tempquanyi[0][0]
-	tempquanyi=0
-	sql="select round(([CloseProfit]+[PositionProfit]-[Commission])-(%s),1) as  quanyia,DATE as D from [LogRecord].[dbo].[AccountsBalance] where userid='%s'  order by date" % (tempquanyi,userid)
-	res1=ms.find_sql(sql)
+
+	sql="select date,deposit,Withdraw,CloseBalance,Commission from [LogRecord].[dbo].[AccountsBalance] where userid='%s'  order by date" % (userid)
+	res=ms.dict_sql(sql)
+	allequates=[]
+	selectequates=[]
+	begintime=19901001
+	if res:
+		last_closebalance=res[0]['CloseBalance']
+		last_withdraw=res[0]['Withdraw']
+		for item in res:
+			date=item['date']
+			equity=item['CloseBalance']+item['Withdraw']
+			commission=item['Commission']
+			daily_equity=(item['CloseBalance']+item['Withdraw']-item['deposit'])-(last_closebalance)
+			daily_ratio=daily_equity/(last_closebalance+last_withdraw+0.00002)*100
+			last_closebalance=item['CloseBalance']
+			last_withdraw=item['Withdraw']
+			tempcon=[date,round(equity,1),round(commission,1),round(daily_equity,1),round(daily_ratio,2)]
+			allequates.append(tempcon)
+		data=allequates[:]
+		data.reverse()
+		#计算画图用的数据
+		fisrtvalue=0
+		selectequates=[item for item in allequates if item[0]>=begintime]
+		fisrtvalue=selectequates[0][3]
+		fisrtvalue=0
+		selectequates=[[item[3]-fisrtvalue,item[0]] for item in selectequates]
+
 	sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='nnnnnnnnnnnn'"
 	res2=ms.find_sql(sql)
-	(tempday,lilunquanyi,realquanyi)=change_delta_toaccumu(res1,res2)
+	(tempday,lilunquanyi,realquanyi)=change_delta_toaccumu(selectequates,res2)
+	#(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)	
 	tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
 	rbdata.append(tempdict)
 	return render_to_response('futureaccountone.html',{
@@ -73,7 +84,7 @@ def futureaccounttotal(request):
 		sql="SELECT top 1 [date] ,[userid],[CloseBalance],Withdraw FROM [LogRecord].[dbo].[AccountsBalance] where userid='%s'  and date< '%s' order by date desc" % (userid,month)
 		temp1res=ms.dict_sql(sql)
 		if temp1res:
-			equity_on_month_begin=round(float(temp1res[0]['CloseBalance']),1)
+			equity_on_month_begin=round(float(temp1res[0]['CloseBalance']+temp1res[0]['Withdraw']),1)
 			Withdraw_on_month_begin=round(float(temp1res[0]['Withdraw']),1)
 		else:
 			equity_on_month_begin=0.1
@@ -83,7 +94,6 @@ def futureaccounttotal(request):
 		#获得当天权益，如果有出金，则标记出来
 		sql="SELECT top 2 [date] ,[userid] ,[prebalance] ,[deposit] ,[Withdraw] ,[CloseProfit]  ,[PositionProfit]  ,[Commission]  ,[CloseBalance]  FROM [LogRecord].[dbo].[AccountsBalance] where userid='%s'  and date>='%s' order by date desc" % (userid,month)
 		res=ms.dict_sql(sql)
-		print "res",res
 		if len(res)>=1:
 			todays_equity=round((res[0]['CloseBalance']+res[0]['Withdraw']),2)
 			print todays_equity
@@ -93,11 +103,8 @@ def futureaccounttotal(request):
 			yesterdays_equity=round((res[1]['CloseBalance']+res[1]['Withdraw']),2)
 		else:
 			yesterdays_equity=0
-		print todays_equity
-		print equity_on_month_begin
-		print Withdraw_on_month_begin
-		monthly_equity=todays_equity-equity_on_month_begin-Withdraw_on_month_begin
-		monthly_rate=round(monthly_equity/(equity_on_month_begin+0.00002+Withdraw_on_month_begin)*100,2)
+		monthly_equity=todays_equity-equity_on_month_begin
+		monthly_rate=round(monthly_equity/(equity_on_month_begin+0.00002)*100,2)
 
 
 		sql="SELECT [date] ,[userid] ,[prebalance] ,[deposit] ,[Withdraw] ,[CloseProfit]  ,[PositionProfit]  ,[Commission]  ,[CloseBalance]  FROM [LogRecord].[dbo].[AccountsBalance] where userid='%s'  and date>='%s' order by date" % (userid,month)
@@ -117,17 +124,17 @@ def futureaccounttotal(request):
 			else:
 				yesterdays_equity=0
 			if len(tempres)>=1:
-				equity=tempres[-1]['CloseBalance']
+				equity=tempres[-1]['CloseBalance']+tempres[-1]['Withdraw']
 				todays_withdraw=tempres[-1]['Withdraw']
 			else:
 				equity=0
 				todays_withdraw=0				
 			commission=tempres[-1]['Commission']
-			daily_profit=round(equity+todays_withdraw-yesterdays_equity,2)
+			daily_profit=round(equity-yesterdays_equity,2)
 			daily_rate=round(daily_profit/(equity+0.00002)*100,2)
-			templist=[tempres[-1]['date'],int(item['primarymoney']),item['future_company'],item['userid'],round(equity_on_month_begin,1),round(monthly_equity,1),str(monthly_rate)+"%",round(equity,1),round(commission,1),round(daily_profit,1),str(daily_rate)+"%",item['beizhu']]
+			templist=[tempres[-1]['date'],int(item['primarymoney']),item['future_company'],item['userid'],round(equity_on_month_begin,1),round(monthly_equity,1),str(monthly_rate)+"%",round(equity,1),round(commission,1),round(daily_profit,1),str(daily_rate)+"%",item['beizhu'],todays_withdraw]
 		else:
-			templist=[19900101,int(item['primarymoney']),item['future_company'],item['userid'],round(equity_on_month_begin,1),round(monthly_equity,1),str(monthly_rate)+"%",round(equity,1),round(commission,1),round(daily_profit,1),str(daily_rate)+"%",item['beizhu']]		
+			templist=[19900101,int(item['primarymoney']),item['future_company'],item['userid'],round(equity_on_month_begin,1),round(monthly_equity,1),str(monthly_rate)+"%",round(equity,1),round(commission,1),round(daily_profit,1),str(daily_rate)+"%",item['beizhu'],todays_withdraw]		
 		returnlist.append(templist)
 	return render_to_response('futureaccounttotal.html',{
 		'data':returnlist
