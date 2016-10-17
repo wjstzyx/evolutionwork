@@ -83,11 +83,11 @@ def futureaccounttotal(request):
 		res=ms.dict_sql(sql)
 		print "res",res
 		if len(res)>=1:
-			todays_equity=round((res[-1]['CloseBalance']),2)
+			todays_equity=round((res[-1]['CloseBalance']+res[-1]['Withdraw']),2)
 		else:
 			todays_equity=0
 		if len(res)==2:
-			yesterdays_equity=round((res[-2]['CloseBalance']),2)
+			yesterdays_equity=round((res[-2]['CloseBalance']+res[-1]['Withdraw']),2)
 		else:
 			yesterdays_equity=0
 		monthly_equity=todays_equity-equity_on_month_begin
@@ -107,12 +107,11 @@ def futureaccounttotal(request):
 				monthly_commitssion=monthly_commitssion+item1['Commission']
 			#计算当日盈利率：
 			if len(tempres)>=2:			
-				yesterdays_equity=tempres[-2]['CloseBalance']
-				equity=tempres[-1]['CloseBalance']
+				yesterdays_equity=tempres[-2]['CloseBalance']+tempres[-2]['Withdraw']
 			else:
 				yesterdays_equity=0
 			if len(tempres)>=1:
-				equity=tempres[-1]['CloseBalance']
+				equity=tempres[-1]['CloseBalance']+tempres[-1]['Withdraw']
 			else:
 				equity=0				
 			commission=tempres[-1]['Commission']
