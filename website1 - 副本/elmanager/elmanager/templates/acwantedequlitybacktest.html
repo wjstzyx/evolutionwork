@@ -42,37 +42,27 @@ function showaccompare(acname){
         <div class="col-lg-12">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            虚拟组权益曲线
+                            额外虚拟组权益曲线
                         </div>
                         <!-- /.panel-heading -->
                         <div class="panel-body">
                             <!-- Nav tabs -->
                             <ul class="nav nav-tabs">
-
-                                <li><a href="#IC" data-toggle="tab">IC</a>
-                                </li>
-                                <li><a href="#IF" data-toggle="tab">IF</a>
+                                <li class="active"><a href="#RB" data-toggle="tab">RB</a>
                                 </li>
                             </ul>
 
                             <!-- Tab panes -->
                             <div class="tab-content">
-                                <div class="tab-pane fade" id="IC">
-                                    <h4>Settings Tab</h4>
+                                <div class="tab-pane fade in active" id="RB">
+                                    <h4>Home Tab</h4>
                                     <div class="row">
-                                    {% for item in ICdata %} 
-                                      <div class="col-md-6"><div id='{{item.acname}}_{{item.symbol}}' style="min-width:700px;height:400px"></div></div>
+                                    {% for item in RBdata %} 
+                                      <div class="col-md-6"><div id='{{item.acname}}' style="min-width:700px;height:400px"></div></div>
                                     {% endfor %}                                    
                                     </div>
                                 </div>
-                                <div class="tab-pane fade" id="IF">
-                                    <h4>Settings Tab</h4>
-                                    <div class="row">
-                                    {% for item in IFdata %} 
-                                      <div class="col-md-6"><div id='{{item.acname}}_{{item.symbol}}' style="min-width:700px;height:400px"></div></div>
-                                    {% endfor %}                                    
-                                    </div>
-                                </div>
+  
                             </div>
                         </div>
                         <!-- /.panel-body -->
@@ -91,12 +81,11 @@ function showaccompare(acname){
 {% endblock %}
 
 {% block extrabodyscript %}
-<script src="{% static 'js/highcharts.js' %}"></script>
-  {% for item in ICdata %}
+  <script type="text/javascript" src="http://cdn.hcharts.cn/highcharts/highcharts.js"></script>
+  {% for item in RBdata %}
   <script>
       $(function () {
-
-          $('#{{item.acname}}_{{item.symbol}}').highcharts({
+          $('#{{item.acname}}').highcharts({
               title: {
                   text: '{{item.acname}}--{{item.symbol}}',
                   x: -20 //center
@@ -136,46 +125,4 @@ function showaccompare(acname){
   </script>
   {% endfor %}
 
-  {% for item in IFdata %}
-  <script>
-      $(function () {
-          $('#{{item.acname}}_{{item.symbol}}').highcharts({
-              title: {
-                  text: '{{item.acname}}--{{item.symbol}}',
-                  x: -20 //center
-              },
-              xAxis: {
-                  categories:{{item.xaxis}}
-              },
-              yAxis: {
-                  title: {
-                      text: '每手净收益'
-                  },
-                  plotLines: [{
-                      value: 0,
-                      width: 1,
-                      color: '#808080'
-                  }]
-              },
-              tooltip: {
-                  valueSuffix: '元'
-              },
-              legend: {
-                  layout: 'vertical',
-                  align: 'right',
-                  verticalAlign: 'middle',
-                  borderWidth: 0
-              },
-              series: [{
-                  name: '实际',
-                  data: {{item.realquanyi}}
-              }, {
-                  name: '理论',
-                  data: {{item.lilunquanyi}}             
-              
-              }]
-          });
-      });
-  </script>
-  {% endfor %}
 {% endblock %}

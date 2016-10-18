@@ -124,15 +124,10 @@ def futureaccounttotal(request):
 		#计算每月收益
 		sql="select sum(Withdraw-deposit) as deltawithdeposit from  [LogRecord].[dbo].[AccountsBalance] where userid='%s'  and date>='%s'" % (userid,month)
 		temp1res=ms.dict_sql(sql)
-		print temp1res
-		if temp1res[0]['deltawithdeposit'] is not None:
+		if temp1res:
 			deltawithdeposit=temp1res[0]['deltawithdeposit']
 		else:
 			deltawithdeposit=0
-		# print  "################"
-		# print (todays_equity-todays1_withdraw)
-		# print (equity_on_month_begin-Withdraw_on_month_begin)
-		# print deltawithdeposit
 		monthly_equity=(todays_equity-todays1_withdraw)-(equity_on_month_begin-Withdraw_on_month_begin)+deltawithdeposit
 		monthly_rate=round(monthly_equity/(equity_on_month_begin+0.00002)*100,2)
 

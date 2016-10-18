@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+{% load i18n static %}
+{% load url from future %}
+
+{% block extrahead %}
+
+{% endblock %}
+{% block extrastyle %}
+
+{% endblock %}
+
+{% block content_title %}{% endblock %}
+{% block content %}
+
+<script>
+function save_monitor_info(id){
+	var id=$("#id_"+id).html();
+	var type=$("#type_"+id).val();
+	var item=$("#item_"+id).val();
+	var ismonitor=$("#ismonitor_"+id).val();
+  var starttime=$("#starttime_"+id).val();
+  var endtime=$("#endtime_"+id).val();
+	data={"id":id,"type":type,"item":item,"ismonitor":ismonitor,"starttime":starttime,"endtime":endtime};
+    $.ajax({
+        url:"{% url 'elmanager.views.save_monitor_info' %}",
+        data:data,
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+            alert("保存成功")
+        }
+
+    });
+}
+
+function delete_monitor_info(id){
+	var data={"id":id};
+	if (confirm("确定删除吗")){
+    $.ajax({
+        url:"{% url 'elmanager.views.delete_monitor_info' %}",
+        data:data,
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+        	window.location.href="/index/monitor/configmonitorlist/";
+        }
+    });
+
+	}
+
+}
+
+
+function add_new_monitor(){
+    $.ajax({
+        url:"{% url 'elmanager.views.add_new_monitor' %}",
+        data:{"date":"data"},
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+        	window.location.href="/index/monitor/configmonitorlist/"
+            
+        }    
+    });
+
+
+}
+</script>
+
+  <div id="page-wrapper"> 
+   <div class="container-fluid" style="height: 950px"> 
+    <!-- Page Heading --> 
+    <div class="row"> 
+     <div class="col-lg-12"> 
+      <h1 class="page-header"> {{userid}} 账户详情</h1> 
+     </div> 
+    </div> 
+    <div class="row"> 
+     <div class="col-lg-4"  style=" overflow-y:auto; height:750px;"> 
+      <div class="panel panel-default"> 
+       <div class="panel-heading"> 
+        <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>{{userid}}	</h3> 
+       </div> 
+       <div class="panel-body"> 
+        <div class="table-responsive"> 
+         <table class="table table-bordered table-hover table-striped"> 
+          <thead> 
+           <tr> 
+            <th align=center width=20%>日期</th> 
+            <th align=center width=20%>权益</th> 
+            <th align=center width=20%>手续费</th> 
+            <th align=center width=20%>盈亏</th>
+            <th align=center width=20%>盈亏比例</th>
+           </tr> 
+          </thead>  
+          <tbody id="mailtotable"> 
+          {% for item in data %}
+           <tr> 
+            <td align=center >{{item.0}}</td>
+            <td align=center >{{item.1}}</td> 
+            <td align=center >{{item.2}}</td> 
+            <td align=center >{{item.3}}</td> 
+            <td align=center >{{item.4}}%</td> 
+           </tr> 
+
+          {% endfor %}
+          </tbody> 
+         </table> 
+        </div> 
+       </div> 
+      </div> 
+     </div> 
+     <div class="col-lg-8">
+     <div class="row"> 
+      <div class="col-lg-4">
+      <div class="col-lg-12">   <lable>输入开始日期：例如20161014</lable></div>
+          <div class="input-group">
+            <form class="form" method="GET">
+            <div class="col-lg-9"><input type="text" class="form-control" name="mydate" value={{begintime}}></div>
+            <div class="col-lg-3"><button type="submit" class="btn btn-default" name="userid" value="{{userid}}">显示</button></div>
+          
+            </form>
+
+    </div><!-- /input-group -->
+  </div><!-- /.col-lg-6 -->
+     </div>
+     </br>
+    <div class="row">
+        <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            账户详情
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                                  <div class="row col-lg-12">
+                                    <div id='chartid1' style="height:350px"></div>
+                                   </div>
+                                  <div class="row col-lg-12">
+                                    <div id='chartid2' style="height:350px"></div>
+                                   </div>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+        </div>
+        <!-- /.col-lg-6 -->
+    </div>
+
+
+
+     </div> 
+    </div> 
+   </div> 
+  </div>
+
+{% endblock %}
+
+{% block extrabodyscript %}
+<script type="text/javascript" src="http://cdn.hcharts.cn/highcharts/highcharts.js"></script>
+{% for item in rbdata %}
+  <script>
+      $(function () {
+          $('#chartid1').highcharts({
+              title: {
+                  text: '{{item.acname}}--累计每日盈亏',
+                  x: -20 //center
+              },
+              xAxis: {
+                  categories:{{item.xaxis}}
+              },
+              yAxis: {
+                  title: {
+                      text: '累计每日盈亏'
+                  },
+                  plotLines: [{
+                      value: 0,
+                      width: 1,
+                      color: '#808080'
+                  }]
+              },
+              tooltip: {
+                  valueSuffix: '元'
+              },
+              legend: {
+                  layout: 'vertical',
+                  align: 'right',
+                  verticalAlign: 'middle',
+                  borderWidth: 0
+              },
+              series: [{
+                  name: '理论',
+                  data: {{item.lilunquanyi}}             
+              
+              }]
+          });
+      });
+  </script>
+{% endfor %}
+
+
+{% for item in rbdata1 %}
+  <script>
+      $(function () {
+          $('#chartid2').highcharts({
+              title: {
+                  text: '{{item.acname}}--账号权益',
+                  x: -20 //center
+              },
+              xAxis: {
+                  categories:{{item.xaxis}}
+              },
+              yAxis: {
+                  title: {
+                      text: '账号权益'
+                  },
+                  plotLines: [{
+                      value: 0,
+                      width: 1,
+                      color: '#808080'
+                  }]
+              },
+              tooltip: {
+                  valueSuffix: '元'
+              },
+              legend: {
+                  layout: 'vertical',
+                  align: 'right',
+                  verticalAlign: 'middle',
+                  borderWidth: 0
+              },
+              series: [{
+                  name: '实际',
+                  data: {{item.lilunquanyi}}             
+              
+              }]
+          });
+      });
+  </script>
+{% endfor %}
+{% endblock %}
