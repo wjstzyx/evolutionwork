@@ -16,6 +16,9 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
     url(r'^online/', include('online.urls')),
+    url(r'^index/login/$', mylogin),
+    url(r'^index/logout/$', mylogout),
+    
     #function page
     url(r'^index/$', index),
     url(r'^index/monitor/mailtolist/$', configmailtolist),

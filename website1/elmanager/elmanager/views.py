@@ -1,7 +1,7 @@
 #coding:utf-8
 from django.template.loader import get_template
 from django.template import Context
-from django.http import HttpResponse
+from django.http import HttpResponse,HttpResponseRedirect
 from django.shortcuts import render_to_response
 import datetime
 import time
@@ -15,9 +15,63 @@ from dbconn import MSSQL
 # ms1 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="future")
 
 
+def mylogout(req):
+	response = HttpResponseRedirect('/index/login')
+	#清理cookie里保存username
+	response.delete_cookie('username')
+	response.delete_cookie('userid')
+	return response
+
+def mylogin(request):
+	if request.method=='POST':
+		userid=request.POST.get("form-username","")
+		password=request.POST.get("form-password","")
+		#获取的表单数据与数据库进行比较（验证密码是否正确）
+		ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+		sql="select username,password,userid from [LogRecord].[dbo].[account_user] where userid='%s' and password='%s' and isactive=1" % (userid,password)
+		res=ms.dict_sql(sql)
+		if len(res)==1:
+			username=res[0]['username']
+			#比较成功，跳转index
+			response = HttpResponseRedirect('/index/')
+			#将username写入浏览器cookie,失效时间为3600
+			response.set_cookie('userid',userid,3600)
+			response.set_cookie('username',username,3600)
+			return response
+		else:
+			#比较失败，还在login
+			return render_to_response('mylogin.html',{
+					'ispass':0,
+					'message':'用户名或者密码错误，请重新登录',
+					})	
+
+
+	RBdata=0
+	return render_to_response('mylogin.html',{
+		'RBdata':RBdata,
+		'ispass':1,
+	})	
+
+
+
+
 
 def futureaccountone(request):
-	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	userid = request.COOKIES.get('userid','')
+	username = request.COOKIES.get('username','')
+	#验证权限
+	sql="SELECT a.username,b.function_id,b.function_content  FROM [LogRecord].[dbo].[account_user] a  inner join [LogRecord].[dbo].[account_group] b  on   a.groupname=b.groupname where a.userid='%s' " % (userid)
+	res=ms.dict_sql(sql)
+	isauthpass=0
+	if res:
+		for item in res:
+			if int(item['function_id'])==3:
+				isauthpass=1
+	if isauthpass==0:
+		response = HttpResponse('没有权限查看，请返回 !!')
+		return response
+
 	userid='账户为空'
 	if request.GET:
 		userid=request.GET.get("userid","")
@@ -76,16 +130,31 @@ def futureaccountone(request):
 		'userid':userid,
 		'rbdata':rbdata,
 		'rbdata1':rbdata1,
-		'begintime':begintime
+		'begintime':begintime,
+		'username':username,
 	})
 
 
 
 def futureaccounttotal(request):
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	userid = request.COOKIES.get('userid','')
+	username = request.COOKIES.get('username','')
+	#验证权限
+	sql="SELECT a.username,b.function_id,b.function_content  FROM [LogRecord].[dbo].[account_user] a  inner join [LogRecord].[dbo].[account_group] b  on   a.groupname=b.groupname where a.userid='%s' " % (userid)
+	res=ms.dict_sql(sql)
+	isauthpass=0
+	if res:
+		for item in res:
+			if int(item['function_id'])==3:
+				isauthpass=1
+	if isauthpass==0:
+		response = HttpResponse('没有权限查看，请返回 !!')
+		return response
+
 	#更新下hongsong合并信息
 	general_HongsongAll()
 
-	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 	sql="SELECT[primarymoney],[future_company],userid,[beizhu] FROM [LogRecord].[dbo].[Future_AccountsBalance]  order by [ordernum]"
 	res=ms.dict_sql(sql)
 	returnlist=[]
@@ -171,7 +240,8 @@ def futureaccounttotal(request):
 			templist=[19900101,int(item['primarymoney']),item['future_company'],item['userid'],round(equity_on_month_begin,1),round(monthly_equity,1),str(monthly_rate)+"%",round(equity,1),round(commission,1),round(daily_profit,1),str(daily_rate)+"%",item['beizhu'],todays_withdraw]		
 		returnlist.append(templist)
 	return render_to_response('futureaccounttotal.html',{
-		'data':returnlist
+		'data':returnlist,
+		'username':username,
 	})
 
 
@@ -458,6 +528,20 @@ def save_order_p_basic(request):
 
 def order_account_equity(request):
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	userid = request.COOKIES.get('userid','')
+	username = request.COOKIES.get('username','')
+	#验证权限
+	sql="SELECT a.username,b.function_id,b.function_content  FROM [LogRecord].[dbo].[account_user] a  inner join [LogRecord].[dbo].[account_group] b  on   a.groupname=b.groupname where a.userid='%s' " % (userid)
+	res=ms.dict_sql(sql)
+	isauthpass=0
+	if res:
+		for item in res:
+			if int(item['function_id'])==2:
+				isauthpass=1
+	if isauthpass==0:
+		response = HttpResponse('没有权限查看，请返回 !!')
+		return response
+
 	sql="SELECT distinct ac from [LogRecord].[dbo].[order_p_follow] order by ac"
 	aclist=ms.dict_sql(sql)
 	ICdata=[]
@@ -581,7 +665,8 @@ def order_account_equity(request):
 		'res':res,
 		'F_aclist':F_aclist,
 		'configinfo':configinfo,
-		'ishowconfig':ishowconfig
+		'ishowconfig':ishowconfig,
+		'username':username,
 	})	
 
 
@@ -651,9 +736,38 @@ def account_equity(request):
 
 
 def index(request):
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	userid = request.COOKIES.get('userid','')
+	username = request.COOKIES.get('username','')
+	#验证权限
+	sql="SELECT a.username,b.function_id,b.function_content  FROM [LogRecord].[dbo].[account_user] a  inner join [LogRecord].[dbo].[account_group] b  on   a.groupname=b.groupname where a.userid='%s' " % (userid)
+	res=ms.dict_sql(sql)
+	isauthpass=0
+	if res:
+		for item in res:
+			if int(item['function_id'])==2:
+				isauthpass=1
+	if isauthpass==0:
+		response = HttpResponseRedirect('/index/login')
+		return response
+	#验证登录用户
+	# ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	userid = request.COOKIES.get('userid','')
+	username = request.COOKIES.get('username','')
+	# sql="select username from [LogRecord].[dbo].[account_user]  where userid='%s' and isactive=1"
+	# res=ms.dict_sql(sql)
+	# if res:
+	# 	username = res[0]['username']
+	# else:
+	# 	username='匿名用户'
+
 	now = datetime.datetime.now()
 	t = get_template('myindex.html')
-	html = t.render(Context({'current_date': now}))
+	html = t.render(Context({
+		'current_date':now,
+		'username':username,
+
+		}))
 	return HttpResponse(html)
 
 def adddata(request):
@@ -708,10 +822,24 @@ def acwantedequlitybacktest(request):
 
 
 def acwantedequlitystock(request):
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	userid = request.COOKIES.get('userid','')
+	username = request.COOKIES.get('username','')
+	#验证权限
+	sql="SELECT a.username,b.function_id,b.function_content  FROM [LogRecord].[dbo].[account_user] a  inner join [LogRecord].[dbo].[account_group] b  on   a.groupname=b.groupname where a.userid='%s' " % (userid)
+	res=ms.dict_sql(sql)
+	isauthpass=0
+	if res:
+		for item in res:
+			if int(item['function_id'])==2:
+				isauthpass=1
+	if isauthpass==0:
+		response = HttpResponse('没有权限查看，请返回 !!')
+		return response
+
 	if request.POST:
 		id=request.POST.get('id','')
 	newD=160621
-	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 	IFdata=[]
 	sql="select distinct ac,symbol from dailyquanyi where symbol='IF' and D>151020  order by ac"
 	res=ms.dict_sql(sql)
@@ -743,6 +871,7 @@ def acwantedequlitystock(request):
 	return render_to_response('acwantedequlitystock.html',{
 		'ICdata':ICdata,
 		'IFdata':IFdata,
+		'username':username,
 	})	
 
 
@@ -973,12 +1102,28 @@ def acwantedequlity(request):
 
 
 def acwantedequlityhistory(request):
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	userid = request.COOKIES.get('userid','')
+	username = request.COOKIES.get('username','')
+	#验证权限
+	sql="SELECT a.username,b.function_id,b.function_content  FROM [LogRecord].[dbo].[account_user] a  inner join [LogRecord].[dbo].[account_group] b  on   a.groupname=b.groupname where a.userid='%s' " % (userid)
+	res=ms.dict_sql(sql)
+	isauthpass=0
+	if res:
+		for item in res:
+			if int(item['function_id'])==2:
+				isauthpass=1
+	if isauthpass==0:
+		response = HttpResponse('没有权限查看，请返回 !!')
+		return response
+
+
 	if request.POST:
 		id=request.POST.get('id','')
 	newD=160621
 	RBlist=[]
 
-	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+
 	rbdata=[]
 	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('RB','RBnight') and iscaculate in (1,2)  and [isstatistic] =1 and [isforhistory]=1 order by sortnum"
 	res=ms.dict_sql(sql)
@@ -1288,17 +1433,34 @@ def acwantedequlityhistory(request):
 		'NIdata':NIdata,
 		'Idata':Idata,
 		'Mdata':Mdata,
+		'username':username,
 	})	
 
 
 
 def acwantedequlitynew(request):
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	userid = request.COOKIES.get('userid','')
+	username = request.COOKIES.get('username','')
+	#验证权限
+	sql="SELECT a.username,b.function_id,b.function_content  FROM [LogRecord].[dbo].[account_user] a  inner join [LogRecord].[dbo].[account_group] b  on   a.groupname=b.groupname where a.userid='%s' " % (userid)
+	res=ms.dict_sql(sql)
+	isauthpass=0
+	if res:
+		for item in res:
+			if int(item['function_id'])==2:
+				isauthpass=1
+	if isauthpass==0:
+		response = HttpResponse('没有权限查看，请返回 !!')
+		return response
+
+
 	if request.POST:
 		id=request.POST.get('id','')
 	newD=160621
 	RBlist=[]
 
-	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+
 	rbdata=[]
 	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('RB','RBnight') and iscaculate in (1,2)  and [isstatistic] =1 and [isforhistory]=0 order by sortnum"
 	res=ms.dict_sql(sql)
@@ -1608,6 +1770,7 @@ def acwantedequlitynew(request):
 		'NIdata':NIdata,
 		'Idata':Idata,
 		'Mdata':Mdata,
+		'username':username,
 	})	
 
 
