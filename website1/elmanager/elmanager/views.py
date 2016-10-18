@@ -75,6 +75,9 @@ def futureaccountone(request):
 
 
 def futureaccounttotal(request):
+	#更新下hongsong合并信息
+	general_HongsongAll()
+	
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 	sql="SELECT[primarymoney],[future_company],userid,[beizhu] FROM [LogRecord].[dbo].[Future_AccountsBalance]  order by [ordernum]"
 	res=ms.dict_sql(sql)
@@ -2186,4 +2189,14 @@ def kpi_tongji(lilunquanyi):
 	return result
 
 
+#红松普票账户和期货账户合并
+def general_HongsongAll():
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+	sql="select max(date) as date from [LogRecord].[dbo].[AccountsBalance] where userid in ('HongsongStock','666061008') group by userid"
+	res=ms.dict_sql(sql)
+	sql="select max(date) as date from [LogRecord].[dbo].[AccountsBalance] where userid ='HongsongAll'"
+	maxHongsongAll=ms.dict_sql(sql)[0]['date']
 
+	if res[0]['date']==res[1]['date'] and res[1]['date']>maxHongsongAll:
+		sql="insert into [LogRecord].[dbo].[AccountsBalance] select date,'HongsongAll' as userid, 0 as prebalance, SUM(deposit) as deposit,SUM(Withdraw)as Withdraw,0 as CloseProfit,0 as PositionProfit,SUM(Commission) as Commission,SUM(CloseBalance) as CloseBalance  from [LogRecord].[dbo].[AccountsBalance] where userid in ('HongsongStock','666061008') and date>%s group by date " % (maxHongsongAll)
+		ms.insert_sql(sql)
