@@ -126,9 +126,6 @@ def futureaccounttotal(request):
 		temp1res=ms.dict_sql(sql)
 		if temp1res:
 			deltawithdeposit=temp1res[0]['deltawithdeposit']
-			print "####################"
-			print userid
-			print "####################"
 		else:
 			deltawithdeposit=0
 		monthly_equity=(todays_equity-todays1_withdraw)-(equity_on_month_begin-Withdraw_on_month_begin)+deltawithdeposit
