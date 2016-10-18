@@ -23,7 +23,7 @@ def futureaccountone(request):
 		userid=request.GET.get("userid","")
 		mydate=request.GET.get("mydate","")
 	# res.reverse()
-	data=0
+	data=[]
 	acname=userid
 	symbol=""
 	rbdata=[]
