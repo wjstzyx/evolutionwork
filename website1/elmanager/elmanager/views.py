@@ -27,12 +27,14 @@ def futureaccountone(request):
 	acname=userid
 	symbol=""
 	rbdata=[]
+	rbdata1=[]
 	#画出盈亏的每天统计图
 
 	sql="select date,deposit,Withdraw,CloseBalance,Commission from [LogRecord].[dbo].[AccountsBalance] where userid='%s'  order by date" % (userid)
 	res=ms.dict_sql(sql)
 	allequates=[]
 	selectequates=[]
+	selectequatesallquanyi=[]
 	if mydate=="":
 		begintime=19901001
 	else:
@@ -57,18 +59,23 @@ def futureaccountone(request):
 		selectequates=[item for item in allequates if item[0]>=begintime]
 		fisrtvalue=selectequates[0][3]
 		fisrtvalue=0
+		selectequatesallquanyi=[[item[1],item[0]] for item in selectequates]
 		selectequates=[[item[3]-fisrtvalue,item[0]] for item in selectequates]
+
 
 	sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='nnnnnnnnnnnn'"
 	res2=ms.find_sql(sql)
 	(tempday,lilunquanyi,realquanyi)=change_delta_toaccumu(selectequates,res2)
-	#(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)	
+	(tempday1,lilunquanyi1,realquanyi1)=range_series(selectequatesallquanyi,res2)	
 	tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
+	tempdict1={'acname':acname,'symbol':symbol,'xaxis':tempday1,'lilunquanyi':lilunquanyi1,'realquanyi':realquanyi1}
 	rbdata.append(tempdict)
+	rbdata1.append(tempdict1)
 	return render_to_response('futureaccountone.html',{
 		'data':data,
 		'userid':userid,
 		'rbdata':rbdata,
+		'rbdata1':rbdata1,
 		'begintime':begintime
 	})
 
@@ -2200,7 +2207,8 @@ def general_HongsongAll():
 	res=ms.dict_sql(sql)
 	sql="select max(date) as date from [LogRecord].[dbo].[AccountsBalance] where userid ='HongsongAll'"
 	maxHongsongAll=ms.dict_sql(sql)[0]['date']
+	nowtime=int(datetime.datetime.now().strftime("%H%M"))
 
-	if res[0]['date']==res[1]['date'] and res[1]['date']>maxHongsongAll:
+	if res[0]['date']==res[1]['date'] and res[1]['date']>maxHongsongAll and nowtime>=1501:
 		sql="insert into [LogRecord].[dbo].[AccountsBalance] select date,'HongsongAll' as userid, 0 as prebalance, SUM(deposit) as deposit,SUM(Withdraw)as Withdraw,0 as CloseProfit,0 as PositionProfit,SUM(Commission) as Commission,SUM(CloseBalance) as CloseBalance  from [LogRecord].[dbo].[AccountsBalance] where userid in ('HongsongStock','666061008') and date>%s group by date " % (maxHongsongAll)
 		ms.insert_sql(sql)

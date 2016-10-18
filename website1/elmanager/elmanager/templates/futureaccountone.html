@@ -71,7 +71,7 @@ function add_new_monitor(){
 </script>
 
   <div id="page-wrapper"> 
-   <div class="container-fluid" style="height: 800px"> 
+   <div class="container-fluid" style="height: 950px"> 
     <!-- Page Heading --> 
     <div class="row"> 
      <div class="col-lg-12"> 
@@ -79,7 +79,7 @@ function add_new_monitor(){
      </div> 
     </div> 
     <div class="row"> 
-     <div class="col-lg-4"  style=" overflow-y:auto; height:650px;"> 
+     <div class="col-lg-4"  style=" overflow-y:auto; height:750px;"> 
       <div class="panel panel-default"> 
        <div class="panel-heading"> 
         <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>{{userid}}	</h3> 
@@ -128,9 +128,29 @@ function add_new_monitor(){
   </div><!-- /.col-lg-6 -->
      </div>
      </br>
-     <div class="row">
-      <div id='chartid' style="min-width:700px;height:400px"></div>
-     </div>
+    <div class="row">
+        <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            账户详情
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                                  <div class="row col-lg-12">
+                                    <div id='chartid1' style="height:350px"></div>
+                                   </div>
+                                  <div class="row col-lg-12">
+                                    <div id='chartid2' style="height:350px"></div>
+                                   </div>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+        </div>
+        <!-- /.col-lg-6 -->
+    </div>
+
+
 
      </div> 
     </div> 
@@ -144,7 +164,7 @@ function add_new_monitor(){
 {% for item in rbdata %}
   <script>
       $(function () {
-          $('#chartid').highcharts({
+          $('#chartid1').highcharts({
               title: {
                   text: '{{item.acname}}--累计每日盈亏',
                   x: -20 //center
@@ -155,6 +175,47 @@ function add_new_monitor(){
               yAxis: {
                   title: {
                       text: '累计每日盈亏'
+                  },
+                  plotLines: [{
+                      value: 0,
+                      width: 1,
+                      color: '#808080'
+                  }]
+              },
+              tooltip: {
+                  valueSuffix: '元'
+              },
+              legend: {
+                  layout: 'vertical',
+                  align: 'right',
+                  verticalAlign: 'middle',
+                  borderWidth: 0
+              },
+              series: [{
+                  name: '理论',
+                  data: {{item.lilunquanyi}}             
+              
+              }]
+          });
+      });
+  </script>
+{% endfor %}
+
+
+{% for item in rbdata1 %}
+  <script>
+      $(function () {
+          $('#chartid2').highcharts({
+              title: {
+                  text: '{{item.acname}}--账号权益',
+                  x: -20 //center
+              },
+              xAxis: {
+                  categories:{{item.xaxis}}
+              },
+              yAxis: {
+                  title: {
+                      text: '账号权益'
                   },
                   plotLines: [{
                       value: 0,
