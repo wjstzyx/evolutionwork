@@ -77,7 +77,7 @@ def futureaccountone(request):
 def futureaccounttotal(request):
 	#更新下hongsong合并信息
 	general_HongsongAll()
-	
+
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 	sql="SELECT[primarymoney],[future_company],userid,[beizhu] FROM [LogRecord].[dbo].[Future_AccountsBalance]  order by [ordernum]"
 	res=ms.dict_sql(sql)
@@ -129,17 +129,21 @@ def futureaccounttotal(request):
 			#计算当日盈利率：
 			if len(tempres)>=2:			
 				yesterdays_equity=tempres[-2]['CloseBalance']+tempres[-2]['Withdraw']
+				yesterdays_withdraw=tempres[-2]['Withdraw']
 			else:
 				yesterdays_equity=0
+				yesterdays_withdraw=0
 			if len(tempres)>=1:
 				equity=tempres[-1]['CloseBalance']+tempres[-1]['Withdraw']
 				todays_withdraw=tempres[-1]['Withdraw']
+				todays_deposit=tempres[-1]['deposit']
 			else:
 				equity=0
-				todays_withdraw=0				
+				todays_withdraw=0
+				todays_deposit=0			
 			commission=tempres[-1]['Commission']
-			daily_profit=round(equity-yesterdays_equity,2)
-			daily_rate=round(daily_profit/(equity+0.00002)*100,2)
+			daily_profit=round(equity-todays_deposit-yesterdays_equity+yesterdays_withdraw,2)
+			daily_rate=round(daily_profit/(yesterdays_equity+0.00002)*100,2)
 			templist=[tempres[-1]['date'],int(item['primarymoney']),item['future_company'],item['userid'],round(equity_on_month_begin,1),round(monthly_equity,1),str(monthly_rate)+"%",round(equity,1),round(commission,1),round(daily_profit,1),str(daily_rate)+"%",item['beizhu'],todays_withdraw]
 		else:
 			templist=[19900101,int(item['primarymoney']),item['future_company'],item['userid'],round(equity_on_month_begin,1),round(monthly_equity,1),str(monthly_rate)+"%",round(equity,1),round(commission,1),round(daily_profit,1),str(daily_rate)+"%",item['beizhu'],todays_withdraw]		
