@@ -79,6 +79,7 @@ def read_maillist():
 i=0
 while(1):
 	read_maillist()
+	break
 	time.sleep(2)	
 
 

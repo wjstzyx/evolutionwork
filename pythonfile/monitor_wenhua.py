@@ -320,6 +320,7 @@ while(1):
 	except Exception,e:
 		print e
 		pass
+	break
 	time.sleep(50)
 	mytime=int(datetime.datetime.now().strftime('%H%M'))
 	if (mytime>=2000 and mytime<=2010) or (mytime>=300 and mytime<=710):
