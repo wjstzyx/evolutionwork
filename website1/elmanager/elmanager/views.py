@@ -29,7 +29,7 @@ def register(request):
 		if len(userid)>=1:
 			sql="insert into [LogRecord].[dbo].[account_user]([username]  ,[password]  ,[groupname]  ,[isactive]  ,[userid]) values('%s','%s','策略人员',1,'%s')" % (username,password,userid)
 			ms.insert_sql(sql)
-			response = HttpResponse('用户创建成功，请登录')
+			response = HttpResponse('用户创建成功，请<a href="/index/login/">登录</a>')
 		else:
 			response = HttpResponse('输入有误')
 			#清理cookie里保存username
