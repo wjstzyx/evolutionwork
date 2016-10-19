@@ -7,12 +7,80 @@ import datetime
 import time
 import math
 from django.utils import simplejson
+import hashlib
 import sys
 reload(sys)
 sys.setdefaultencoding( "utf-8" )
 from dbconn import MSSQL
 # ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 # ms1 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="future")
+
+
+def register(request):
+	if request.method=='POST':
+		ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+		print request.POST
+		username=request.POST.get('username','')
+		userid=request.POST.get('userid','')
+		password=request.POST.get('password','')
+		m2=hashlib.md5()
+		m2.update(password)
+		password=m2.hexdigest()
+		if len(userid)>=1:
+			sql="insert into [LogRecord].[dbo].[account_user]([username]  ,[password]  ,[groupname]  ,[isactive]  ,[userid]) values('%s','%s','策略人员',1,'%s')" % (username,password,userid)
+			ms.insert_sql(sql)
+			response = HttpResponse('用户创建成功，请登录')
+		else:
+			response = HttpResponse('输入有误')
+			#清理cookie里保存username
+		response.delete_cookie('username')
+		response.delete_cookie('userid')
+		return response
+	else:
+		return render_to_response('register.html',{
+				'ispass':0,
+				'message':'用户名或者密码错误，请重新登录',
+				'username':'正在注册',
+				})	
+
+
+
+
+def change_password(request):
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	userid = request.COOKIES.get('userid','')
+	username = request.COOKIES.get('username','')
+	#验证权限
+	if len(userid)<=1:
+		response = HttpResponseRedirect('/index/login')
+		return response
+
+	if request.method=='POST':
+		print request.POST
+		userid = request.COOKIES.get('userid','')
+		username = request.COOKIES.get('username','')
+		newpassword=request.POST.get('newpassword','')
+		m2=hashlib.md5()
+		m2.update(newpassword)
+		newpassword=m2.hexdigest()
+		if len(userid)>=1:
+			sql="update top(1) [LogRecord].[dbo].[account_user] set password='%s' where userid='%s'" % (newpassword,userid)
+			ms.insert_sql(sql)
+			response = HttpResponse('密码修改成功，请返回重新登录')
+		else:
+			response = HttpResponse('用户未登录，请重新登录')
+			#清理cookie里保存username
+		response.delete_cookie('username')
+		response.delete_cookie('userid')
+		return response
+	else:
+		return render_to_response('change_password.html',{
+				'ispass':0,
+				'message':'用户名或者密码错误，请重新登录',
+				'username':username,
+				})	
+
+
 
 
 def mylogout(req):
@@ -26,6 +94,10 @@ def mylogin(request):
 	if request.method=='POST':
 		userid=request.POST.get("form-username","")
 		password=request.POST.get("form-password","")
+
+		m2=hashlib.md5()
+		m2.update(password)
+		password=m2.hexdigest()
 		#获取的表单数据与数据库进行比较（验证密码是否正确）
 		ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 		sql="select username,password,userid from [LogRecord].[dbo].[account_user] where userid='%s' and password='%s' and isactive=1" % (userid,password)
@@ -69,7 +141,7 @@ def futureaccountone(request):
 			if int(item['function_id'])==3:
 				isauthpass=1
 	if isauthpass==0:
-		response = HttpResponse('没有权限查看，请返回 !!')
+		response = HttpResponse("该功能正在完善，请返回 !! <button><a href='/index/'>返回</a></button>")
 		return response
 
 	userid='账户为空'
@@ -149,7 +221,7 @@ def futureaccounttotal(request):
 			if int(item['function_id'])==3:
 				isauthpass=1
 	if isauthpass==0:
-		response = HttpResponse('没有权限查看，请返回 !!')
+		response = HttpResponse("该功能正在完善，请返回 !! <button><a href='/index/'>返回</a></button>")
 		return response
 
 	#更新下hongsong合并信息
@@ -539,7 +611,7 @@ def order_account_equity(request):
 			if int(item['function_id'])==2:
 				isauthpass=1
 	if isauthpass==0:
-		response = HttpResponse('没有权限查看，请返回 !!')
+		response = HttpResponse("该功能正在完善，请返回 !! <button><a href='/index/'>返回</a></button>")
 		return response
 
 	sql="SELECT distinct ac from [LogRecord].[dbo].[order_p_follow] order by ac"
@@ -834,7 +906,7 @@ def acwantedequlitystock(request):
 			if int(item['function_id'])==2:
 				isauthpass=1
 	if isauthpass==0:
-		response = HttpResponse('没有权限查看，请返回 !!')
+		response = HttpResponse("该功能正在完善，请返回 !! <button><a href='/index/'>返回</a></button>")
 		return response
 
 	if request.POST:
@@ -1114,7 +1186,7 @@ def acwantedequlityhistory(request):
 			if int(item['function_id'])==2:
 				isauthpass=1
 	if isauthpass==0:
-		response = HttpResponse('没有权限查看，请返回 !!')
+		response = HttpResponse("该功能正在完善，请返回 !! <button><a href='/index/'>返回</a></button>")
 		return response
 
 
@@ -1451,7 +1523,7 @@ def acwantedequlitynew(request):
 			if int(item['function_id'])==2:
 				isauthpass=1
 	if isauthpass==0:
-		response = HttpResponse('没有权限查看，请返回 !!')
+		response = HttpResponse("该功能正在完善，请返回 !! <button><a href='/index/'>返回</a></button>")
 		return response
 
 
@@ -1879,6 +1951,20 @@ def showaccompare(requst):
 
 def configmonitorlist(request):
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	userid = request.COOKIES.get('userid','')
+	username = request.COOKIES.get('username','')
+	#验证权限
+	sql="SELECT a.username,b.function_id,b.function_content  FROM [LogRecord].[dbo].[account_user] a  inner join [LogRecord].[dbo].[account_group] b  on   a.groupname=b.groupname where a.userid='%s' " % (userid)
+	res=ms.dict_sql(sql)
+	isauthpass=0
+	if res:
+		for item in res:
+			if int(item['function_id'])==4:
+				isauthpass=1
+	if isauthpass==0:
+		response = HttpResponse("该功能正在完善，请返回 !! <button><a href='/index/'>返回</a></button>")
+		return response
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 	sql="SELECT [id],[type],[item],[ismonitor],[starttime],[endtime] FROM [LogRecord].[dbo].[monitorconfig]"
 	res=ms.dict_sql(sql)
 	data=res
@@ -1888,6 +1974,21 @@ def configmonitorlist(request):
 
 
 def configmailtolist(request):
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	userid = request.COOKIES.get('userid','')
+	username = request.COOKIES.get('username','')
+	#验证权限
+	sql="SELECT a.username,b.function_id,b.function_content  FROM [LogRecord].[dbo].[account_user] a  inner join [LogRecord].[dbo].[account_group] b  on   a.groupname=b.groupname where a.userid='%s' " % (userid)
+	res=ms.dict_sql(sql)
+	isauthpass=0
+	if res:
+		for item in res:
+			if int(item['function_id'])==4:
+				isauthpass=1
+	if isauthpass==0:
+		response = HttpResponse("该功能正在完善，请返回 !! <button><a href='/index/'>返回</a></button>")
+		return response
+
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 	sql="SELECT [id],[name],[email],[istomail]  FROM [LogRecord].[dbo].[mailtolist]"
 	res=ms.dict_sql(sql)

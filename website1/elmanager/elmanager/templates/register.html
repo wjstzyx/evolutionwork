@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% load i18n static %}
+{% load url from future %}
+
+{% block extrahead %}
+
+{% endblock %}
+{% block extrastyle %}
+{% endblock %}
+
+{% block content_title %}{% endblock %}
+{% block content %}
+
+<script>
+function save_monitor_info(id){
+	var id=$("#id_"+id).html();
+	var type=$("#type_"+id).val();
+	var item=$("#item_"+id).val();
+	var ismonitor=$("#ismonitor_"+id).val();
+  var starttime=$("#starttime_"+id).val();
+  var endtime=$("#endtime_"+id).val();
+	data={"id":id,"type":type,"item":item,"ismonitor":ismonitor,"starttime":starttime,"endtime":endtime};
+    $.ajax({
+        url:"{% url 'elmanager.views.save_monitor_info' %}",
+        data:data,
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+            alert("保存成功")
+        }
+
+    });
+}
+
+function delete_monitor_info(id){
+	var data={"id":id};
+	if (confirm("确定删除吗")){
+    $.ajax({
+        url:"{% url 'elmanager.views.delete_monitor_info' %}",
+        data:data,
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+        	window.location.href="/index/monitor/configmonitorlist/";
+        }
+    });
+
+	}
+
+}
+
+
+function add_new_monitor(){
+    $.ajax({
+        url:"{% url 'elmanager.views.add_new_monitor' %}",
+        data:{"date":"data"},
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+        	window.location.href="/index/monitor/configmonitorlist/"
+            
+        }    
+    });
+
+
+}
+</script>
+
+  <div id="page-wrapper"> 
+   <div class="container-fluid" style="height: 900px"> 
+    <!-- Page Heading --> 
+    <div class="row"> 
+     <div class="col-lg-12"> 
+      <h1 class="page-header">  注册账号 </h1> 
+
+     </div> 
+    </div>
+
+<form class="form" method='POST'>
+<div class="row">
+<div class="col-md-2"></div>
+<div class="col-md-4">
+    <div class="form-group">
+    <label for="exampleInputEmail1">请输入姓名</label>
+    <input  class="form-control" name='username' placeholder="enter username">
+    </div>
+    <div class="form-group">
+    <label for="exampleInputEmail1">请输入登录用户名</label>
+    <input  class="form-control" name='userid' placeholder="enter userid">
+    </div>
+    <div class="form-group">
+    <label for="exampleInputEmail1">请输入密码</label>
+    <input  class="form-control" name='password' placeholder="enter password">
+    <br>
+    <button class="submit" name="sttype" value="register">注册</button>
+    <button><a href='/index/'>返回</a></button>
+    </div>
+
+
+</div>
+
+<div class="col-md-2"></div>
+</div>
+
+</form>
+
+
+   </div> 
+  </div>
+
+{% endblock %}

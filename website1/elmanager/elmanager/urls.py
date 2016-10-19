@@ -18,7 +18,9 @@ urlpatterns = patterns('',
     url(r'^online/', include('online.urls')),
     url(r'^index/login/$', mylogin),
     url(r'^index/logout/$', mylogout),
-    
+    url(r'^index/change_password/$', change_password),
+    url(r'^index/register/$', register),
+
     #function page
     url(r'^index/$', index),
     url(r'^index/monitor/mailtolist/$', configmailtolist),
