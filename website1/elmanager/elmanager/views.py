@@ -949,6 +949,22 @@ def acwantedequlitystock(request):
 
 
 def acwantedequlity(request):
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	userid = request.COOKIES.get('userid','')
+	username = request.COOKIES.get('username','')
+	#验证权限
+	sql="SELECT a.username,b.function_id,b.function_content  FROM [LogRecord].[dbo].[account_user] a  inner join [LogRecord].[dbo].[account_group] b  on   a.groupname=b.groupname where a.userid='%s' " % (userid)
+	res=ms.dict_sql(sql)
+	isauthpass=0
+	if res:
+		for item in res:
+			if int(item['function_id'])==2:
+				isauthpass=1
+	if isauthpass==0:
+		response = HttpResponse("该功能正在完善，请返回 !! <button><a href='/index/'>返回</a></button>")
+		return response
+
+
 	if request.POST:
 		id=request.POST.get('id','')
 	newD=160621
