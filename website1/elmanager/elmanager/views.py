@@ -37,13 +37,13 @@ def accountdetail_ac(request):
 		userid=request.GET.get("userid","")
 		# userid=userid.strip('/')
 	#如果是账号则以下逻辑：
-	sql="select 1 as aa from p_follow where ac='%s'" % (userid)
+	sql="select 1 as aa from p_basic where ac='%s'" % (userid)
 	res111=ms.dict_sql(sql)
 	resultlist={}
 	res={}
 	rbdata=[]
 	message=""
-	if res111:
+	if not  res111:
 		sql="SELECT [AC]  ,[F_ac]  ,[ratio],1 as isac  FROM [Future].[dbo].[p_follow] where ac='%s' and ratio<>0" % (userid)
 		res=ms.dict_sql(sql)
 		for item in res:
@@ -114,11 +114,6 @@ def accountdetail_ac(request):
 				(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 				tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
 				rbdata.append(tempdict)	
-
-
-
-
-			pass
 		else:
 			message="此虚拟组没有统计表现，请联系俞洋"
 
