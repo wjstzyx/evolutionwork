@@ -116,6 +116,10 @@ def accountdetail_ac(request):
 				rbdata.append(tempdict)	
 		else:
 			message="此虚拟组没有统计表现，请联系俞洋"
+		sql="select 1 as aa from p_follow where ac='%s'" % (userid)
+		res33=ms.dict_sql(sql)
+		if res33:
+			message="请检查账号配置！！在p_basic 和p_follow中都存在配置"
 
 		return render_to_response('detail_ac_chart.html',{
 			'res':res,
