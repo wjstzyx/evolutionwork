@@ -66,6 +66,14 @@ def accountdetail_ac(request):
 				for key in aclistresult:
 					keylist=keylist+",'"+key+"'"
 				keylist=keylist.strip(",")
+				#将aclistresult key 变成小写
+				# newaclistresult={}
+				# for item in aclistresult:
+				# 	newaclistresult[item.lower()]=aclistresult[item]
+				# aclistresult=newaclistresult
+				# print aclistresult
+
+
 				sql="select kk.acname,quanyisymbol,case when issumps=0 then pp.position when issumps=1 then 10 end as position from LogRecord.dbo.quanyicaculatelist kk inner join (select round(SUM(p.P_size*a.ratio/100.0),0) as position,p.ac,p.STOCK from p_basic p inner join AC_RATIO a on p.AC=a.AC and p.STOCK=a.Stock and p.AC in (%s) where p.ac in (%s) group by p.ac,p.STOCK) pp on kk.acname=pp.AC" % (keylist,keylist)
 				tmpres11=ms.dict_sql(sql)
 				resultlist={}
