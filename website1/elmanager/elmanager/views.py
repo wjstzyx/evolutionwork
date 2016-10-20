@@ -16,6 +16,128 @@ from dbconn import MSSQL
 # ms1 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="future")
 
 
+def accountdetail_ac(request):
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	userid = request.COOKIES.get('userid','')
+	username = request.COOKIES.get('username','')
+	#验证权限
+	sql="SELECT a.username,b.function_id,b.function_content  FROM [LogRecord].[dbo].[account_user] a  inner join [LogRecord].[dbo].[account_group] b  on   a.groupname=b.groupname where a.userid='%s' " % (userid)
+	res=ms.dict_sql(sql)
+	isauthpass=0
+	if res:
+		for item in res:
+			if int(item['function_id'])==3:
+				isauthpass=1
+	if isauthpass==0:
+		response = HttpResponse("该功能正在完善，请返回 !! <button><a href='/index/'>返回</a></button>")
+		return response
+
+	userid='账户为空'
+	if request.GET:
+		userid=request.GET.get("userid","")
+		# userid=userid.strip('/')
+	#如果是账号则以下逻辑：
+	sql="select 1 as aa from p_follow where ac='%s'" % (userid)
+	res111=ms.dict_sql(sql)
+	resultlist={}
+	res={}
+	rbdata=[]
+	message=""
+	if res111:
+		sql="SELECT [AC]  ,[F_ac]  ,[ratio],1 as isac  FROM [Future].[dbo].[p_follow] where ac='%s' and ratio<>0" % (userid)
+		res=ms.dict_sql(sql)
+		for item in res:
+			sql="SELECT 1 isac  FROM [Future].[dbo].[p_follow] where ac='%s' " % (item['F_ac'])
+			res1=ms.dict_sql(sql)
+			if res1:
+				item['isac']='账号'
+			else:
+				item['isac']='虚拟组'
+
+
+			aclistresult=order_get_ac_ratio_three(userid)
+			resultlist={}
+			if aclistresult:
+				newaclistresult={}
+				for key in aclistresult:
+					newaclistresult[key.lower()]=aclistresult[key]
+				aclistresult=newaclistresult
+				keylist=""
+				for key in aclistresult:
+					keylist=keylist+",'"+key+"'"
+				keylist=keylist.strip(",")
+				sql="select kk.acname,quanyisymbol,case when issumps=0 then pp.position when issumps=1 then 10 end as position from LogRecord.dbo.quanyicaculatelist kk inner join (select round(SUM(p.P_size*a.ratio/100.0),0) as position,p.ac,p.STOCK from p_basic p inner join AC_RATIO a on p.AC=a.AC and p.STOCK=a.Stock and p.AC in (%s) where p.ac in (%s) group by p.ac,p.STOCK) pp on kk.acname=pp.AC" % (keylist,keylist)
+				tmpres11=ms.dict_sql(sql)
+				resultlist={}
+				for item in tmpres11:
+					resultlist[item['quanyisymbol']]=0
+				for item in tmpres11:
+					resultlist[item['quanyisymbol']]=resultlist[item['quanyisymbol']]+item['position']*aclistresult[item['acname'].lower()]/100.0
+					del aclistresult[item['acname'].lower()]
+				for key in aclistresult:
+					resultlist[key]="此虚拟组没有找到对应手数"
+				resultlist=[(key,resultlist[key]) for key in resultlist]
+				resultlist.sort(key=lambda x:x[0])
+			else:
+				resultlist=[('没有配置虚拟组','或虚拟组配置手数为0')]
+		if res==[]:
+			res=[{'AC':'此账号没有相关配置','F_ac':'请联系小仇','ratio':'账号：'+userid,'isac':''}]
+			resultlist=[('没有配置虚拟组','或虚拟组配置手数为0')]
+		return render_to_response('accountdetail_ac.html',{
+			'res':res,
+			'userid':userid,
+			'username':username,
+			'resultlist':resultlist,
+		})
+	#如果是虚拟组：
+	else:
+		#查看他是否在计算之列：
+		sql="select top(1) 1 as aa from dailyquanyi_V2 where ac='%s'" % (userid)
+		res222=ms.dict_sql(sql)
+		if res222:
+			sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where acname='%s' and iscaculate in (1,2) order by sortnum" % (userid)
+			res=ms.dict_sql(sql)
+			for item in res:
+				acname=item['ac']
+				symbol=item['symbol']
+				#第一个价格
+				sql="select top 1 quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+				tempquanyi=ms.find_sql(sql)
+				if tempquanyi==[]:
+					tempquanyi=0
+				else:
+					tempquanyi=tempquanyi[0][0]
+				sql="select quanyi-(%s) as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (tempquanyi,acname,symbol)
+				res1=ms.find_sql(sql)
+				sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+				res2=ms.find_sql(sql)		
+				(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
+				tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
+				rbdata.append(tempdict)	
+
+
+
+
+			pass
+		else:
+			message="此虚拟组没有统计表现，请联系俞洋"
+
+		return render_to_response('detail_ac_chart.html',{
+			'res':res,
+			'userid':userid,
+			'username':username,
+			'resultlist':resultlist,
+			'message':message,
+			'rbdata':rbdata,
+		})
+
+
+
+
+
+
+
+
 def register(request):
 	# if request.method=='POST':
 	# 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
@@ -2311,6 +2433,40 @@ def order_get_ac_ratio_two(account):
 	# print ac_ratio
 	return ac_ratio
 
+#获得账号点菜系统虚拟组(第三版本-p_follow)
+def order_get_ac_ratio_three(account):
+	#获取总账户配置的虚拟组的ratio
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+	#sql="WITH Emp AS ( SELECT ac,F_ac,ratio FROM  [LogRecord].[dbo].[order_p_follow] WHERE   ac='%s' UNION ALL  SELECT   D.AC,D.F_ac,D.ratio*emp.ratio/100 FROM   Emp         INNER JOIN [LogRecord].[dbo].[order_p_follow] d ON d.ac = Emp.F_ac)SELECT AC,f_AC,ratio FROM  Emp" % (account)
+	#sql="select AC,f_AC,ratio from [LogRecord].[dbo].[order_p_follow] where ac='%s'" % (account)
+	#检测是否自循环
+	sql="select * from [Future].[dbo].[p_follow]  where ac=F_ac and ac='%s'" % (account)
+	res=ms.dict_sql(sql)
+	if res:
+		return []
+
+	sql="WITH Emp AS ( SELECT ac,F_ac,ratio FROM  [Future].[dbo].[p_follow] WHERE   ac='%s' UNION ALL  SELECT   D.AC,D.F_ac,D.ratio*emp.ratio/100 FROM   Emp         INNER JOIN [Future].[dbo].[p_follow] d ON d.ac = Emp.F_ac)     select '%s' as AC,f_AC,SUM(ratio) as ratio from Emp where  f_ac not in (select ac from Emp)  and ratio<>0 group by F_ac" % (account,account)
+	res=ms.dict_sql(sql)
+	accountlist=[]
+	aclist=[]
+	for item in res:
+		accountlist.append(item['AC'])
+		aclist.append(item['f_AC'])
+	accountlist=list(set(accountlist))
+	aclist=list(set(aclist))
+	# print accountlist
+	# print aclist
+	ac_ratio={}
+	for item in aclist:
+		ac_ratio[item]=0
+	for item in res:
+		ac_ratio[item['f_AC']]=ac_ratio[item['f_AC']]+item['ratio']
+	# print ac_ratio
+	for key in accountlist:
+		if ac_ratio.has_key(key):
+			del ac_ratio[key]
+	# print ac_ratio
+	return ac_ratio
 
 
 #计算总权益

@@ -43,12 +43,17 @@ def is_Tsymbol_multi(ms,type=""):
 
 #p_basic与p_follow配置是否有冗余，删除p_basic中没有，而p_follow中存在的记录
 def is_rongyu():
-	sql="delete from p_follow where f_ac in (select distinct F_ac from p_follow where F_ac not in (select distinct ac from p_follow) and  F_ac not in (select distinct ac from P_BASIC ))"
-	ms.inert_sql(sql)
+	sql="select * from p_follow where f_ac in (select distinct F_ac from p_follow where F_ac not in (select distinct ac from p_follow) and  F_ac not in (select distinct ac from P_BASIC ))"
+	res=ms05.dict_sql(sql)
+	for item in res:
+		print "冗余配置信息"
+		print item 
+	# sql="delete from p_follow where f_ac in (select distinct F_ac from p_follow where F_ac not in (select distinct ac from p_follow) and  F_ac not in (select distinct ac from P_BASIC ))"
+	# ms05.inert_sql(sql)
 
 is_acname_ok()
 is_Tsymbol_multi(ms05,type="05")
 is_Tsymbol_multi(ms03,type="03")
 is_Tsymbol_multi(ms07,type="07")
 is_Tsymbol_multi(mscloud,type="mscloud")
-# is_rongyu()
+is_rongyu()

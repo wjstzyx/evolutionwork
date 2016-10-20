@@ -84,9 +84,9 @@ def main_run_afl():
 	totalconfig=[]
 	for file in aflfiles:
 		fileparts = file.split(".")
-		if len(fileparts) >= 2 and fileparts[1].lower() == "afl":
+		if len(fileparts) >= 2 and fileparts[-1].lower() == "afl":
 			basename = fileparts[0]
-			timeperiod=basename.split('-')[1]
+			timeperiod=basename.split('-')[1].strip(" ")
 			if timeperiod in ('1min','2min','3min','4min','5min'):
 				itemsettingdir=ABautoroot+"\\ABautofile\\setting\\a1_5"
 			if timeperiod in ('6min','7min','8min','9min','10min'):
@@ -101,7 +101,7 @@ def main_run_afl():
 				itemsettingdir=ABautoroot+"\\ABautofile\\setting\\a26_30"
 			itemfile=aflfiledir+"\\"+file
 			settingfile=itemsettingdir+"\\"+timeperiod+".ABS"
-			Ticker=basename.split('-')[0]
+			Ticker=basename.split('-')[0].strip(" ")
 			totalconfig.append([itemsettingdir,itemfile,settingfile,Ticker])
 
 
@@ -182,13 +182,13 @@ def test_is_all_ac_st():
 	res1=ms.dict_sql(sql)
 	sql="select SUM(1) as sum from P_BASIC where ac in (select distinct ac from P_BASIC where st in (select distinct st from st_report_test))"
 	res2=ms.dict_sql(sql)
+	print 'begin '
 	if res1[0]['sum']==res2[0]['sum']:
 		sql="delete from st_report where st in (select distinct st from st_report_test)"
 		ms.insert_sql(sql)
 		sql="insert into st_report([P],[PP],[ST],[D],[T],[stockdate],[type]) select [P],[PP],[ST],[D],[T],[stockdate] ,0 as type  from st_report_test"
 		ms.insert_sql(sql)
-		
-		print "success 回测虚拟组完成"
+		print "success 已经将st_report_test 信息导入 st_report"
 		
 	else:
 		print "fail 不完成，请检查"
@@ -202,7 +202,7 @@ def test_is_all_ac_st():
 # main_import_data()
 
 #3  choose_aflfile(acname)
-main_run_afl()
+# main_run_afl()
 #5  
 
 

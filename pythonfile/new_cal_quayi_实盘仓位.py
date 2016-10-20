@@ -437,13 +437,13 @@ def multiple_ratio(myquotes,ratio):
 # show_all_ac('RU3v4e')
 
 
-(myquotes,totalsum)=input_groupbyquanyi('pzh','p')
+(myquotes,totalsum)=input_groupbyquanyi('test_jieti1','rb')
 #仓位信息OK
-print totalsum
-ratio=0.1
+# print totalsum
+ratio=0.4
 myquotes=multiple_ratio(myquotes,ratio)
-for item in myquotes:
-	print item 
-# cal_quanyi('test_Pselect',myquotes,ratio*totalsum,'p')
+# for item in myquotes:
+# 	print item 
+cal_quanyi('test_jieti1',myquotes,ratio*totalsum,'rb')
 
 # show_account('myaccount2')
