@@ -76,15 +76,12 @@ def accountdetail_ac(request):
 			#sql="select kk.acname,quanyisymbol,case when issumps=0 then pp.position when issumps=1 then 10 end as position from LogRecord.dbo.quanyicaculatelist kk inner join (select round(SUM(p.P_size*a.ratio/100.0),0) as position,p.ac,p.STOCK from p_basic p inner join AC_RATIO a on p.AC=a.AC and p.STOCK=a.Stock and p.AC in (%s) where p.ac in (%s) group by p.ac,p.STOCK) pp on kk.acname=pp.AC" % (keylist,keylist)
 			tmpres11=ms.dict_sql(sql)
 			resultlist={}
-			# print "aclistresult",aclistresult
-			# print "tmpres11",tmpres11
 			for item in tmpres11:
 				resultlist[item['quanyisymbol']]=0
 			for item in tmpres11:
 				resultlist[item['quanyisymbol']]=resultlist[item['quanyisymbol']]+item['position']*aclistresult[item['acname'].lower()]/100.0
 				print item['acname'].lower()
 				del aclistresult[item['acname'].lower()]
-			print "aclistresult",aclistresult
 			for key in aclistresult:
 				resultlist[key]="此虚拟组没有找到对应手数"
 			resultlist=[(key,resultlist[key]) for key in resultlist]

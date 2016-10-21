@@ -600,10 +600,10 @@ def real_account_groupbyquanyi(ac,symbol):
 
 
 
-(myquotes,totalsum)=input_groupbyquanyi('test_jieti1','RB')
-# for item in myquotes:
-# 	print item 
-cal_quanyi('test_jieti1',myquotes,totalsum,'RB')
+# (myquotes,totalsum)=input_groupbyquanyi('rb3choosel','RB')
+# # for item in myquotes:
+# # 	print item 
+# cal_quanyi('rb3choosel',myquotes,totalsum,'RB')
 
 # show_account('myaccount2')
 
@@ -623,7 +623,7 @@ def main_fun_sumps():
 
 def main_fun():
 	#获取需要处理的列表
-	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1 and issumps=0 and isyepan in (0,1,12) order by id desc "
+	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where acname in ('9LUD','9LUD10','9LUD11V2','9LUD13','9LUD14','9LUD16','9LUD2CH','9LUD3','9LUD4','9LUD5','9LUD6','9LUD7','9LUD8','9V4EIV','9VK3','ALchoosel','ALrangel','ALregionbreak','ALtupo','CH4jzs','CH4srzs','DayRMLineRrate','DayRMSumL','DaySRWB','espy','IFQG1310','IH_PBT','IH_ZH','J3hl','J3v4e','Jchoosel','Jdn3choose','Jdn3openbreak','Jdn3tupo10','Jdn3tupo15','Jdn3tupo5','Jdnhl','Jdnhlc','Jrangel','LBatch1','LQGOld_TG','LQGST_TG','Ltupo','LUD52015','LUD62015','LUD72015','LUD82015','MA3hl','MA3v4e','MEBatch1','PBregionbreak','RMregionbreak','RMtupo','RMtupo_1sym','UDKY','YEQGEX','YEQGOT','YEQGTR','YYmid','Yyy','ZCchoosel','ZCrangel','ZNchoosel','ZNcxv','ZNmid','ZNrangel','ZNregionbreak','ZWindex2','ZWindex5')  and iscaculate in (0,1)"
 	#sql="SELECT top 17 id,[acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('RB') and iscaculate=1 order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
@@ -636,4 +636,4 @@ def main_fun():
 		cal_quanyi(item['acname'],myquotes,totalsum,quanyisymbol)
 
 # main_fun_sumps()
-# main_fun()
+main_fun()
