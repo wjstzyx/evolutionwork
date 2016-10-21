@@ -55,39 +55,42 @@ def accountdetail_ac(request):
 				item['isac']='虚拟组'
 
 
-			aclistresult=order_get_ac_ratio_three(userid)
+		aclistresult=order_get_ac_ratio_three(userid)
+		resultlist={}
+		if aclistresult:
+			newaclistresult={}
+			testnewaclistresult={}
+			for key in aclistresult:
+				newaclistresult[key.lower().split('__')[0]]=aclistresult[key]
+			for key in aclistresult:
+				testnewaclistresult[key.lower()]=aclistresult[key]
+			aclistresult=testnewaclistresult
+			keylist=""
+			for key in newaclistresult:
+				keylist=keylist+",'"+key+"'"
+			keylist=keylist.strip(",")
+			print keylist
+
+
+			sql="select kk.acname+'__'+cast(sss.s_id as nvarchar) as acname,quanyisymbol,case when issumps=0 then pp.position when issumps=1 then 10 end as position from LogRecord.dbo.quanyicaculatelist kk inner join (select round(SUM(p.P_size*a.ratio/100.0),0) as position,p.ac,p.STOCK from p_basic p inner join AC_RATIO a on p.AC=a.AC and p.STOCK=a.Stock and p.AC in (%s) where p.ac in (%s) group by p.ac,p.STOCK) pp on kk.acname=pp.AC inner join Symbol_ID sss on kk.quanyisymbol=sss.Symbol" % (keylist,keylist)
+			#sql="select kk.acname,quanyisymbol,case when issumps=0 then pp.position when issumps=1 then 10 end as position from LogRecord.dbo.quanyicaculatelist kk inner join (select round(SUM(p.P_size*a.ratio/100.0),0) as position,p.ac,p.STOCK from p_basic p inner join AC_RATIO a on p.AC=a.AC and p.STOCK=a.Stock and p.AC in (%s) where p.ac in (%s) group by p.ac,p.STOCK) pp on kk.acname=pp.AC" % (keylist,keylist)
+			tmpres11=ms.dict_sql(sql)
 			resultlist={}
-			if aclistresult:
-				newaclistresult={}
-				for key in aclistresult:
-					newaclistresult[key.lower()]=aclistresult[key]
-				aclistresult=newaclistresult
-				keylist=""
-				for key in aclistresult:
-					keylist=keylist+",'"+key+"'"
-				keylist=keylist.strip(",")
-				#将aclistresult key 变成小写
-				# newaclistresult={}
-				# for item in aclistresult:
-				# 	newaclistresult[item.lower()]=aclistresult[item]
-				# aclistresult=newaclistresult
-				# print aclistresult
-
-
-				sql="select kk.acname,quanyisymbol,case when issumps=0 then pp.position when issumps=1 then 10 end as position from LogRecord.dbo.quanyicaculatelist kk inner join (select round(SUM(p.P_size*a.ratio/100.0),0) as position,p.ac,p.STOCK from p_basic p inner join AC_RATIO a on p.AC=a.AC and p.STOCK=a.Stock and p.AC in (%s) where p.ac in (%s) group by p.ac,p.STOCK) pp on kk.acname=pp.AC" % (keylist,keylist)
-				tmpres11=ms.dict_sql(sql)
-				resultlist={}
-				for item in tmpres11:
-					resultlist[item['quanyisymbol']]=0
-				for item in tmpres11:
-					resultlist[item['quanyisymbol']]=resultlist[item['quanyisymbol']]+item['position']*aclistresult[item['acname'].lower()]/100.0
-					del aclistresult[item['acname'].lower()]
-				for key in aclistresult:
-					resultlist[key]="此虚拟组没有找到对应手数"
-				resultlist=[(key,resultlist[key]) for key in resultlist]
-				resultlist.sort(key=lambda x:x[0])
-			else:
-				resultlist=[('没有配置虚拟组','或虚拟组配置手数为0')]
+			# print "aclistresult",aclistresult
+			# print "tmpres11",tmpres11
+			for item in tmpres11:
+				resultlist[item['quanyisymbol']]=0
+			for item in tmpres11:
+				resultlist[item['quanyisymbol']]=resultlist[item['quanyisymbol']]+item['position']*aclistresult[item['acname'].lower()]/100.0
+				print item['acname'].lower()
+				del aclistresult[item['acname'].lower()]
+			print "aclistresult",aclistresult
+			for key in aclistresult:
+				resultlist[key]="此虚拟组没有找到对应手数"
+			resultlist=[(key,resultlist[key]) for key in resultlist]
+			resultlist.sort(key=lambda x:x[0])
+		else:
+			resultlist=[('没有配置虚拟组','或虚拟组配置手数为0')]
 		if res==[]:
 			res=[{'AC':'此账号没有相关配置','F_ac':'请联系小仇','ratio':'账号：'+userid,'isac':''}]
 			resultlist=[('没有配置虚拟组','或虚拟组配置手数为0')]
@@ -2451,8 +2454,8 @@ def order_get_ac_ratio_three(account):
 	res=ms.dict_sql(sql)
 	if res:
 		return []
-
-	sql="WITH Emp AS ( SELECT ac,F_ac,ratio FROM  [Future].[dbo].[p_follow] WHERE   ac='%s' UNION ALL  SELECT   D.AC,D.F_ac,D.ratio*emp.ratio/100 FROM   Emp         INNER JOIN [Future].[dbo].[p_follow] d ON d.ac = Emp.F_ac)     select '%s' as AC,f_AC,SUM(ratio) as ratio from Emp where  f_ac not in (select ac from Emp)  and ratio<>0 group by F_ac" % (account,account)
+	sql="WITH Emp AS ( SELECT ac,F_ac,ratio,stock FROM  [Future].[dbo].[p_follow] WHERE   ac='%s' UNION ALL  SELECT   D.AC,D.F_ac,D.ratio*emp.ratio/100,D.stock FROM   Emp         INNER JOIN [Future].[dbo].[p_follow] d ON d.ac = Emp.F_ac)     select '%s' as AC,f_AC+'__'+stock as f_AC,SUM(ratio) as ratio from Emp where  f_ac not in (select ac from Emp)  and ratio<>0 group by F_ac,stock order by F_ac" % (account,account)
+	#sql="WITH Emp AS ( SELECT ac,F_ac,ratio FROM  [Future].[dbo].[p_follow] WHERE   ac='%s' UNION ALL  SELECT   D.AC,D.F_ac,D.ratio*emp.ratio/100 FROM   Emp         INNER JOIN [Future].[dbo].[p_follow] d ON d.ac = Emp.F_ac)     select '%s' as AC,f_AC,SUM(ratio) as ratio from Emp where  f_ac not in (select ac from Emp)  and ratio<>0 group by F_ac" % (account,account)
 	res=ms.dict_sql(sql)
 	accountlist=[]
 	aclist=[]
