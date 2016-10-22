@@ -69,7 +69,6 @@ def accountdetail_ac(request):
 			for key in newaclistresult:
 				keylist=keylist+",'"+key+"'"
 			keylist=keylist.strip(",")
-			print keylist
 
 
 			sql="select kk.acname+'__'+cast(sss.s_id as nvarchar) as acname,quanyisymbol,case when issumps=0 then pp.position when issumps=1 then 10 end as position from LogRecord.dbo.quanyicaculatelist kk inner join (select round(SUM(p.P_size*a.ratio/100.0),0) as position,p.ac,p.STOCK from p_basic p inner join AC_RATIO a on p.AC=a.AC and p.STOCK=a.Stock and p.AC in (%s) where p.ac in (%s) group by p.ac,p.STOCK) pp on kk.acname=pp.AC inner join Symbol_ID sss on kk.quanyisymbol=sss.Symbol" % (keylist,keylist)
@@ -79,9 +78,9 @@ def accountdetail_ac(request):
 			for item in tmpres11:
 				resultlist[item['quanyisymbol']]=0
 			for item in tmpres11:
-				resultlist[item['quanyisymbol']]=resultlist[item['quanyisymbol']]+item['position']*aclistresult[item['acname'].lower()]/100.0
-				print item['acname'].lower()
-				del aclistresult[item['acname'].lower()]
+				if aclistresult.has_key(item['acname'].lower()):
+					resultlist[item['quanyisymbol']]=resultlist[item['quanyisymbol']]+item['position']*aclistresult[item['acname'].lower()]/100.0
+					del aclistresult[item['acname'].lower()]
 			for key in aclistresult:
 				resultlist[key]="此虚拟组没有找到对应手数"
 			resultlist=[(key,resultlist[key]) for key in resultlist]
@@ -188,7 +187,6 @@ def change_password(request):
 		return response
 
 	if request.method=='POST':
-		print request.POST
 		userid = request.COOKIES.get('userid','')
 		username = request.COOKIES.get('username','')
 		newpassword=request.POST.get('newpassword','')
@@ -385,7 +383,6 @@ def futureaccounttotal(request):
 		if len(res)>=1:
 			todays_equity=round((res[0]['CloseBalance']+res[0]['Withdraw']),2)
 			todays1_withdraw=res[0]['Withdraw']
-			print todays_equity
 		else:
 			todays_equity=0
 			todays1_withdraw=0
@@ -397,7 +394,6 @@ def futureaccounttotal(request):
 		#计算每月收益
 		sql="select sum(Withdraw-deposit) as deltawithdeposit from  [LogRecord].[dbo].[AccountsBalance] where userid='%s'  and date>='%s'" % (userid,month)
 		temp1res=ms.dict_sql(sql)
-		print temp1res
 		if temp1res[0]['deltawithdeposit'] is not None:
 			deltawithdeposit=temp1res[0]['deltawithdeposit']
 		else:
@@ -560,9 +556,6 @@ def add_whitelist(request):
 		for item in iplist:
 			if item !=outIP:
 				localIP=item
-		print computername
-		print localIP
-		print outIP
 		if request.META.has_key('HTTP_X_FORWARDED_FOR'):  
 		    localIP =  request.META['HTTP_X_FORWARDED_FOR']  
 		else:  
@@ -690,9 +683,7 @@ def save_order_p_basic(request):
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 
 	if request.POST:
-		print request.POST
 		data=request.POST.get("data","")
-		print data
 		data=data.strip('#')
 		data=data.split('#')
 		isdel=0
@@ -702,7 +693,7 @@ def save_order_p_basic(request):
 		for item in data:
 			item=item.strip(';')
 			item=item.split(';')
-			if len(item)==3:
+			if len(item)==4:
 				if isdel==0:
 					sql="delete from [LogRecord].[dbo].[order_p_follow] where ac='%s'" % (item[0])
 					ms.insert_sql(sql)
@@ -710,16 +701,30 @@ def save_order_p_basic(request):
 				#将一行中的多个“ss,ff,f”拆分
 				F_aclist=item[1].split(',')
 				for temitem in F_aclist:
+					#symbol的确认
+					print 'temitem',temitem
+					if item[2]=='default':
+						sql="select  quanyisymbol from LogRecord.dbo.quanyicaculatelist  where acname='%s'" % (temitem)
+						tempres1=ms.dict_sql(sql)
+						if tempres1:
+							realsymbol=tempres1[0]['quanyisymbol']
+						else:
+							realsymbol=item[2]
+					else:
+						realsymbol=item[2]
+					print 'realsymbol',realsymbol
+
 					#检查temitem是否是 order_p_follow 中的项目，如果是则继续，如果不是，则检查是否是p_follow中的ac
 					if temitem in order_p_follow_res:
-						sql="insert into [LogRecord].[dbo].[order_p_follow](ac,F_ac,ratio,Pratio) values('%s','%s',%s,%s)" % (item[0],temitem,item[2],item[2])
+						sql="insert into [LogRecord].[dbo].[order_p_follow](ac,F_ac,ratio,Pratio,stock) values('%s','%s',%s,%s,'%s')" % (item[0],temitem,item[3],item[3],realsymbol)
 						ms.insert_sql(sql)
-						print sql 
+						# print sql 
 					else:
 						#temitem 在p_follow中，需要执行copy
-						sql="insert into [LogRecord].[dbo].[order_p_follow](ac,F_ac,ratio,Pratio) select '%s',F_ac,sum(ratio)*(%s),100 from [Future].[dbo].[p_follow]  where ac='%s' group by F_ac" % (item[0],float(item[2])/100.0,temitem)
+						sql="insert into [LogRecord].[dbo].[order_p_follow](ac,F_ac,ratio,Pratio,stock)   select '%s',F_ac,sum(ratio)*(%s),100,s.symbol from [Future].[dbo].[p_follow] p   left join  (select * from [Future].[dbo].[Symbol_ID] where id in (SELECT min(id)  FROM [Future].[dbo].[Symbol_ID] where (Symbol not like '%%night%%'  and (Symbol not like '%%N' ) and Symbol not like '%%ZL') OR  Symbol='ZN' or Symbol='RMZL'group by s_id)) s on   p.stock=s.S_ID    where ac='%s'    group by p.F_ac,s.Symbol" % (item[0],float(item[3])/100.0,temitem)
+						#sql="insert into [LogRecord].[dbo].[order_p_follow](ac,F_ac,ratio,Pratio,stock) select '%s',F_ac,sum(ratio)*(%s),100,'default' from [Future].[dbo].[p_follow]  where ac='%s' group by F_ac" % (item[0],float(item[3])/100.0,temitem)
 						ms.insert_sql(sql)
-						print sql 
+						# print sql 
 
 	else:
 		print "not post"
@@ -762,8 +767,10 @@ def order_account_equity(request):
 		whichform=request.POST.get('query','')
 		if whichform=='query':
 			account=request.POST.get('searchaccount','')
-			sql="select ID as myid,row_number()OVER(ORDER BY [AC] DESC) as id,ac,F_ac,ratio from [LogRecord].[dbo].[order_p_follow] where ac='%s' order by F_ac" % (account)
+			sql="select ID as myid,row_number()OVER(ORDER BY [AC] DESC) as id,ac,F_ac,ratio,stock from [LogRecord].[dbo].[order_p_follow] where ac='%s' order by F_ac" % (account)
 			res=ms.dict_sql(sql)
+			sql="select distinct quanyisymbol from LogRecord.dbo.quanyicaculatelist order by quanyisymbol"
+			quanyisymbollist=ms.dict_sql(sql)
 			#监测account名字是否与p_basic或者p_foloow一致 
 			sql="select 1 from [Future].[dbo].[P_BASIC] where ac='%s' union all select 2 from [Future].[dbo].[P_follow] where ac='%s'" % (account,account)
 			testres=ms.dict_sql(sql)
@@ -773,30 +780,46 @@ def order_account_equity(request):
 			sql="select distinct acname as ac,'虚拟组' as type from [LogRecord].[dbo].[quanyicaculatelist] union all select distinct ac,'测试账户' as type from [LogRecord].[dbo].order_p_follow   union all  select distinct ac,'真实账户' as type from [Future].[dbo].[p_follow] order by type,ac"
 			F_aclist=ms.dict_sql(sql)
 			# amount_list
+
 			aclistresult=order_get_ac_ratio_two(account)
 			resultlist={}
+			# if aclistresult:
+			# 	newaclistresult={}
+			# 	for key in aclistresult:
+			# 		newaclistresult[key.lower()]=aclistresult[key]
+			# 	aclistresult=newaclistresult
+			# 	keylist=""
+			# 	for key in aclistresult:
+			# 		keylist=keylist+",'"+key+"'"
+			# 	keylist=keylist.strip(",")
+
 			if aclistresult:
 				newaclistresult={}
+				testnewaclistresult={}
 				for key in aclistresult:
-					newaclistresult[key.lower()]=aclistresult[key]
-				aclistresult=newaclistresult
+					newaclistresult[key.lower().split('__')[0]]=aclistresult[key]
+				for key in aclistresult:
+					testnewaclistresult[key.lower()]=aclistresult[key]
+				aclistresult=testnewaclistresult
 				keylist=""
-				for key in aclistresult:
+				for key in newaclistresult:
 					keylist=keylist+",'"+key+"'"
 				keylist=keylist.strip(",")
-				sql="select kk.acname,quanyisymbol,case when issumps=0 then pp.position when issumps=1 then 10 end as position from LogRecord.dbo.quanyicaculatelist kk inner join (select round(SUM(p.P_size*a.ratio/100.0),0) as position,p.ac,p.STOCK from p_basic p inner join AC_RATIO a on p.AC=a.AC and p.STOCK=a.Stock and p.AC in (%s) where p.ac in (%s) group by p.ac,p.STOCK) pp on kk.acname=pp.AC" % (keylist,keylist)
+
+				sql="select kk.acname+'__'+cast(sss.s_id as nvarchar) as acname,quanyisymbol,case when issumps=0 then pp.position when issumps=1 then 10 end as position from LogRecord.dbo.quanyicaculatelist kk inner join (select round(SUM(p.P_size*a.ratio/100.0),0) as position,p.ac,p.STOCK from p_basic p inner join AC_RATIO a on p.AC=a.AC and p.STOCK=a.Stock and p.AC in (%s) where p.ac in (%s) group by p.ac,p.STOCK) pp on kk.acname=pp.AC inner join Symbol_ID sss on kk.quanyisymbol=sss.Symbol" % (keylist,keylist)		
+				#sql="select kk.acname,quanyisymbol,case when issumps=0 then pp.position when issumps=1 then 10 end as position from LogRecord.dbo.quanyicaculatelist kk inner join (select round(SUM(p.P_size*a.ratio/100.0),0) as position,p.ac,p.STOCK from p_basic p inner join AC_RATIO a on p.AC=a.AC and p.STOCK=a.Stock and p.AC in (%s) where p.ac in (%s) group by p.ac,p.STOCK) pp on kk.acname=pp.AC" % (keylist,keylist)
 				tmpres11=ms.dict_sql(sql)
 				resultlist={}
 				for item in tmpres11:
 					resultlist[item['quanyisymbol']]=0
 				for item in tmpres11:
-					resultlist[item['quanyisymbol']]=resultlist[item['quanyisymbol']]+item['position']*aclistresult[item['acname'].lower()]/100.0
-					del aclistresult[item['acname'].lower()]
+					if aclistresult.has_key(item['acname'].lower()):
+						resultlist[item['quanyisymbol']]=resultlist[item['quanyisymbol']]+item['position']*aclistresult[item['acname'].lower()]/100.0
+						del aclistresult[item['acname'].lower()]
 				for key in aclistresult:
 					resultlist[key]="此虚拟组没有找到对应手数"
 				resultlist=[(key,resultlist[key]) for key in resultlist]
 				resultlist.sort(key=lambda x:x[0])
-				print resultlist
 			else:
 				resultlist=[('没有配置虚拟组','或虚拟组配置手数为0')]
 
@@ -807,13 +830,13 @@ def order_account_equity(request):
 				'F_aclist':F_aclist,
 				'aclist':aclist,
 				'ishowconfig':ishowconfig,
-				'resultlist':resultlist
+				'resultlist':resultlist,
+				'quanyisymbollist':quanyisymbollist,
 			})
 		if whichform=='equity':
 			ishowconfig=1
 			account=request.POST.get('account','')
 			totalquanyiresult=order_get_dailyquanyi(account,150521)
-			print 'totalquanyiresult',totalquanyiresult
 			if totalquanyiresult['ispass']==0:
 				result=totalquanyiresult['result']
 				configinfo=totalquanyiresult['configinfo']
@@ -838,10 +861,12 @@ def order_account_equity(request):
 		isadd_new_line=request.POST.get('add_new_line','')
 		if isadd_new_line=='query':
 			account=request.POST.get('account','')
-			sql="insert into [LogRecord].[dbo].[order_p_follow](ac,F_ac,ratio,Pratio) values('%s','请选择',100,100)" % (account)
+			sql="insert into [LogRecord].[dbo].[order_p_follow](ac,F_ac,ratio,Pratio,stock) values('%s','请选择',100,100,'default')" % (account)
 			ms.insert_sql(sql)
-			sql="select ID as myid,row_number()OVER(ORDER BY [AC] DESC) as id,ac,F_ac,ratio from [LogRecord].[dbo].[order_p_follow] where ac='%s' order by F_ac" % (account)
+			sql="select ID as myid,row_number()OVER(ORDER BY [AC] DESC) as id,ac,F_ac,ratio,stock from [LogRecord].[dbo].[order_p_follow] where ac='%s' order by F_ac" % (account)
 			res=ms.dict_sql(sql)
+			sql="select distinct quanyisymbol from LogRecord.dbo.quanyicaculatelist order by quanyisymbol"
+			quanyisymbollist=ms.dict_sql(sql)
 			#监测account名字是否与p_basic或者p_foloow一致 
 			sql="select 1 from [Future].[dbo].[P_BASIC] where ac='%s' union all select 2 from [Future].[dbo].[P_follow] where ac='%s'" % (account,account)
 			testres=ms.dict_sql(sql)
@@ -855,7 +880,8 @@ def order_account_equity(request):
 				'res':res,
 				'F_aclist':F_aclist,
 				'aclist':aclist,
-				'ishowconfig':ishowconfig
+				'ishowconfig':ishowconfig,
+				'quanyisymbollist':quanyisymbollist,
 			})
 
 
@@ -2416,8 +2442,8 @@ def order_get_ac_ratio_two(account):
 	res=ms.dict_sql(sql)
 	if res:
 		return []
-
-	sql="WITH Emp AS ( SELECT ac,F_ac,ratio FROM  [LogRecord].[dbo].[order_p_follow] WHERE   ac='%s' UNION ALL  SELECT   D.AC,D.F_ac,D.ratio*emp.ratio/100 FROM   Emp         INNER JOIN [LogRecord].[dbo].[order_p_follow] d ON d.ac = Emp.F_ac)     select '%s' as AC,f_AC,SUM(ratio) as ratio from Emp where  f_ac not in (select ac from Emp)  and ratio<>0 group by F_ac" % (account,account)
+	sql="WITH Emp AS ( SELECT ac,F_ac,ratio,stock FROM  [LogRecord].[dbo].[order_p_follow]  WHERE   ac='%s' UNION ALL  SELECT   D.AC,D.F_ac,D.ratio*emp.ratio/100,D.stock FROM   Emp          INNER JOIN [LogRecord].[dbo].[order_p_follow] d ON d.ac = Emp.F_ac)      select '%s' as AC,f_AC+'__'+CAST(ss.S_ID as nvarchar) as f_AC,SUM(ratio) as ratio from Emp   inner join  Symbol_ID ss on Emp.stock=ss.Symbol     where  Emp.f_ac not in (select ac from Emp)  and Emp.ratio<>0 group by Emp.F_ac,ss.S_ID order by Emp.F_ac" % (account,account)
+	#sql="WITH Emp AS ( SELECT ac,F_ac,ratio FROM  [LogRecord].[dbo].[order_p_follow] WHERE   ac='%s' UNION ALL  SELECT   D.AC,D.F_ac,D.ratio*emp.ratio/100 FROM   Emp         INNER JOIN [LogRecord].[dbo].[order_p_follow] d ON d.ac = Emp.F_ac)     select '%s' as AC,f_AC,SUM(ratio) as ratio from Emp where  f_ac not in (select ac from Emp)  and ratio<>0 group by F_ac" % (account,account)
 	res=ms.dict_sql(sql)
 	accountlist=[]
 	aclist=[]
@@ -2525,6 +2551,68 @@ def order_get_dailyquanyi(account,fromDdy):
 	if ac_ratio==[]:
 		return {"ispass":0,"result":"存在有自己跟随自己的配置，请修正"}
 	for key in ac_ratio:
+		realac=key.split("__")[0]
+		quanyisymbols_id=key.split("__")[-1]
+		sql="select  a.acname,s.S_ID,s.Symbol from LogRecord.dbo.quanyicaculatelist a left join Symbol_ID s on a.quanyisymbol=s.Symbol where a.acname='%s' and  s.S_ID='%s'" % (realac,quanyisymbols_id)
+		quanyisymbol=ms.dict_sql(sql)[0]['Symbol']
+		sql="SELECT top 1  (convert(int,replace(convert(varchar(10),DATEADD(day,1,stockdate),120),'-',''))-20000000) as D  FROM [Future].[dbo].[quanyi_log_groupby_v2] where ac='%s' and symbol='%s' order by stockdate" % (realac,quanyisymbol)
+		tempD=ms.dict_sql(sql)
+		if tempD:
+			Dlist.append(tempD[0]['D'])
+			configinfo.append([key,ac_ratio[key],tempD[0]['D']])
+		else:
+			Dlist.append(200000)
+			sql="select ac from [LogRecord].[dbo].[order_p_follow]  where F_ac='%s' and stock='%s'" % (realac,quanyisymbol)
+			tempres=ms.dict_sql(sql)
+			tempresult=tempresult+" 基本账户 %s 中 %s 没有产生过信号,请补全近两年策略信号</br>" % (tempres[0]['ac'],key)
+			configinfo.append([key,ac_ratio[key],200000])
+	fromDdy=max(Dlist)
+	if 200000 in Dlist:
+		return {"ispass":0,"result":tempresult,"configinfo":configinfo}
+
+		
+	for key in ac_ratio:
+		ratio=ac_ratio[key]
+		if ratio>0:
+			sql="SELECT [quanyisymbol]  FROM [LogRecord].[dbo].[quanyicaculatelist] where acname='%s' and quanyisymbol='%s'" % (realac,quanyisymbol)
+			res=ms.dict_sql(sql)
+			if not res:
+				# print {"ispass":0,"result":"%s does not has equity" % (key)}
+				return {"ispass":0,"result":"%s 不在配置表 quanyicaculatelist 中，请加上并获得历史信号" % (key),"configinfo":configinfo}
+			else:
+				symbol=res[0]['quanyisymbol']
+				acname=realac
+				sql="select top 1 D,quanyi as  quanyia from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=%s order by D" % (acname,symbol,fromDdy)
+				tempres=ms.find_sql(sql)
+				if tempres==[]:
+					initoalquanyi=0
+				else:
+					initoalquanyi=tempres[0][1]
+				sql="select D,(quanyi-(%s)) as  quanyia from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=%s order by D" % (initoalquanyi,acname,symbol,fromDdy)
+				res1=ms.find_sql(sql)
+				#乘以ratio
+				newres1=[]
+				for item in res1:
+					newres1.append([item[0],item[1]*ratio/10.0])
+				totalquanyi=add_time_series(totalquanyi,newres1)
+				totalquanyi=sorted(totalquanyi,key=lambda a :a[0])
+	totalquanyi=[[item[1],item[0]] for item in totalquanyi]
+				# for item in totalquanyi:
+				# 	print item 
+	return {"ispass":1,"result":totalquanyi,"configinfo":configinfo}
+
+def order_get_dailyquanyi_backup(account,fromDdy):
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+	ac_ratio=order_get_ac_ratio_two(account)
+	totalquanyi=[]
+	#获取对齐时间
+	Dlist=[]
+	tempresult=""
+	configinfo=[]
+	Dlist.append(fromDdy)
+	if ac_ratio==[]:
+		return {"ispass":0,"result":"存在有自己跟随自己的配置，请修正"}
+	for key in ac_ratio:
 		sql="SELECT top 1  (convert(int,replace(convert(varchar(10),DATEADD(day,1,stockdate),120),'-',''))-20000000) as D  FROM [Future].[dbo].[quanyi_log_groupby_v2] where ac='%s' order by stockdate" % (key)
 		tempD=ms.dict_sql(sql)
 		if tempD:
@@ -2537,7 +2625,6 @@ def order_get_dailyquanyi(account,fromDdy):
 			tempresult=tempresult+" 基本账户 %s 中 %s 没有产生过信号,请补全近两年策略信号</br>" % (tempres[0]['ac'],key)
 			configinfo.append([key,ac_ratio[key],200000])
 	fromDdy=max(Dlist)
-	print Dlist
 	if 200000 in Dlist:
 		return {"ispass":0,"result":tempresult,"configinfo":configinfo}
 
@@ -2571,7 +2658,6 @@ def order_get_dailyquanyi(account,fromDdy):
 				# for item in totalquanyi:
 				# 	print item 
 	return {"ispass":1,"result":totalquanyi,"configinfo":configinfo}
-
 
 
 #两个时间序列相加

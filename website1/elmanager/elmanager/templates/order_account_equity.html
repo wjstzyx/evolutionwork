@@ -52,6 +52,7 @@ function begin_calculate(id){
         for(var i=1,rows=mytable.rows.length; i<rows; i++){
             tempccc=mytable.rows[i].cells[0].innerHTML;
             tempc=tempc+';'+ tempccc;
+
             o=mytable.rows[i].cells[1].getElementsByTagName("select")[0];
             var str = "";
             for(var j=0;j<o.length;j++){   
@@ -60,10 +61,21 @@ function begin_calculate(id){
                           }
                       }
             tempccc=str.substr(0,str.length-1);
+            tempc=tempc+';'+ tempccc;
 
+            o=mytable.rows[i].cells[2].getElementsByTagName("select")[0];
+            var str = "";
+            for(var j=0;j<o.length;j++){   
+                          if(o.options[j].selected){
+                              str+=o.options[j].value+",";
+                          }
+                      }
+            tempccc=str.substr(0,str.length-1);
             tempc=tempc+';'+ tempccc;
-            tempccc=mytable.rows[i].cells[2].getElementsByTagName("input")[0].value;
+
+            tempccc=mytable.rows[i].cells[3].getElementsByTagName("input")[0].value;
             tempc=tempc+';'+ tempccc;
+
             data=data+'#'+tempc;
             tempc="";
         }
@@ -131,6 +143,7 @@ function begin_calculate(id){
              <tr> 
               <th align=center>账号名</th> 
               <th align=center>虚拟组名</th> 
+              <th align=center>作用品种</th>             
               <th align=center>比例（100%）</th> 
               <th align=center>操作</th>
              </tr> 
@@ -142,7 +155,7 @@ function begin_calculate(id){
               <td >
 
               <div class="form-group">
-                <select class="selectpicker" name="acname" multiple data-live-search="true" data-live-search-placeholder="Search" data-actions-box="true">
+                <select id='select1' class="selectpicker" name="acname" multiple data-live-search="true" data-live-search-placeholder="Search" data-actions-box="true">
                   {% if item.F_ac != '请选择' %}
                   <option value="{{item.F_ac}}" selected="selected">{{item.F_ac}}</option>
                   {% endif %}
@@ -152,6 +165,16 @@ function begin_calculate(id){
                 </select>
               </div>
               </td>
+              <td >
+              <div class="form-group">
+                  <select class="form-control" id='quanyisymbol'>
+                    <option selected="selected">{{item.stock}}</option>
+                    {% for item in quanyisymbollist %}
+                    <option value="{{item.quanyisymbol}}">{{item.quanyisymbol}}</option>
+                    {% endfor %}
+                  </select>
+              </div>   
+              </td> 
               <td ><input type="text" value="{{item.ratio}}"/></td> 
               <td><button type="button" onclick="delete_order_p_follow_info(this)">删除</button></td>
              </tr> 

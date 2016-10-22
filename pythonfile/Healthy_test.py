@@ -51,9 +51,21 @@ def is_rongyu():
 	# sql="delete from p_follow where f_ac in (select distinct F_ac from p_follow where F_ac not in (select distinct ac from p_follow) and  F_ac not in (select distinct ac from P_BASIC ))"
 	# ms05.inert_sql(sql)
 
+#监测p_basic 中的配置手数是<>10
+def P_basic_sumpsize():
+	sql="select p.ac,round(SUM(p.P_size*a.ratio/100),0) as ratio from P_BASIC p left join AC_RATIO a on p.AC=a.AC group by p.achaving round(SUM(p.P_size*a.ratio/100),0)<>10order by round(SUM(p.P_size*a.ratio/100),0) desc"
+	res=ms.dict_sql(sql)
+	print "配置中不等于10手虚拟组"
+	for item in res:
+		print item['ac'],'  ',item['ratio']\
+
+
+
+
 is_acname_ok()
 is_Tsymbol_multi(ms05,type="05")
 is_Tsymbol_multi(ms03,type="03")
 is_Tsymbol_multi(ms07,type="07")
 is_Tsymbol_multi(mscloud,type="mscloud")
 is_rongyu()
+P_basic_sumpsize()
