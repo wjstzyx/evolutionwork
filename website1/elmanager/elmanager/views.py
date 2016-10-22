@@ -99,10 +99,14 @@ def accountdetail_ac(request):
 	#如果是虚拟组：
 	else:
 		print request.GET
-		begintime=151020
-		endtime=200000
-		begintime=int(request.GET.get("begintime",""))-20000000
-		endtime=int(request.GET.get("endtime",""))-20000000
+		begintime=request.GET.get("begintime","")
+		if begintime:
+			begintime=int(request.GET.get("begintime",""))-20000000
+			endtime=int(request.GET.get("endtime",""))-20000000
+		else:
+			begintime=151020
+			endtime=200000
+
 		#查看他是否在计算之列：
 		sql="select top(1) 1 as aa from dailyquanyi_V2 where ac='%s'" % (userid)
 		res222=ms.dict_sql(sql)
@@ -133,6 +137,10 @@ def accountdetail_ac(request):
 		if res33:
 			message="请检查账号配置！！在p_basic 和p_follow中都存在配置"
 
+		begintime=str(begintime+20000000)
+		begintime=begintime[0:4]+'-'+begintime[4:6]+'-'+begintime[6:8]
+		endtime=str(endtime+20000000)
+		endtime=endtime[0:4]+'-'+endtime[4:6]+'-'+endtime[6:8]
 		return render_to_response('detail_ac_chart.html',{
 			'res':res,
 			'userid':userid,
@@ -140,8 +148,8 @@ def accountdetail_ac(request):
 			'resultlist':resultlist,
 			'message':message,
 			'rbdata':rbdata,
-			'begintime':begintime+20000000,
-			'endtime':endtime+20000000,
+			'begintime':begintime,
+			'endtime':endtime,
 
 		})
 
