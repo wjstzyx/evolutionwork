@@ -98,6 +98,11 @@ def accountdetail_ac(request):
 		})
 	#如果是虚拟组：
 	else:
+		print request.GET
+		begintime=151020
+		endtime=200000
+		begintime=int(request.GET.get("begintime",""))-20000000
+		endtime=int(request.GET.get("endtime",""))-20000000
 		#查看他是否在计算之列：
 		sql="select top(1) 1 as aa from dailyquanyi_V2 where ac='%s'" % (userid)
 		res222=ms.dict_sql(sql)
@@ -108,15 +113,15 @@ def accountdetail_ac(request):
 				acname=item['ac']
 				symbol=item['symbol']
 				#第一个价格
-				sql="select top 1 quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+				sql="select top 1 quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=%s order by D" % (acname,symbol,begintime)
 				tempquanyi=ms.find_sql(sql)
 				if tempquanyi==[]:
 					tempquanyi=0
 				else:
 					tempquanyi=tempquanyi[0][0]
-				sql="select quanyi-(%s) as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (tempquanyi,acname,symbol)
+				sql="select quanyi-(%s) as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=%s and D<=%s order by D" % (tempquanyi,acname,symbol,begintime,endtime)
 				res1=ms.find_sql(sql)
-				sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+				sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=%s and D<=%s order by D" % (acname,symbol,begintime,endtime)
 				res2=ms.find_sql(sql)		
 				(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 				tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
@@ -135,6 +140,9 @@ def accountdetail_ac(request):
 			'resultlist':resultlist,
 			'message':message,
 			'rbdata':rbdata,
+			'begintime':begintime+20000000,
+			'endtime':endtime+20000000,
+
 		})
 
 

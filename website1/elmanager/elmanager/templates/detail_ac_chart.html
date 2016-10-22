@@ -6,7 +6,7 @@
 
 {% endblock %}
 {% block extrastyle %}
-
+    <link href="{% static 'css/bootstrap-datetimepicker.min.css' %}" rel="stylesheet">
 {% endblock %}
 
 {% block content_title %}{% endblock %}
@@ -79,28 +79,58 @@ function add_new_monitor(){
      </div> 
     </div> 
     <div class="row"> 
-    <div class="col-lg-2"></div>
+    <div class="col-lg-2">
+    <form action="" class="form-horizontal" method='get'>
+        <fieldset>
+            <div class="row control-group">
+                <label class="control-label">开始时间</label>
+                <div class="controls input-append date form_date1" data-date="" data-date-format="yyyy-mm-dd" data-link-field="dtp_input1" data-link-format="yyyymmdd">
+                    <input size="16" type="text" value="{{begintime}}" readonly>
+                    <span class="add-on"><i class="icon-remove"></i></span>
+          <span class="add-on"><i class="icon-th"></i></span>
+                </div>
+          <input type="hidden" id="dtp_input1" name="begintime" value="" /><br/>
+            </div>
+            <div class="row control-group">
+                <label class="control-label">结束时间</label>
+                <div class="controls input-append date form_date1" data-date="" data-date-format="yyyy-mm-dd" data-link-field="dtp_input2" data-link-format="yyyymmdd">
+                    <input size="16" type="text" value="{{endtime}}" readonly>
+                    <span class="add-on"><i class="icon-remove"></i></span>
+          <span class="add-on"><i class="icon-th"></i></span>
+                </div>
+          <input type="hidden" id="dtp_input2" name="endtime" value="" /><br/>
+          <input type="hidden" name="userid" value="{{userid}}" />
+          <div class="row">
+            <div class="col-sm-12"><button type="submit">显示</button></div>
+          
+          </div>
+            </div>
+
+        </fieldset>
+    </form>
+
+    </div>
      <div class="col-lg-8">
      </br>
-    <div class="row">
-        <div class="col-lg-12">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            虚拟组表现   <font color="#FF0000">{{message}}</font>
-                        </div>
-                        <!-- /.panel-heading -->
-                        <div class="panel-body">
-                                  <div class="row col-lg-12">
-                                    <div id='chartid1' style="height:400px"></div>
-                                   </div>
+        <div class="row">
+            <div class="col-lg-12">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                虚拟组表现   <font color="#FF0000">{{message}}</font>
+                            </div>
+                            <!-- /.panel-heading -->
+                            <div class="panel-body">
+                                      <div class="row col-lg-12">
+                                        <div id='chartid1' style="height:400px"></div>
+                                       </div>
 
+                            </div>
+                            <!-- /.panel-body -->
                         </div>
-                        <!-- /.panel-body -->
-                    </div>
-                    <!-- /.panel -->
+                        <!-- /.panel -->
+            </div>
+            <!-- /.col-lg-6 -->
         </div>
-        <!-- /.col-lg-6 -->
-    </div>
 
 
 
@@ -113,6 +143,22 @@ function add_new_monitor(){
 
 {% block extrabodyscript %}
 <script type="text/javascript" src="http://cdn.hcharts.cn/highcharts/highcharts.js"></script>
+<script src="{% static 'js/bootstrap-datetimepicker.min.js' %}" charset="UTF-8" ></script>
+<script src="{% static 'js/datetimepickerlocales/bootstrap-datetimepicker.zh-CN.js' %}"></script>
+<script type="text/javascript">
+
+  $('.form_date1').datetimepicker({
+        language:  'zh-CN',
+        weekStart: 1,
+        todayBtn:  1,
+    autoclose: 1,
+    todayHighlight: 1,
+    startView: 2,
+    minView: 2,
+    forceParse: 0
+    });
+
+</script>
 {% for item in rbdata %}
   <script>
       $(function () {
