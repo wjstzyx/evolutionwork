@@ -35,6 +35,9 @@ def accountdetail_ac(request):
 	userid='账户为空'
 	if request.GET:
 		userid=request.GET.get("userid","")
+		if '__' in userid:
+			muquanyisymbol=userid.split('__')[-1]
+			userid=userid.split('__')[0]
 		# userid=userid.strip('/')
 	#如果是账号则以下逻辑：
 	sql="select 1 as aa from p_basic where ac='%s'" % (userid)
@@ -44,7 +47,7 @@ def accountdetail_ac(request):
 	rbdata=[]
 	message=""
 	if not  res111:
-		sql="SELECT [AC]  ,[F_ac]  ,[ratio],1 as isac  FROM [Future].[dbo].[p_follow] where ac='%s' and ratio<>0" % (userid)
+		sql="SELECT [AC]  ,[F_ac]+'__'+CAST(stock as nvarchar) as F_ac  ,stock,bb.Symbol,[ratio],1 as isac  FROM [Future].[dbo].[p_follow] p left join (SELECT *  FROM [Future].[dbo].[Symbol_ID] where (Symbol not like '%%night%%'  and (Symbol not like '%%N' ) and Symbol not like '%%ZL') OR  Symbol='ZN' or Symbol='RMZL') bB  on p.stock=bb.S_ID where ac='%s ' and ratio<>0" % (userid)
 		res=ms.dict_sql(sql)
 		for item in res:
 			sql="SELECT 1 isac  FROM [Future].[dbo].[p_follow] where ac='%s' " % (item['F_ac'])
@@ -108,10 +111,16 @@ def accountdetail_ac(request):
 			endtime=200000
 
 		#查看他是否在计算之列：
-		sql="select top(1) 1 as aa from dailyquanyi_V2 where ac='%s'" % (userid)
+		if muquanyisymbol:
+			sql=" SELECT top 1 * from [LogRecord].[dbo].[quanyicaculatelist] where acname='%s' and [quanyisymbol] in ( select Symbol from Symbol_ID where S_ID='%s')" % (userid,muquanyisymbol)
+			myquanyisymbol=ms.dict_sql(sql)[0]['quanyisymbol']
+		else:
+			myquanyisymbol='nono'
+
+		sql="select top(1) 1 as aa from dailyquanyi_V2 where ac='%s' and symbol='%s'" % (userid,myquanyisymbol)
 		res222=ms.dict_sql(sql)
 		if res222:
-			sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where acname='%s' and iscaculate in (1,2) order by sortnum" % (userid)
+			sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where acname='%s' and quanyisymbol='%s' and iscaculate in (1,2) order by sortnum" % (userid,myquanyisymbol)
 			res=ms.dict_sql(sql)
 			for item in res:
 				acname=item['ac']
@@ -2569,9 +2578,11 @@ def order_get_dailyquanyi(account,fromDdy):
 	for key in ac_ratio:
 		realac=key.split("__")[0]
 		quanyisymbols_id=key.split("__")[-1]
+		sql="select top(1) [positionsymbol] from [LogRecord].[dbo].[quanyicaculatelist]  where acname='%s'" % (realac)
+		positionsymbol=ms.dict_sql(sql)[0]['positionsymbol']
 		sql="select  a.acname,s.S_ID,s.Symbol from LogRecord.dbo.quanyicaculatelist a left join Symbol_ID s on a.quanyisymbol=s.Symbol where a.acname='%s' and  s.S_ID='%s'" % (realac,quanyisymbols_id)
 		quanyisymbol=ms.dict_sql(sql)[0]['Symbol']
-		sql="SELECT top 1  (convert(int,replace(convert(varchar(10),DATEADD(day,1,stockdate),120),'-',''))-20000000) as D  FROM [Future].[dbo].[quanyi_log_groupby_v2] where ac='%s' and symbol='%s' order by stockdate" % (realac,quanyisymbol)
+		sql="SELECT top 1  (convert(int,replace(convert(varchar(10),DATEADD(day,1,stockdate),120),'-',''))-20000000) as D  FROM [Future].[dbo].[quanyi_log_groupby_v2] where ac='%s' and symbol='%s' order by stockdate" % (realac,positionsymbol)
 		tempD=ms.dict_sql(sql)
 		if tempD:
 			Dlist.append(tempD[0]['D'])

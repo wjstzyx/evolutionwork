@@ -90,7 +90,8 @@ function add_new_monitor(){
             <thead> 
              <tr> 
               <th align=center width=20%>账号名</th> 
-              <th align=center width=20%>虚拟组</th> 
+              <th align=center width=20%>虚拟组</th>
+              <th align=center width=10%>作用品种</th> 
               <th align=center width=20%>配置比例(%)</th> 
               <th align=center width=20%>是否跟随账号</th>
              </tr> 
@@ -99,7 +100,8 @@ function add_new_monitor(){
             {% for item in res %}
              <tr> 
               <td align=center >{{item.AC}}</td>
-              <td align=center ><a href='/index/quanyi/accountdetail_ac/?userid={{item.F_ac}}' target="_blank">{{item.F_ac}}</a></td> 
+              <td align=center ><a href='/index/quanyi/accountdetail_ac/?userid={{item.F_ac}}' target="_blank">{{item.F_ac}}</a></td>
+              <td align=center >{{item.Symbol}}</td> 
               <td align=center >{{item.ratio}}</td> 
               <td align=center >{{item.isac}}</td> 
              </tr> 

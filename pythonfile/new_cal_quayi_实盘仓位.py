@@ -20,7 +20,7 @@ def myround(num):
 	if num<=0:
 		return round(num+0.000000001)
 
-def input_groupbyquanyi(ac,symbol):
+def input_groupbyquanyi(ac,symbol,quanyisymbol=''):
 	# 清除临时表
 	try:
 		sql="drop table #temp_quanyi_new"
@@ -81,7 +81,7 @@ def input_groupbyquanyi(ac,symbol):
 		###以上已经准备好虚拟组的仓位信息
 		fisrttime=positionlist[0][0]
 		#[datetime.datetime(2015, 10, 21, 9, 0), 6.0, 6.0]
-		sql="select	C,StockDate from TSymbol_quotes_backup where Symbol='%s' and  stockdate >='%s' order by StockDate " % (symbol,fisrttime)
+		sql="select	C,StockDate from TSymbol_quotes_backup where Symbol='%s' and  stockdate >='%s' order by StockDate " % (quanyisymbol,fisrttime)
 		res=ms.dict_sql(sql)
 		# print res[:10]
 		#对行情日期遍历
@@ -257,6 +257,8 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto,isshow=1):
 	aa=int(lenx/30)
 	numx=[]
 	labvalue=[]
+	print lenx
+	print aa
 	for i in range(0,lenx-aa,aa):
 		numx.append(i)
 		labvalue.append(avalue[i].strftime("%Y-%m-%d"))
@@ -437,13 +439,13 @@ def multiple_ratio(myquotes,ratio):
 # show_all_ac('RU3v4e')
 
 
-(myquotes,totalsum)=input_groupbyquanyi('test_jieti1','rb')
+(myquotes,totalsum)=input_groupbyquanyi('ZWindex5','I','CU')
 #仓位信息OK
 # print totalsum
-ratio=0.4
-myquotes=multiple_ratio(myquotes,ratio)
-# for item in myquotes:
-# 	print item 
-cal_quanyi('test_jieti1',myquotes,ratio*totalsum,'rb')
+ratio=1
+# myquotes=multiple_ratio(myquotes,ratio)
+for item in myquotes:
+	print item 
+cal_quanyi('ZWindex5',myquotes,ratio*totalsum,'CU')
 
 # show_account('myaccount2')

@@ -21,7 +21,9 @@ def myround(num):
 	if num<=0:
 		return round(num+0.000000001)
 
-def input_groupbyquanyi(ac,symbol):
+def input_groupbyquanyi(ac,symbol,quanyisymbol=''):
+	if quanyisymbol=='':
+		quanyisymbol=symbol
 	# 清除临时表
 	try:
 		sql="drop table #temp_quanyi_new"
@@ -82,7 +84,7 @@ def input_groupbyquanyi(ac,symbol):
 		###以上已经准备好虚拟组的仓位信息
 		fisrttime=positionlist[0][0]
 		#[datetime.datetime(2015, 10, 21, 9, 0), 6.0, 6.0]
-		sql="select	C,StockDate from TSymbol_quotes_backup where Symbol='%s' and  stockdate >='%s' order by StockDate " % (symbol,fisrttime)
+		sql="select	C,StockDate from TSymbol_quotes_backup where Symbol='%s' and  stockdate >='%s' order by StockDate " % (quanyisymbol,fisrttime)
 		res=ms.dict_sql(sql)
 		# print res[:10]
 		#对行情日期遍历
@@ -600,10 +602,10 @@ def real_account_groupbyquanyi(ac,symbol):
 
 
 
-# (myquotes,totalsum)=input_groupbyquanyi('rb3choosel','RB')
+# (myquotes,totalsum)=input_groupbyquanyi('ZWindex5','I','CU')
 # # for item in myquotes:
 # # 	print item 
-# cal_quanyi('rb3choosel',myquotes,totalsum,'RB')
+# cal_quanyi('ZWindex5',myquotes,totalsum,'CU')
 
 # show_account('myaccount2')
 
@@ -616,21 +618,24 @@ def main_fun_sumps():
 		print item['acname'],item['id']
 		positionsymbol=item['positionsymbol']
 		quanyisymbol=item['quanyisymbol']
-		(myquotes,totalsum)=input_groupbyquanyi(item['acname'],positionsymbol)
+		(myquotes,totalsum)=input_groupbyquanyi(item['acname'],positionsymbol,quanyisymbol)
 		# print 'myquotes',myquotes
 		#直接设置数字 10
 		cal_quanyi(item['acname'],myquotes,10,quanyisymbol)
 
 def main_fun():
 	#获取需要处理的列表
-	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1 and issumps=0 and isyepan in (0,1,12) order by id desc "
+	#sql="SELECT TOP 1000 [id]      ,[acname]      ,[positionsymbol]      ,[quanyisymbol]      ,[iscaculate]      ,[isforhistory]      ,[isstatistic]      ,[isyepan]      ,[iscalcubyvick]      ,[sortnum]      ,[issumps]  FROM [LogRecord].[dbo].[quanyicaculatelist] where [positionsymbol]<>[quanyisymbol]  order by id desc"
+
+
+	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1 and issumps=0 and isyepan in (0,1,12)  order by id desc "
 	#sql="SELECT top 17 id,[acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('RB') and iscaculate=1 order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
 		print item['acname'],item['id']
 		positionsymbol=item['positionsymbol']
 		quanyisymbol=item['quanyisymbol']
-		(myquotes,totalsum)=input_groupbyquanyi(item['acname'],positionsymbol)
+		(myquotes,totalsum)=input_groupbyquanyi(item['acname'],positionsymbol,quanyisymbol)
 		# print 'myquotes',myquotes
 		#直接设置数字 10
 		cal_quanyi(item['acname'],myquotes,totalsum,quanyisymbol)
