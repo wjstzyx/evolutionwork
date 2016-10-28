@@ -609,6 +609,14 @@ def real_account_groupbyquanyi(ac,symbol):
 
 # show_account('myaccount2')
 
+
+def write_heart(type,name):
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+	sql="update [LogRecord].[dbo].[quotes_python_heart] set [updatetime]=getdate() where type='%s' and name='%s' and [isactive]=1" % (type,name)
+	ms.insert_sql(sql)
+
+
+
 def main_fun_sumps():
 	#获取需要处理的列表
 	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1 and issumps=1 and isyepan in (0,1,12) order by id desc "
@@ -628,7 +636,7 @@ def main_fun():
 	#sql="SELECT TOP 1000 [id]      ,[acname]      ,[positionsymbol]      ,[quanyisymbol]      ,[iscaculate]      ,[isforhistory]      ,[isstatistic]      ,[isyepan]      ,[iscalcubyvick]      ,[sortnum]      ,[issumps]  FROM [LogRecord].[dbo].[quanyicaculatelist] where [positionsymbol]<>[quanyisymbol]  order by id desc"
 
 
-	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1 and issumps=0 and isyepan in (0,1,12)  order by id desc "
+	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1 and issumps=0 and isyepan in (0,1,12) order by id desc "
 	#sql="SELECT top 17 id,[acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('RB') and iscaculate=1 order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
@@ -640,5 +648,9 @@ def main_fun():
 		#直接设置数字 10
 		cal_quanyi(item['acname'],myquotes,totalsum,quanyisymbol)
 
+
+
 main_fun_sumps()
 main_fun()
+
+write_heart('daily_equity','nosum1')
