@@ -402,6 +402,8 @@ def futureaccounttotal(request):
 			Withdraw_on_month_begin=0
 		if item['primarymoney']>10 and equity_on_month_begin<10:
 			equity_on_month_begin=item['primarymoney']
+		real_equity_on_month_begin=equity_on_month_begin-Withdraw_on_month_begin
+
 		#获得当天权益，如果有出金，则标记出来
 		sql="SELECT top 2 [date] ,[userid] ,[prebalance] ,[deposit] ,[Withdraw] ,[CloseProfit]  ,[PositionProfit]  ,[Commission]  ,[CloseBalance]  FROM [LogRecord].[dbo].[AccountsBalance] where userid='%s'  and date>='%s' order by date desc" % (userid,month)
 		res=ms.dict_sql(sql)
@@ -416,6 +418,7 @@ def futureaccounttotal(request):
 		else:
 			yesterdays_equity=0
 
+
 		#计算每月收益
 		sql="select sum(Withdraw-deposit) as deltawithdeposit from  [LogRecord].[dbo].[AccountsBalance] where userid='%s'  and date>='%s'" % (userid,month)
 		temp1res=ms.dict_sql(sql)
@@ -427,8 +430,9 @@ def futureaccounttotal(request):
 		# print (todays_equity-todays1_withdraw)
 		# print (equity_on_month_begin-Withdraw_on_month_begin)
 		# print deltawithdeposit
+		real_equity_on_month_begin=real_equity_on_month_begin-deltawithdeposit+todays1_withdraw
 		monthly_equity=(todays_equity-todays1_withdraw)-(equity_on_month_begin-Withdraw_on_month_begin)+deltawithdeposit
-		monthly_rate=round(monthly_equity/(equity_on_month_begin+0.00002)*100,2)
+		monthly_rate=round(monthly_equity/(real_equity_on_month_begin+0.00002)*100,2)
 
 
 		sql="SELECT [date] ,[userid] ,[prebalance] ,[deposit] ,[Withdraw] ,[CloseProfit]  ,[PositionProfit]  ,[Commission]  ,[CloseBalance]  FROM [LogRecord].[dbo].[AccountsBalance] where userid='%s'  and date>='%s' order by date" % (userid,month)
