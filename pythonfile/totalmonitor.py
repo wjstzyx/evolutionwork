@@ -50,7 +50,7 @@ def monitor_daily_equity():
 	nowtime=datetime.datetime.now().strftime("%H%M")
 	nowtime=int(nowtime)
 	dayOfWeek = datetime.datetime.now().weekday()
-	if dayOfWeek in (0,1,2,3,4) and nowtime>=1700 and nowtime<1740:
+	if dayOfWeek in (0,1,2,3,4) and nowtime>=1655 and nowtime<1701:
 		sql="select DATEDIFF(day, updatetime, getdate()) as aaa from [LogRecord].[dbo].[quotes_python_heart]where type='daily_equity'  and name in ('nosum1')   and isactive=1"
 		res=ms.dict_sql(sql)
 		if res[0]['aaa']>=1:
