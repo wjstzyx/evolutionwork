@@ -17,7 +17,8 @@ try:
 	os.system(cmd)
 except:
 	pass
-	
+print 'Next task'
+
 
 
 try:
