@@ -25,7 +25,7 @@ def handle_distinct_record(ms):
 		else:
 			fromtime='2015-01-01'
 			lastvp=-9999
-		print name,fromtime
+		print fromtime,name
 
 		sql="select * from [future].[dbo].[map_backup] where name='%s' and datetime>'%s'  order by datetime" % (name,fromtime)
 		res1=ms.dict_sql(sql)
