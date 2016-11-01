@@ -416,7 +416,7 @@ def futureaccounttotal(request):
 		if len(res)==2:
 			yesterdays_equity=round((res[1]['CloseBalance']+res[1]['Withdraw']),2)
 		else:
-			yesterdays_equity=0
+			yesterdays_equity=equity_on_month_begin
 
 
 		#计算每月收益
@@ -435,7 +435,7 @@ def futureaccounttotal(request):
 		monthly_rate=round(monthly_equity/(real_equity_on_month_begin+0.00002)*100,2)
 
 
-		sql="SELECT [date] ,[userid] ,[prebalance] ,[deposit] ,[Withdraw] ,[CloseProfit]  ,[PositionProfit]  ,[Commission]  ,[CloseBalance]  FROM [LogRecord].[dbo].[AccountsBalance] where userid='%s'  and date>='%s' order by date" % (userid,month)
+		sql="SELECT [date] ,[userid] ,[prebalance] ,[deposit] ,[Withdraw] ,[CloseProfit]  ,[PositionProfit]  ,[Commission]  ,[CloseBalance]  FROM [LogRecord].[dbo].[AccountsBalance] where userid='%s'  and date>='%s' order by date" % (userid,month-100)
 		tempres=ms.dict_sql(sql)
 		equity=0
 		monthly_commitssion=0
