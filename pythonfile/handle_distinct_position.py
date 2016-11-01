@@ -4,6 +4,7 @@
 import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
+import datetime
 from dbconn import MSSQL
 #ms05 = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 ms105 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="future")
@@ -12,6 +13,12 @@ ms105 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="future")
 # -*- coding: utf-8 -*-
 
 def handle_distinct_record(ms):
+	nowtime=int(datetime.datetime.now().strftime('%H%M'))
+	if nowtime>=1800 and nowtime<=1802:
+		#删除20天前的历史记录
+		sql='delete  FROM [future].[dbo].[map_backup]  where DATEDIFF(day,datetime,getdate())>20'
+		ms.insert_sql(sql)
+
 	sql="select distinct name from [future].[dbo].[map_backup] order by name"
 	res=ms.dict_sql(sql)
 	for item in res:
@@ -39,6 +46,7 @@ def handle_distinct_record(ms):
 
 
 handle_distinct_record(ms105)
+
 
 
 
