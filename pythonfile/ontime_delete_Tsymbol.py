@@ -11,6 +11,15 @@ mscloud = MSSQL(host="139.196.190.246",user="future",pwd="K@ra0Key",db="future")
 # resList = ms.find_sql("select top 2 * from st_report")
 # print resList
 # -*- coding: utf-8 -*-
+
+try:
+	cmd='sudo ntpdate pool.ntp.org'
+	os.system(cmd)
+except:
+	pass
+	
+
+
 try:
 	sql="delete from [Future].[dbo].[TSymbol] where DATEDIFF(day,[StockDate],GETDATE())>130"
 	ms03.insert_sql(sql)
