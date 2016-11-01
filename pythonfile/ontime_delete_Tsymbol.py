@@ -5,9 +5,24 @@ reload(sys)
 sys.setdefaultencoding('utf8')
 from dbconn import MSSQL
 import datetime
-ms03 = MSSQL(host="192.168.0.3",user="future",pwd="K@ra0Key",db="future")
-ms07 = MSSQL(host="192.168.0.7",user="future",pwd="K@ra0Key",db="future")
-mscloud = MSSQL(host="139.196.190.246",user="future",pwd="K@ra0Key",db="future")
+try:
+	ms03 = MSSQL(host="192.168.0.3",user="future",pwd="K@ra0Key",db="future")
+except:
+	pass
+
+
+try:
+	ms07 = MSSQL(host="192.168.0.7",user="future",pwd="K@ra0Key",db="future")
+except:
+	pass
+
+
+
+try:
+	mscloud = MSSQL(host="139.196.190.246",user="future",pwd="K@ra0Key",db="future")
+except:
+	pass
+
 # resList = ms.find_sql("select top 2 * from st_report")
 # print resList
 # -*- coding: utf-8 -*-
