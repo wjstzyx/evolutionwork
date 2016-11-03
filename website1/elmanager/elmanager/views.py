@@ -1796,6 +1796,41 @@ def map_acname_position(request):
 		tempdict={'acname':acname,'symbol':symbol,'data1':newdata1,'data2':newdata2}
 		IFdata.append(tempdict)
 
+		nowtime=(datetime.datetime.now()-datetime.timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S")
+		sql="SELECT top 2000 datetime as stockdate,vp as totalposition from [future].[dbo].[real_map_backup] where name='%s'  and datetime>='%s' order by datetime" % (acname,nowtime)
+		res1=ms105.dict_sql(sql)
+		data1=[]
+		if res1:
+			for item  in res1:
+				stockdate=(item['stockdate']+ datetime.timedelta(hours = 8)).strftime("%Y-%m-%d %H:%M:%S")
+				timeArray = time.strptime(stockdate, "%Y-%m-%d %H:%M:%S")
+				timeStamp = int(time.mktime(timeArray))
+				totalposition=round(item['totalposition'],3)
+				tempdata1=[timeStamp,totalposition]
+				data1.append(tempdata1)
+			newdata1=change_scatter_tocontinue(data1)
+		else:
+			newdata1=[]
+		sql="SELECT top 2000 datetime as stockdate,rp as totalposition from [future].[dbo].[real_map_backup] where name='%s'  and datetime>='%s' order by datetime" % (acname,nowtime)
+		res2=ms105.dict_sql(sql)
+		data2=[]
+		if res2:
+			for item  in res2:
+				stockdate=(item['stockdate']+ datetime.timedelta(hours = 8)).strftime("%Y-%m-%d %H:%M:%S")
+				timeArray = time.strptime(stockdate, "%Y-%m-%d %H:%M:%S")
+				timeStamp = int(time.mktime(timeArray))
+				totalposition=round(item['totalposition'],3)
+				tempdata1=[timeStamp,totalposition]
+				data2.append(tempdata1)
+			newdata2=change_scatter_tocontinue(data2)
+		else:
+			newdata2=[]
+
+		tempdict={'acname':acname+'today','symbol':symbol,'data1':newdata1,'data2':newdata2}
+		IFdata.append(tempdict)
+
+
+
 	ICdata=[]
 	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where [quanyisymbol] in ('IC') and  iscaculate in (3)  and [isstatistic] =1 and [isforhistory]=0 order by sortnum"
 	res=ms.dict_sql(sql)
