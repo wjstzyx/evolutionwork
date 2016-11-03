@@ -1728,6 +1728,203 @@ def acwantedequlityhistory(request):
 	})	
 
 
+def map_acname_position(request):
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	ms105 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="future") 
+	userid = request.COOKIES.get('userid','')
+	username = request.COOKIES.get('username','')
+	#验证权限
+	sql="SELECT a.username,b.function_id,b.function_content  FROM [LogRecord].[dbo].[account_user] a  inner join [LogRecord].[dbo].[account_group] b  on   a.groupname=b.groupname where a.userid='%s' " % (userid)
+	res=ms.dict_sql(sql)
+	isauthpass=0
+	if res:
+		for item in res:
+			if int(item['function_id'])==2:
+				isauthpass=1
+	if isauthpass==0:
+		response = HttpResponse("该功能正在完善，请返回 !! <button><a href='/index/'>返回</a></button>")
+		return response
+
+
+	if request.POST:
+		id=request.POST.get('id','')
+	newD=160621
+	RBlist=[]
+
+
+	IFdata=[]
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where [quanyisymbol] in ('IF') and  iscaculate in (3)  and [isstatistic] =1 and [isforhistory]=0 order by sortnum"
+	res=ms.dict_sql(sql)
+	for item in res:
+		acname=item['ac']
+		symbol=item['symbol']
+		#第一个价格
+		sql="select top 1 quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		tempquanyi=ms.find_sql(sql)
+		if tempquanyi==[]:
+			tempquanyi=0
+		else:
+			tempquanyi=tempquanyi[0][0]
+		sql="SELECT  [vp],CONVERT(varchar(16), datetime, 120) as datetime FROM [future].[dbo].[real_map_backup] where name='%s' order by datetime" % (acname)
+		print sql 
+		res1=ms105.find_sql(sql)
+		sql="SELECT  [rp],CONVERT(varchar(16), datetime, 120) as datetime FROM [future].[dbo].[real_map_backup] where name='%s' order by datetime" % (acname)
+		res2=ms105.find_sql(sql)		
+		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
+		IFdata.append(tempdict)
+
+	ICdata=[]
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where [quanyisymbol] in ('IC') and  iscaculate in (3)  and [isstatistic] =1 and [isforhistory]=0 order by sortnum"
+	res=ms.dict_sql(sql)
+	for item in res:
+		acname=item['ac']
+		symbol=item['symbol']
+		#第一个价格
+		sql="select top 1 quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		tempquanyi=ms.find_sql(sql)
+		if tempquanyi==[]:
+			tempquanyi=0
+		else:
+			tempquanyi=tempquanyi[0][0]
+		sql="select quanyi-(%s) as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (tempquanyi,acname,symbol)
+		res1=ms.find_sql(sql)
+		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res2=ms.find_sql(sql)		
+		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
+		ICdata.append(tempdict)
+
+	IHdata=[]
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where [quanyisymbol] in ('IH') and  iscaculate in (3)  and [isstatistic] =1 and [isforhistory]=0 order by sortnum"
+	res=ms.dict_sql(sql)
+	for item in res:
+		acname=item['ac']
+		symbol=item['symbol']
+		#第一个价格
+		sql="select top 1 quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		tempquanyi=ms.find_sql(sql)
+		if tempquanyi==[]:
+			tempquanyi=0
+		else:
+			tempquanyi=tempquanyi[0][0]
+		sql="select quanyi-(%s) as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (tempquanyi,acname,symbol)
+		res1=ms.find_sql(sql)
+		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res2=ms.find_sql(sql)		
+		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
+		IHdata.append(tempdict)
+
+
+
+	return render_to_response('map_acname_position.html',{
+		'IFdata':IFdata,
+		'ICdata':ICdata,
+		'IHdata':IHdata,
+		'username':username,
+	})	
+
+
+
+
+def stockmapequty(request):
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	userid = request.COOKIES.get('userid','')
+	username = request.COOKIES.get('username','')
+	#验证权限
+	sql="SELECT a.username,b.function_id,b.function_content  FROM [LogRecord].[dbo].[account_user] a  inner join [LogRecord].[dbo].[account_group] b  on   a.groupname=b.groupname where a.userid='%s' " % (userid)
+	res=ms.dict_sql(sql)
+	isauthpass=0
+	if res:
+		for item in res:
+			if int(item['function_id'])==2:
+				isauthpass=1
+	if isauthpass==0:
+		response = HttpResponse("该功能正在完善，请返回 !! <button><a href='/index/'>返回</a></button>")
+		return response
+
+
+	if request.POST:
+		id=request.POST.get('id','')
+	newD=160621
+	RBlist=[]
+
+
+	IFdata=[]
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where [quanyisymbol] in ('IF') and  iscaculate in (3)  and [isstatistic] =1 and [isforhistory]=0 order by sortnum"
+	res=ms.dict_sql(sql)
+	for item in res:
+		acname=item['ac']
+		symbol=item['symbol']
+		#第一个价格
+		sql="select top 1 quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		tempquanyi=ms.find_sql(sql)
+		if tempquanyi==[]:
+			tempquanyi=0
+		else:
+			tempquanyi=tempquanyi[0][0]
+		sql="select quanyi-(%s) as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (tempquanyi,acname,symbol)
+		res1=ms.find_sql(sql)
+		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res2=ms.find_sql(sql)		
+		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
+		IFdata.append(tempdict)
+
+	ICdata=[]
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where [quanyisymbol] in ('IC') and  iscaculate in (3)  and [isstatistic] =1 and [isforhistory]=0 order by sortnum"
+	res=ms.dict_sql(sql)
+	for item in res:
+		acname=item['ac']
+		symbol=item['symbol']
+		#第一个价格
+		sql="select top 1 quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		tempquanyi=ms.find_sql(sql)
+		if tempquanyi==[]:
+			tempquanyi=0
+		else:
+			tempquanyi=tempquanyi[0][0]
+		sql="select quanyi-(%s) as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (tempquanyi,acname,symbol)
+		res1=ms.find_sql(sql)
+		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res2=ms.find_sql(sql)		
+		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
+		ICdata.append(tempdict)
+
+	IHdata=[]
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where [quanyisymbol] in ('IH') and  iscaculate in (3)  and [isstatistic] =1 and [isforhistory]=0 order by sortnum"
+	res=ms.dict_sql(sql)
+	for item in res:
+		acname=item['ac']
+		symbol=item['symbol']
+		#第一个价格
+		sql="select top 1 quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		tempquanyi=ms.find_sql(sql)
+		if tempquanyi==[]:
+			tempquanyi=0
+		else:
+			tempquanyi=tempquanyi[0][0]
+		sql="select quanyi-(%s) as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (tempquanyi,acname,symbol)
+		res1=ms.find_sql(sql)
+		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res2=ms.find_sql(sql)		
+		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
+		IHdata.append(tempdict)
+
+
+
+	return render_to_response('stockmapequity.html',{
+		'IFdata':IFdata,
+		'ICdata':ICdata,
+		'IHdata':IHdata,
+		'username':username,
+	})	
+
+
+
 
 def acwantedequlitynew(request):
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
@@ -2122,6 +2319,7 @@ def realcompare(request):
 
 def showaccompare(requst):
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+	ms105 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="future") 
 	if requst.GET:
 		print "bb"
 		print requst.GET
@@ -2129,12 +2327,13 @@ def showaccompare(requst):
 	else:
 		print "aaaaa"
 		acname='Rb_QGpLud'
+	acname='IF_Huitiaoall_0'
 	#acname='9KDHPM'
 	##获取5日前日期
 	nowtime=(datetime.datetime.now()-datetime.timedelta(days=10)).strftime("%Y-%m-%d %H:%M:%S")
-	sql="SELECT top 2000 stockdate,totalposition  FROM [Future].[dbo].[quanyi_log_groupby] where ac='%s' and stockdate>='%s' order by stockdate " % (acname,nowtime)
+	sql="SELECT top 2000 datetime as stockdate,vp as totalposition from [future].[dbo].[real_map_backup] where name='%s'  and datetime>='%s' order by datetime" % (acname,nowtime)
 	print sql
-	res1=ms.dict_sql(sql)
+	res1=ms105.dict_sql(sql)
 	data1=[]
 	if res1:
 		for item  in res1:
@@ -2147,8 +2346,8 @@ def showaccompare(requst):
 		newdata1=change_scatter_tocontinue(data1)
 	else:
 		newdata1=[]
-	sql="SELECT top 2000 stockdate,totalposition  FROM [Future].[dbo].[real_quanyi_log_groupby] where ac='%s' and stockdate>='%s' order by stockdate " % (acname,nowtime)
-	res2=ms.dict_sql(sql)
+	sql="SELECT top 2000 datetime as stockdate,rp as totalposition from [future].[dbo].[real_map_backup] where name='%s'  and datetime>='%s' order by datetime" % (acname,nowtime)
+	res2=ms105.dict_sql(sql)
 	data2=[]
 	if res2:
 		for item  in res2:
