@@ -1828,7 +1828,7 @@ def map_acname_position(request):
 		else:
 			newdata2=[]
 
-		tempdict={'acname':acname+'today','symbol':symbol,'data1':newdata1,'data2':newdata2}
+		tempdict={'acname':acname+'_today','symbol':symbol,'data1':newdata1,'data2':newdata2}
 		IFdata.append(tempdict)
 
 
