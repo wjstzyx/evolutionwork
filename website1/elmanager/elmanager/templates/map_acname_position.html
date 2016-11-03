@@ -42,7 +42,7 @@ function showaccompare(acname){
         <div class="col-lg-12">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            虚拟组权益曲线
+                            映射仓位信息
                         </div>
                         <!-- /.panel-heading -->
                         <div class="panel-body">
@@ -105,48 +105,99 @@ function showaccompare(acname){
   <script type="text/javascript" src="http://cdn.hcharts.cn/highcharts/highcharts.js"></script>
   {% for item in IFdata %}
   <script>
-      $(function () {
-          $('#{{item.acname}}').highcharts({
-              title: {
-                  text: '{{item.acname}}--{{item.symbol}}',
-                  x: -20 //center
-              },
-              xAxis: {
-                  categories:{{item.xaxis}}
-              },
-              yAxis: [{
-                  title: {
-                      text: '原始仓位'
-                  },
-                  plotLines: [{
-                      value: 0,
-                      width: 1,
-                      color: '#808080'
-                  }]
-              },{
-                  title: {
-                      text: '映射仓位'
-                  },
-                  opposite: true,
-                  plotLines: [{
-                      value: 0,
-                      width: 1,
-                      color: '#808080'
-                  }]
-              }],
-              tooltip: {
-                  valueSuffix: '元'
-              },
-              legend: {
-                  layout: 'vertical',
-                  align: 'right',
-                  verticalAlign: 'middle',
-                  borderWidth: 0
-              },
-              series: [{name:"原始仓位",data: {{item.lilunquanyi}} }
-              ,{name:"映射仓位",data: {{item.realquanyi}} ,yAxis: 1}]
-          });
-      });
+    $(function () {
+        var data='{{item.acnmae}}';
+        var data1={{item.data1}};
+        var data2={{item.data2}};
+        var tempdata1=[];
+        for(var i=0; i<data1.length; i++){
+            data1[i][0]=data1[i][0]*1000;
+                        }
+        for(var i=0; i<data2.length; i++){
+            data2[i][0]=data2[i][0]*1000;
+                        } 
+
+        $('#{{item.acname}}').highcharts({
+            chart: {
+                zoomType: 'x',
+                spacingRight: 20
+            },
+            title: {
+                text: '{{item.acname}}--交易仓位信息'
+            },
+
+            xAxis: {
+                    type:"datetime",//时间轴要加上这个type，默认是linear
+                    maxPadding : 0.05,
+                    minPadding : 0.05,
+                    tickPixelInterval : 150,
+                    tickWidth:5,//刻度的宽度
+                    lineColor : '#990000',//自定义刻度颜色
+                    lineWidth :3,//自定义x轴宽度
+                    gridLineWidth :1,
+                    dateTimeLabelFormats:
+                    {
+                        second: '%H:%M:%S',
+                        minute: '%e. %b %H:%M',
+                        hour: '%b/%e %H:%M',
+                        day: '%e日/%b',
+                        week: '%e. %b',
+                        month: '%b %y',
+                        year: '%Y'
+                    },
+            },
+            yAxis: [{
+                title: {
+                    text: '虚拟组仓位'
+                }
+            },{ 
+                opposite: true,
+                title: {
+                    text: '映射仓位'
+                }
+            }],
+            tooltip: {
+                shared: true
+            },
+            legend: {
+                enabled: false
+            },
+            plotOptions: {
+                area: {
+                    fillColor: {
+                        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1},
+                        stops: [
+                            [0, Highcharts.getOptions().colors[0]],
+                            [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                        ]
+                    },
+                    lineWidth: 1,
+                    marker: {
+                        enabled: false
+                    },
+                    shadow: false,
+                    states: {
+                        hover: {
+                            lineWidth: 1
+                        }
+                    },
+                    threshold: null
+                }
+            },
+
+
+
+            series: [{
+                        name:'虚拟组仓位',
+                        data:data1
+                        },{
+                        name:'映射仓位',
+                        data:data2,
+                        yAxis: 1,
+
+            }]
+        });
+    });       
   </script>
   {% endfor %}
   {% for item in ICdata %}

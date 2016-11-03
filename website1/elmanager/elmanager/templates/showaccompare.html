@@ -46,11 +46,17 @@ $(function () {
                     year: '%Y'
                 },
         },
-        yAxis: {
+        yAxis: [{
             title: {
-                text: '仓位'
+                text: '虚拟组仓位'
             }
-        },
+        },{ 
+            lineWidth: 1,
+            opposite: true,
+            title: {
+                text: '映射仓位'
+            }
+        }],
         tooltip: {
             shared: true
         },
@@ -87,7 +93,9 @@ $(function () {
                     data:data1
                     },{
                     name:'实际仓位',
-                    data:data2
+                    data:data2,
+                    yAxis: 1,
+
         }]
     });
 });       
