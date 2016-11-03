@@ -1750,7 +1750,9 @@ def map_acname_position(request):
 		id=request.POST.get('id','')
 	newD=160621
 	RBlist=[]
-
+	timeArray = time.strptime('2016-11-03 14:19:00', "%Y-%m-%d %H:%M:%S")
+	timeStamp = int(time.mktime(timeArray))
+	print 'timeStamp',timeStamp
 
 
 
@@ -1769,7 +1771,7 @@ def map_acname_position(request):
 		data1=[]
 		if res1:
 			for item  in res1:
-				stockdate=(item['stockdate']+ datetime.timedelta(hours = 8)).strftime("%Y-%m-%d %H:%M:%S")
+				stockdate=(item['stockdate']+ datetime.timedelta(hours = 0)).strftime("%Y-%m-%d %H:%M:%S")
 				timeArray = time.strptime(stockdate, "%Y-%m-%d %H:%M:%S")
 				timeStamp = int(time.mktime(timeArray))
 				totalposition=round(item['totalposition'],3)
