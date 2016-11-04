@@ -544,16 +544,26 @@ def acname_p_basic(request):
 	whichtype=0
 	res1=""
 	res2=""
+	accountlist=""
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 	if request.GET:
 		acname=request.GET.get("acname","")
 		sql="select p.AC,p.ST,t.TradName,isnull(ss.Symbol,p.stock) as stock , ISNULL(convert(nvarchar,t.tradetime,120),'0未产生信号') as tradetime,ISNULL(convert(nvarchar,kk.stockdate,120),'无心跳') as heart from P_BASIC p left join Trading_logSymbol t on p.ST=t.ST left join Symbol_ID ss on p.STOCK=ss.S_ID left join LogRecord.dbo.ST_heart kk on p.ST=kk.st where p.ac='%s' order by tradetime" % (acname)
 		res=ms.dict_sql(sql)
+		sql="select distinct ac from p_follow where F_ac='%s' order by ac" % (acname)
+		tempres=ms.dict_sql(sql)
+		for item in tempres:
+			temp="【"+item['ac']+"】 "
+			accountlist=accountlist+temp
+	if accountlist=="":
+		accountlist="【未查到-请手工确认，如果仍然需要查看权益，请修复】"
+
 
 	return render_to_response('acname_p_basic.html',{
 		'data':data,
 		'whichtype':whichtype,
-		'res':res
+		'res':res,
+		'accountlist':accountlist,
 	})	
 
 
