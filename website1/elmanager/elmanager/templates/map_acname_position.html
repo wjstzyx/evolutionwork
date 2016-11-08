@@ -48,12 +48,9 @@ function showaccompare(acname){
                         <div class="panel-body">
                             <!-- Nav tabs -->
                             <ul class="nav nav-tabs">
-                                <li class="active"><a href="#IF" data-toggle="tab">IF</a>
+                                <li class="active"><a href="#IF" data-toggle="tab">信号</a>
                                 </li>
-                                <li><a href="#IC" data-toggle="tab">IC</a>
-                                </li>
-                                <li><a href="#IH" data-toggle="tab">IH</a>
-                                </li>
+
 
                             </ul>
 
@@ -67,23 +64,6 @@ function showaccompare(acname){
                                     {% endfor %}                                    
                                     </div>
                                 </div>
-                                <div class="tab-pane fade" id="IC">
-                                    <h4>Profile Tab</h4>
-                                    <div class="row">
-                                    {% for item in ICdata %} 
-                                      <div class="col-md-6"><div id='{{item.acname}}' style="min-width:700px;height:400px"></div></div>
-                                    {% endfor %}                                    
-                                    </div>
-                                </div>
-                                <div class="tab-pane fade" id="IH">
-                                    <h4>Messages Tab</h4>
-                                    <div class="row">
-                                    {% for item in IHdata %} 
-                                      <div class="col-md-6"><div id='{{item.acname}}' style="min-width:700px;height:400px"></div></div>
-                                    {% endfor %}                                    
-                                    </div>
-                                </div>
-
                             </div>
                         </div>
                         <!-- /.panel-body -->
@@ -198,85 +178,6 @@ function showaccompare(acname){
             }]
         });
     });       
-  </script>
-  {% endfor %}
-  {% for item in ICdata %}
-  <script>
-      $(function () {
-          $('#{{item.acname}}').highcharts({
-              title: {
-                  text: '{{item.acname}}--{{item.symbol}}',
-                  x: -20 //center
-              },
-              xAxis: {
-                  categories:{{item.xaxis}}
-              },
-              yAxis: {
-                  title: {
-                      text: '每手净收益'
-                  },
-                  plotLines: [{
-                      value: 0,
-                      width: 1,
-                      color: '#808080'
-                  }]
-              },
-              tooltip: {
-                  valueSuffix: '元'
-              },
-              legend: {
-                  layout: 'vertical',
-                  align: 'right',
-                  verticalAlign: 'middle',
-                  borderWidth: 0
-              },
-              series: [{
-                  name: '理论',
-                  data: {{item.lilunquanyi}}             
-              
-              }]
-          });
-      });
-  </script>
-  {% endfor %}
-
-  {% for item in IHdata %}
-  <script>
-      $(function () {
-          $('#{{item.acname}}').highcharts({
-              title: {
-                  text: '{{item.acname}}--{{item.symbol}}',
-                  x: -20 //center
-              },
-              xAxis: {
-                  categories:{{item.xaxis}}
-              },
-              yAxis: {
-                  title: {
-                      text: '每手净收益'
-                  },
-                  plotLines: [{
-                      value: 0,
-                      width: 1,
-                      color: '#808080'
-                  }]
-              },
-              tooltip: {
-                  valueSuffix: '元'
-              },
-              legend: {
-                  layout: 'vertical',
-                  align: 'right',
-                  verticalAlign: 'middle',
-                  borderWidth: 0
-              },
-              series: [{
-                  name: '理论',
-                  data: {{item.lilunquanyi}}             
-              
-              }]
-          });
-      });
   </script>
   {% endfor %}
 
