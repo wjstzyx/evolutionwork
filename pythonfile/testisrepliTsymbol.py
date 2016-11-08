@@ -6,7 +6,7 @@ sys.setdefaultencoding('utf8')
 from dbconn import MSSQL
 ms05 = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 ms03 = MSSQL(host="192.168.0.3",user="future",pwd="K@ra0Key",db="future")
-ms07 = MSSQL(host="192.168.0.7",user="future",pwd="K@ra0Key",db="future")
+#ms07 = MSSQL(host="192.168.0.7",user="future",pwd="K@ra0Key",db="future")
 mscloud = MSSQL(host="139.196.190.246",user="future",pwd="K@ra0Key",db="future")
 # resList = ms.find_sql("select top 2 * from st_report")
 # print resList
@@ -86,9 +86,9 @@ test_replicate(ms03)
 test_replicate_backup(ms03)
 test_replicate_alltime(ms03)
 
-test_replicate(ms07)
-test_replicate_backup(ms07)
-test_replicate_alltime(ms07)
+# test_replicate(ms07)
+# test_replicate_backup(ms07)
+# test_replicate_alltime(ms07)
 
 test_replicate(mscloud)
 test_replicate_backup(mscloud)
