@@ -1843,54 +1843,10 @@ def map_acname_position(request):
 
 
 
-	ICdata=[]
-	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where [quanyisymbol] in ('IC') and  iscaculate in (3)  and [isstatistic] =1 and [isforhistory]=0 order by sortnum"
-	res=ms.dict_sql(sql)
-	for item in res:
-		acname=item['ac']
-		symbol=item['symbol']
-		#第一个价格
-		sql="select top 1 quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
-		tempquanyi=ms.find_sql(sql)
-		if tempquanyi==[]:
-			tempquanyi=0
-		else:
-			tempquanyi=tempquanyi[0][0]
-		sql="select quanyi-(%s) as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (tempquanyi,acname,symbol)
-		res1=ms.find_sql(sql)
-		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
-		res2=ms.find_sql(sql)		
-		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
-		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
-		ICdata.append(tempdict)
-
-	IHdata=[]
-	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where [quanyisymbol] in ('IH') and  iscaculate in (3)  and [isstatistic] =1 and [isforhistory]=0 order by sortnum"
-	res=ms.dict_sql(sql)
-	for item in res:
-		acname=item['ac']
-		symbol=item['symbol']
-		#第一个价格
-		sql="select top 1 quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
-		tempquanyi=ms.find_sql(sql)
-		if tempquanyi==[]:
-			tempquanyi=0
-		else:
-			tempquanyi=tempquanyi[0][0]
-		sql="select quanyi-(%s) as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (tempquanyi,acname,symbol)
-		res1=ms.find_sql(sql)
-		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
-		res2=ms.find_sql(sql)		
-		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
-		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
-		IHdata.append(tempdict)
-
 
 
 	return render_to_response('map_acname_position.html',{
 		'IFdata':IFdata,
-		'ICdata':ICdata,
-		'IHdata':IHdata,
 		'username':username,
 	})	
 
@@ -1936,7 +1892,7 @@ def stockmapequty(request):
 		sql="select quanyi-(%s) as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (tempquanyi,acname,symbol)
 		res1=ms.find_sql(sql)
 		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
-		res2=ms.find_sql(sql)		
+		res2=ms.find_sql(sql)
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
 		IFdata.append(tempdict)

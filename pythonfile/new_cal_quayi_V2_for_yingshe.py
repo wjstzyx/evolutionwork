@@ -178,13 +178,15 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto):
 	#得到总的需要计算日期的天数
 	#dayquanyilist=[quanyi,times,ref(-1)position]
 	dayquanyilist={}
-	sql="select distinct CONVERT(varchar(10), stockdate, 120 ) as datename from [Future].[dbo].[quanyi_log_groupby_v2] order by datename"
-	datelist=ms.dict_sql(sql)
+	sql="select distinct CONVERT(varchar(10), [datetime], 120 ) as datename from [future].[dbo].[real_map_backup] order by datename"
+	datelist=ms105.dict_sql(sql)
 	for item in datelist:
 		mytime=item['datename'].replace('-','')
 		mytime=str(int(mytime)-20000000)
 		dayquanyilist[mytime]=[0,0,0]
 	daylists=[k for k in sorted(dayquanyilist.keys())]
+	# print daylists
+	# print tempquotes
 
 
 	#将总权益分成每天的权益，最后再合成
@@ -564,6 +566,7 @@ def main_fun():
 		(myquotes,totalsum)=input_groupbyquanyi(item['acname'],quanyisymbol)
 		# print 'myquotes',myquotes
 		#直接设置数字 10
+		print "cal_quanyi"
 		cal_quanyi(item['acname'],myquotes,totalsum,quanyisymbol)
 
 
