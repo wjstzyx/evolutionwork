@@ -26,7 +26,7 @@ def input_groupbyquanyi(ac,quanyisymbol=''):
 	totalsum=1
 	symbol=quanyisymbol
 	#获取行情
-	sql="select datetime,rp,rp from [future].[dbo].[real_map_backup] where name='%s' order by datetime"% (ac)
+	sql="select datetime,rp,rp from [future].[dbo].[real_map_backup_forquanyi] where name='%s' order by datetime"% (ac)
 	positionlist=ms105.find_sql(sql)
 	if positionlist:
 		###以上已经准备好虚拟组的仓位信息
@@ -185,8 +185,8 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto):
 		mytime=str(int(mytime)-20000000)
 		dayquanyilist[mytime]=[0,0,0]
 	daylists=[k for k in sorted(dayquanyilist.keys())]
-	# print daylists
-	# print tempquotes
+	#print daylists
+	#print tempquotes
 
 
 	#将总权益分成每天的权益，最后再合成
@@ -576,7 +576,7 @@ if len(sys.argv)>1:
     acanme=sys.argv[1]
 
 
-# acanme='IF_Huitiaoall_0'
+#acanme='LUD_5YD_0'
 main_fun(acanme)
 
 # write_heart('daily_equity','nosum1')

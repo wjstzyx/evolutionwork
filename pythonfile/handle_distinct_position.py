@@ -45,7 +45,38 @@ def handle_distinct_record(ms):
 			lastvp=vp
 
 
-handle_distinct_record(ms105)
+
+def handle_distinct_record_forquanyi(ms):
+	nowtime=int(datetime.datetime.now().strftime('%H%M'))
+	sql="select distinct name from [future].[dbo].[real_map_backup] order by name"
+	res=ms.dict_sql(sql)
+	for item in res:
+		name=item['name']
+		#确认开始时间
+		sql="select top 1 datetime,rp from [future].[dbo].[real_map_backup_forquanyi] where name='%s' order by datetime desc" % (name)
+		tempres=ms.dict_sql(sql)
+		if tempres:
+			fromtime=tempres[0]['datetime']
+			lastvp=tempres[0]['rp']
+		else:
+			fromtime='2015-01-01'
+			lastvp=-9999
+		print fromtime,name
+
+		sql="select * from [future].[dbo].[real_map_backup] where name='%s' and datetime>'%s'  order by datetime" % (name,fromtime)
+		res1=ms.dict_sql(sql)
+		#将有变化的存入
+		for item1 in res1:
+			vp=item1['rp']
+			if vp!=lastvp:
+				sql="insert into [future].[dbo].[real_map_backup_forquanyi](name,datetime,vp,rp) values('%s','%s',%s,%s) " % (name,item1['datetime'],item1['vp'],item1['rp'])
+				ms.insert_sql(sql)
+			lastvp=vp
+
+
+
+#handle_distinct_record(ms105)
+handle_distinct_record_forquanyi(ms105)
 
 
 

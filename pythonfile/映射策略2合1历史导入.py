@@ -27,7 +27,7 @@ ms105 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="future")
 # LUD_3YD2
 # LUD_5YD
 
-
+#每次需要修改路径
 dir=r"C:\Users\YuYang\Desktop\映射程序\IFYD_YS\输出文件"
 
 
@@ -90,26 +90,9 @@ def get_one_line(line,date='',name=''):
 		#date='20161102'
 		mydatetime=str(date)+' '+str(matchObj.group(1))+":"+str(matchObj.group(2))+":"+str(matchObj.group(3)).split('.')[0]
 		mydatetime=datetime.datetime.strptime(mydatetime,"%Y%m%d %H:%M:%S")
-		# try:
-		# 	mydatetime=datetime.datetime.strptime(mydatetime,"%Y%m%d %H:%M:%S")
-		# except Exception,e:
-		# 	print e
-		# 	print mydatetime
-		# 	exit()
 		vp=matchObj.group(4)
 		rp=matchObj.group(5)
 		if ('还没有出现有效信号' not in rp):
-			# tempvlaue="('%s','%s','%s','%s')" % (name,mydatetime,vp,rp)
-			# totalvalue=totalvalue+","+tempvlaue
-			# inum=inum+1
-			# if inum>1000:
-			# 	totalvalue=totalvalue.strip(",")
-			# 	sql=sql="insert into [future].[dbo].[test_map_backup](name,datetime,vp,rp) values%s" % (totalvalue)
-			# 	ms105.insert_sql(sql)
-			# 	totalvalue=""
-			# 	inum=0
-
-
 			sql="insert into [future].[dbo].[test_map_backup](name,datetime,vp,rp) values('%s','%s','%s','%s')" % (name,mydatetime,vp,rp)
 			try:
 				ms105.insert_sql(sql)
@@ -210,5 +193,4 @@ print 'handle_distinct_record'
 handle_distinct_record(ms105,name)
 print cmd_new_cal()
 cmd_new_cal()
-# filename=r'C:\Users\YuYang\Desktop\映射程序\LUD\输出文件\分单记录-20161102.txt'
-# read_one_file(filename,date='20161102',name='LUD')
+

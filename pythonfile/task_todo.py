@@ -12,6 +12,40 @@ ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 # print resList
 # -*- coding: utf-8 -*-
 
+def monitor_position_change(acname):
+	sql="select '%s' as name, Expr1  from [Future].[dbo].View_%s" % (acname,acname)
+	res=ms.dict_sql(sql)
+	nowposition=res[0]['Expr1']
+	sql="SELECT   [lastposition]  FROM [LogRecord].[dbo].[mytemp_position] where acname='%s'" % (acname)
+	res=ms.dict_sql(sql)
+	if res:
+		lastposition=res[0]['lastposition']
+		sql=" update [LogRecord].[dbo].[mytemp_position] set lastposition=%s,inserttime=GETDATE() where acname='%s'" % (nowposition,acname)
+		ms.insert_sql(sql)
+	else:
+		lastposition=0
+		sql="insert into [LogRecord].[dbo].[mytemp_position](acname,lastposition) values('%s',%s)" % (acname,nowposition)
+		ms.insert_sql(sql)
+
+
+	if nowposition!=lastposition:
+		print 'nowposition',nowposition
+		print 'lastposition',lastposition
+		#发送邮件
+		subject="虚拟组 %s 仓位变动 " % (acname)+datetime.datetime.now().strftime("%H:%M:%S")
+		mailtolist="yuyang@evolutionlabs.com.cn"
+		message=str(e).replace("'",'#')+"\r\n"+sql.replace("'",'#')
+		sendmessage="13764504303"
+		sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,message,0,sendmessage)
+		ms.insert_sql(sql)
+	else:
+		print 'OK'
+
+
+
+
+
+
 
 def istasktodo(type):
 	sql="select * FROM [LogRecord].[dbo].[task_todo] where type='%s' and status=0 " % (type)
@@ -30,4 +64,4 @@ def istasktodo(type):
 		print item 
 
 istasktodo('datafix')
-
+monitor_position_change('test_Pselect')
