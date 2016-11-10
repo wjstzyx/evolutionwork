@@ -3,6 +3,7 @@
 import urllib, urllib2, json
 import sys
 import datetime
+from sendSMSM import sendsms
 import os 
 reload(sys)
 sys.setdefaultencoding('utf8')
@@ -32,12 +33,14 @@ def monitor_position_change(acname):
 		print 'nowposition',nowposition
 		print 'lastposition',lastposition
 		#发送邮件
-		subject="虚拟组 %s 仓位变动 " % (acname)+datetime.datetime.now().strftime("%H:%M:%S")
-		mailtolist="yuyang@evolutionlabs.com.cn"
-		message=str(e).replace("'",'#')+"\r\n"+sql.replace("'",'#')
-		sendmessage="13764504303"
-		sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,message,0,sendmessage)
-		ms.insert_sql(sql)
+		subject=" %s 仓位为 %s " % (acname,nowposition)+datetime.datetime.now().strftime("%H:%M:%S")
+		# mailtolist="yuyang@evolutionlabs.com.cn"
+		message=subject
+		sendmessage=["13764504303"]
+		smsresult=sendsms(sendmessage,message)
+		print 'smsresult',smsresult
+		# sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,message,0,sendmessage)
+		# ms.insert_sql(sql)
 	else:
 		print 'OK'
 
