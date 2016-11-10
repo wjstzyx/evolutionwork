@@ -75,7 +75,7 @@ def handle_distinct_record_forquanyi(ms):
 
 
 
-#handle_distinct_record(ms105)
+handle_distinct_record(ms105)
 handle_distinct_record_forquanyi(ms105)
 
 
