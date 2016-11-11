@@ -74,6 +74,6 @@ def sendsms(mobile='',content=''):
 	except:
 		return 0
 
-result=sendsms('13764504303','huhuuhu')
-print "ddd"
-print result
+# result=sendsms('13764504303','huhuuhu')
+# print "ddd"
+# print result

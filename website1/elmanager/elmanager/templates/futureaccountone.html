@@ -6,6 +6,8 @@
 
 {% endblock %}
 {% block extrastyle %}
+<link href="{% static 'css/jqueryuicss/custom-theme/jquery-ui-1.10.0.custom.css' %}" rel="stylesheet">
+
 
 {% endblock %}
 
@@ -79,7 +81,7 @@ function add_new_monitor(){
      </div> 
     </div> 
     <div class="row"> 
-     <div class="col-lg-4"  style=" overflow-y:auto; height:750px;"> 
+    <div class="col-lg-4"  style=" overflow-y:auto; height:750px;"> 
       <div class="panel panel-default"> 
        <div class="panel-heading"> 
         <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>{{userid}}	</h3> 
@@ -113,15 +115,43 @@ function add_new_monitor(){
        </div> 
       </div> 
      </div> 
-     <div class="col-lg-8">
-     <div class="row"> 
+    <div class="col-lg-8">
+      <div class="row">
+      <div class="col-lg-8">
+            <!--end slider-->
+
+                        <table>
+
+                          <tr>
+                            <td width="300px">                              <p>
+                          <label for="amount">开始日期：</label>
+                          <input type="text" id="amount1" value=1>
+                        </p></td>
+                            <td width="300px">                              <p>
+                          <label for="amount">结束日期：</label>
+                          <input type="text" id="amount2" value=2>
+                        </p></td>
+                          </tr>
+                          <tr>
+                            <td width="300px"><div id="v-slider1"></div></td>
+                            <td width="300px"><div id="v-slider2"></div></td>
+                          </tr>
+                        </table>
+                        <br>
+                        
+                        
+      </div>
+        
+      </div>
+
+
+    <div class="row"> 
       <div class="col-lg-4">
       <div class="col-lg-12">   <lable>输入开始日期：例如20161014</lable></div>
           <div class="input-group">
             <form class="form" method="GET">
             <div class="col-lg-9"><input type="text" class="form-control" name="mydate" value={{begintime}}></div>
-            <div class="col-lg-3"><button type="submit" class="btn btn-default" name="userid" value="{{userid}}">显示</button></div>
-          
+            <div class="col-lg-3"><button type="submit" class="btn btn-default" name="userid" value="{{userid}}">显示</button></div>          
             </form>
 
     </div><!-- /input-group -->
@@ -161,6 +191,42 @@ function add_new_monitor(){
 
 {% block extrabodyscript %}
 <script type="text/javascript" src="http://cdn.hcharts.cn/highcharts/highcharts.js"></script>
+
+<script src="{% static 'js/jqueryuijs/assets/js/jquery-ui-1.10.0.custom.min.js' %}"></script>
+
+<script >
+    $(function () {
+      $('#h-slider').slider({
+        range: true,
+        values: [17, 67],
+        slide: function (event, ui) { $("#amount").val(ui.value); }
+
+      });
+
+    $("#v-slider1").slider({
+        orientation: "horizentol",
+        range: "max",
+        min: 0,
+        max: 100,
+        value: 60,
+        slide: function (event, ui) {
+            $("#amount1").val(ui.value);
+        }
+    });
+    $("#v-slider2").slider({
+        orientation: "horizentol",
+        range: "min",
+        min: 0,
+        max: 100,
+        value: 60,
+        slide: function (event, ui) {
+            $("#amount2").val(ui.value);
+        }
+    });
+/*      $("#amount").val($("#h-slider").slider("value"));*/
+    });
+</script>
+
 {% for item in rbdata %}
   <script>
       $(function () {
