@@ -303,6 +303,8 @@ def futureaccountone(request):
 	if request.GET:
 		userid=request.GET.get("userid","")
 		mydate=request.GET.get("mydate","")
+		mybegintime=request.GET.get("mybegintime","")
+		myendtime=request.GET.get("myendtime","")
 	# res.reverse()
 	data=[]
 	acname=userid
@@ -316,6 +318,9 @@ def futureaccountone(request):
 	allequates=[]
 	selectequates=[]
 	selectequatesallquanyi=[]
+	# mybegintime=19901001
+	# myendtime=20200000
+
 	if mydate=="":
 		begintime=19901001
 	else:
@@ -336,12 +341,21 @@ def futureaccountone(request):
 		data=allequates[:]
 		data.reverse()
 		#计算画图用的数据
-		fisrtvalue=0
-		selectequates=[item for item in allequates if item[0]>=begintime]
-		fisrtvalue=selectequates[0][3]
+		firsttime=allequates[0][0]
+		lasttime=allequates[-1][0]
+		print mybegintime
+		print myendtime
+
+		selectequates=[item for item in allequates if item[0]>=int(mybegintime)]
+		selectequates=[item for item in selectequates if item[0]<=int(myendtime)]
+		# fisrtvalue=selectequates[0][3]
 		fisrtvalue=0
 		selectequatesallquanyi=[[item[1],item[0]] for item in selectequates]
 		selectequates=[[item[3]-fisrtvalue,item[0]] for item in selectequates]
+		# selectequates[0][0]=0
+		mybegintime=selectequates[0][1]
+		myendtime=selectequates[-1][1]
+
 
 
 	sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='nnnnnnnnnnnn'"
@@ -359,6 +373,12 @@ def futureaccountone(request):
 		'rbdata1':rbdata1,
 		'begintime':begintime,
 		'username':username,
+		'mybegintime':mybegintime,
+		'myendtime':myendtime,
+		'firsttime':firsttime,
+		'lasttime':lasttime,
+
+
 	})
 
 

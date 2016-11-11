@@ -119,17 +119,18 @@ function add_new_monitor(){
       <div class="row">
       <div class="col-lg-8">
             <!--end slider-->
+            <form class="form" method="GET">
 
                         <table>
 
                           <tr>
                             <td width="300px">                              <p>
                           <label for="amount">开始日期：</label>
-                          <input type="text" id="amount1" value=1>
+                          <input type="text" id="amount1"  name='mybegintime' value={{mybegintime}}>
                         </p></td>
                             <td width="300px">                              <p>
                           <label for="amount">结束日期：</label>
-                          <input type="text" id="amount2" value=2>
+                          <input type="text" id="amount2" name='myendtime' value={{myendtime}}>
                         </p></td>
                           </tr>
                           <tr>
@@ -147,10 +148,7 @@ function add_new_monitor(){
 
     <div class="row"> 
       <div class="col-lg-4">
-      <div class="col-lg-12">   <lable>输入开始日期：例如20161014</lable></div>
           <div class="input-group">
-            <form class="form" method="GET">
-            <div class="col-lg-9"><input type="text" class="form-control" name="mydate" value={{begintime}}></div>
             <div class="col-lg-3"><button type="submit" class="btn btn-default" name="userid" value="{{userid}}">显示</button></div>          
             </form>
 
@@ -206,9 +204,9 @@ function add_new_monitor(){
     $("#v-slider1").slider({
         orientation: "horizentol",
         range: "max",
-        min: 0,
-        max: 100,
-        value: 60,
+        min: {{firsttime}},
+        max: {{lasttime}},
+        value: {{mybegintime}},
         slide: function (event, ui) {
             $("#amount1").val(ui.value);
         }
@@ -216,9 +214,9 @@ function add_new_monitor(){
     $("#v-slider2").slider({
         orientation: "horizentol",
         range: "min",
-        min: 0,
-        max: 100,
-        value: 60,
+        min: {{firsttime}},
+        max: {{lasttime}},
+        value: {{myendtime}},
         slide: function (event, ui) {
             $("#amount2").val(ui.value);
         }
