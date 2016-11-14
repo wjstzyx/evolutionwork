@@ -329,8 +329,7 @@ def futureaccountone(request):
 		mybegintime=19900101
 		myendtime=20200000
 
-	print 'mybegintime',mybegintime
-	print 'myendtime',myendtime
+
 
 
 	if res:
@@ -375,6 +374,11 @@ def futureaccountone(request):
 	rbdata1.append(tempdict1)
 	#计算KPI
 	realtongji=kpi_tongji(lilunquanyi)
+	realtongji['Net_Profit']=round(realtongji['Net_Profit']/10000,3)
+	realtongji['Max_Drawdown']=round(realtongji['Max_Drawdown']/10000,3)
+	realtongji['Daily_Std']=round(realtongji['Daily_Std']/10000,3)
+	realtongji['Max_Day_Profit']=round(realtongji['Max_Day_Profit']/10000,3)
+	realtongji['Max_Day_Loss']=round(realtongji['Max_Day_Loss']/10000,3)
 
 	return render_to_response('futureaccountone.html',{
 		'data':data,
@@ -386,6 +390,7 @@ def futureaccountone(request):
 		'myendtime':myendtime,
 		'firsttime':firsttime,
 		'lasttime':lasttime,
+		'realtongji':realtongji,
 
 
 	})
