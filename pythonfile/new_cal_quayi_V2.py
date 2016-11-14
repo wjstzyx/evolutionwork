@@ -602,10 +602,10 @@ def real_account_groupbyquanyi(ac,symbol):
 
 
 
-# (myquotes,totalsum)=input_groupbyquanyi('ZWindex5','I','CU')
-# # for item in myquotes:
-# # 	print item 
-# cal_quanyi('ZWindex5',myquotes,totalsum,'CU')
+# (myquotes,totalsum)=input_groupbyquanyi('RBQGSTREVYP_TG','RBnight','RBnight')
+# for item in myquotes:
+# 	print item 
+# cal_quanyi('RBQGYP_TG',myquotes,totalsum,'RBnight')
 
 # show_account('myaccount2')
 
@@ -654,7 +654,7 @@ def main_fun():
 def test_is_ok():
 	sql=""
 
-# main_fun_sumps()
+main_fun_sumps()
 main_fun()
 
 write_heart('daily_equity','nosum1')

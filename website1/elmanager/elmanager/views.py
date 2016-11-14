@@ -300,11 +300,17 @@ def futureaccountone(request):
 		return response
 
 	userid='账户为空'
+	mybegintime=19900101
+	myendtime=20200000
 	if request.GET:
 		userid=request.GET.get("userid","")
 		mydate=request.GET.get("mydate","")
 		mybegintime=request.GET.get("mybegintime","")
 		myendtime=request.GET.get("myendtime","")
+		if myendtime<mybegintime:
+			response = HttpResponse("结束时间小于开始时间，无法显示，请返回")
+			return response
+
 	# res.reverse()
 	data=[]
 	acname=userid
@@ -318,13 +324,12 @@ def futureaccountone(request):
 	allequates=[]
 	selectequates=[]
 	selectequatesallquanyi=[]
-	# mybegintime=19901001
-	# myendtime=20200000
 
-	if mydate=="":
-		begintime=19901001
-	else:
-		begintime=int(mydate)
+	if mybegintime=="" or myendtime=="":
+		mybegintime=19900101
+		myendtime=20200000
+
+
 	if res:
 		last_closebalance=res[0]['CloseBalance']
 		last_withdraw=res[0]['Withdraw']
@@ -343,8 +348,7 @@ def futureaccountone(request):
 		#计算画图用的数据
 		firsttime=allequates[0][0]
 		lasttime=allequates[-1][0]
-		print mybegintime
-		print myendtime
+
 
 		selectequates=[item for item in allequates if item[0]>=int(mybegintime)]
 		selectequates=[item for item in selectequates if item[0]<=int(myendtime)]
@@ -352,7 +356,7 @@ def futureaccountone(request):
 		fisrtvalue=0
 		selectequatesallquanyi=[[item[1],item[0]] for item in selectequates]
 		selectequates=[[item[3]-fisrtvalue,item[0]] for item in selectequates]
-		# selectequates[0][0]=0
+		selectequates[0][0]=0
 		mybegintime=selectequates[0][1]
 		myendtime=selectequates[-1][1]
 
@@ -366,12 +370,15 @@ def futureaccountone(request):
 	tempdict1={'acname':acname,'symbol':symbol,'xaxis':tempday1,'lilunquanyi':lilunquanyi1,'realquanyi':realquanyi1}
 	rbdata.append(tempdict)
 	rbdata1.append(tempdict1)
+	#计算KPI
+	realtongji=kpi_tongji(lilunquanyi)
+	print realtongji
+
 	return render_to_response('futureaccountone.html',{
 		'data':data,
 		'userid':userid,
 		'rbdata':rbdata,
 		'rbdata1':rbdata1,
-		'begintime':begintime,
 		'username':username,
 		'mybegintime':mybegintime,
 		'myendtime':myendtime,
@@ -911,6 +918,7 @@ def order_account_equity(request):
 				result=totalquanyiresult['result']
 				configinfo=totalquanyiresult['configinfo']
 				print "1######################################################"
+				print result[0:10]
 				(tempday,lilunquanyi,realquanyi)=range_series(result,[])
 				print "2######################################################"
 				tempdict={'acname':account,'symbol':"",'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}

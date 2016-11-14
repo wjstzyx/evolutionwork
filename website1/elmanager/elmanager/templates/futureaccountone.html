@@ -156,6 +156,49 @@ function add_new_monitor(){
   </div><!-- /.col-lg-6 -->
      </div>
      </br>
+      <div class="panel panel-default"> 
+       <div class="panel-heading"> 
+        <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>实际账户KPI  </h3> 
+       </div> 
+       <div class="panel-body"> 
+        <div class="table-responsive"> 
+         <table class="table table-bordered table-hover table-striped"> 
+          <tbody id="mailtotable"> 
+          <tr>
+          <td bgcolor="#cccccc">Net_Profit</td>
+          <td>{{tongji.Net_Profit}}</td>
+          <td bgcolor="#cccccc">Daily_Std</td>
+          <td>{{tongji.Daily_Std}}</td>
+          <td bgcolor="#cccccc">Day_Winrate</td>
+          <td>{{tongji.Day_Winrate}}</td>
+          <td bgcolor="#cccccc">Max_Day_Profit</td>
+          <td>{{tongji.Max_Day_Profit}}</td>
+          </tr>
+          <tr>
+          <td bgcolor="#d9d9d9">Max_Drawdown</td>
+          <td>{{tongji.Max_Drawdown}}</td>
+          <td bgcolor="#d9d9d9">Ann_Sharpe</td>
+          <td>{{tongji.Ann_Sharpe}}</td>
+          <td bgcolor="#d9d9d9">Days</td>
+          <td>{{tongji.Days}}</td>
+          <td bgcolor="#d9d9d9">Max_Loss_Days</td>
+          <td>{{tongji.Max_Loss_Days}}</td>
+          </tr>
+          <tr>
+          <td bgcolor="#cccccc">Max_Day_to_New_High</td>
+          <td>{{tongji.Max_Day_to_New_High}}</td>
+          <td bgcolor="#cccccc">Max_Win_Days</td>
+          <td>{{tongji.Max_Win_Days}}</td>
+          <td bgcolor="#cccccc">Max_Day_Loss</td>
+          <td>{{tongji.Max_Day_Loss}}</td>
+          <td> </td>
+          <td> </td>
+          </tr>
+          </tbody> 
+         </table> 
+        </div> 
+       </div> 
+      </div> 
     <div class="row">
         <div class="col-lg-12">
                     <div class="panel panel-default">
