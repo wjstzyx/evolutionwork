@@ -1531,10 +1531,10 @@ def acwantedequlityhistory(request):
 		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		#计算交易次数(200天平均)
-		sql="select AVG(times) as avg from ( select top 200 times from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a" % (acname)
+		sql="select round(AVG(times)/10,2) as avg from (  select top 200 * from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a where abs(position)+ABS(quanyi)+abs(times)<>0" % (acname)
 		res1=ms.dict_sql(sql)
 		avgtime=res1[0]['avg']
-		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime}
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':tempday[-1]}
 		rbdata.append(tempdict)
 
 	AGdata=[]
@@ -1556,10 +1556,10 @@ def acwantedequlityhistory(request):
 		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		#计算交易次数(200天平均)
-		sql="select AVG(times) as avg from ( select top 200 times from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a" % (acname)
+		sql="select round(AVG(times)/10,2) as avg from (  select top 200 * from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a where abs(position)+ABS(quanyi)+abs(times)<>0" % (acname)
 		res1=ms.dict_sql(sql)
 		avgtime=res1[0]['avg']
-		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime}
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':tempday[-1]}
 
 		AGdata.append(tempdict)
 
@@ -1582,10 +1582,10 @@ def acwantedequlityhistory(request):
 		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		#计算交易次数(200天平均)
-		sql="select AVG(times) as avg from ( select top 200 times from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a" % (acname)
+		sql="select round(AVG(times)/10,2) as avg from (  select top 200 * from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a where abs(position)+ABS(quanyi)+abs(times)<>0" % (acname)
 		res1=ms.dict_sql(sql)
 		avgtime=res1[0]['avg']
-		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime}
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':tempday[-1]}
 		CUdata.append(tempdict)
 
 	RUdata=[]
@@ -1607,10 +1607,10 @@ def acwantedequlityhistory(request):
 		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		#计算交易次数(200天平均)
-		sql="select AVG(times) as avg from ( select top 200 times from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a" % (acname)
+		sql="select round(AVG(times)/10,2) as avg from (  select top 200 * from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a where abs(position)+ABS(quanyi)+abs(times)<>0" % (acname)
 		res1=ms.dict_sql(sql)
 		avgtime=res1[0]['avg']
-		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime}
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':tempday[-1]}
 		RUdata.append(tempdict)
 
 	TAdata=[]
@@ -1632,10 +1632,10 @@ def acwantedequlityhistory(request):
 		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		#计算交易次数(200天平均)
-		sql="select AVG(times) as avg from ( select top 200 times from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a" % (acname)
+		sql="select round(AVG(times)/10,2) as avg from (  select top 200 * from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a where abs(position)+ABS(quanyi)+abs(times)<>0" % (acname)
 		res1=ms.dict_sql(sql)
 		avgtime=res1[0]['avg']
-		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime}
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':tempday[-1]}
 		TAdata.append(tempdict)
 
 	JDdata=[]
@@ -1657,10 +1657,10 @@ def acwantedequlityhistory(request):
 		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		#计算交易次数(200天平均)
-		sql="select AVG(times) as avg from ( select top 200 times from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a" % (acname)
+		sql="select round(AVG(times)/10,2) as avg from (  select top 200 * from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a where abs(position)+ABS(quanyi)+abs(times)<>0" % (acname)
 		res1=ms.dict_sql(sql)
 		avgtime=res1[0]['avg']
-		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime}
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':tempday[-1]}
 		JDdata.append(tempdict)
 
 	BUdata=[]
@@ -1682,10 +1682,10 @@ def acwantedequlityhistory(request):
 		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		#计算交易次数(200天平均)
-		sql="select AVG(times) as avg from ( select top 200 times from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a" % (acname)
+		sql="select round(AVG(times)/10,2) as avg from (  select top 200 * from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a where abs(position)+ABS(quanyi)+abs(times)<>0" % (acname)
 		res1=ms.dict_sql(sql)
 		avgtime=res1[0]['avg']
-		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime}
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':tempday[-1]}
 		BUdata.append(tempdict)
 
 	CSdata=[]
@@ -1707,10 +1707,10 @@ def acwantedequlityhistory(request):
 		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		#计算交易次数(200天平均)
-		sql="select AVG(times) as avg from ( select top 200 times from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a" % (acname)
+		sql="select round(AVG(times)/10,2) as avg from (  select top 200 * from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a where abs(position)+ABS(quanyi)+abs(times)<>0" % (acname)
 		res1=ms.dict_sql(sql)
 		avgtime=res1[0]['avg']
-		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime}
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':tempday[-1]}
 		CSdata.append(tempdict)
 
 	HCdata=[]
@@ -1732,10 +1732,10 @@ def acwantedequlityhistory(request):
 		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		#计算交易次数(200天平均)
-		sql="select AVG(times) as avg from ( select top 200 times from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a" % (acname)
+		sql="select round(AVG(times)/10,2) as avg from (  select top 200 * from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a where abs(position)+ABS(quanyi)+abs(times)<>0" % (acname)
 		res1=ms.dict_sql(sql)
 		avgtime=res1[0]['avg']
-		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime}
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':tempday[-1]}
 		HCdata.append(tempdict)
 
 	Pdata=[]
@@ -1757,10 +1757,10 @@ def acwantedequlityhistory(request):
 		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		#计算交易次数(200天平均)
-		sql="select AVG(times) as avg from ( select top 200 times from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a" % (acname)
+		sql="select round(AVG(times)/10,2) as avg from (  select top 200 * from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a where abs(position)+ABS(quanyi)+abs(times)<>0" % (acname)
 		res1=ms.dict_sql(sql)
 		avgtime=res1[0]['avg']
-		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime}
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':tempday[-1]}
 		Pdata.append(tempdict)
 
 	PPdata=[]
@@ -1782,10 +1782,10 @@ def acwantedequlityhistory(request):
 		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		#计算交易次数(200天平均)
-		sql="select AVG(times) as avg from ( select top 200 times from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a" % (acname)
+		sql="select round(AVG(times)/10,2) as avg from (  select top 200 * from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a where abs(position)+ABS(quanyi)+abs(times)<>0" % (acname)
 		res1=ms.dict_sql(sql)
 		avgtime=res1[0]['avg']
-		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime}
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':tempday[-1]}
 		PPdata.append(tempdict)
 
 	NIdata=[]
@@ -1807,10 +1807,10 @@ def acwantedequlityhistory(request):
 		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		#计算交易次数(200天平均)
-		sql="select AVG(times) as avg from ( select top 200 times from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a" % (acname)
+		sql="select round(AVG(times)/10,2) as avg from (  select top 200 * from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a where abs(position)+ABS(quanyi)+abs(times)<>0" % (acname)
 		res1=ms.dict_sql(sql)
 		avgtime=res1[0]['avg']
-		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime}
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':tempday[-1]}
 		NIdata.append(tempdict)
 	
 	Idata=[]
@@ -1832,10 +1832,10 @@ def acwantedequlityhistory(request):
 		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		#计算交易次数(200天平均)
-		sql="select AVG(times) as avg from ( select top 200 times from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a" % (acname)
+		sql="select round(AVG(times)/10,2) as avg from (  select top 200 * from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a where abs(position)+ABS(quanyi)+abs(times)<>0" % (acname)
 		res1=ms.dict_sql(sql)
 		avgtime=res1[0]['avg']
-		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime}
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':tempday[-1]}
 		Idata.append(tempdict)
 
 	Mdata=[]
@@ -1857,10 +1857,10 @@ def acwantedequlityhistory(request):
 		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		#计算交易次数(200天平均)
-		sql="select AVG(times) as avg from ( select top 200 times from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a" % (acname)
+		sql="select round(AVG(times)/10,2) as avg from (  select top 200 * from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a where abs(position)+ABS(quanyi)+abs(times)<>0" % (acname)
 		res1=ms.dict_sql(sql)
 		avgtime=res1[0]['avg']
-		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime}
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':tempday[-1]}
 		Mdata.append(tempdict)
 
 	return render_to_response('acwantedequlity.html',{
@@ -2137,10 +2137,10 @@ def acwantedequlitynew(request):
 		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		#计算交易次数(200天平均)
-		sql="select AVG(times) as avg from ( select top 200 times from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a" % (acname)
+		sql="select round(AVG(times)/10,2) as avg from (  select top 200 * from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a where abs(position)+ABS(quanyi)+abs(times)<>0" % (acname)
 		res1=ms.dict_sql(sql)
 		avgtime=res1[0]['avg']
-		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime}
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':tempday[-1]}
 		rbdata.append(tempdict)
 
 	AGdata=[]
@@ -2162,10 +2162,10 @@ def acwantedequlitynew(request):
 		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		#计算交易次数(200天平均)
-		sql="select AVG(times) as avg from ( select top 200 times from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a" % (acname)
+		sql="select round(AVG(times)/10,2) as avg from (  select top 200 * from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a where abs(position)+ABS(quanyi)+abs(times)<>0" % (acname)
 		res1=ms.dict_sql(sql)
 		avgtime=res1[0]['avg']
-		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime}
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':tempday[-1]}
 		AGdata.append(tempdict)
 
 	CUdata=[]
@@ -2187,10 +2187,10 @@ def acwantedequlitynew(request):
 		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		#计算交易次数(200天平均)
-		sql="select AVG(times) as avg from ( select top 200 times from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a" % (acname)
+		sql="select round(AVG(times)/10,2) as avg from (  select top 200 * from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a where abs(position)+ABS(quanyi)+abs(times)<>0" % (acname)
 		res1=ms.dict_sql(sql)
 		avgtime=res1[0]['avg']
-		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime}
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':tempday[-1]}
 		CUdata.append(tempdict)
 
 	RUdata=[]
@@ -2212,10 +2212,10 @@ def acwantedequlitynew(request):
 		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		#计算交易次数(200天平均)
-		sql="select AVG(times) as avg from ( select top 200 times from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a" % (acname)
+		sql="select round(AVG(times)/10,2) as avg from (  select top 200 * from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a where abs(position)+ABS(quanyi)+abs(times)<>0" % (acname)
 		res1=ms.dict_sql(sql)
 		avgtime=res1[0]['avg']
-		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime}
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':tempday[-1]}
 		RUdata.append(tempdict)
 
 	TAdata=[]
@@ -2237,10 +2237,10 @@ def acwantedequlitynew(request):
 		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		#计算交易次数(200天平均)
-		sql="select AVG(times) as avg from ( select top 200 times from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a" % (acname)
+		sql="select round(AVG(times)/10,2) as avg from (  select top 200 * from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a where abs(position)+ABS(quanyi)+abs(times)<>0" % (acname)
 		res1=ms.dict_sql(sql)
 		avgtime=res1[0]['avg']
-		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime}
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':tempday[-1]}
 		TAdata.append(tempdict)
 
 	JDdata=[]
@@ -2262,10 +2262,10 @@ def acwantedequlitynew(request):
 		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		#计算交易次数(200天平均)
-		sql="select AVG(times) as avg from ( select top 200 times from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a" % (acname)
+		sql="select round(AVG(times)/10,2) as avg from (  select top 200 * from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a where abs(position)+ABS(quanyi)+abs(times)<>0" % (acname)
 		res1=ms.dict_sql(sql)
 		avgtime=res1[0]['avg']
-		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime}
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':tempday[-1]}
 		JDdata.append(tempdict)
 
 	BUdata=[]
@@ -2287,10 +2287,10 @@ def acwantedequlitynew(request):
 		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		#计算交易次数(200天平均)
-		sql="select AVG(times) as avg from ( select top 200 times from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a" % (acname)
+		sql="select round(AVG(times)/10,2) as avg from (  select top 200 * from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a where abs(position)+ABS(quanyi)+abs(times)<>0" % (acname)
 		res1=ms.dict_sql(sql)
 		avgtime=res1[0]['avg']
-		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime}
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':tempday[-1]}
 		BUdata.append(tempdict)
 
 	CSdata=[]
@@ -2312,10 +2312,10 @@ def acwantedequlitynew(request):
 		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		#计算交易次数(200天平均)
-		sql="select AVG(times) as avg from ( select top 200 times from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a" % (acname)
+		sql="select round(AVG(times)/10,2) as avg from (  select top 200 * from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a where abs(position)+ABS(quanyi)+abs(times)<>0" % (acname)
 		res1=ms.dict_sql(sql)
 		avgtime=res1[0]['avg']
-		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime}
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':tempday[-1]}
 		CSdata.append(tempdict)
 
 	HCdata=[]
@@ -2337,10 +2337,10 @@ def acwantedequlitynew(request):
 		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		#计算交易次数(200天平均)
-		sql="select AVG(times) as avg from ( select top 200 times from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a" % (acname)
+		sql="select round(AVG(times)/10,2) as avg from (  select top 200 * from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a where abs(position)+ABS(quanyi)+abs(times)<>0" % (acname)
 		res1=ms.dict_sql(sql)
 		avgtime=res1[0]['avg']
-		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime}
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':tempday[-1]}
 		HCdata.append(tempdict)
 
 	Pdata=[]
@@ -2362,10 +2362,10 @@ def acwantedequlitynew(request):
 		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		#计算交易次数(200天平均)
-		sql="select AVG(times) as avg from ( select top 200 times from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a" % (acname)
+		sql="select round(AVG(times)/10,2) as avg from (  select top 200 * from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a where abs(position)+ABS(quanyi)+abs(times)<>0" % (acname)
 		res1=ms.dict_sql(sql)
 		avgtime=res1[0]['avg']
-		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime}
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':tempday[-1]}
 		Pdata.append(tempdict)
 
 	PPdata=[]
@@ -2387,10 +2387,10 @@ def acwantedequlitynew(request):
 		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		#计算交易次数(200天平均)
-		sql="select AVG(times) as avg from ( select top 200 times from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a" % (acname)
+		sql="select round(AVG(times)/10,2) as avg from (  select top 200 * from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a where abs(position)+ABS(quanyi)+abs(times)<>0" % (acname)
 		res1=ms.dict_sql(sql)
 		avgtime=res1[0]['avg']
-		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime}
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':tempday[-1]}
 		PPdata.append(tempdict)
 
 	NIdata=[]
@@ -2412,10 +2412,10 @@ def acwantedequlitynew(request):
 		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		#计算交易次数(200天平均)
-		sql="select AVG(times) as avg from ( select top 200 times from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a" % (acname)
+		sql="select round(AVG(times)/10,2) as avg from (  select top 200 * from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a where abs(position)+ABS(quanyi)+abs(times)<>0" % (acname)
 		res1=ms.dict_sql(sql)
 		avgtime=res1[0]['avg']
-		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime}
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':tempday[-1]}
 		NIdata.append(tempdict)
 	
 	Idata=[]
@@ -2437,10 +2437,10 @@ def acwantedequlitynew(request):
 		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		#计算交易次数(200天平均)
-		sql="select AVG(times) as avg from ( select top 200 times from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a" % (acname)
+		sql="select round(AVG(times)/10,2) as avg from (  select top 200 * from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a where abs(position)+ABS(quanyi)+abs(times)<>0" % (acname)
 		res1=ms.dict_sql(sql)
 		avgtime=res1[0]['avg']
-		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime}
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':tempday[-1]}
 		Idata.append(tempdict)
 
 	Mdata=[]
@@ -2462,10 +2462,10 @@ def acwantedequlitynew(request):
 		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		#计算交易次数(200天平均)
-		sql="select AVG(times) as avg from ( select top 200 times from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a" % (acname)
+		sql="select round(AVG(times)/10,2) as avg from (  select top 200 * from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a where abs(position)+ABS(quanyi)+abs(times)<>0" % (acname)
 		res1=ms.dict_sql(sql)
 		avgtime=res1[0]['avg']
-		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime}
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':tempday[-1]}
 		Mdata.append(tempdict)
 
 	return render_to_response('acwantedequlity.html',{
@@ -3137,7 +3137,11 @@ def order_get_dailyquanyi_forLilun(account,fromDdy):
 		realac=key.split("__")[0]
 		quanyisymbols_id=key.split("__")[-1]
 		sql="select top(1) [positionsymbol] from [LogRecord].[dbo].[quanyicaculatelist]  where acname='%s'" % (realac)
-		positionsymbol=ms.dict_sql(sql)[0]['positionsymbol']
+		res11=ms.dict_sql(sql)
+		if res11:
+			positionsymbol=res11[0]['positionsymbol']
+		else:
+			return {"ispass":0,"result":"虚拟组权益没有准备，请联系俞洋--%s" % (realac)}
 		sql="select  a.acname,s.S_ID,s.Symbol from LogRecord.dbo.quanyicaculatelist a left join Symbol_ID s on a.quanyisymbol=s.Symbol where a.acname='%s' and  s.S_ID='%s'" % (realac,quanyisymbols_id)
 		quanyisymbol=ms.dict_sql(sql)[0]['Symbol']
 		sql="SELECT top 1  (convert(int,replace(convert(varchar(10),DATEADD(day,1,stockdate),120),'-',''))-20000000) as D  FROM [Future].[dbo].[quanyi_log_groupby_v2] where ac='%s' and symbol='%s' order by stockdate" % (realac,positionsymbol)

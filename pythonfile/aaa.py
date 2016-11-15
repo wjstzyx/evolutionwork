@@ -19,6 +19,7 @@ def order_get_dailyquanyi_forLilun(account,fromDdy):
 		realac=key.split("__")[0]
 		quanyisymbols_id=key.split("__")[-1]
 		sql="select top(1) [positionsymbol] from [LogRecord].[dbo].[quanyicaculatelist]  where acname='%s'" % (realac)
+		print sql 
 		positionsymbol=ms.dict_sql(sql)[0]['positionsymbol']
 		sql="select  a.acname,s.S_ID,s.Symbol from LogRecord.dbo.quanyicaculatelist a left join Symbol_ID s on a.quanyisymbol=s.Symbol where a.acname='%s' and  s.S_ID='%s'" % (realac,quanyisymbols_id)
 		quanyisymbol=ms.dict_sql(sql)[0]['Symbol']
@@ -135,10 +136,9 @@ def add_time_series(totalquanyi,res1):
 	return result
 
 
-account='666061007'
+account='52001006'
 fromDdy=151002
 bb=order_get_ac_ratio_three(account)
-print bb 
 aa=order_get_dailyquanyi_forLilun(account,fromDdy)
 print aa
 
