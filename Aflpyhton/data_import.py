@@ -198,7 +198,7 @@ def test_is_all_ac_st():
 ##########
 ##运行步骤(有些步骤是可以每天定时做的 #1  #2 )
 ##########
-# gere_datafile(starttime='2015-04-01')
+gere_datafile(starttime='2016-05-01')
 # main_import_data()
 
 #3  choose_aflfile(acname)
