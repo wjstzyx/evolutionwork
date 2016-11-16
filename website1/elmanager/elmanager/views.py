@@ -3009,7 +3009,11 @@ def order_get_dailyquanyi(account,fromDdy):
 		sql="select top(1) [positionsymbol] from [LogRecord].[dbo].[quanyicaculatelist]  where acname='%s'" % (realac)
 		positionsymbol=ms.dict_sql(sql)[0]['positionsymbol']
 		sql="select  a.acname,s.S_ID,s.Symbol from LogRecord.dbo.quanyicaculatelist a left join Symbol_ID s on a.quanyisymbol=s.Symbol where a.acname='%s' and  s.S_ID='%s'" % (realac,quanyisymbols_id)
-		quanyisymbol=ms.dict_sql(sql)[0]['Symbol']
+		tempres1=ms.dict_sql(sql)
+		if tempres1:
+			quanyisymbol=ms.dict_sql(sql)[0]['Symbol']
+		else:
+			return {"ispass":0,"result":"权益计算配置表未配置该选项 %s" % (key),"configinfo":[]}
 		sql="SELECT top 1  (convert(int,replace(convert(varchar(10),DATEADD(day,1,stockdate),120),'-',''))-20000000) as D  FROM [Future].[dbo].[quanyi_log_groupby_v2] where ac='%s' and symbol='%s' order by stockdate" % (realac,positionsymbol)
 		tempD=ms.dict_sql(sql)
 		if tempD:
