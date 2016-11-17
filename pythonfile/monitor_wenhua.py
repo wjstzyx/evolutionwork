@@ -55,26 +55,26 @@ def monitor_AB_st_night():
 			# print endtime
 			# print nowtime
 			pass
-		sql="select (cast(replace(CONVERT(nvarchar,Stockdate,108),':','') as int)-cast(timenum as int)) as aa,st from [LogRecord].[dbo].[ST_heart] where timenum is not null and (cast(replace(CONVERT(nvarchar,Stockdate,108),':','') as int)-cast(timenum as int))>(period+2)*100 and type in (2,12)"
-		res=ms.dict_sql(sql)
-		message=''
-		subject='策略没有更新行情'+datetime.datetime.now().strftime("%H:%M:%S")
-		if res:
-			print "have waring"
-			stringnum=0
-			for item in res:
-				stringnum=stringnum+1
-				st=item['st']
-				timediff=item['aa']
-				if stringnum<50:
-					message=message+'策略号 '+str(st)+'; '
-			sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,message,0,sendmessage)
-			ms.insert_sql(sql)
-		else:	
-			# print starttime
-			# print endtime
-			# print nowtime
-			pass
+		# sql="select (cast(replace(CONVERT(nvarchar,Stockdate,108),':','') as int)-cast(timenum as int)) as aa,st from [LogRecord].[dbo].[ST_heart] where timenum is not null and (cast(replace(CONVERT(nvarchar,Stockdate,108),':','') as int)-cast(timenum as int))>(period+2)*100 and type in (2,12)"
+		# res=ms.dict_sql(sql)
+		# message=''
+		# subject='策略没有更新行情'+datetime.datetime.now().strftime("%H:%M:%S")
+		# if res:
+		# 	print "have waring"
+		# 	stringnum=0
+		# 	for item in res:
+		# 		stringnum=stringnum+1
+		# 		st=item['st']
+		# 		timediff=item['aa']
+		# 		if stringnum<50:
+		# 			message=message+'策略号 '+str(st)+'; '
+		# 	sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,message,0,sendmessage)
+		# 	ms.insert_sql(sql)
+		# else:	
+		# 	# print starttime
+		# 	# print endtime
+		# 	# print nowtime
+		# 	pass
 
 
 
@@ -125,26 +125,26 @@ def monitor_AB_st_day():
 			# print endtime
 			# print nowtime
 			pass
-		sql="select (cast(replace(CONVERT(nvarchar,Stockdate,108),':','') as int)-cast(timenum as int)) as aa,st from [LogRecord].[dbo].[ST_heart] where timenum is not null and (cast(replace(CONVERT(nvarchar,Stockdate,108),':','') as int)-cast(timenum as int))>(period+2)*100 and type in (1,12)"
-		res=ms.dict_sql(sql)
-		message=''
-		subject='策略没有更新行情'+datetime.datetime.now().strftime("%H:%M:%S")
-		if res:
-			print "have waring"
-			stringnum=0
-			for item in res:
-				stringnum=stringnum+1
-				st=item['st']
-				timediff=item['aa']
-				if stringnum<50:
-					message=message+'策略号 '+str(st)+'; '
-			sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,message,0,sendmessage)
-			ms.insert_sql(sql)
-		else:	
-			# print starttime
-			# print endtime
-			# print nowtime
-			pass
+		# sql="select (cast(replace(CONVERT(nvarchar,Stockdate,108),':','') as int)-cast(timenum as int)) as aa,st from [LogRecord].[dbo].[ST_heart] where timenum is not null and (cast(replace(CONVERT(nvarchar,Stockdate,108),':','') as int)-cast(timenum as int))>(period+2)*100 and type in (1,12)"
+		# res=ms.dict_sql(sql)
+		# message=''
+		# subject='策略没有更新行情'+datetime.datetime.now().strftime("%H:%M:%S")
+		# if res:
+		# 	print "have waring"
+		# 	stringnum=0
+		# 	for item in res:
+		# 		stringnum=stringnum+1
+		# 		st=item['st']
+		# 		timediff=item['aa']
+		# 		if stringnum<50:
+		# 			message=message+'策略号 '+str(st)+'; '
+		# 	sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,message,0,sendmessage)
+		# 	ms.insert_sql(sql)
+		# else:	
+		# 	# print starttime
+		# 	# print endtime
+		# 	# print nowtime
+		# 	pass
 
 
 
