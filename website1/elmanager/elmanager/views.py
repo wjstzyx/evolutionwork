@@ -2095,6 +2095,102 @@ def stockmapequty(request):
 
 
 
+
+def acwantedequlitynew_oneacname(request):
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	userid = request.COOKIES.get('userid','')
+	username = request.COOKIES.get('username','')
+	#验证权限
+	sql="SELECT a.username,b.function_id,b.function_content  FROM [LogRecord].[dbo].[account_user] a  inner join [LogRecord].[dbo].[account_group] b  on   a.groupname=b.groupname where a.userid='%s' " % (userid)
+	res=ms.dict_sql(sql)
+	isauthpass=0
+	if res:
+		for item in res:
+			if int(item['function_id'])==2:
+				isauthpass=1
+	if isauthpass==0:
+		response = HttpResponse("该功能正在完善，请返回 !! <button><a href='/index/'>返回</a></button>")
+		return response
+
+
+	if request.GET:
+		symbol=request.GET.get("symbol","")
+	quanyisymbol=symbol
+
+	rbdata=[]
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('%s') and iscaculate in (1,2)  and [isstatistic] =1 and [isforhistory]=0 order by sortnum" % (symbol)
+	print sql 
+	res=ms.dict_sql(sql)
+	for item in res:
+		acname=item['ac']
+		symbol=item['symbol']
+		#第一个价格
+		sql="select top 1 quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		tempquanyi=ms.find_sql(sql)
+		if tempquanyi==[]:
+			tempquanyi=0
+		else:
+			tempquanyi=tempquanyi[0][0]
+		sql="select quanyi-(%s) as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (tempquanyi,acname,symbol)
+		res1=ms.find_sql(sql)
+		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res2=ms.find_sql(sql)		
+		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
+		#计算交易次数(200天平均)
+		sql="select round(AVG(times)/10,2) as avg from (  select top 200 * from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a where abs(position)+ABS(quanyi)+abs(times)<>0" % (acname)
+		res1=ms.dict_sql(sql)
+		avgtime=res1[0]['avg']
+		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':tempday[-1]}
+		rbdata.append(tempdict)
+
+
+
+
+
+
+
+	return render_to_response('acwantedequlity_onesymbol.html',{
+		'AGdata':rbdata,
+		'username':username,
+		'quanyisymbol':quanyisymbol,
+	})	
+
+
+
+def acwantedequlitynew_oneacname(request):
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	userid = request.COOKIES.get('userid','')
+	username = request.COOKIES.get('username','')
+	#验证权限
+	sql="SELECT a.username,b.function_id,b.function_content  FROM [LogRecord].[dbo].[account_user] a  inner join [LogRecord].[dbo].[account_group] b  on   a.groupname=b.groupname where a.userid='%s' " % (userid)
+	res=ms.dict_sql(sql)
+	isauthpass=0
+	if res:
+		for item in res:
+			if int(item['function_id'])==2:
+				isauthpass=1
+	if isauthpass==0:
+		response = HttpResponse("该功能正在完善，请返回 !! <button><a href='/index/'>返回</a></button>")
+		return response
+
+
+	sql="select distinct quanyisymbol from [LogRecord].[dbo].[quanyicaculatelist]  order by quanyisymbol"
+	res=ms.dict_sql(sql)
+	
+
+
+
+
+
+	return render_to_response('acwantedequlityindex.html',{
+		'AGdata':rbdata,
+		'username':username,
+		'quanyisymbol':quanyisymbol,
+	})	
+
+
+
+
 def acwantedequlitynew(request):
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 	userid = request.COOKIES.get('userid','')

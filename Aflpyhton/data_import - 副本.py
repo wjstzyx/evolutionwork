@@ -14,17 +14,6 @@ from datetime import date
 import time
 from win32com.client import Dispatch
 import shutil
-import chardet
-import re
-
-
-
-ABautoroot=r'E:'
-dirformat=r'D:\Program Files\AmiBroker\Formats\custom3.format'
-database=r'D:\Program Files\AmiBroker\newlianxu'
-ABprogramedir="D:\\Program Files\\AmiBroker"
-
-
 def import_data(dirfrom,dirformat,database):
 	ab = Dispatch("Broker.Application")	
 	ab.LoadDatabase(database)
@@ -35,7 +24,8 @@ def import_data(dirfrom,dirformat,database):
 
 
 
-def run_aflfile(ab,database,Ticker,aflfle,settingfile):
+def run_aflfile(database,Ticker,aflfle,settingfile):
+	ab = Dispatch("Broker.Application")
 	ab.LoadDatabase(database)
 	ab.Documents.Open(Ticker)
 	# set apply to and range
@@ -49,14 +39,7 @@ def run_aflfile(ab,database,Ticker,aflfle,settingfile):
 	print "Successfully loaded AFL script:", aflfle
 	isLoadSettings=aa.LoadSettings(settingfile)
 	print "Successfully loaded setting file:",settingfile
-	aa.RangeMode = 0
- 	# aa.RangeMode = 3   
- 	# aa.RangeFromDate ='2016/10/01'
- 	# aa.RangeToDate = '2016/11/01'
-
-
-
-
+	aa.RangeMode = 0	# all data
 	try:
 		aa.Backtest(0)
 		# time.sleep(5)
@@ -75,6 +58,11 @@ def run_aflfile(ab,database,Ticker,aflfle,settingfile):
 
 
 
+ABautoroot=r'E:'
+dirformat=r'D:\Program Files\AmiBroker\Formats\custom3.format'
+database=r'D:\Program Files\AmiBroker\newlianxu'
+ABprogramedir="D:\\Program Files\\AmiBroker"
+
 
 #将数据文件夹中的数据全部导入
 def main_import_data():
@@ -92,7 +80,6 @@ def main_run_afl():
 	#todo:解析symbl 直接赋值给Ticker
 	aflfiledir=ABautoroot+"\\ABautofile\\aflfile"
 	aflfiles=os.listdir(aflfiledir)
-	ab = Dispatch("Broker.Application")
 
 	totalconfig=[]
 	for file in aflfiles:
@@ -136,12 +123,11 @@ def main_run_afl():
 
 			cmd='taskkill /F /IM Broker.exe'
 			os.system(cmd)
-			ab = Dispatch("Broker.Application")
 			tempdir=item[0]
 		aflfle=item[1]
 		settingfile=item[2]
 		Ticker=item[3]
-		run_aflfile(ab,database,Ticker,aflfle,settingfile)
+		run_aflfile(database,Ticker,aflfle,settingfile)
 
 
 
@@ -163,36 +149,14 @@ def gere_datafile(starttime):
 
 #根据虚拟组名字选择规定的afl文件放入制定文件夹
 def choose_aflfile(acname):
-	dirroot=r'E:\ABautofile\sortalffile'
-	targetroot=r'E:\ABautofile\aflfile'
-	#监测虚拟组元素是否全
-	sql="  select p.ST from P_BASIC p  left join [LogRecord].[dbo].[aflfile_st_symbol_time] b  on p.ST=b.st   where p.AC='%s'  and b.symbol is null" % (acname)
-	res=ms.dict_sql(sql)
-	if res:
-		print "%s 虚拟组元素缺少,添加后重新进行" % (acname),res
-		exit()
-	else:
-		sql="  select p.ST,b.symbol,b.time from P_BASIC p  left join [LogRecord].[dbo].[aflfile_st_symbol_time] b  on p.ST=b.st   where p.AC='%s'" % (acname)
-		res1=ms.dict_sql(sql)
-		for item in res1:
-			filename=dirroot+"\\"+item['symbol']+"\\"+item['time']+"\\"+item['ST']+".afl"
-			targetfilename=targetroot+"\\"+item['symbol']+"-"+item['time']+"-"+item['ST']+".afl"
-			shutil.copyfile(filename,targetfilename)
-
-
-# choose_aflfile('dd')
+	filepath=r'E:\ABautofile\totalAflfile\%s' % (acname)
+	acnamelist=os.listdir(filepath)
+	print acnamelist
+	for item in acnamelist:
+		print item
 
 
 
-#根据账号选择afl文件
-def choose_aflfile_byaccount(account):
-	sql="select distinct f_ac from p_follow where ac='%s'" % (account)
-	res=ms.dict_sql(sql)
-	for item in res:
-		acname=item['f_ac']
-		choose_aflfile(acname)
-
-# choose_aflfile_byaccount('StepMultiI300w')
 
 # filepath=r'E:\ABautofile\totalAflfile'
 #afl文件重命名，加入symbol
@@ -231,103 +195,15 @@ def test_is_all_ac_st():
 
 # test_is_all_ac_st()
 
-#将正确命名的alf文件正确分布在文件夹
-
-def sort_afl_file(tempfilepath='',targetroot=''):
-	tempfilepath=r'E:\ABautofile\tempfile'
-	targetroot=r'E:\ABautofile\sortalffile'
-	aflfiles=os.listdir(tempfilepath)
-	for item in aflfiles:
-		# i=i+1
-		# print i 
-		# detectedEncodingDict = chardet.detect(item)
-		# print detectedEncodingDict
-		filemame= item.decode('gb2312').encode('utf-8')
-		put_in_target_position(filemame,targetroot,tempfilepath,item)
-
-
-def put_in_target_position(filemame,targetroot,tempfilepath,item):
-	symbol=filemame.split('-')[0].strip(" ").lower()
-	timeinterval=filemame.split('-')[1].strip(" ").lower()
-	symboldir=targetroot+"\\"+symbol
-	symbol_time_dir=symboldir+"\\"+timeinterval
-	# print symbol,timeinterval
-	# print symboldir,symbol_time_dir
-	if not os.path.isdir(symboldir):
-		os.mkdir(symboldir)
-	if not os.path.isdir(symbol_time_dir):
-		os.mkdir(symbol_time_dir)
-	#获取st号码
-	st='nost'
-	with open(tempfilepath+"\\"+item,'r') as f:
-		for line in f.readlines():
-			#if detectedEncodingDict['encoding']  not in ('GB2312','ascii'):
-			#	print 'detectedEncodingDict=',detectedEncodingDict['encoding']
-			#line=line.decode(detectedEncodingDict['encoding']).encode('utf-8')
-			matchObj = re.match( r'.*StrategyID = \"(.*)\";', line, re.M|re.I)
-			if matchObj:
-				# print "matchObj.group(1) : ", matchObj.group(1)
-				st=matchObj.group(1).strip(" ")
-	if st == 'nost':
-		print filemame,"未查询到st号，请确认"
-		exit()
-	else:
-		newfilename=symbol_time_dir+"\\"+st+".afl"
-		shutil.copyfile(tempfilepath+"\\"+item,newfilename)
-		#对应关系存数据库
-		sql="select 1 as a from [LogRecord].[dbo].[aflfile_st_symbol_time] where st='%s'" % (st)
-		res=ms.dict_sql(sql)
-		if res:
-			sql="update [LogRecord].[dbo].[aflfile_st_symbol_time] set symbol='%s',time='%s',inserttime=getdate() where st='%s'" % (symbol,timeinterval,st)
-			ms.insert_sql(sql)
-			print "重复的ID ",st,filemame
-		else:
-			sql="insert into [LogRecord].[dbo].[aflfile_st_symbol_time](st,symbol,time) values('%s','%s','%s')" % (st,symbol,timeinterval)
-			ms.insert_sql(sql)
-
-
-
-# sort_afl_file()
-
-
-#对制定文件夹afl加前缀
-def add_prename(symbol='',tieminteval=''):
-	targetdir=r'E:\ABautofile\z_change_prename'
-	aflfiles=os.listdir(targetdir)
-	for item in aflfiles:
-		filemame= item.decode('gb2312').encode('utf-8')
-		print filemame
-		if os.path.isdir(targetdir+'\\'+item):
-			matchObj = re.match( r'(.*)StepMultiI', item, re.M|re.I)
-			if matchObj:
-				symbol=matchObj.group(1).strip(" ")
-			else:
-				print "no symbol",targetdir+'\\'+filemame
-				exit()
-
-			secondaflfiles=os.listdir(targetdir+'\\'+item)
-			for item1 in secondaflfiles:
-				newfilename=symbol+"-"+item1
-				oldfile=targetdir+"\\"+item+"\\"+item1
-				newfile=targetdir+"\\"+item+"\\"+newfilename
-				copufilename=r'E:\ABautofile\tempfile'+"\\"+newfilename
-				shutil.move(oldfile,newfile)
-				shutil.copyfile(newfile,copufilename)
-		print filemame,'文件夹'
-
-# add_prename()
-
-
-
 ##########
 ##运行步骤(有些步骤是可以每天定时做的 #1  #2 )
 ##########
-# gere_datafile(starttime='2015-05-01')
+gere_datafile(starttime='2016-05-01')
 # main_import_data()
 
 #3  choose_aflfile(acname)
 # main_run_afl()
 #5  
 
-#检测st_repoet_test中的策略是不是虚拟组有且唯一的策略号
-test_is_all_ac_st()
+
+
