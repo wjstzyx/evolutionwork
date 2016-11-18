@@ -28,7 +28,7 @@ ms105 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="future")
 # LUD_5YD
 
 #每次需要修改路径
-dir=r"C:\Users\YuYang\Desktop\映射程序\TFSTATIC\输出文件"
+dir=r"C:\Users\YuYang\Desktop\映射程序\TFALL\输出文件"
 
 
 
@@ -191,8 +191,8 @@ def cmd_new_cal():
 
 
 
-filelist=get_filename_list()
-handle_file(filelist)
+# filelist=get_filename_list()
+# handle_file(filelist)
 print 'move_signal'
 move_signal()
 print 'handle_distinct_record'

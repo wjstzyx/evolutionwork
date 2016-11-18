@@ -556,8 +556,9 @@ def write_heart(type,name):
 
 
 
-def main_fun(acanme):
-	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=3 and issumps=0 and isyepan in (0,1,12)  and acname='%s' order by id desc " % (acanme)
+def main_fun(acanme=''):
+	#sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=3 and issumps=0 and isyepan in (0,1,12)  and acname='%s' order by id desc " % (acanme)
+	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=3 and issumps=0 and isyepan in (0,1,12) order by id desc "
 	res=ms.dict_sql(sql)
 	for item in res:
 		print item['acname'],item['id']
@@ -577,6 +578,6 @@ if len(sys.argv)>1:
 
 
 #acanme='LUD_5YD_0'
-main_fun(acanme)
+main_fun('')
 
 # write_heart('daily_equity','nosum1')

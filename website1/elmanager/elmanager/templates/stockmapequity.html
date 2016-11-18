@@ -54,6 +54,10 @@ function showaccompare(acname){
                                 </li>
                                 <li><a href="#IH" data-toggle="tab">IH</a>
                                 </li>
+                                <li><a href="#TF" data-toggle="tab">TF</a>
+                                </li>
+                                <li><a href="#T" data-toggle="tab">T</a>
+                                </li>
 
                             </ul>
 
@@ -79,6 +83,22 @@ function showaccompare(acname){
                                     <h4>Messages Tab</h4>
                                     <div class="row">
                                     {% for item in IHdata %} 
+                                      <div class="col-md-6"><div id='{{item.acname}}-{{item.symbol}}' style="min-width:700px;height:400px"></div></div>
+                                    {% endfor %}                                    
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="TF">
+                                    <h4>Messages Tab</h4>
+                                    <div class="row">
+                                    {% for item in TFdata %} 
+                                      <div class="col-md-6"><div id='{{item.acname}}-{{item.symbol}}' style="min-width:700px;height:400px"></div></div>
+                                    {% endfor %}                                    
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="T">
+                                    <h4>Messages Tab</h4>
+                                    <div class="row">
+                                    {% for item in Tdata %} 
                                       <div class="col-md-6"><div id='{{item.acname}}-{{item.symbol}}' style="min-width:700px;height:400px"></div></div>
                                     {% endfor %}                                    
                                     </div>
@@ -183,6 +203,87 @@ function showaccompare(acname){
   {% endfor %}
 
   {% for item in IHdata %}
+  <script>
+      $(function () {
+          $('#{{item.acname}}-{{item.symbol}}').highcharts({
+              title: {
+                  text: '{{item.acname}}--{{item.symbol}}',
+                  x: -20 //center
+              },
+              xAxis: {
+                  categories:{{item.xaxis}}
+              },
+              yAxis: {
+                  title: {
+                      text: '每手净收益'
+                  },
+                  plotLines: [{
+                      value: 0,
+                      width: 1,
+                      color: '#808080'
+                  }]
+              },
+              tooltip: {
+                  valueSuffix: '元'
+              },
+              legend: {
+                  layout: 'vertical',
+                  align: 'right',
+                  verticalAlign: 'middle',
+                  borderWidth: 0
+              },
+              series: [{
+                  name: '理论',
+                  data: {{item.lilunquanyi}}             
+              
+              }]
+          });
+      });
+  </script>
+  {% endfor %}
+
+  {% for item in TFdata %}
+  <script>
+      $(function () {
+          $('#{{item.acname}}-{{item.symbol}}').highcharts({
+              title: {
+                  text: '{{item.acname}}--{{item.symbol}}',
+                  x: -20 //center
+              },
+              xAxis: {
+                  categories:{{item.xaxis}}
+              },
+              yAxis: {
+                  title: {
+                      text: '每手净收益'
+                  },
+                  plotLines: [{
+                      value: 0,
+                      width: 1,
+                      color: '#808080'
+                  }]
+              },
+              tooltip: {
+                  valueSuffix: '元'
+              },
+              legend: {
+                  layout: 'vertical',
+                  align: 'right',
+                  verticalAlign: 'middle',
+                  borderWidth: 0
+              },
+              series: [{
+                  name: '理论',
+                  data: {{item.lilunquanyi}}             
+              
+              }]
+          });
+      });
+  </script>
+  {% endfor %}
+
+
+  {% for item in Tdata %}
   <script>
       $(function () {
           $('#{{item.acname}}-{{item.symbol}}').highcharts({
