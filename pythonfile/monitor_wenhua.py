@@ -40,7 +40,7 @@ def monitor_AB_st_night():
 		message=''
 		subject='AB策略卡死报警'+datetime.datetime.now().strftime("%H:%M:%S")
 		if res:
-			print "have waring"
+			print "have waring2"
 			stringnum=0
 			for item in res:
 				stringnum=stringnum+1
@@ -55,26 +55,25 @@ def monitor_AB_st_night():
 			# print endtime
 			# print nowtime
 			pass
-		# sql="select (cast(replace(CONVERT(nvarchar,Stockdate,108),':','') as int)-cast(timenum as int)) as aa,st from [LogRecord].[dbo].[ST_heart] where timenum is not null and (cast(replace(CONVERT(nvarchar,Stockdate,108),':','') as int)-cast(timenum as int))>(period+2)*100 and type in (2,12)"
-		# res=ms.dict_sql(sql)
-		# message=''
-		# subject='策略没有更新行情'+datetime.datetime.now().strftime("%H:%M:%S")
-		# if res:
-		# 	print "have waring"
-		# 	stringnum=0
-		# 	for item in res:
-		# 		stringnum=stringnum+1
-		# 		st=item['st']
-		# 		timediff=item['aa']
-		# 		if stringnum<50:
-		# 			message=message+'策略号 '+str(st)+'; '
-		# 	sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,message,0,sendmessage)
-		# 	ms.insert_sql(sql)
-		# else:	
-		# 	# print starttime
-		# 	# print endtime
-		# 	# print nowtime
-		# 	pass
+		sql="select * from [LogRecord].[dbo].[ST_heart] where type in (2,12)"
+		res=ms.dict_sql(sql)
+		for item in res:
+			stockdate=item['stockdate']
+			timenum=item["timenum"]
+			period=item['period']
+			st=item['st']
+			timenum=str(timenum)
+			if len(timenum)==5:
+				timenum="0"+timenum
+			timenum=datetime.datetime.strptime(timenum,'%H%M%S')
+			stockdate=datetime.datetime.strptime(stockdate.strftime("%H%M%S"),'%H%M%S')
+			if round((stockdate-timenum).seconds/60)>(period+5) and (nowtime1>='21:05:00' and nowtime1<='23:00:00'):
+				message=''
+				subject='夜盘策略行情无更新'+datetime.datetime.now().strftime("%H:%M:%S")
+				print "have waring3"
+				sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,message,0,sendmessage)
+				ms.insert_sql(sql)
+				break
 
 
 
@@ -94,6 +93,7 @@ def monitor_AB_st_day():
 	sql="select getdate()"
 	getnow=ms.find_sql(sql)[0][0]
 	nowtime=getnow.strftime('%H:%M:%S')
+	nowtime1=nowtime
 	nowtime=datetime.datetime.strptime(nowtime,'%H:%M:%S')
 	starttime=datetime.datetime.strptime(starttime,'%H:%M:%S')
 	endtime=datetime.datetime.strptime(endtime,'%H:%M:%S')
@@ -107,7 +107,7 @@ def monitor_AB_st_day():
 			subject=str(res[0]['st'])+" "+str(res[0]['address'])+"策略卡死"+datetime.datetime.now().strftime("%H:%M:%S")
 			
 		if res:
-			print "have waring"
+			print "have waring4"
 			stringnum=0
 			for item in res:
 				stringnum=stringnum+1
@@ -125,26 +125,26 @@ def monitor_AB_st_day():
 			# print endtime
 			# print nowtime
 			pass
-		# sql="select (cast(replace(CONVERT(nvarchar,Stockdate,108),':','') as int)-cast(timenum as int)) as aa,st from [LogRecord].[dbo].[ST_heart] where timenum is not null and (cast(replace(CONVERT(nvarchar,Stockdate,108),':','') as int)-cast(timenum as int))>(period+2)*100 and type in (1,12)"
-		# res=ms.dict_sql(sql)
-		# message=''
-		# subject='策略没有更新行情'+datetime.datetime.now().strftime("%H:%M:%S")
-		# if res:
-		# 	print "have waring"
-		# 	stringnum=0
-		# 	for item in res:
-		# 		stringnum=stringnum+1
-		# 		st=item['st']
-		# 		timediff=item['aa']
-		# 		if stringnum<50:
-		# 			message=message+'策略号 '+str(st)+'; '
-		# 	sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,message,0,sendmessage)
-		# 	ms.insert_sql(sql)
-		# else:	
-		# 	# print starttime
-		# 	# print endtime
-		# 	# print nowtime
-		# 	pass
+		sql="select * from [LogRecord].[dbo].[ST_heart] where type in (1,12)"
+		res=ms.dict_sql(sql)
+		for item in res:
+			stockdate=item['stockdate']
+			timenum=item["timenum"]
+			period=item['period']
+			st=item['st']
+			timenum=str(timenum)
+			if len(timenum)==5:
+				timenum="0"+timenum
+			timenum=datetime.datetime.strptime(timenum,'%H%M%S')
+			stockdate=datetime.datetime.strptime(stockdate.strftime("%H%M%S"),'%H%M%S')
+			if round((stockdate-timenum).seconds/60)>(period+5) and ((nowtime1>='09:10:00' and nowtime1<='10:15:00') or (nowtime1>='10:30:00' and nowtime1<='11:30:00') or (nowtime1>='13:35:00' and nowtime1<='15:30:00')):
+				message=''
+				subject='日盘策略没有更新行情'+datetime.datetime.now().strftime("%H:%M:%S")
+				print "have waring1"
+				sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,message,0,sendmessage)
+				ms.insert_sql(sql)
+				break
+
 
 
 
