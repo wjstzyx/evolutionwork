@@ -28,7 +28,7 @@ ms105 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="future")
 # LUD_5YD
 
 #每次需要修改路径
-dir=r"C:\Users\YuYang\Desktop\映射程序\IFYD_YS\输出文件"
+dir=r"C:\Users\YuYang\Desktop\映射程序\TFSTATIC\输出文件"
 
 
 
@@ -89,15 +89,21 @@ def get_one_line(line,date='',name=''):
 		#写入库
 		#date='20161102'
 		mydatetime=str(date)+' '+str(matchObj.group(1))+":"+str(matchObj.group(2))+":"+str(matchObj.group(3)).split('.')[0]
-		mydatetime=datetime.datetime.strptime(mydatetime,"%Y%m%d %H:%M:%S")
-		vp=matchObj.group(4)
-		rp=matchObj.group(5)
-		if ('还没有出现有效信号' not in rp):
-			sql="insert into [future].[dbo].[test_map_backup](name,datetime,vp,rp) values('%s','%s','%s','%s')" % (name,mydatetime,vp,rp)
-			try:
-				ms105.insert_sql(sql)
-			except:
-				pass
+		# mydatetime=datetime.datetime.strptime(mydatetime,"%Y%m%d %H:%M:%S")
+		try:
+			mydatetime=datetime.datetime.strptime(mydatetime,"%Y%m%d %H:%M:%S")
+			isdone=1
+		except:
+			isdone=0
+		if isdone==1 or 1==1:
+			vp=matchObj.group(4)
+			rp=matchObj.group(5)
+			if ('还没有出现有效信号' not in rp):
+				sql="insert into [future].[dbo].[test_map_backup](name,datetime,vp,rp) values('%s','%s','%s','%s')" % (name,mydatetime,vp,rp)
+				try:
+					ms105.insert_sql(sql)
+				except:
+					pass
 
 
 
@@ -191,6 +197,6 @@ print 'move_signal'
 move_signal()
 print 'handle_distinct_record'
 handle_distinct_record(ms105,name)
-print cmd_new_cal()
-cmd_new_cal()
+# print cmd_new_cal()
+# cmd_new_cal()
 

@@ -2157,7 +2157,7 @@ def acwantedequlitynew_oneacname(request):
 
 
 
-def acwantedequlitynew_oneacname(request):
+def acwantedequlitynew(request):
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 	userid = request.COOKIES.get('userid','')
 	username = request.COOKIES.get('username','')
@@ -2176,22 +2176,29 @@ def acwantedequlitynew_oneacname(request):
 
 	sql="select distinct quanyisymbol from [LogRecord].[dbo].[quanyicaculatelist]  order by quanyisymbol"
 	res=ms.dict_sql(sql)
-	
+	lenres=len(res)
+	aa=int(lenres/2)
+	print 'aa',aa
+	res1=res[:aa]
+	res2=res[aa:]
+
+
+
 
 
 
 
 
 	return render_to_response('acwantedequlityindex.html',{
-		'AGdata':rbdata,
+		'res1':res1,
+		'res2':res2,
 		'username':username,
-		'quanyisymbol':quanyisymbol,
 	})	
 
 
 
 
-def acwantedequlitynew(request):
+def acwantedequlitynew1(request):
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 	userid = request.COOKIES.get('userid','')
 	username = request.COOKIES.get('username','')

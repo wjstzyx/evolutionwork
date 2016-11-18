@@ -68,7 +68,7 @@ def monitor_AB_st_night():
 			timenum=datetime.datetime.strptime(timenum,'%H%M%S')
 			stockdate=datetime.datetime.strptime(stockdate.strftime("%H%M%S"),'%H%M%S')
 			if round((stockdate-timenum).seconds/60)>(period+5) and (nowtime1>='21:05:00' and nowtime1<='23:00:00'):
-				message=''
+				message=''+str(st)
 				subject='夜盘策略行情无更新'+datetime.datetime.now().strftime("%H:%M:%S")
 				print "have waring3"
 				sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,message,0,sendmessage)
@@ -137,8 +137,9 @@ def monitor_AB_st_day():
 				timenum="0"+timenum
 			timenum=datetime.datetime.strptime(timenum,'%H%M%S')
 			stockdate=datetime.datetime.strptime(stockdate.strftime("%H%M%S"),'%H%M%S')
-			if round((stockdate-timenum).seconds/60)>(period+5) and ((nowtime1>='09:10:00' and nowtime1<='10:15:00') or (nowtime1>='10:30:00' and nowtime1<='11:30:00') or (nowtime1>='13:35:00' and nowtime1<='15:30:00')):
-				message=''
+			if round((stockdate-timenum).seconds/60)>(period+5) and ((nowtime1>='09:10:00' and nowtime1<='10:15:00') or (nowtime1>='10:30:00' and nowtime1<='11:30:00') or (nowtime1>='13:35:00' and nowtime1<='15:00:00')):
+				print stockdate,timenum,round((stockdate-timenum).seconds/60),period
+				message=''+str(st)
 				subject='日盘策略没有更新行情'+datetime.datetime.now().strftime("%H:%M:%S")
 				print "have waring1"
 				sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,message,0,sendmessage)

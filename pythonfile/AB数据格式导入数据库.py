@@ -17,7 +17,7 @@ ms03 = MSSQL(host="192.168.0.3",user="future",pwd="K@ra0Key",db="future")
 
 def main_fun():
 	fileroot=r'Y:\data_shiwei\20161021\1Min'
-	symbol='OI'
+	symbol='A'
 	srcFilePath=fileroot+"\\"+'%s.csv' % (symbol)
 	reader = csv.reader(file(srcFilePath,'rb'))
 	for line in reader:

@@ -123,24 +123,29 @@ def del_head_info(testlist,StrategyID,dayornight,sum_or_one):
 def all_file(numtpe,dayornight,sum_or_one):
 	#get max StrategyID
 	lenth1=len(numtpe)
+	if lenth1<>5 :
+		print "##########################"
+		print "error:Please input the right ST(length equals 5 )"
+		print "##########################"
+		exit()
+	
 	newnum=numtpe
 	for i in range(10-lenth1):
 		newnum=str(newnum)+'0'
-	print 	numtpe,newnum
 
-	sql="select top 1 max(st) as st from [LogRecord].[dbo].[all_st_list] where st like '%s%%' and st>='%s'" % (numtpe,newnum)
+	sql="select top 1 max(st) as st from [LogRecord].[dbo].[all_st_list] where st like '%s%%' and cast(st as float)>=cast('%s' as float)" % (numtpe,newnum)
 	res=ms.dict_sql(sql)
 	if res[0]['st'] is not None:
 		StrategyID1=int(res[0]['st'])+1
 	else:
 		StrategyID1='no'
-	sql="select top 1 max(st) as st from [Future].[dbo].[Trading_logSymbol] where st like '%s%%' and st>='%s'" % (numtpe,newnum)
+	sql="select top 1 max(st) as st from [Future].[dbo].[Trading_logSymbol] where st like '%s%%' and cast(st as float)>=cast('%s' as float)" % (numtpe,newnum)
 	res=ms.dict_sql(sql)
 	if res[0]['st'] is not None:
 		StrategyID2=int(res[0]['st'])+1
 	else:
 		StrategyID2='no'
-	sql="select top 1 max(st) as st from [Future].[dbo].[P_BASIC] where st like '%s%%' and st>='%s'" % (numtpe,newnum)
+	sql="select top 1 max(st) as st from [Future].[dbo].[P_BASIC] where st like '%s%%' and cast(st as float)>=cast('%s' as float)" % (numtpe,newnum)
 	res=ms.dict_sql(sql)
 	if res[0]['st'] is not None:
 		StrategyID3=int(res[0]['st'])+1
@@ -151,13 +156,8 @@ def all_file(numtpe,dayornight,sum_or_one):
 		print "##########################"
 		print "this is new stnum "
 		print "##########################"
-		if len(numtpe)==10:
-			StrategyID=int(numtpe)
-		else:
-			print "##########################"
-			print "error:Please input the right ST(length equals 10 )"
-			print "##########################"
-			exit()
+		StrategyID=int(newnum)+1
+
 	else:
 		if StrategyID1=='no':
 			StrategyID1=0
@@ -187,7 +187,7 @@ def all_file(numtpe,dayornight,sum_or_one):
 			print "There already exits the ST:",StrategyID
 			exit()
 		else:
-			if item.split('.')[1]=='afl':
+			if item.split('.')[-1].lower()=='afl':
 				del_head_info(item,str(StrategyID),dayornight,sum_or_one)
 				listname=item.split('.')[0].replace("'","")
 				sql="insert into [LogRecord].[dbo].[all_st_list](st,[filename],[inserttime]) values('%s','%s',getdate())" % (str(StrategyID),listname)
