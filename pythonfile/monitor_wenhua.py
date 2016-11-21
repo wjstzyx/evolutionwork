@@ -131,6 +131,8 @@ def monitor_AB_st_day():
 			stockdate=item['stockdate']
 			timenum=item["timenum"]
 			period=item['period']
+			# stockdate=datetime.datetime.strptime('2016-11-21 09:47:02','%Y-%m-%d %H:%M:%S')
+			# timenum=94600
 			st=item['st']
 			timenum=str(timenum)
 			if len(timenum)==5:
@@ -138,9 +140,9 @@ def monitor_AB_st_day():
 			timenum=datetime.datetime.strptime(timenum,'%H%M%S')
 			stockdate=datetime.datetime.strptime(stockdate.strftime("%H%M%S"),'%H%M%S')
 			if round((stockdate-timenum).seconds/60)>(period+5) and ((nowtime1>='09:33:00' and nowtime1<='10:14:00') or (nowtime1>='10:30:00' and nowtime1<='11:30:00') or (nowtime1>='13:35:00' and nowtime1<='15:00:00')):
-				# print stockdate,timenum,round((stockdate-timenum).seconds/60),period
-				message=''+str(st)
-				subject='日盘策略没有更新行情'+datetime.datetime.now().strftime("%H:%M:%S")
+				print stockdate,timenum,round((stockdate-timenum).seconds/60),period
+				message=''+str(st)+stockdate.strftime('%Y-%m-%d %H:%M:%S')+" "+timenum.strftime('%Y-%m-%d %H:%M:%S')+" "+str(period)+" "+str(round((stockdate-timenum).seconds/60))
+				subject='日盘策略没有更新行情'+" "+datetime.datetime.now().strftime("%H:%M:%S")
 				print "have waring1"
 				sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,message,0,sendmessage)
 				ms.insert_sql(sql)
