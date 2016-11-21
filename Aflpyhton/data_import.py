@@ -59,7 +59,7 @@ def run_aflfile(ab,database,Ticker,aflfle,settingfile):
 
 	try:
 		aa.Backtest(0)
-		# time.sleep(5)
+		#time.sleep(5)
 		#aa.Explore()
 		#aa.Backtest(0)
 		#resultFile = ResultFolder + "\\" + basename + "-ps.csv"
@@ -228,6 +228,12 @@ def test_is_all_ac_st():
 		
 	else:
 		print "fail 不完成，请检查"
+		sql="  select b.AC,b.ST from (  select  * from P_BASIC where st in (select distinct st from st_report_test)) a right join (  select  * from P_BASIC where ac in (select distinct ac from P_BASIC where st in (select distinct st from st_report_test))) b  on a.AC=b.AC and a.ST=b.ST  where a.AC is null"
+		res=ms.dict_sql(sql)
+		print "as follows:"
+		for item in res:
+			print item['AC'],item['ST']
+
 
 # test_is_all_ac_st()
 
@@ -322,7 +328,7 @@ def add_prename(symbol='',tieminteval=''):
 ##########
 ##运行步骤(有些步骤是可以每天定时做的 #1  #2 )
 ##########
-# gere_datafile(starttime='2015-05-01')
+# gere_datafile(starttime='2015-02-01')
 # main_import_data()
 
 #3  choose_aflfile(acname)

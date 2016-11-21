@@ -17,7 +17,7 @@ ms03 = MSSQL(host="192.168.0.3",user="future",pwd="K@ra0Key",db="future")
 
 def main_fun():
 	fileroot=r'Y:\data_shiwei\20161021\1Min'
-	symbol='AL'
+	symbol='Lnight'
 	srcFilePath=fileroot+"\\"+'%s.csv' % (symbol)
 	reader = csv.reader(file(srcFilePath,'rb'))
 	for line in reader:
@@ -30,7 +30,7 @@ def main_fun():
 def line_write_in_database(symbol,line):
 	stockdate=line[0]+" "+line[1]
 	stockdate=datetime.datetime.strptime(stockdate,'%Y/%m/%d %H:%M')
-	if stockdate>datetime.datetime.strptime('2015/01/01','%Y/%m/%d') and stockdate<datetime.datetime.strptime('2016/06/01','%Y/%m/%d'):
+	if stockdate>datetime.datetime.strptime('2015/01/01','%Y/%m/%d') and stockdate<datetime.datetime.strptime('2016/10/01','%Y/%m/%d'):
 		sql="select 1 from [TSymbol_quotes_backup] where symbol='%s' and stockdate='%s'" % (symbol,stockdate)
 		res=ms.dict_sql(sql)
 		if not res:

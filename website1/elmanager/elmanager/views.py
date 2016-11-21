@@ -2163,7 +2163,6 @@ def acwantedequlitynew_oneacname(request):
 
 	rbdata=[]
 	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('%s') and iscaculate in (1,2)  and [isstatistic] =1 and [isforhistory]=0 order by sortnum" % (symbol)
-	print sql 
 	res=ms.dict_sql(sql)
 	for item in res:
 		acname=item['ac']
@@ -2184,8 +2183,14 @@ def acwantedequlitynew_oneacname(request):
 		sql="select round(AVG(times)/10,2) as avg from (  select top 200 * from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a where abs(position)+ABS(quanyi)+abs(times)<>0" % (acname)
 		res1=ms.dict_sql(sql)
 		avgtime=res1[0]['avg']
-		tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':tempday[-1]}
+		if tempday:
+			tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':tempday[-1]}
+
+		else:
+			tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':0}
 		rbdata.append(tempdict)
+
+
 
 
 
