@@ -636,7 +636,7 @@ def main_fun():
 	#sql="SELECT TOP 1000 [id]      ,[acname]      ,[positionsymbol]      ,[quanyisymbol]      ,[iscaculate]      ,[isforhistory]      ,[isstatistic]      ,[isyepan]      ,[iscalcubyvick]      ,[sortnum]      ,[issumps]  FROM [LogRecord].[dbo].[quanyicaculatelist] where [positionsymbol]<>[quanyisymbol]  order by id desc"
 
 
-	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1 and issumps=0 and isyepan in (0,1,12) order by id desc "
+	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1 and issumps=0 and isyepan in (0,1,12)  AND quanyisymbol not in ('IF','IC','IH') order by id desc "
 	#sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1 and issumps=0 and isyepan in (0,1,12)  and id<=715 order by id desc "
 	#sql="SELECT top 17 id,[acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('RB') and iscaculate=1 order by sortnum"
 	res=ms.dict_sql(sql)
