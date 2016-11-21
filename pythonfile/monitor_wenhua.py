@@ -139,7 +139,12 @@ def monitor_AB_st_day():
 				timenum="0"+timenum
 			timenum=datetime.datetime.strptime(timenum,'%H%M%S')
 			stockdate=datetime.datetime.strptime(stockdate.strftime("%H%M%S"),'%H%M%S')
-			if round((stockdate-timenum).seconds/60)>(period+5) and ((nowtime1>='09:33:00' and nowtime1<='10:14:00') or (nowtime1>='10:30:00' and nowtime1<='11:30:00') or (nowtime1>='13:35:00' and nowtime1<='15:00:00')):
+			if stockdate>=timenum:
+				tempdate=round((stockdate-timenum).seconds/60)
+			else:
+				tempdate=round((timenum-stockdate).seconds/60)
+
+			if tempdate>(period+5) and ((nowtime1>='09:33:00' and nowtime1<='10:14:00') or (nowtime1>='10:30:00' and nowtime1<='11:30:00') or (nowtime1>='13:35:00' and nowtime1<='15:00:00')):
 				print stockdate,timenum,round((stockdate-timenum).seconds/60),period
 				message=''+str(st)+stockdate.strftime('%Y-%m-%d %H:%M:%S')+" "+timenum.strftime('%Y-%m-%d %H:%M:%S')+" "+str(period)+" "+str(round((stockdate-timenum).seconds/60))
 				subject='日盘策略没有更新行情'+" "+datetime.datetime.now().strftime("%H:%M:%S")
