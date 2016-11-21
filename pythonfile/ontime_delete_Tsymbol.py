@@ -11,17 +11,14 @@ except:
 	pass
 
 
-try:
-	ms07 = MSSQL(host="192.168.0.7",user="future",pwd="K@ra0Key",db="future")
-except:
-	pass
 
 
 
-try:
-	mscloud = MSSQL(host="139.196.190.246",user="future",pwd="K@ra0Key",db="future")
-except:
-	pass
+
+# try:
+# 	mscloud = MSSQL(host="139.196.190.246",user="future",pwd="K@ra0Key",db="future")
+# except:
+# 	pass
 
 # resList = ms.find_sql("select top 2 * from st_report")
 # print resList
@@ -39,8 +36,8 @@ print 'Next task'
 try:
 	sql="delete from [Future].[dbo].[TSymbol] where DATEDIFF(day,[StockDate],GETDATE())>130"
 	ms03.insert_sql(sql)
-	ms07.insert_sql(sql)
-	mscloud.insert_sql(sql)
+	# ms07.insert_sql(sql)
+	# mscloud.insert_sql(sql)
 except Exception,e:
 	ms1 = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 	subject="清理Tsymbol定时任务出错"+datetime.datetime.now().strftime("%H:%M:%S")
