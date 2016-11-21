@@ -644,17 +644,22 @@ def main_fun():
 		print item['acname'],item['id']
 		positionsymbol=item['positionsymbol']
 		quanyisymbol=item['quanyisymbol']
-		(myquotes,totalsum)=input_groupbyquanyi(item['acname'],positionsymbol,quanyisymbol)
-		# print 'myquotes',myquotes
-		#直接设置数字 10
-		cal_quanyi(item['acname'],myquotes,totalsum,quanyisymbol)
+		try:
+			(myquotes,totalsum)=input_groupbyquanyi(item['acname'],positionsymbol,quanyisymbol)
+			# print 'myquotes',myquotes
+			#直接设置数字 10
+			cal_quanyi(item['acname'],myquotes,totalsum,quanyisymbol)
+		except:
+			pass 
+
 
 
 
 def test_is_ok():
 	sql=""
 
-main_fun_sumps()
+
 main_fun()
+main_fun_sumps()
 
 write_heart('daily_equity','nosum1')
