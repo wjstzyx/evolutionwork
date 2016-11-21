@@ -657,4 +657,3 @@ def test_is_ok():
 main_fun_sumps()
 main_fun()
 
-write_heart('daily_equity','nosum1')
