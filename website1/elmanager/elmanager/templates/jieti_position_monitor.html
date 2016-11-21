@@ -85,7 +85,7 @@ function add_new_monitor(){
 
     <div class="row"> 
      <div class="col-lg-2"></div> 
-     <div class="col-lg-4"> 
+     <div class="col-lg-6"> 
       <div class="panel panel-default"> 
        <div class="panel-heading"> 
         <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>阶梯型策略仓位监控</h3> 
@@ -101,7 +101,8 @@ function add_new_monitor(){
 
             <th align=center >实际仓位</th>
             <th align=center >理论仓位</th>
-            <th align=center >品种ID</th> 
+            <th align=center >理论总仓位</th>
+            <th align=center >理论开仓百分比</th> 
            </tr> 
           </thead>  
           <tbody id="mailtotable"> 
@@ -110,7 +111,8 @@ function add_new_monitor(){
             <td align=center ><a href="/index/monitor/jieti_distinct_position/" target="_blank" >{{item.symbol}}</a></td> 
             <td align=center {% if item.real != item.backtest %} bgColor=#0099ff {% endif %}>  {{item.real}}</td> 
             <td align=center >{{item.backtest}}</td> 
-            <td align=center >{{item.stock}}</td> 
+            <td align=center >{{item.totalposition}}</td>
+            <td align=center >{{item.myhpercent}}%</td> 
            </tr> 
             {% endfor %}
           </tbody> 
