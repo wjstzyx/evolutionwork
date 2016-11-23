@@ -16,6 +16,66 @@ from dbconn import MSSQL
 # ms1 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="future")
 
 
+def total_monitor(request):
+	data=""
+	whichtype=0
+	res1=""
+	res2=""
+	res3=""
+	res11=""
+	res21=""
+	res31=""
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	if request.POST:
+		print "request.POST",request.POST
+		sttype=request.POST.get("sttype","")
+		print sttype
+		if sttype=="day":
+			#策略上线未产生信号
+			sql="select distinct ac from (select p.AC,p.ST,p.STOCK from P_BASIC p left join Trading_logSymbol t on p.ST=t.ST where t.id is null and p.P_size<>0) a where ac not in (select itemname from [LogRecord].[dbo].[white_list] where isactive=1 and TYPE='nosignal') order by ac"
+			res1=ms.dict_sql(sql)
+			whichtype=1
+		if sttype=="night":
+			period=request.POST.get("period","")
+			sql="select distinct ac from (select p.AC,p.P_size,p.ST,p.STOCK,t.tradetime,t.TradName from P_BASIC p left join Trading_logSymbol t on p.ST=t.ST where p.P_size<>0 and DATEDIFF(day,t.tradetime,GETDATE())>%s) a  where ac not in (select itemname from [LogRecord].[dbo].[white_list] where isactive=1 and TYPE='longtimenosignal')order by ac" % (period)
+			res2=ms.dict_sql(sql)
+			whichtype=2
+		if sttype=="day_white":
+			#策略上线未产生信号_白名单
+			sql="SELECT itemname as ac FROM [LogRecord].[dbo].[white_list] where TYPE='nosignal' and isactive=1 order by itemname"
+			res11=ms.dict_sql(sql)
+			whichtype=11
+		if sttype=="night_white":
+			#策略上线未产生信号_白名单
+			sql="SELECT itemname as ac FROM [LogRecord].[dbo].[white_list] where TYPE='longtimenosignal' and isactive=1 order by itemname"
+			res21=ms.dict_sql(sql)
+			whichtype=21
+		if sttype=="type3":
+			#存在没有心跳策略的虚拟组
+			sql="select distinct ac from (select distinct a.AC from P_BASIC a left join LogRecord.dbo.ST_heart b on a.ST=b.st  where b.st is null and a.P_size <>0 ) a where ac not in (select itemname from [LogRecord].[dbo].[white_list] where isactive=1 and TYPE='noheart')  order by ac"
+			res3=ms.dict_sql(sql)
+			whichtype=3
+		if sttype=="type3_white":
+			#策略上线未产生信号_白名单
+			sql="SELECT itemname as ac FROM [LogRecord].[dbo].[white_list] where TYPE='noheart' and isactive=1 order by itemname"
+			res31=ms.dict_sql(sql)
+			whichtype=31
+	return render_to_response('lasttime_p_basic.html',{
+		'data':data,
+		'whichtype':whichtype,
+		'res1':res1,
+		'res2':res2,
+		'res11':res11,
+		'res21':res21,
+		'res3':res3,
+		'res31':res31
+	})	
+
+
+
+
+
+
 def jieti_distinct_position(request):
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 	sql="select a.p as backtest,b.P as real ,a.tradetime as backtest_time,b.tradetime as real_time,a.st,a.ticknum as backtest_bar,b.TickNum as real_bar from (SELECT p,st,tradetime,TickNum FROM [Future].[dbo].[for_backtest_Trading_logSymbol]) a left join ( SELECT p,st ,tradetime,TickNum FROM [Future].[dbo].[Trading_logSymbol]) b  on a.st=b.st  where a.p<>b.P "
