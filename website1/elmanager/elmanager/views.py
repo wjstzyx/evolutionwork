@@ -146,7 +146,7 @@ def accountdetail_ac(request):
 			if int(item['function_id'])==3:
 				isauthpass=1
 	if isauthpass==0:
-		response = HttpResponse("该功能正在完善，请返回 !! <button><a href='/index/'>返回</a></button>")
+		response = HttpResponse("该功能正在完善，请返回 !! <a href='/index/'>返回</a>")
 		return response
 
 	userid='账户为空'
@@ -413,7 +413,7 @@ def futureaccountone(request):
 			if int(item['function_id'])==3:
 				isauthpass=1
 	if isauthpass==0:
-		response = HttpResponse("该功能正在完善，请返回 !! <button><a href='/index/'>返回</a></button>")
+		response = HttpResponse("该功能正在完善，请返回 !! <a href='/index/'>返回</a>")
 		return response
 
 	userid='账户为空'
@@ -579,7 +579,7 @@ def futureaccounttotal(request):
 			if int(item['function_id'])==3:
 				isauthpass=1
 	if isauthpass==0:
-		response = HttpResponse("该功能正在完善，请返回 !! <button><a href='/index/'>返回</a></button>")
+		response = HttpResponse("该功能正在完善，请返回 !! <a href='/index/'>返回</a>")
 		return response
 
 	#更新下hongsong合并信息
@@ -990,7 +990,7 @@ def order_account_equity(request):
 			if int(item['function_id'])==2:
 				isauthpass=1
 	if isauthpass==0:
-		response = HttpResponse("该功能正在完善，请返回 !! <button><a href='/index/'>返回</a></button>")
+		response = HttpResponse("该功能正在完善，请返回 !! <a href='/index/'>返回</a>")
 		return response
 
 	sql="SELECT distinct ac from [LogRecord].[dbo].[order_p_follow] order by ac"
@@ -1277,7 +1277,7 @@ def acwantedequlitybacktest(request):
 			if int(item['function_id'])==2:
 				isauthpass=1
 	if isauthpass==0:
-		response = HttpResponse("该功能正在完善，请返回 !! <button><a href='/index/'>返回</a></button>")
+		response = HttpResponse("该功能正在完善，请返回 !! <a href='/index/'>返回</a>")
 		return response
 
 
@@ -1323,7 +1323,7 @@ def acwantedequlitystock(request):
 			if int(item['function_id'])==2:
 				isauthpass=1
 	if isauthpass==0:
-		response = HttpResponse("该功能正在完善，请返回 !! <button><a href='/index/'>返回</a></button>")
+		response = HttpResponse("该功能正在完善，请返回 !! <a href='/index/'>返回</a>")
 		return response
 
 	if request.POST:
@@ -1378,7 +1378,7 @@ def acwantedequlity(request):
 			if int(item['function_id'])==2:
 				isauthpass=1
 	if isauthpass==0:
-		response = HttpResponse("该功能正在完善，请返回 !! <button><a href='/index/'>返回</a></button>")
+		response = HttpResponse("该功能正在完善，请返回 !! <a href='/index/'>返回</a>")
 		return response
 
 
@@ -1619,7 +1619,7 @@ def acwantedequlityhistory(request):
 			if int(item['function_id'])==2:
 				isauthpass=1
 	if isauthpass==0:
-		response = HttpResponse("该功能正在完善，请返回 !! <button><a href='/index/'>返回</a></button>")
+		response = HttpResponse("该功能正在完善，请返回 !! <a href='/index/'>返回</a>")
 		return response
 
 
@@ -2013,7 +2013,7 @@ def map_acname_position(request):
 			if int(item['function_id'])==2:
 				isauthpass=1
 	if isauthpass==0:
-		response = HttpResponse("该功能正在完善，请返回 !! <button><a href='/index/'>返回</a></button>")
+		response = HttpResponse("该功能正在完善，请返回 !! <a href='/index/'>返回</a>")
 		return response
 
 
@@ -2127,7 +2127,7 @@ def stockmapequty(request):
 			if int(item['function_id'])==2:
 				isauthpass=1
 	if isauthpass==0:
-		response = HttpResponse("该功能正在完善，请返回 !! <button><a href='/index/'>返回</a></button>")
+		response = HttpResponse("该功能正在完善，请返回 !! <a href='/index/'>返回</a>")
 		return response
 
 
@@ -2270,7 +2270,7 @@ def acwantedequlitynew_oneacname(request):
 			if int(item['function_id'])==2:
 				isauthpass=1
 	if isauthpass==0:
-		response = HttpResponse("该功能正在完善，请返回 !! <button><a href='/index/'>返回</a></button>")
+		response = HttpResponse("该功能正在完善，请返回 !! <a href='/index/'>返回</a>")
 		return response
 
 
@@ -2336,7 +2336,7 @@ def acwantedequlitynew(request):
 			if int(item['function_id'])==2:
 				isauthpass=1
 	if isauthpass==0:
-		response = HttpResponse("该功能正在完善，请返回 !! <button><a href='/index/'>返回</a></button>")
+		response = HttpResponse("该功能正在完善，请返回 !! <a href='/index/'>返回</a>")
 		return response
 
 
@@ -2377,7 +2377,7 @@ def acwantedequlitynew1(request):
 			if int(item['function_id'])==2:
 				isauthpass=1
 	if isauthpass==0:
-		response = HttpResponse("该功能正在完善，请返回 !! <button><a href='/index/'>返回</a></button>")
+		response = HttpResponse("该功能正在完善，请返回 !! <a href='/index/'>返回</a>")
 		return response
 
 
@@ -2874,7 +2874,7 @@ def configmonitorlist(request):
 			if int(item['function_id'])==4:
 				isauthpass=1
 	if isauthpass==0:
-		response = HttpResponse("该功能正在完善，请返回 !! <button><a href='/index/'>返回</a></button>")
+		response = HttpResponse("该功能正在完善，请返回 !! <a href='/index/'>返回</a>")
 		return response
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 	sql="SELECT [id],[type],[item],[ismonitor],[starttime],[endtime] FROM [LogRecord].[dbo].[monitorconfig]"
@@ -2898,7 +2898,7 @@ def configmailtolist(request):
 			if int(item['function_id'])==4:
 				isauthpass=1
 	if isauthpass==0:
-		response = HttpResponse("该功能正在完善，请返回 !! <button><a href='/index/'>返回</a></button>")
+		response = HttpResponse("该功能正在完善，请返回 !! <a href='/index/'>返回</a>")
 		return response
 
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
