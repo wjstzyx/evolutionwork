@@ -108,9 +108,9 @@ function add_new_monitor(){
     <!-- Page Heading --> 
       <div class="row"> 
        <div class="col-lg-12"> 
-        <h1 class="page-header"> 策略时间异常检测 </h1> 
+        <h1 class="page-header"> 报警具体信息查询 </h1> 
         <ol class="breadcrumb"> 
-         <li class="active"> <i class="fa fa-dashboard"></i> 监测虚拟组中策略不产生信号状况---若虚拟组中该策略不需要，请及时联系仇蓓蕾删除</li> 
+         <li class="active"> <i class="fa fa-dashboard"></i> 详细报警信息---报警具体信息查询</li> 
         </ol> 
        </div> 
       </div>
@@ -118,82 +118,67 @@ function add_new_monitor(){
       <form class="form" method='POST'>
         <div class="form-group">
           <div class="row">
-            <div class="col-lg-2">
-            <label class="control-label" for="inputSuccess4">1）  策略上线未产生信号</label>
-            </div>
-            <div class="col-lg-1">
-            </div>
-            <div class="col-lg-2">
-            <button class="btn" name="sttype" value="day">查询</button>
-            </div>
-            <div class="col-lg-2">
-            <button class="btn" name="sttype" value="day_white">白名单查询</button>
+            <div class="col-lg-6">
+            <table>
+              <tr>
+                <td width="250px"><button class="btn" name="sttype" value="day_quotes_lack">日盘行情数据缺失报警</button></td>
+                <td width="250px"><button class="btn" name="sttype" value="night_quotes_lack">夜盘行情数据缺失报警</button></td>
+
+              </tr>
+              <tr>
+                <td width="200px"><button class="btn" name="sttype" value="day_quotes_lasttime">日盘行情采集最新时间</button></td>
+                <td width="200px"><button class="btn" name="sttype" value="night_quotes_lasttime">夜盘行情采集最新时间</button></td>
+              </tr>
+<!--               <tr>
+                <td width="200px"><button class="btn" name="sttype" value="jieti_position_monitor">阶梯型策略仓位</button></td>
+                <td width="200px"><button class="btn" name="sttype" value="jieti_position_monitor"></button></td>
+              </tr> -->
+              <tr>
+                <td width="200px"><button class="btn" name="sttype" value="time_adjust">时间校准信息</button></td>
+                <td width="200px"><button class="btn" name="sttype" value="time_adjust"></button></td>
+              </tr>
+            </table>
+            
             </div>
 
-          </div>
-          <br>
-          <div class="row">
-            <div class="col-lg-2">
-            <label class="control-label" for="inputSuccess4">2）  策略最后更新于N天前</label>
-            </div>
-            <div class="col-lg-1">
-            <select class="form-control" name="period">
-              <option value=10>10天</option>
-              <option selected="selected" value=30>30天</option>
-              <option value=50>50天</option>
-              <option value=80>80天</option>
-              <option value=180>180天</option>
-            </select>
-            </div>
-            <div class="col-lg-2">
-            <button class="btn" name="sttype" value="night">查询</button>
-            </div>
-            <div class="col-lg-2">
-            <button class="btn" name="sttype" value="night_white">白名单查询</button>
-            </div>
-          </div>
-          <br>
-          <div class="row">
-            <div class="col-lg-2">
-            <label class="control-label" for="inputSuccess4">3）  存在没有心跳策略的虚拟组</label>
-            </div>
-            <div class="col-lg-1">
-            </div>
-            <div class="col-lg-2">
-            <button class="btn" name="sttype" value="type3">查询</button>
-            </div>
-            <div class="col-lg-2">
-            <button class="btn" name="sttype" value="type3_white">白名单查询</button>
-            </div>
 
           </div>
+
         </div>
       </form>
   </div>
 
 {% if whichtype == 1 %}
     <div class="row"> 
-     <div class="col-lg-4"> 
+     <div class="col-lg-8"> 
       <div class="panel panel-default"> 
        <div class="panel-heading"> 
-        <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>策略上线未产生信号</h3> 
+        <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>日盘行情数据缺失报警(最多显示200个)</h3> 
        </div>
        <div class="panel-body"> 
         <div class="table-responsive"> 
          <table class="table table-bordered table-hover table-striped" id="table1"> 
           <thead> 
            <tr> 
-            <th align=center width=30px>策略名称</th>
-            <th align=center width=30px>操作</th> 
+            <th align=center>策略号</th>
+            <th align=center>最新心跳日期</th>
+            <th align=center >最新BAR</th> 
+            <th align=center >周期</th> 
+            <th align=center >所在机器</th> 
+            <th align=center >相差分钟</th>
+            <th align=center >策略名字</th> 
            </tr> 
           </thead>  
           <tbody id="mailtotable"> 
             {% for item in res1 %}
            <tr> 
-            <td ><a href='/index/monitor/acname_p_basic/?acname={{item.ac}}' target="_blank">{{item.ac}}</a></td> 
-            <td>
-              <button type="button" onclick="add_whitelist(this,'{{item.ac}}','nosignal','table1')">加入白名单</button>
-            </td>
+              <td>{{item.st}}</td>
+              <td>{{item.stockdate}}</td>
+              <td>{{item.timenum}}</td>
+              <td>{{item.period}}</td>
+              <td>{{item.address}}</td>
+              <td>{{item.mydatediff}}</td>
+              <td>{{item.TradName}}</td>
            </tr> 
             {% endfor %}
           </tbody> 
@@ -207,94 +192,29 @@ function add_new_monitor(){
 {% endif %}
 {% if whichtype == 2 %}
     <div class="row"> 
-     <div class="col-lg-4"> 
+     <div class="col-lg-6"> 
       <div class="panel panel-default"> 
        <div class="panel-heading"> 
-        <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>策略最后更新于N天前</h3> 
+        <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>行情采集最新时间</h3> 
        </div>
        <div class="panel-body"> 
         <div class="table-responsive"> 
          <table class="table table-bordered table-hover table-striped" id='table2'> 
           <thead> 
            <tr> 
-            <th align=center width=30px>策略名称</th>
-            <th align=center width=30px>操作</th> 
+            <th align=center width=30px>品种</th>
+            <th align=center width=30px>延迟时间</th> 
+            <th align=center width=30px>最新bar时间</th> 
            </tr> 
           </thead>  
           <tbody > 
-            {% for item in res2 %}
-           <tr> 
-            <td ><a href='/index/monitor/acname_p_basic/?acname={{item.ac}}' target="_blank">{{item.ac}}</a></td> 
-            <td>
-              <button type="button" onclick="add_whitelist(this,'{{item.ac}}','longtimenosignal','table2')">加入白名单</button>
-            </td>
-           </tr> 
-            {% endfor %}
-          </tbody> 
-         </table>          
-        </div> 
-       </div> 
-      </div> 
-     </div> 
-    </div> 
-{% endif %}
-{% if whichtype == 11 %}
-    <div class="row"> 
-     <div class="col-lg-4"> 
-      <div class="panel panel-default"> 
-       <div class="panel-heading"> 
-        <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>策略上线未产生信号白名单</h3> 
-       </div>
-       <div class="panel-body"> 
-        <div class="table-responsive"> 
-         <table class="table table-bordered table-hover table-striped" id="table11"> 
-          <thead> 
-           <tr> 
-            <th align=center width=30px>策略名称</th>
-            <th align=center width=30px>操作</th> 
-           </tr> 
-          </thead>  
-          <tbody id="mailtotable"> 
-            {% for item in res11 %}
-           <tr> 
-            <td ><a href='/index/monitor/acname_p_basic/?acname={{item.ac}}' target="_blank">{{item.ac}}</a></td> 
-            <td>
-              <button type="button" onclick="remove_whitelist(this,'{{item.ac}}','nosignal','table11')">移除白名单</button>
-            </td>
-           </tr> 
-            {% endfor %}
-          </tbody> 
-         </table>          
-        </div> 
+            {% for item in res1 %}
+           <tr>
+              <td>{{item.Symbol}}</td>
+              <td>{{item.mydatediff}}</td>
+              <td>{{item.stockdate}}</td>       
+              
 
-       </div> 
-      </div> 
-     </div> 
-    </div> 
-{% endif %}
-{% if whichtype == 21 %}
-    <div class="row"> 
-     <div class="col-lg-4"> 
-      <div class="panel panel-default"> 
-       <div class="panel-heading"> 
-        <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>策略最后更新于N天前白名单</h3> 
-       </div>
-       <div class="panel-body"> 
-        <div class="table-responsive"> 
-         <table class="table table-bordered table-hover table-striped" id='table22'> 
-          <thead> 
-           <tr> 
-            <th align=center width=30px>策略名称</th>
-            <th align=center width=30px>操作</th> 
-           </tr> 
-          </thead>  
-          <tbody > 
-            {% for item in res21 %}
-           <tr> 
-            <td ><a href='/index/monitor/acname_p_basic/?acname={{item.ac}}' target="_blank">{{item.ac}}</a></td> 
-            <td>
-              <button type="button" onclick="remove_whitelist(this,'{{item.ac}}','longtimenosignal','table22')">移除白名单</button>
-            </td>
            </tr> 
             {% endfor %}
           </tbody> 
@@ -305,75 +225,41 @@ function add_new_monitor(){
      </div> 
     </div> 
 {% endif %}
-
 {% if whichtype == 3 %}
     <div class="row"> 
-     <div class="col-lg-4"> 
+     <div class="col-lg-5"> 
       <div class="panel panel-default"> 
        <div class="panel-heading"> 
-        <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>存在没有心跳策略的虚拟组</h3> 
+        <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>时间校准信息--（与192.168.0.5机器时间比较，请第一步先校准.5机器）</h3> 
        </div>
        <div class="panel-body"> 
         <div class="table-responsive"> 
-         <table class="table table-bordered table-hover table-striped" id="table3"> 
+         <table class="table table-bordered table-hover table-striped" id='table2'> 
           <thead> 
            <tr> 
-            <th align=center width=30px>策略名称</th>
-            <th align=center width=30px>操作</th> 
+            <th align=center width=30px>机器名</th>
+            <th align=center width=90px>相差时间(s)</th> 
            </tr> 
           </thead>  
-          <tbody id="mailtotable"> 
-            {% for item in res3 %}
-           <tr> 
-            <td ><a href='/index/monitor/acname_p_basic/?acname={{item.ac}}' target="_blank">{{item.ac}}</a></td> 
-            <td>
-              <button type="button" onclick="add_whitelist(this,'{{item.ac}}','noheart','table3')">加入白名单</button>
-            </td>
+          <tbody > 
+            {% for item in res1 %}
+           <tr>
+              <td>{{item.address}}</td>
+              <td>{{item.mydatediff}}</td>
+    
+              
+
            </tr> 
             {% endfor %}
           </tbody> 
          </table>          
         </div> 
-
        </div> 
       </div> 
      </div> 
     </div> 
 {% endif %}
-{% if whichtype == 31 %}
-    <div class="row"> 
-     <div class="col-lg-4"> 
-      <div class="panel panel-default"> 
-       <div class="panel-heading"> 
-        <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>策略上线未产生信号白名单</h3> 
-       </div>
-       <div class="panel-body"> 
-        <div class="table-responsive"> 
-         <table class="table table-bordered table-hover table-striped" id="table31"> 
-          <thead> 
-           <tr> 
-            <th align=center width=30px>策略名称</th>
-            <th align=center width=30px>操作</th> 
-           </tr> 
-          </thead>  
-          <tbody id="mailtotable"> 
-            {% for item in res31 %}
-           <tr> 
-            <td ><a href='/index/monitor/acname_p_basic/?acname={{item.ac}}' target="_blank">{{item.ac}}</a></td> 
-            <td>
-              <button type="button" onclick="remove_whitelist(this,'{{item.ac}}','noheart','table31')">移除白名单</button>
-            </td>
-           </tr> 
-            {% endfor %}
-          </tbody> 
-         </table>          
-        </div> 
 
-       </div> 
-      </div> 
-     </div> 
-    </div> 
-{% endif %}
 
 
    </div> 

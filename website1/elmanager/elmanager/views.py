@@ -27,40 +27,71 @@ def total_monitor(request):
 	res31=""
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 	if request.POST:
-		print "request.POST",request.POST
 		sttype=request.POST.get("sttype","")
 		print sttype
-		if sttype=="day":
-			#策略上线未产生信号
-			sql="select distinct ac from (select p.AC,p.ST,p.STOCK from P_BASIC p left join Trading_logSymbol t on p.ST=t.ST where t.id is null and p.P_size<>0) a where ac not in (select itemname from [LogRecord].[dbo].[white_list] where isactive=1 and TYPE='nosignal') order by ac"
+		if sttype=="day_quotes_lack":
+			#日盘行情数据缺失报警
+			sql=" select top(200) a.*,t.TradName from (select st,stockdate,timenum,period, [address] ,DATEDIFF(MINUTE, CONVERT(datetime,case when LEN(CAST(timenum as nvarchar))=6 then left(CAST(timenum as nvarchar),2)+':'+SUBSTRING(CAST(timenum as nvarchar),3,2)+':'+RIGHT(CAST(timenum as nvarchar),2) when LEN(CAST(timenum as nvarchar))=5 then left('0'+CAST(timenum as nvarchar),2)+':'+SUBSTRING('0'+CAST(timenum as nvarchar),3,2)+':'+RIGHT('0'+CAST(timenum as nvarchar),2) end,114),convert(datetime,CONVERT(nvarchar,stockdate,114),114)) as mydatediff  from [LogRecord].[dbo].[ST_heart] where type in (1,12) )a  left join Trading_logSymbol t on  a.st=t.ST  where ABS(mydatediff)>a.period+17  order by ABS(mydatediff) desc"
 			res1=ms.dict_sql(sql)
 			whichtype=1
-		if sttype=="night":
-			period=request.POST.get("period","")
-			sql="select distinct ac from (select p.AC,p.P_size,p.ST,p.STOCK,t.tradetime,t.TradName from P_BASIC p left join Trading_logSymbol t on p.ST=t.ST where p.P_size<>0 and DATEDIFF(day,t.tradetime,GETDATE())>%s) a  where ac not in (select itemname from [LogRecord].[dbo].[white_list] where isactive=1 and TYPE='longtimenosignal')order by ac" % (period)
-			res2=ms.dict_sql(sql)
+
+		if sttype=="night_quotes_lack":
+			#夜盘行情数据缺失报警
+			sql=" select top(200) a.*,t.TradName from (select st,stockdate,timenum,period, [address] ,DATEDIFF(MINUTE, CONVERT(datetime,case when LEN(CAST(timenum as nvarchar))=6 then left(CAST(timenum as nvarchar),2)+':'+SUBSTRING(CAST(timenum as nvarchar),3,2)+':'+RIGHT(CAST(timenum as nvarchar),2) when LEN(CAST(timenum as nvarchar))=5 then left('0'+CAST(timenum as nvarchar),2)+':'+SUBSTRING('0'+CAST(timenum as nvarchar),3,2)+':'+RIGHT('0'+CAST(timenum as nvarchar),2) end,114),convert(datetime,CONVERT(nvarchar,stockdate,114),114)) as mydatediff  from [LogRecord].[dbo].[ST_heart] where type in (2,12) )a  left join Trading_logSymbol t on  a.st=t.ST  where ABS(mydatediff)>a.period+17  order by ABS(mydatediff) desc"
+			res1=ms.dict_sql(sql)
+			whichtype=1
+
+		if sttype=="day_quotes_lasttime":
+			#日盘行情采集最新时间
+			sql="  select DATEDIFF(MINUTE,stockdate,GETDATE()) as mydatediff ,stockdate, Symbol from (  select MAX(stockdate) as stockdate,Symbol,GETDATE() as nowtime from TSymbol group by Symbol) a  where DATEDIFF(MINUTE,stockdate,GETDATE())>2 order by DATEDIFF(MINUTE,stockdate,GETDATE()) desc"
+			res=ms.dict_sql(sql)
+			sql="SELECT [symbol]  FROM [LogRecord].[dbo].[catch_quotes] where isday in (1,12) and symbol not in ('RMZL')"
+			tempres=ms.dict_sql(sql)
+			selectsymbol=[]
+			for item in tempres:
+				selectsymbol.append(item['symbol'])
+			selectres=[]
+			for item in res:
+				if item['Symbol'] in selectsymbol:
+					selectres.append(item)
+			res1=selectres
+
+
+			# sql="  select a.stockdate,GETDATE() as nowtime,DATEDIFF(MINUTE,a.stockdate,GETDATE()) as mydatediff ,a.Symbol from (  select MAX(stockdate) as stockdate,Symbol from TSymbol group by Symbol) a   inner join [LogRecord].[dbo].[catch_quotes] b   on a.Symbol=b.symbol    where b.isday in (1,12)   and a.symbol not in ('RMZL') and DATEDIFF(MINUTE,a.stockdate,GETDATE())>2  order by stockdate "
+			# res1=ms.dict_sql(sql)
 			whichtype=2
-		if sttype=="day_white":
-			#策略上线未产生信号_白名单
-			sql="SELECT itemname as ac FROM [LogRecord].[dbo].[white_list] where TYPE='nosignal' and isactive=1 order by itemname"
-			res11=ms.dict_sql(sql)
-			whichtype=11
-		if sttype=="night_white":
-			#策略上线未产生信号_白名单
-			sql="SELECT itemname as ac FROM [LogRecord].[dbo].[white_list] where TYPE='longtimenosignal' and isactive=1 order by itemname"
-			res21=ms.dict_sql(sql)
-			whichtype=21
-		if sttype=="type3":
-			#存在没有心跳策略的虚拟组
-			sql="select distinct ac from (select distinct a.AC from P_BASIC a left join LogRecord.dbo.ST_heart b on a.ST=b.st  where b.st is null and a.P_size <>0 ) a where ac not in (select itemname from [LogRecord].[dbo].[white_list] where isactive=1 and TYPE='noheart')  order by ac"
-			res3=ms.dict_sql(sql)
+
+		if sttype=="night_quotes_lasttime":
+			#日盘行情采集最新时间
+
+			sql="  select DATEDIFF(MINUTE,stockdate,GETDATE()) as mydatediff ,stockdate, Symbol from (  select MAX(stockdate) as stockdate,Symbol,GETDATE() as nowtime from TSymbol group by Symbol) a  where DATEDIFF(MINUTE,stockdate,GETDATE())>2  order by DATEDIFF(MINUTE,stockdate,GETDATE()) desc"
+			res=ms.dict_sql(sql)
+			sql="SELECT [symbol]  FROM [LogRecord].[dbo].[catch_quotes] where isday =0 and symbol not in ('RMZL')"
+			tempres=ms.dict_sql(sql)
+			selectsymbol=[]
+			for item in tempres:
+				selectsymbol.append(item['symbol'])
+			selectres=[]
+			for item in res:
+				if item['Symbol'] in selectsymbol:
+					selectres.append(item)
+			res1=selectres
+
+			# sql="  select a.stockdate,GETDATE() as nowtime,DATEDIFF(MINUTE,a.stockdate,GETDATE()) as mydatediff ,a.Symbol from (  select MAX(stockdate) as stockdate,Symbol from TSymbol group by Symbol) a   inner join [LogRecord].[dbo].[catch_quotes] b   on a.Symbol=b.symbol    where b.isday=0   and a.symbol not in ('RMZL') and DATEDIFF(MINUTE,a.stockdate,GETDATE())>2  order by stockdate "
+			# res1=ms.dict_sql(sql)
+			whichtype=2
+
+
+		if sttype=="time_adjust":
+			#夜盘行情数据缺失报警
+			sql="SELECT distinct address,abs(DATEDIFF(SECOND,[databasetime],[stockdate])) as mydatediff FROM [LogRecord].[dbo].[ST_heart]   where ABS(DATEDIFF(SECOND,[databasetime],[stockdate]))>=3 order by ABS(DATEDIFF(SECOND,[databasetime],[stockdate])) desc"
+			res1=ms.dict_sql(sql)
 			whichtype=3
-		if sttype=="type3_white":
-			#策略上线未产生信号_白名单
-			sql="SELECT itemname as ac FROM [LogRecord].[dbo].[white_list] where TYPE='noheart' and isactive=1 order by itemname"
-			res31=ms.dict_sql(sql)
-			whichtype=31
-	return render_to_response('lasttime_p_basic.html',{
+
+
+
+
+	return render_to_response('total_monitor.html',{
 		'data':data,
 		'whichtype':whichtype,
 		'res1':res1,
