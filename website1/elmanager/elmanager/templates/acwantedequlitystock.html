@@ -98,7 +98,7 @@ function showaccompare(acname){
 
           $('#{{item.acname}}_{{item.symbol}}').highcharts({
               title: {
-                  text: '{{item.acname}}--{{item.symbol}}',
+                  text: '{{item.acname}}--{{item.symbol}}--近200日平均日交易次数 {{item.avgtime}}',
                   x: -20 //center
               },
               xAxis: {
@@ -123,10 +123,7 @@ function showaccompare(acname){
                   verticalAlign: 'middle',
                   borderWidth: 0
               },
-              series: [{
-                  name: '实际',
-                  data: {{item.realquanyi}}
-              }, {
+              series: [ {
                   name: '理论',
                   data: {{item.lilunquanyi}}             
               
@@ -141,7 +138,7 @@ function showaccompare(acname){
       $(function () {
           $('#{{item.acname}}_{{item.symbol}}').highcharts({
               title: {
-                  text: '{{item.acname}}--{{item.symbol}}',
+                  text: '{{item.acname}}--{{item.symbol}}--近200日平均日交易次数 {{item.avgtime}}',
                   x: -20 //center
               },
               xAxis: {
@@ -166,10 +163,7 @@ function showaccompare(acname){
                   verticalAlign: 'middle',
                   borderWidth: 0
               },
-              series: [{
-                  name: '实际',
-                  data: {{item.realquanyi}}
-              }, {
+              series: [ {
                   name: '理论',
                   data: {{item.lilunquanyi}}             
               
