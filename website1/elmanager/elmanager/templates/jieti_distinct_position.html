@@ -103,7 +103,8 @@ function add_new_monitor(){
             <th align=center >理论信号时间</th>
             <th align=center >实际信号时间</th> 
             <th align=center >理论信号bar</th> 
-            <th align=center >实际信号bar</th> 
+            <th align=center >实际信号bar</th>
+            <th align=center >策略所在机器</th> 
            </tr> 
           </thead>  
           <tbody id="mailtotable"> 
@@ -116,6 +117,7 @@ function add_new_monitor(){
             <td align=center >{{item.real_time}}</td> 
             <td align=center >{{item.backtest_bar}}</td> 
             <td align=center >{{item.real_bar}}</td>
+            <td align=center >{{item.address}}</td>
            </tr> 
             {% endfor %}
           </tbody> 

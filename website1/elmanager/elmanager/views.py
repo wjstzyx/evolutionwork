@@ -109,7 +109,8 @@ def total_monitor(request):
 
 def jieti_distinct_position(request):
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
-	sql="select a.p as backtest,b.P as real ,a.tradetime as backtest_time,b.tradetime as real_time,a.st,a.ticknum as backtest_bar,b.TickNum as real_bar from (SELECT p,st,tradetime,TickNum FROM [Future].[dbo].[for_backtest_Trading_logSymbol]) a left join ( SELECT p,st ,tradetime,TickNum FROM [Future].[dbo].[Trading_logSymbol]) b  on a.st=b.st  where a.p<>b.P "
+	#sql="select a.p as backtest,b.P as real ,a.tradetime as backtest_time,b.tradetime as real_time,a.st,a.ticknum as backtest_bar,b.TickNum as real_bar from (SELECT p,st,tradetime,TickNum FROM [Future].[dbo].[for_backtest_Trading_logSymbol]) a left join ( SELECT p,st ,tradetime,TickNum FROM [Future].[dbo].[Trading_logSymbol]) b  on a.st=b.st  where a.p<>b.P "
+	sql="select aaa.*,bbb.address from ( select a.p as backtest,b.P as real ,a.tradetime as backtest_time,b.tradetime as real_time,a.st,a.ticknum as backtest_bar,b.TickNum as real_bar from (SELECT p,st,tradetime,TickNum FROM [Future].[dbo].[for_backtest_Trading_logSymbol]) a left join ( SELECT p,st ,tradetime,TickNum FROM [Future].[dbo].[Trading_logSymbol]) b  on a.st=b.st  where a.p<>b.P) aaa inner join LogRecord.dbo.ST_heart bbb on aaa.ST=bbb.st"
 	res=ms.dict_sql(sql)
 	return render_to_response('jieti_distinct_position.html',{
 		'data':1,

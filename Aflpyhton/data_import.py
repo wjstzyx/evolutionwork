@@ -92,6 +92,8 @@ def main_run_afl():
 	#todo:解析symbl 直接赋值给Ticker
 	aflfiledir=ABautoroot+"\\ABautofile\\aflfile"
 	aflfiles=os.listdir(aflfiledir)
+	cmd='taskkill /F /IM Broker.exe'
+	os.system(cmd)
 	ab = Dispatch("Broker.Application")
 
 	totalconfig=[]
@@ -322,6 +324,16 @@ def add_prename(symbol='',tieminteval=''):
 		print filemame,'文件夹'
 
 # add_prename()
+
+
+#显示进度
+def show_progress(nownum,totalnum):
+	totala=""+str(totalnum)
+	nownuma=""+str(nownum)
+	nownum=round((nownum/totalnum)*50)
+	totalnum=50
+	for i in range(totalnum):
+		totala=totala+"#"
 
 
 
