@@ -13,6 +13,7 @@ ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 
 def cal_distinct_position_lilun():
 	#1 put lilun equity into account_position_lilun
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 	sql="truncate table [LogRecord].[dbo].account_position_lilun"
 	ms.insert_sql(sql)
 	sql="select distinct userid from [LogRecord].[dbo].[account_position] order by userid"
@@ -25,6 +26,19 @@ def cal_distinct_position_lilun():
 	totalsql=totalsql.strip(" union all ")
 	totalsql="insert into [LogRecord].[dbo].account_position_lilun([userID],[stockID],[position],[inserttime]) "+ totalsql
 	ms.insert_sql(totalsql)
+	#2 shangpin yingshe
+	ms1 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="Future")
+	sql="SELECT a.account as userID,a.stock as stockID,(handperstock*position) as position,GETDATE() as inserttime  FROM [future].[dbo].[SP_ACCOUNT_STRATEGY] a  left join [future].[dbo].[SP_STRATEGY] b  on a.stock=b.stock and a.strategyname=b.name where  position<>0"
+	tempres=ms1.dict_sql(sql)
+	totalsql=""
+	tempv=""
+	for item in tempres:
+		tempv=",('%s','%s','%s','%s')" % (item['userID'],item['stockID'],item['position'],item['inserttime'].strftime("%Y-%m-%d %H:%M:%S"))
+		totalsql=totalsql+tempv
+	totalsql=totalsql.strip(",")
+	totalsql="insert into [LogRecord].[dbo].account_position_lilun([userID],[stockID],[position],[inserttime]) values%s" % (totalsql)
+	ms.insert_sql(totalsql)
+
 
 cal_distinct_position_lilun()
 
@@ -49,5 +63,5 @@ def show_distinct():
 	return real_miss_set,lilun_miss_set,disticnt_set
 
 
-real_miss_set,lilun_miss_set,disticnt_set=show_distinct()
-print disticnt_set
+# real_miss_set,lilun_miss_set,disticnt_set=show_distinct()
+# print disticnt_set

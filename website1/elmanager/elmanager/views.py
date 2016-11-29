@@ -3335,7 +3335,7 @@ def get_dailyquanyi(account,fromDdy):
 	totalquanyi=[]
 	for key in ac_ratio:
 		ratio=ac_ratio[key]
-		if ratio>0:
+		if ratio<>0:
 			sql="SELECT [quanyisymbol]  FROM [LogRecord].[dbo].[quanyicaculatelist] where acname='%s'" % (key)
 			res=ms.dict_sql(sql)
 			if not res:
@@ -3410,7 +3410,7 @@ def order_get_dailyquanyi(account,fromDdy):
 		quanyisymbol=ms.dict_sql(sql)[0]['Symbol']
 
 		ratio=ac_ratio[key]
-		if ratio>0:
+		if ratio<>0:
 			sql="SELECT [quanyisymbol]  FROM [LogRecord].[dbo].[quanyicaculatelist] where acname='%s' and quanyisymbol='%s'" % (realac,quanyisymbol)
 			res=ms.dict_sql(sql)
 			if not res:
@@ -3468,7 +3468,7 @@ def order_get_dailyquanyi_backup(account,fromDdy):
 		
 	for key in ac_ratio:
 		ratio=ac_ratio[key]
-		if ratio>0:
+		if ratio<>0:
 			sql="SELECT [quanyisymbol]  FROM [LogRecord].[dbo].[quanyicaculatelist] where acname='%s'" % (key)
 			res=ms.dict_sql(sql)
 			if not res:
@@ -3548,7 +3548,7 @@ def order_get_dailyquanyi_forLilun(account,fromDdy):
 
 
 		ratio=ac_ratio[key]
-		if ratio>0:
+		if ratio<>0:
 			sql="SELECT [quanyisymbol]  FROM [LogRecord].[dbo].[quanyicaculatelist] where acname='%s' and quanyisymbol='%s'" % (realac,quanyisymbol)
 			res=ms.dict_sql(sql)
 			if not res:
@@ -3713,11 +3713,29 @@ def cal_distinct_position_lilun():
 	totalsql="insert into [LogRecord].[dbo].account_position_lilun([userID],[stockID],[position],[inserttime]) "+ totalsql
 	ms.insert_sql(totalsql)
 
+	#2 shangpin yingshe
+	ms1 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="Future")
+	sql="SELECT a.account as userID,a.stock as stockID,(handperstock*position) as position,GETDATE() as inserttime  FROM [future].[dbo].[SP_ACCOUNT_STRATEGY] a  left join [future].[dbo].[SP_STRATEGY] b  on a.stock=b.stock and a.strategyname=b.name where  position<>0"
+	tempres=ms1.dict_sql(sql)
+	totalsql=""
+	tempv=""
+	for item in tempres:
+		tempv=",('%s','%s','%s','%s')" % (item['userID'],item['stockID'],item['position'],item['inserttime'].strftime("%Y-%m-%d %H:%M:%S"))
+		totalsql=totalsql+tempv
+	totalsql=totalsql.strip(",")
+	totalsql="insert into [LogRecord].[dbo].account_position_lilun([userID],[stockID],[position],[inserttime]) values%s" % (totalsql)
+	ms.insert_sql(totalsql)
+
+
+
+
 #得到账户，数据库仓位差异 三个list
 def show_distinct():
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 	nowday=datetime.datetime.now().strftime('%Y%m%d')
-	sql=" select aaa.userID as realuserID,aaa.stockID as realstockID,aaa.position as realposition,aaa.inserttime as realinserttime,  bbb.* from (        select * from  (   select a.userID,a.stockID,(a.longhave-a.shorthave) as position,inserttime from [LogRecord].[dbo].[account_position] a inner join (  select MAX(time) as time  ,userid   FROM [LogRecord].[dbo].[account_position]  where date='20161129' group by userid) b  on a.time=b.time and a.userID=b.userID )ka ) aaa full outer join (    select * from [LogRecord].[dbo].[account_position_lilun]  ) bbb     on aaa.userID=bbb.userID and aaa.stockID=bbb.stockID     where aaa.position<>bbb.position or (bbb.userID is null and aaa.position<>0) or (aaa.userID is null and bbb.position<>0 )    "
+	#sql=" select aaa.userID as realuserID,aaa.stockID as realstockID,aaa.position as realposition,aaa.inserttime as realinserttime,  bbb.* from (        select * from  (   select a.userID,a.stockID,(a.longhave-a.shorthave) as position,inserttime from [LogRecord].[dbo].[account_position] a inner join (  select MAX(time) as time  ,userid   FROM [LogRecord].[dbo].[account_position]  where date='20161129' group by userid) b  on a.time=b.time and a.userID=b.userID )ka ) aaa full outer join (    select * from [LogRecord].[dbo].[account_position_lilun]  ) bbb     on aaa.userID=bbb.userID and aaa.stockID=bbb.stockID     where aaa.position<>bbb.position or (bbb.userID is null and aaa.position<>0) or (aaa.userID is null and bbb.position<>0 )    "
+	sql="select aaa.userID as realuserID,aaa.stockID as realstockID,aaa.position as realposition,aaa.inserttime as realinserttime,  bbb.* from (        select * from  (   select a.userID,a.stockID,(a.longhave-a.shorthave) as position,inserttime from [LogRecord].[dbo].[account_position] a inner join (  select MAX(time) as time  ,userid   FROM [LogRecord].[dbo].[account_position]  where date='20161129' group by userid) b  on a.time=b.time and a.userID=b.userID )ka ) aaa full outer join (     select userID,stockID,sum(position)as position,MAX(inserttime)as inserttime  from [LogRecord].[dbo].[account_position_lilun]  group by userID,stockID ) bbb       on aaa.userID=bbb.userID and aaa.stockID=bbb.stockID  where aaa.position<>bbb.position or (bbb.userID is null and aaa.position<>0) or (aaa.userID is null and bbb.position<>0 ) and (bbb.userID in (select distinct userID from [LogRecord].[dbo].account_position))"
+
 	res=ms.dict_sql(sql)
 	disticnt_set=[]
 	lilun_miss_set=[]
@@ -3733,3 +3751,6 @@ def show_distinct():
 	# print lilun_miss_set
 	# print disticnt_set
 	return real_miss_set,lilun_miss_set,disticnt_set
+
+
+ 
