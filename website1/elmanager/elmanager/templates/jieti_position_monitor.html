@@ -97,8 +97,8 @@ function add_new_monitor(){
          <table class="table table-bordered table-hover table-striped"> 
           <thead> 
            <tr> 
-            <th align=center >品种</th> 
-
+            <th align=center >品种</th>
+            <th align=center >品种编号</th> 
             <th align=center >实际仓位</th>
             <th align=center >理论仓位</th>
             <th align=center >理论总仓位</th>
@@ -109,6 +109,7 @@ function add_new_monitor(){
           {% for item in res %}
            <tr> 
             <td align=center ><a href="/index/monitor/jieti_distinct_position/" target="_blank" >{{item.symbol}}</a></td> 
+            <td align=center >{{item.stock}}</td> 
             <td align=center {% if item.real != item.backtest %} bgColor=#0099ff {% endif %}>  {{item.real}}</td> 
             <td align=center >{{item.backtest}}</td> 
             <td align=center >{{item.totalposition}}</td>

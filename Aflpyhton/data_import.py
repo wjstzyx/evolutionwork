@@ -11,12 +11,15 @@ ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 
 import os
 from datetime import date
+import datetime
 import time
 from win32com.client import Dispatch
 import shutil
 import chardet
 import re
-
+import pandas as pd
+import numpy as np
+import math
 
 
 ABautoroot=r'E:'
@@ -78,6 +81,8 @@ def run_aflfile(ab,database,Ticker,aflfle,settingfile):
 
 #将数据文件夹中的数据全部导入
 def main_import_data():
+	cmd='taskkill /F /IM Broker.exe'
+	os.system(cmd)
 	datafir=ABautoroot+"\\ABautofile\\datafile"
 	datafiles = os.listdir(datafir)
 	for file in datafiles:
@@ -123,7 +128,12 @@ def main_run_afl():
 
 	totalconfig=sorted(totalconfig, key=lambda student: student[0])
 	tempdir=""
+	totalnum=len(totalconfig)
+	tempi=0
+
+
 	for item in totalconfig:
+		tempi=tempi+1
 		if item[0]!=tempdir:
 			print item 
 			print tempdir
@@ -144,42 +154,69 @@ def main_run_afl():
 		settingfile=item[2]
 		Ticker=item[3]
 		run_aflfile(ab,database,Ticker,aflfle,settingfile)
+		show_progress(tempi,totalnum)
 
 
 
 #从数据库中将数据保存csv 并放入规定文件夹
+def gere_datafile_merge(starttime='',lastdays=30):
+	starttime=datetime.datetime.now()-datetime.timedelta(days=30)
+	starttime=starttime.strftime("%Y-%m-%d")
+	sql="select distinct symbol from TSymbol"
+	res1=ms.dict_sql(sql)
+	for symbol in res1:
+		sql="select CONVERT(varchar(20),StockDate,111) as data, CONVERT(varchar(20),StockDate,8) as time,O,H,L,C,V,OPI from TSymbol_quotes_backup where Symbol='%s' and stockdate>='%s'  order by StockDate" % (symbol['symbol'],starttime)
+		rows=ms.dict_sql(sql)
+		datafir=ABautoroot+"\\ABautofile\\dataprepare\\lastfile"
+		import csv
+		fieldnames = ['data', 'time', 'O', 'H', 'L', 'C', 'V', 'OPI']
+		dict_writer = csv.DictWriter(file(datafir+'\\%s.csv' % (symbol['symbol']), 'wb'), fieldnames=fieldnames)
+		# dict_writer.writerow(fieldnames)
+		dict_writer.writerows(rows)
+		general_data(symbol['symbol'])
+		print symbol['symbol']," finished"
+	
+	print "No1. data_merge finished"
+
 def gere_datafile(starttime):
 	sql="select distinct symbol from TSymbol"
 	res1=ms.dict_sql(sql)
 	for symbol in res1:
 		sql="select CONVERT(varchar(20),StockDate,111) as data, CONVERT(varchar(20),StockDate,8) as time,O,H,L,C,V,OPI from TSymbol_quotes_backup where Symbol='%s' and stockdate>='%s'  order by StockDate" % (symbol['symbol'],starttime)
 		rows=ms.dict_sql(sql)
-		datafir=ABautoroot+"\\ABautofile\\datafile"
+		datafir=ABautoroot+"\\ABautofile\\\datafile"
 		import csv
 		fieldnames = ['data', 'time', 'O', 'H', 'L', 'C', 'V', 'OPI']
 		dict_writer = csv.DictWriter(file(datafir+'\\%s.csv' % (symbol['symbol']), 'wb'), fieldnames=fieldnames)
 		# dict_writer.writerow(fieldnames)
 		dict_writer.writerows(rows)
-	print "gere_datafile finished"
+	
+	print "No1. data_merge finished"
 
 
 #根据虚拟组名字选择规定的afl文件放入制定文件夹
-def choose_aflfile(acname):
+# order to [LogRecord].[dbo].[quanyicaculatelist] set iscalcubyvick>0, p_basic 
+def choose_aflfile(acname=''):
 	dirroot=r'E:\ABautofile\sortalffile'
 	targetroot=r'E:\ABautofile\aflfile'
-	#监测虚拟组元素是否全
-	sql="  select p.ST from P_BASIC p  left join [LogRecord].[dbo].[aflfile_st_symbol_time] b  on p.ST=b.st   where p.AC='%s'  and b.symbol is null" % (acname)
+	sql="SELECT acname  FROM [LogRecord].[dbo].[quanyicaculatelist] where iscalcubyvick>0 order by iscalcubyvick desc"
 	res=ms.dict_sql(sql)
-	if res:
-		print "%s 虚拟组元素缺少,添加后重新进行" % (acname),res
-		exit()
-	else:
-		sql="  select p.ST,b.symbol,b.time from P_BASIC p  left join [LogRecord].[dbo].[aflfile_st_symbol_time] b  on p.ST=b.st   where p.AC='%s'" % (acname)
-		res1=ms.dict_sql(sql)
-		for item in res1:
-			filename=dirroot+"\\"+item['symbol']+"\\"+item['time']+"\\"+item['ST']+".afl"
-			targetfilename=targetroot+"\\"+item['symbol']+"-"+item['time']+"-"+item['ST']+".afl"
-			shutil.copyfile(filename,targetfilename)
+	for item in res:
+		acname=item['acname']
+		#监测虚拟组元素是否全
+		sql="  select p.ST from P_BASIC p  left join [LogRecord].[dbo].[aflfile_st_symbol_time] b  on p.ST=b.st   where p.AC='%s'  and b.symbol is null" % (acname)
+		res=ms.dict_sql(sql)
+		if res:
+			print "%s lack of element st " % (acname),res
+			exit()
+		else:
+			sql="  select p.ST,b.symbol,b.time from P_BASIC p  left join [LogRecord].[dbo].[aflfile_st_symbol_time] b  on p.ST=b.st   where p.AC='%s'" % (acname)
+			res1=ms.dict_sql(sql)
+			for item in res1:
+				filename=dirroot+"\\"+item['symbol']+"\\"+item['time']+"\\"+item['ST']+".afl"
+				targetfilename=targetroot+"\\"+item['symbol']+"-"+item['time']+"-"+item['ST']+".afl"
+				shutil.copyfile(filename,targetfilename)
+		print acname,"move OK"
 
 
 # choose_aflfile('dd')
@@ -328,24 +365,56 @@ def add_prename(symbol='',tieminteval=''):
 
 #显示进度
 def show_progress(nownum,totalnum):
-	totala=""+str(totalnum)
-	nownuma=""+str(nownum)
-	nownum=round((nownum/totalnum)*50)
-	totalnum=50
-	for i in range(totalnum):
+	nownum1=int((nownum*100/totalnum))
+	shopunum1=int((nownum*50/totalnum))
+	totala=""
+	for i in range(shopunum1):
 		totala=totala+"#"
+	totala=totala+" "+	str(nownum1)+"%"
+	print totala
+
+
+
+
+
+def general_data(symbol):
+	dataroot=r'E:\ABautofile\dataprepare'
+	oldfile=dataroot+"\\oldfile\\"+symbol+".csv"
+	lastfile=dataroot+"\\lastfile\\"+symbol+".csv"
+	targetfile=dataroot+"\\targetfile\\"+symbol+".csv"
+	df1 = pd.read_csv(oldfile,names=['day','time','O','H','L','C','V','OPI'])
+	df2 = pd.read_csv(lastfile,names=['day1','time1','O1','H1','L1','C1','V1','OPI1'])
+	df1['datetime']=df1['day']+" "+df1['time']
+	df2['datetime']=df2['day1']+" "+df2['time1']
+	outdf= pd.merge(df1,df2,on='datetime',how = 'outer',).fillna(-999)
+	partone=outdf[outdf['day1']==-999][['day','time','O','H','L','C','V','OPI']]
+	parttwo=outdf[outdf['day1']<>-999][['day1','time1','O1','H1','L1','C1','V1','OPI1']]
+	parttwo.columns = ['day','time','O','H','L','C','V','OPI']
+	aaa=partone.append(parttwo)
+	aaa.to_csv(targetfile,index=False,header=False)
+	#move to target dir
+	# 'E:\ABautofile\dataprepare\targetfile' move to  'E:\ABautofile\datafile'
+	# shutil.copyfile(FROM,TO)
+	#'T' 'TF' will not participate in 
+	shutil.copyfile(targetfile,oldfile)
+	movetodir=r'E:\ABautofile\datafile'+"\\"+symbol+".csv"
+	shutil.move(targetfile,movetodir)
+
 
 
 
 ##########
 ##运行步骤(有些步骤是可以每天定时做的 #1  #2 )
 ##########
+# #1 530s
 # gere_datafile(starttime='2015-02-01')
+# #2 152s
 # main_import_data()
-
-#3  choose_aflfile(acname)
+acname='znStepMultiI'
+choose_aflfile(acname)
 # main_run_afl()
 #5  
 
 #检测st_repoet_test中的策略是不是虚拟组有且唯一的策略号
-test_is_all_ac_st()
+# test_is_all_ac_st()
+# show_progress(87,100)

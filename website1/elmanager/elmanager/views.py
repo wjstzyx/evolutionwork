@@ -110,7 +110,8 @@ def total_monitor(request):
 def jieti_distinct_position(request):
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 	#sql="select a.p as backtest,b.P as real ,a.tradetime as backtest_time,b.tradetime as real_time,a.st,a.ticknum as backtest_bar,b.TickNum as real_bar from (SELECT p,st,tradetime,TickNum FROM [Future].[dbo].[for_backtest_Trading_logSymbol]) a left join ( SELECT p,st ,tradetime,TickNum FROM [Future].[dbo].[Trading_logSymbol]) b  on a.st=b.st  where a.p<>b.P "
-	sql="select aaa.*,bbb.address from ( select a.p as backtest,b.P as real ,a.tradetime as backtest_time,b.tradetime as real_time,a.st,a.ticknum as backtest_bar,b.TickNum as real_bar from (SELECT p,st,tradetime,TickNum FROM [Future].[dbo].[for_backtest_Trading_logSymbol]) a left join ( SELECT p,st ,tradetime,TickNum FROM [Future].[dbo].[Trading_logSymbol]) b  on a.st=b.st  where a.p<>b.P) aaa inner join LogRecord.dbo.ST_heart bbb on aaa.ST=bbb.st"
+	#sql="select aaa.*,bbb.address from ( select a.p as backtest,b.P as real ,a.tradetime as backtest_time,b.tradetime as real_time,a.st,a.ticknum as backtest_bar,b.TickNum as real_bar from (SELECT p,st,tradetime,TickNum FROM [Future].[dbo].[for_backtest_Trading_logSymbol]) a left join ( SELECT p,st ,tradetime,TickNum FROM [Future].[dbo].[Trading_logSymbol]) b  on a.st=b.st  where a.p<>b.P) aaa inner join LogRecord.dbo.ST_heart bbb on aaa.ST=bbb.st"
+	sql="select aaa.*,bbb.address,kkk.positionsymbol from ( select a.p as backtest,b.P as real ,a.tradetime as backtest_time,b.tradetime as real_time,a.st,a.ticknum as backtest_bar,b.TickNum as real_bar,b.TradName from (SELECT p,st,tradetime,TickNum FROM [Future].[dbo].[for_backtest_Trading_logSymbol] ) a left join ( SELECT p,st ,tradetime,TickNum ,TradName FROM [Future].[dbo].[Trading_logSymbol]) b  on a.st=b.st  where a.p<>b.P) aaa inner join LogRecord.dbo.ST_heart bbb on aaa.ST=bbb.st left join (select positionsymbol,st from  P_BASIC p inner join LogRecord.dbo.quanyicaculatelist pp on p.AC=pp.acname)kkk on aaa.ST=kkk.ST"
 	res=ms.dict_sql(sql)
 	return render_to_response('jieti_distinct_position.html',{
 		'data':1,
@@ -3545,6 +3546,7 @@ def order_get_dailyquanyi_forLilun(account,fromDdy):
 				for item in res1:
 					newres1.append([item[0],item[1]*ratio/10.0])
 				totalquanyi=add_time_series(totalquanyi,newres1)
+				print 'totalquanyi',totalquanyi[0:5]
 				totalquanyi=sorted(totalquanyi,key=lambda a :a[0])
 	totalquanyi=[[item[1],item[0]] for item in totalquanyi]
 				# for item in totalquanyi:

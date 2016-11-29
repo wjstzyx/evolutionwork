@@ -84,8 +84,8 @@ function add_new_monitor(){
 
 
     <div class="row"> 
-     <div class="col-lg-2"></div> 
-     <div class="col-lg-8"> 
+     <div class="col-lg-1"></div> 
+     <div class="col-lg-9"> 
       <div class="panel panel-default"> 
        <div class="panel-heading"> 
         <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>阶梯型策略信号差异</h3> 
@@ -97,6 +97,7 @@ function add_new_monitor(){
          <table class="table table-bordered table-hover table-striped"> 
           <thead> 
            <tr> 
+            <th align=center >品种</th>
             <th align=center >策略号</th>
             <th align=center >理论信号</th>
             <th align=center >实际信号</th>
@@ -104,12 +105,14 @@ function add_new_monitor(){
             <th align=center >实际信号时间</th> 
             <th align=center >理论信号bar</th> 
             <th align=center >实际信号bar</th>
+            <th align=center >策略名称</th> 
             <th align=center >策略所在机器</th> 
            </tr> 
           </thead>  
           <tbody id="mailtotable"> 
           {% for item in res %}
-           <tr> 
+           <tr>
+            <td align=center >{{item.positionsymbol}}</td>
             <td align=center >{{item.st}}</td> 
             <td align=center >{{item.backtest}}</td> 
             <td align=center >{{item.real}}</td> 
@@ -117,7 +120,10 @@ function add_new_monitor(){
             <td align=center >{{item.real_time}}</td> 
             <td align=center >{{item.backtest_bar}}</td> 
             <td align=center >{{item.real_bar}}</td>
+            <td align=center >{{item.TradName}}</td>
             <td align=center >{{item.address}}</td>
+
+            
            </tr> 
             {% endfor %}
           </tbody> 
