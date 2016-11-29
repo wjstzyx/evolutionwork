@@ -137,6 +137,10 @@ function add_new_monitor(){
                 <td width="200px"><button class="btn" name="sttype" value="time_adjust">时间校准信息</button></td>
                 <td width="200px"><button class="btn" name="sttype" value="time_adjust"></button></td>
               </tr>
+              <tr>
+                <td width="200px"><button class="btn" name="sttype" value="real_lilun_position">实盘--数据库仓位</button></td>
+                <td width="200px"><button class="btn" name="sttype" value="time_adjust"></button></td>
+              </tr>
             </table>
             
             </div>
@@ -260,7 +264,123 @@ function add_new_monitor(){
     </div> 
 {% endif %}
 
+{% if whichtype == 4 %}
+    <div class="row"> 
+     <div class="col-lg-8"> 
+      <div class="panel panel-default"> 
+       <div class="panel-heading"> 
+        <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>实盘 VS 数据库 -- 差异-- 仓位对比 {{res1.nowtime}} </h3> 
+       </div>
+       <div class="panel-body"> 
+        <div class="table-responsive"> 
+         <table class="table table-bordered table-hover table-striped" id='table2'> 
+          <thead> 
+           <tr> 
+            <th align=center >账号名</th>
+            <th align=center >品种</th>
+            <th align=center >账号仓位</th> 
+            <th align=center >数据库仓位</th> 
+            <th align=center >账号检查时间</th> 
+            <th align=center >数据库检查时间</th> 
+           </tr> 
+          </thead>  
+          <tbody > 
+            {% for item in res1.disticnt_set %}
+           <tr>
+              <td>{{item.realuserID}}</td>
+              <td>{{item.realstockID}}</td>
+              <td>{{item.realposition}}</td>
+              <td>{{item.position}}</td>
+              <td>{{ item.realinserttime|date:"Y-m-d H:i:s" }} </td>
+              <td>{{ item.inserttime|date:"Y-m-d H:i:s" }}</td>
 
+           </tr> 
+            {% endfor %}
+          </tbody> 
+         </table>          
+        </div> 
+       </div> 
+      </div> 
+     </div> 
+    </div> 
+    <div class="row">
+    <div class="col-lg-5">
+        <div class="panel panel-default"> 
+         <div class="panel-heading"> 
+          <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>数据库存在---账号不存在品种 {{res1.nowtime}} </h3> 
+         </div>
+         <div class="panel-body"> 
+          <div class="table-responsive"> 
+           <table class="table table-bordered table-hover table-striped" id='table2'> 
+            <thead> 
+             <tr> 
+              <th align=center >账号名</th>
+              <th align=center >品种</th>
+              <th align=center >数据库仓位</th> 
+              <th align=center >数据库检查时间</th>  
+             </tr> 
+            </thead>  
+            <tbody > 
+              {% for item in res1.real_miss_set %}
+             <tr>
+                <td>{{item.userID}}</td>
+                <td>{{item.stockID}}</td>
+                <td>{{item.position}}</td>
+                <td>{{ item.inserttime|date:"Y-m-d H:i:s" }}</td>
+      
+                
+
+             </tr> 
+              {% endfor %}
+            </tbody> 
+           </table>          
+          </div> 
+         </div> 
+        </div> 
+
+    </div>
+    <div class="col-lg-5">
+        <div class="panel panel-default"> 
+         <div class="panel-heading"> 
+          <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>账号存在，数据库无仓位品种--  {{res1.nowtime}} </h3> 
+         </div>
+         <div class="panel-body"> 
+          <div class="table-responsive"> 
+           <table class="table table-bordered table-hover table-striped" id='table2'> 
+            <thead> 
+             <tr> 
+              <th align=center >账号名</th>
+              <th align=center >品种</th>
+              <th align=center >数据库仓位</th> 
+              <th align=center >数据库检查时间</th> 
+             </tr> 
+            </thead>  
+            <tbody > 
+              {% for item in res1.lilun_miss_set %}
+             <tr>
+                <td>{{item.realuserID}}</td>
+                <td>{{item.realstockID}}</td>
+                <td>{{item.realposition}}</td>
+                <td>{{ item.realinserttime|date:"Y-m-d H:i:s" }}</td>
+      
+                
+
+             </tr> 
+              {% endfor %}
+            </tbody> 
+           </table>          
+          </div> 
+         </div> 
+        </div> 
+
+
+    </div>       
+    </div>
+
+
+
+
+{% endif %}
 
    </div> 
   </div>

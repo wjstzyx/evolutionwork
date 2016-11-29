@@ -148,4 +148,9 @@ def shou_account_position():
 	totalsql=totalsql.strip(" union all ")
 	print totalsql
 
-shou_account_position()
+sql="select distinct symbol,s_id from future.dbo.symbol_id where symbol not like '%%night%%'  and symbol not in ('CUN','AUN','AGN','LZL','MEZL','RMZL')"
+res=ms.dict_sql(sql)
+symboldict={}
+for item in res:
+	symboldict[item['s_id']]=item['symbol']
+print symboldict['56']

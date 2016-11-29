@@ -88,6 +88,34 @@ def total_monitor(request):
 			res1=ms.dict_sql(sql)
 			whichtype=3
 
+		if sttype=="real_lilun_position":
+			cal_distinct_position_lilun()
+			real_miss_set,lilun_miss_set,disticnt_set=show_distinct()
+			res1={}
+			sql="select distinct symbol,s_id from future.dbo.symbol_id where symbol not like '%%night%%'  and symbol not in ('CUN','AUN','AGN','LZL','MEZL','RMZL')"
+			res=ms.dict_sql(sql)
+			symboldict={}
+			for item in res:
+				symboldict[item['s_id']]=item['symbol']
+
+			for item in real_miss_set:
+				item['stockID']=symboldict[item['stockID']]+"-"+str(item['stockID'])
+
+			for item in lilun_miss_set:
+				item['realstockID']=symboldict[item['realstockID']]+"-"+str(item['realstockID'])
+
+			for item in disticnt_set:
+				item['realstockID']=symboldict[item['realstockID']]+"-"+str(item['realstockID'])
+				# print symboldict[item['stockID']]
+			res1['real_miss_set']=real_miss_set
+			res1['lilun_miss_set']=lilun_miss_set
+			res1['disticnt_set']=disticnt_set	
+			print 'lilun_miss_set',lilun_miss_set
+			nowtime=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+			res1['nowtime']=nowtime
+
+			whichtype=4
+
 
 
 
@@ -95,11 +123,7 @@ def total_monitor(request):
 		'data':data,
 		'whichtype':whichtype,
 		'res1':res1,
-		'res2':res2,
-		'res11':res11,
-		'res21':res21,
-		'res3':res3,
-		'res31':res31
+
 	})	
 
 
@@ -3670,3 +3694,42 @@ def general_HongsongAll():
 	if res[0]['date']==res[1]['date'] and res[1]['date']>maxHongsongAll and nowtime>=1501:
 		sql="insert into [LogRecord].[dbo].[AccountsBalance] select date,'HongsongAll' as userid, 0 as prebalance, SUM(deposit) as deposit,SUM(Withdraw)as Withdraw,0 as CloseProfit,0 as PositionProfit,SUM(Commission) as Commission,SUM(CloseBalance) as CloseBalance  from [LogRecord].[dbo].[AccountsBalance] where userid in ('HongsongStock','666061008') and date>%s group by date " % (maxHongsongAll)
 		ms.insert_sql(sql)
+
+
+#将账号仓位快照入库
+def cal_distinct_position_lilun():
+	#1 put lilun equity into account_position_lilun
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	sql="truncate table [LogRecord].[dbo].account_position_lilun"
+	ms.insert_sql(sql)
+	sql="select distinct userid from [LogRecord].[dbo].[account_position] order by userid"
+	res=ms.dict_sql(sql)
+	totalsql=""
+	for item in res:
+		userid=item['userid']
+		tempsql="select '%s' as [userID],STOCK as [stockID],Expr1 as position,GETDATE() as nowtime from future.dbo.view_%s" % (userid,userid)
+		totalsql=totalsql+" union all "+tempsql
+	totalsql=totalsql.strip(" union all ")
+	totalsql="insert into [LogRecord].[dbo].account_position_lilun([userID],[stockID],[position],[inserttime]) "+ totalsql
+	ms.insert_sql(totalsql)
+
+#得到账户，数据库仓位差异 三个list
+def show_distinct():
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	nowday=datetime.datetime.now().strftime('%Y%m%d')
+	sql=" select aaa.userID as realuserID,aaa.stockID as realstockID,aaa.position as realposition,aaa.inserttime as realinserttime,  bbb.* from (        select * from  (   select a.userID,a.stockID,(a.longhave-a.shorthave) as position,inserttime from [LogRecord].[dbo].[account_position] a inner join (  select MAX(time) as time  ,userid   FROM [LogRecord].[dbo].[account_position]  where date='20161129' group by userid) b  on a.time=b.time and a.userID=b.userID )ka ) aaa full outer join (    select * from [LogRecord].[dbo].[account_position_lilun]  ) bbb     on aaa.userID=bbb.userID and aaa.stockID=bbb.stockID     where aaa.position<>bbb.position or (bbb.userID is null and aaa.position<>0) or (aaa.userID is null and bbb.position<>0 )    "
+	res=ms.dict_sql(sql)
+	disticnt_set=[]
+	lilun_miss_set=[]
+	real_miss_set=[]
+	for item in res:
+		if item['realuserID'] is None:
+			real_miss_set.append(item)
+		if item['userID'] is None:
+			lilun_miss_set.append(item)
+		if item['realuserID'] is not None and item['userID'] is not None:
+			disticnt_set.append(item)
+	# print real_miss_set
+	# print lilun_miss_set
+	# print disticnt_set
+	return real_miss_set,lilun_miss_set,disticnt_set
