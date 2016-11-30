@@ -102,7 +102,10 @@ def total_monitor(request):
 				item['stockID']=symboldict[item['stockID']]+"-"+str(item['stockID'])
 
 			for item in lilun_miss_set:
-				item['realstockID']=symboldict[item['realstockID']]+"-"+str(item['realstockID'])
+				if item['realstockID'] in symboldict.keys():
+					item['realstockID']=symboldict[item['realstockID']]+"-"+str(item['realstockID'])
+				else:
+					item['realstockID']='error'
 
 			for item in disticnt_set:
 				item['realstockID']=symboldict[item['realstockID']]+"-"+str(item['realstockID'])
@@ -110,7 +113,6 @@ def total_monitor(request):
 			res1['real_miss_set']=real_miss_set
 			res1['lilun_miss_set']=lilun_miss_set
 			res1['disticnt_set']=disticnt_set	
-			print 'lilun_miss_set',lilun_miss_set
 			nowtime=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 			res1['nowtime']=nowtime
 
@@ -3714,13 +3716,25 @@ def cal_distinct_position_lilun():
 	ms.insert_sql(totalsql)
 
 	#2 shangpin yingshe
+	totalsql=""
 	ms1 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="Future")
-	sql="SELECT a.account as userID,a.stock as stockID,(handperstock*position) as position,GETDATE() as inserttime  FROM [future].[dbo].[SP_ACCOUNT_STRATEGY] a  left join [future].[dbo].[SP_STRATEGY] b  on a.stock=b.stock and a.strategyname=b.name where  position<>0"
-	tempres=ms1.dict_sql(sql)
+	res=['670611','666061010','666061001','28032','11808319','11803593','05810058','032442']
+	for item in res:
+		userid=item
+		tempsql="select '%s' as [userID],STOCK as [stockID],Expr1 as position,GETDATE() as inserttime from future.dbo.view_%s" % (userid,userid)
+		totalsql=totalsql+" union all "+tempsql
+	totalsql=totalsql.strip(" union all ")
+	# totalsql="insert into [LogRecord].[dbo].account_position_lilun([userID],[stockID],[position],[inserttime]) "+ totalsql
+	tempres=ms1.dict_sql(totalsql)
+
+
+
+	# sql="SELECT a.account as userID,a.stock as stockID,(handperstock*position) as position,GETDATE() as inserttime  FROM [future].[dbo].[SP_ACCOUNT_STRATEGY] a  left join [future].[dbo].[SP_STRATEGY] b  on a.stock=b.stock and a.strategyname=b.name where  position<>0"
+	# tempres=ms1.dict_sql(sql)
 	totalsql=""
 	tempv=""
 	for item in tempres:
-		tempv=",('%s','%s','%s','%s')" % (item['userID'],item['stockID'],item['position'],item['inserttime'].strftime("%Y-%m-%d %H:%M:%S"))
+		tempv=",('%s','%s','%s','%s')" % (item['userID'],item['stockID'],int(item['position']),item['inserttime'].strftime("%Y-%m-%d %H:%M:%S"))
 		totalsql=totalsql+tempv
 	totalsql=totalsql.strip(",")
 	totalsql="insert into [LogRecord].[dbo].account_position_lilun([userID],[stockID],[position],[inserttime]) values%s" % (totalsql)
@@ -3734,7 +3748,7 @@ def show_distinct():
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 	nowday=datetime.datetime.now().strftime('%Y%m%d')
 	#sql=" select aaa.userID as realuserID,aaa.stockID as realstockID,aaa.position as realposition,aaa.inserttime as realinserttime,  bbb.* from (        select * from  (   select a.userID,a.stockID,(a.longhave-a.shorthave) as position,inserttime from [LogRecord].[dbo].[account_position] a inner join (  select MAX(time) as time  ,userid   FROM [LogRecord].[dbo].[account_position]  where date='20161129' group by userid) b  on a.time=b.time and a.userID=b.userID )ka ) aaa full outer join (    select * from [LogRecord].[dbo].[account_position_lilun]  ) bbb     on aaa.userID=bbb.userID and aaa.stockID=bbb.stockID     where aaa.position<>bbb.position or (bbb.userID is null and aaa.position<>0) or (aaa.userID is null and bbb.position<>0 )    "
-	sql="select aaa.userID as realuserID,aaa.stockID as realstockID,aaa.position as realposition,aaa.inserttime as realinserttime,  bbb.* from (        select * from  (   select a.userID,a.stockID,(a.longhave-a.shorthave) as position,inserttime from [LogRecord].[dbo].[account_position] a inner join (  select MAX(time) as time  ,userid   FROM [LogRecord].[dbo].[account_position]  where date='%s' group by userid) b  on a.time=b.time and a.userID=b.userID )ka ) aaa full outer join (     select userID,stockID,sum(position)as position,MAX(inserttime)as inserttime  from [LogRecord].[dbo].[account_position_lilun]  group by userID,stockID ) bbb       on aaa.userID=bbb.userID and aaa.stockID=bbb.stockID  where aaa.position<>bbb.position or (bbb.userID is null and aaa.position<>0) or (aaa.userID is null and bbb.position<>0 ) and (bbb.userID in (select distinct userID from [LogRecord].[dbo].account_position))" % (nowday)
+	sql="select aaa.userID as realuserID,aaa.stockID as realstockID,aaa.position as realposition,aaa.inserttime as realinserttime,  bbb.* from (        select * from  (   select a.userID,a.stockID,(a.longhave-a.shorthave) as position,inserttime from [LogRecord].[dbo].[account_position] a inner join (  select MAX(time) as time  ,userid   FROM [LogRecord].[dbo].[account_position]  where date='%s' group by userid) b  on a.time=b.time and a.userID=b.userID and a.date='%s')ka ) aaa full outer join (     select userID,stockID,sum(position)as position,MAX(inserttime)as inserttime  from [LogRecord].[dbo].[account_position_lilun]  group by userID,stockID ) bbb       on aaa.userID=bbb.userID and aaa.stockID=bbb.stockID  where aaa.position<>bbb.position or (bbb.userID is null and aaa.position<>0) or (aaa.userID is null and bbb.position<>0 ) and (bbb.userID in (select distinct userID from [LogRecord].[dbo].account_position))" % (nowday,nowday)
 
 	res=ms.dict_sql(sql)
 	disticnt_set=[]

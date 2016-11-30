@@ -221,6 +221,7 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto):
 		pointvalue=res[0]['pointvalue']
 		commvalue=res[0]['commision']
 
+
 	#直接计算并画图
 	tempquotes=myquotes[:]
 	avalue=[]
@@ -242,8 +243,10 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto):
 	daylists=[k for k in sorted(dayquanyilist.keys())]
 
 
+
 	#将总权益分成每天的权益，最后再合成
 	for item in tempquotes:
+
 		datetime=item[0]
 		D=datetime.strftime('%Y%m%d')
 		thisday=str(int(D)-20000000)
@@ -256,8 +259,10 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto):
 		dayquanyilist[thisday][1]=dayquanyilist[thisday][1]+deltatime
 		dayquanyilist[thisday][2]=myround(lastposition)
 
+
 	####写入数据库
 	newlist=[[k,dayquanyilist[k]] for k in sorted(dayquanyilist.keys())]
+
 
 	tempmyquanyi=0
 	for item  in newlist:
@@ -636,7 +641,7 @@ def main_fun():
 	#sql="SELECT TOP 1000 [id]      ,[acname]      ,[positionsymbol]      ,[quanyisymbol]      ,[iscaculate]      ,[isforhistory]      ,[isstatistic]      ,[isyepan]      ,[iscalcubyvick]      ,[sortnum]      ,[issumps]  FROM [LogRecord].[dbo].[quanyicaculatelist] where [positionsymbol]<>[quanyisymbol]  order by id desc"
 
 
-	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where  acname='YEnew' order by id desc "
+	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1 and issumps=0 and isyepan in (0)  AND quanyisymbol not in ('IF','IC','IH') order by id desc "
 	#sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1 and issumps=0 and isyepan in (0,1,12)  and id<=715 order by id desc "
 	#sql="SELECT top 17 id,[acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('RB') and iscaculate=1 order by sortnum"
 	res=ms.dict_sql(sql)
@@ -644,10 +649,13 @@ def main_fun():
 		print item['acname'],item['id']
 		positionsymbol=item['positionsymbol']
 		quanyisymbol=item['quanyisymbol']
+
 		(myquotes,totalsum)=input_groupbyquanyi(item['acname'],positionsymbol,quanyisymbol)
 		# print 'myquotes',myquotes
 		#直接设置数字 10
 		cal_quanyi(item['acname'],myquotes,totalsum,quanyisymbol)
+
+
 
 
 
@@ -656,4 +664,3 @@ def test_is_ok():
 
 
 main_fun()
-
