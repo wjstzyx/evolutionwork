@@ -644,13 +644,11 @@ def main_fun():
 		print item['acname'],item['id']
 		positionsymbol=item['positionsymbol']
 		quanyisymbol=item['quanyisymbol']
-		try:
-			(myquotes,totalsum)=input_groupbyquanyi(item['acname'],positionsymbol,quanyisymbol)
-			# print 'myquotes',myquotes
-			#直接设置数字 10
-			cal_quanyi(item['acname'],myquotes,totalsum,quanyisymbol)
-		except:
-			pass 
+		(myquotes,totalsum)=input_groupbyquanyi(item['acname'],positionsymbol,quanyisymbol)
+		# print 'myquotes',myquotes
+		#直接设置数字 10
+		cal_quanyi(item['acname'],myquotes,totalsum,quanyisymbol)
+
 
 
 
