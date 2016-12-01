@@ -409,7 +409,7 @@ def general_data(symbol):
 # #1 530s
 gere_datafile(starttime='2015-02-01')
 #2 152s
-# main_import_data()
+main_import_data()
 # acname='znStepMultiI'
 # choose_aflfile(acname)
 # main_run_afl()
