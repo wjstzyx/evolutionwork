@@ -3724,8 +3724,25 @@ def cal_distinct_position_lilun():
 		tempsql="select '%s' as [userID],STOCK as [stockID],Expr1 as position,GETDATE() as inserttime from future.dbo.view_%s" % (userid,userid)
 		totalsql=totalsql+" union all "+tempsql
 	totalsql=totalsql.strip(" union all ")
-	# totalsql="insert into [LogRecord].[dbo].account_position_lilun([userID],[stockID],[position],[inserttime]) "+ totalsql
+	#totalsql="insert into [LogRecord].[dbo].account_position_lilun([userID],[stockID],[position],[inserttime]) "+ totalsql
 	tempres=ms1.dict_sql(totalsql)
+
+	#3 stock yinghse
+	sql="SELECT [Symbol]  ,[S_ID] FROM [Future].[dbo].[Symbol_ID] where Symbol in ('IC','IF','IH','TF','T')"
+	res=ms.dict_sql(sql)
+	symboldict={}
+	for item in res:
+		symboldict[item['Symbol']]=item['S_ID']
+	sql="SELECT a.account,a.symbol,sum(a.ratio*b.position ) as Position  FROM [future].[dbo].[account_position_stock_yingshe] a left join [future].[dbo].[RealPosition] b on a.acanme=b.Name group by a.account,a.symbol"
+	res=ms1.dict_sql(sql)
+	for item in res:
+		print "'"+item['symbol']+"'"
+		symbol_id=symboldict[item['symbol']]
+
+		sql="insert into [LogRecord].[dbo].account_position_lilun([userID],[stockID],[position],[inserttime]) values('%s','%s','%s',getdate())" % (item['account'],symbol_id,item['Position'])
+		ms.insert_sql(sql)
+
+
 
 
 

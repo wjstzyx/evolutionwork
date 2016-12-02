@@ -396,9 +396,9 @@ def cal_distinct_position_lilun():
 
 
 
+
 #得到账户，数据库仓位差异 三个list
-def account_database_isdistinct():
-	cal_distinct_position_lilun()
+def show_distinct():
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 	nowday=datetime.datetime.now().strftime('%Y%m%d')
 	sql="select aaa.userID as realuserID,aaa.stockID as realstockID,aaa.position as realposition,aaa.inserttime as realinserttime,  bbb.* from (        select * from  (   select a.userID,a.stockID,(a.longhave-a.shorthave) as position,inserttime from [LogRecord].[dbo].[account_position] a inner join (  select MAX(time) as time  ,userid   FROM [LogRecord].[dbo].[account_position]  where date='%s' group by userid) b  on a.time=b.time and a.userID=b.userID and a.date='%s')ka ) aaa full outer join (     select userID,stockID,sum(position)as position,MAX(inserttime)as inserttime  from [LogRecord].[dbo].[account_position_lilun]  group by userID,stockID ) bbb       on aaa.userID=bbb.userID and aaa.stockID=bbb.stockID  where aaa.position<>bbb.position or (bbb.userID is null and aaa.position<>0) or (aaa.userID is null and bbb.position<>0 ) and (bbb.userID in (select distinct userID from [LogRecord].[dbo].account_position))" % (nowday,nowday)
@@ -416,8 +416,9 @@ def account_database_isdistinct():
 			disticnt_set.append(item)
 	return real_miss_set,lilun_miss_set,disticnt_set
 
-
- 
+#得到账户，数据库仓位差异 三个list
+def account_database_isdistinct():
+	#
 
 	
 

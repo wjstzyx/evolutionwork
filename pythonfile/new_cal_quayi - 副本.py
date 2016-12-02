@@ -243,7 +243,10 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto,isshow=1):
 	# for i in range(len(avalue)):
 	# 	print avalue[i],yvalue[i]
 	# for item in yvalue:
-	# 	print yvalue
+	# for item in yvalue:
+	# 	print item 
+	# for item in avalue:
+	# 	print item 
 	plt.figure(figsize=(16,8))
 	# plt.plot(avalue, yvalue, 'r')
 	# plt.show()
@@ -439,13 +442,13 @@ def multiple_ratio(myquotes,ratio):
 # show_all_ac('RU3v4e')
 
 
-(myquotes,totalsum)=input_groupbyquanyi('zcStepMultiI','zc')
+(myquotes,totalsum)=input_groupbyquanyi('agStepMultiI','ag')
 #仓位信息OK
 print totalsum
 for item in myquotes:
 	print item 
 ratio=1
-myquotes=multiple_ratio(myquotes,ratio)
-cal_quanyi('zcStepMultiI',myquotes,ratio*totalsum,'zc')
+# myquotes=multiple_ratio(myquotes,ratio)
+# cal_quanyi('cfStepMultiI',myquotes,ratio*totalsum,'CF')
 
 # show_account('myaccount2')
