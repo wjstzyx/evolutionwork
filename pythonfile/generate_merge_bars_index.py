@@ -113,14 +113,15 @@ def get_Kbarinfo(period,stockdate):
     tempstr=""
     for item in res:
         symbol=item['Symbol']
-        # sql="Insert_Kbars '%s','%s',%s,%s,%s,%s,%s,%s" % (symbol,stockdate,item['O'],item['C'],item['H'],item['L'],item['V'],item['OPI'])
-        # ms.insert_sql(sql)
-        temp="('%s','%s',%s,%s,%s,%s,%s,%s)" % (symbol,stockdate,item['O'],item['C'],item['H'],item['L'],item['V'],item['OPI']) 
-        tempstr=tempstr+","+temp
-    tempstr=tempstr.strip(",")
-    if tempstr!="":
-        tempstr="insert into [Future].[dbo].[TSymbol_15min]([Symbol],[StockDate],[O]  ,[C]   ,[H]   ,[L]  ,[V] ,[OPI]) values %s" %(tempstr)
-        ms.insert_sql(tempstr)
+        sql="Insert_Kbars '%s','%s',%s,%s,%s,%s,%s,%s" % (symbol,stockdate,item['O'],item['C'],item['H'],item['L'],item['V'],item['OPI'])
+        ms.insert_sql(sql)
+        
+    #     temp="('%s','%s',%s,%s,%s,%s,%s,%s)" % (symbol,stockdate,item['O'],item['C'],item['H'],item['L'],item['V'],item['OPI']) 
+    #     tempstr=tempstr+","+temp
+    # tempstr=tempstr.strip(",")
+    # if tempstr!="":
+    #     tempstr="insert into [Future].[dbo].[TSymbol_15min]([Symbol],[StockDate],[O]  ,[C]   ,[H]   ,[L]  ,[V] ,[OPI]) values %s" %(tempstr)
+    #     ms.insert_sql(tempstr)
 
 
 
@@ -134,7 +135,7 @@ def get_Kbarinfo(period,stockdate):
 
 
 def general_Kbars(intervaltime):
-    sql="select * from [Future].[dbo].[Kbars_merge]  where period=%s and intervaldate>='2016-03-19 12:30:00'  and  intervaldate<='2016-12-07' order by [intervaldate] " % (intervaltime)
+    sql="select * from [Future].[dbo].[Kbars_merge]  where period=%s and intervaldate>='2015-01-02 12:30:00'  and  intervaldate<='2016-12-07' order by [intervaldate] " % (intervaltime)
     #'2016-03-19 12:30:00'
     res=ms.dict_sql(sql)
     for item in res:
