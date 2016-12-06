@@ -412,7 +412,7 @@ def cal_distinct_position_lilun():
 
 
  
-#得到账户，数据库仓位差异 三个list
+#仓位报警-差异超过3分钟就报警
 def account_database_isdistinct():
 	#查询发件人
 	(mailtolist,sendmessage)=get_messagelist()
@@ -462,12 +462,6 @@ def account_database_isdistinct():
 
 
 
-
-
-
-
-
-	
 
 if ismonitorday()==0:
 	exit()
