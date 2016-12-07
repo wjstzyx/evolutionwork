@@ -103,7 +103,10 @@ def general_Kbars(intervaltime):
 
 # general_Kbars(15)
 
-
+def write_heart(type,name):
+    ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+    sql="update [LogRecord].[dbo].[quotes_python_heart] set [updatetime]=getdate() where type='%s' and name='%s' and [isactive]=1" % (type,name)
+    ms.insert_sql(sql)
 
 
 
@@ -134,9 +137,9 @@ def main_fun(starttime,period,type='history'):
             print oldtime,fromtime
             get_Kbarinfo(period,oldtime)
             get_Kbarinfo(period,fromtime)
+            lasttime=100
             while(1):
                 sql="select datediff(MINUTE,'%s',max(stockdate)) as diff from Tsymbol" % (fromtime)
-                print sql
                 res=ms.dict_sql(sql)
                 if res[0]['diff']>=period:
                     oldtime=fromtime
@@ -147,6 +150,19 @@ def main_fun(starttime,period,type='history'):
                 get_Kbarinfo(period,oldtime)
                 get_Kbarinfo(period,fromtime)
                 time.sleep(5)
+                nowtime=int(datetime.datetime.now().strftime('%H%M'))
+                print nowtime
+                if lasttime!=nowtime:
+                    write_heart('Kbars','15min')
+                    lasttime=nowtime
+
+                #写心跳
+
+                if nowtime>=500 and nowtime<=600:
+                    exit()
+
+
+
 
 
 
