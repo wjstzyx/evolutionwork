@@ -6,6 +6,7 @@ import sys
 import time
 from dbconn import MSSQL
 ms = MSSQL(host="192.168.0.3\SQLEXPRESS",user="future",pwd="K@ra0Key",db="future")
+# ms05 = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 import datetime
 
 
@@ -72,17 +73,35 @@ def get_Kbarinfo(period,stockdate):
     for item in res:
         symbol=item['Symbol']
         sql="Insert_Kbars '%s','%s',%s,%s,%s,%s,%s,%s,%s" % (symbol,stockdate,item['O'],item['C'],item['H'],item['L'],item['V'],item['OPI'],period)
-        #print sql
+        print sql
         ms.insert_sql(sql)
-    # 连续写入
-    #     temp="('%s','%s',%s,%s,%s,%s,%s,%s)" % (symbol,stockdate,item['O'],item['C'],item['H'],item['L'],item['V'],item['OPI']) 
-    #     tempstr=tempstr+","+temp
-    # tempstr=tempstr.strip(",")
-    # if tempstr!="":
-    #     tempstr="insert into [Future].[dbo].[TSymbol_15min]([Symbol],[StockDate],[O]  ,[C]   ,[H]   ,[L]  ,[V] ,[OPI]) values %s" %(tempstr)
-    #     ms.insert_sql(tempstr)
 
 
+
+
+def get_Kbarinfo_history(period,stockdate):
+    sql="select a.*,b.O,c.C from  (select Symbol,MIN(StockDate) as openstockdate,MAX(StockDate) as closestockdate,MAX(H) as H,MIN(L) as L,SUM(V) as V,SUM(OPI) as OPI from TSymbol_quotes_backup where StockDate>='%s'  AND DATEDIFF(MINUTE,'%s',StockDate)<%s  group by Symbol ) a inner join  TSymbol_quotes_backup b on a.Symbol=b.Symbol and a.openstockdate=b.StockDate inner join TSymbol_quotes_backup c on a.Symbol=c.Symbol and a.closestockdate=c.StockDate " % (stockdate,stockdate,period)
+    # print sql 
+    res=ms.dict_sql(sql)
+    #put in table
+    tempstr=""
+    for item in res:
+        symbol=item['Symbol']
+        temp="('%s','%s',%s,%s,%s,%s,%s,%s)" % (symbol,stockdate,item['O'],item['C'],item['H'],item['L'],item['V'],item['OPI']) 
+        tempstr=tempstr+","+temp
+    tempstr=tempstr.strip(",")
+    if tempstr!="":
+        if period==5:
+            tempstr="insert into [Future].[dbo].[TSymbol_5min]([Symbol],[StockDate],[O]  ,[C]   ,[H]   ,[L]  ,[V] ,[OPI]) values %s" %(tempstr)
+        if period==15:
+            tempstr="insert into [Future].[dbo].[TSymbol_15min]([Symbol],[StockDate],[O]  ,[C]   ,[H]   ,[L]  ,[V] ,[OPI]) values %s" %(tempstr)
+        if period==20:
+            tempstr="insert into [Future].[dbo].[TSymbol_20min]([Symbol],[StockDate],[O]  ,[C]   ,[H]   ,[L]  ,[V] ,[OPI]) values %s" %(tempstr)
+        if period==30:
+            tempstr="insert into [Future].[dbo].[TSymbol_30min]([Symbol],[StockDate],[O]  ,[C]   ,[H]   ,[L]  ,[V] ,[OPI]) values %s" %(tempstr)
+        if period==60:
+            tempstr="insert into [Future].[dbo].[TSymbol_60min]([Symbol],[StockDate],[O]  ,[C]   ,[H]   ,[L]  ,[V] ,[OPI]) values %s" %(tempstr)
+        ms.insert_sql(tempstr)
 
 
 
@@ -116,9 +135,9 @@ def main_fun(starttime,period,type='history'):
             resultlist=[]
             total_day_generate(fromdate=starttime,interval=period,resultlist=resultlist)
             #resultlist中存储着所需要的K线的开始时间 [datetime.datetime(2014, 1, 1, 9, 0), datetime.datetime(2014, 1, 1, 9, 15), datetime.datetime(2014, 1, 1, 9, 30)
-            for myitem in resultlist[0:2]:
+            for myitem in resultlist:
                 print myitem
-                get_Kbarinfo(period,myitem)
+                get_Kbarinfo_history(period,myitem)
         if type=='now':
             #从Tsymbol_nmin 表中选择最新的Kbar时间
             resultlist=[]
@@ -169,4 +188,4 @@ def main_fun(starttime,period,type='history'):
     #产生目标K线时间list
 
 
-main_fun(starttime='2014-01-01',period=15,type='now')
+main_fun(starttime='2015-01-05',period=15,type='now')
