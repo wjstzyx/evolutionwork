@@ -5,7 +5,7 @@ import re
 import sys
 import time
 from dbconn import MSSQL
-ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+ms = MSSQL(host="192.168.0.3\SQLEXPRESS",user="future",pwd="K@ra0Key",db="future")
 import datetime
 
 
@@ -71,7 +71,7 @@ def get_Kbarinfo(period,stockdate):
     tempstr=""
     for item in res:
         symbol=item['Symbol']
-        sql="Insert_Kbars '%s','%s',%s,%s,%s,%s,%s,%s" % (symbol,stockdate,item['O'],item['C'],item['H'],item['L'],item['V'],item['OPI'])
+        sql="Insert_Kbars '%s','%s',%s,%s,%s,%s,%s,%s,%s" % (symbol,stockdate,item['O'],item['C'],item['H'],item['L'],item['V'],item['OPI'],period)
         #print sql
         ms.insert_sql(sql)
     # 连续写入
@@ -160,10 +160,6 @@ def main_fun(starttime,period,type='history'):
 
                 if nowtime>=500 and nowtime<=600:
                     exit()
-
-
-
-
 
 
 

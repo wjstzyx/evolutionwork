@@ -3306,6 +3306,7 @@ def order_get_ac_ratio_three(account):
 	if res:
 		return []
 	sql="WITH Emp AS ( SELECT ac,F_ac,ratio,stock FROM  [Future].[dbo].[p_follow] WHERE   ac='%s' UNION ALL  SELECT   D.AC,D.F_ac,D.ratio*emp.ratio/100,D.stock FROM   Emp         INNER JOIN [Future].[dbo].[p_follow] d ON d.ac = Emp.F_ac)     select '%s' as AC,f_AC+'__'+stock as f_AC,SUM(ratio) as ratio from Emp where  f_ac not in (select ac from Emp)  and ratio<>0 group by F_ac,stock order by F_ac" % (account,account)
+	print sql 
 	#sql="WITH Emp AS ( SELECT ac,F_ac,ratio FROM  [Future].[dbo].[p_follow] WHERE   ac='%s' UNION ALL  SELECT   D.AC,D.F_ac,D.ratio*emp.ratio/100 FROM   Emp         INNER JOIN [Future].[dbo].[p_follow] d ON d.ac = Emp.F_ac)     select '%s' as AC,f_AC,SUM(ratio) as ratio from Emp where  f_ac not in (select ac from Emp)  and ratio<>0 group by F_ac" % (account,account)
 	res=ms.dict_sql(sql)
 	accountlist=[]
