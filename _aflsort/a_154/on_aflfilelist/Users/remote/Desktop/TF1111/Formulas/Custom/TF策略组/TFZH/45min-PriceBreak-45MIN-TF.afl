@@ -1,0 +1,124 @@
+//  RASHEED'S BREAKOUTS
+//  help requested for adding an exploration for End of Day breakouts
+/*  coded by NW Trader 1-29-10 with exploration, chart signals and chart options
+    toggle parameter to select between C or H & L for the breakout crossings
+    toggle parameter added to remove extra trade signals
+    Volume at price added
+*/
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+//#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "45min-PriceBreak-45MIN-TF";
+StrategyID = 380017;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+_SECTION_BEGIN("BREAK OUTS");
+
+SetBarsRequired(-2,-2);
+
+H0 = H;
+L0 = L;
+C0 = C;
+O0 = O;
+
+Lookback = Param("LookBack", 6, 0, 50, 1); // Default for interday commodity currency trading
+shift = Param("Shift", 3, 1, 50, 1); // ?
+d = Param("d",1,0,100,1);
+ADX_Level = Param("ADX Level", 21, 1, 100 );
+/*
+x0 = SelectedValue(Cum(1));
+x1 = x0 - shift;
+H = Ref(H,  - shift + 1);
+L = Ref(L,  - shift + 1);
+H1 = SelectedValue(Ref(HHV(H, Lookback),  - 1));
+L1 = SelectedValue(Ref(LLV(L, Lookback),  - 1));
+*/
+
+x0 = Cum(1);
+x1 = x0 - shift;
+H = Ref(H,  - shift + 1);
+L = Ref(L,  - shift + 1);
+H1 = Ref(HHV(H, Lookback),  - 1);
+L1 = Ref(LLV(L, Lookback),  - 1);
+
+//Plot(H1, "H1", colorYellow);
+//Plot(L1, "L1", colorYellow);
+
+H = H0;
+L = L0;
+C = C0;
+O = O0;
+
+up = Cross(H, H1) AND Cum(1) > x1;
+dn = Cross(L1, L) AND Cum(1) > x1;
+
+
+XH1 = Cross(C, H1);
+XL1 = Cross(L1, C);
+XH2 = Cross(H, H1);
+XL2 = Cross(L1, L);
+
+
+XH1 = CPPCount(C>H1,d)==d;
+XL1 = CPPCount(C<L1,d)==d;
+
+
+volfilter = ADX(14)>=ADX_Level;
+
+
+bsig0 = XH1;
+ssig0 = XL1;
+
+//bsig0 = XH2;
+//ssig0 = XL2;
+
+t1 = Param("t1",91500,91500,151500,100);
+t2 = Param("t2",95800,91500,151500,100);
+t3 = Param("t3",130000,91500,151500,100);
+t4 = Param("t4",151500,91500,151500,100);
+
+timefilter = (TimeNum()>=t1 AND TimeNum()<=t2) OR (TimeNum()>=t3 AND TimeNum()<=t4);
+
+bsig0 = bsig0 AND volfilter AND timefilter;
+ssig0 = ssig0 AND volfilter AND timefilter;
+
+
+bsig = ExRem(bsig0, ssig0);
+ssig = ExRem(ssig0, bsig0); 
+
+ps=GetPs(bsig,ssig,0);
+
+Lstbsg = BarsSince(bsig);
+Lstssg = BarsSince(ssig);
+
+Holdperiod=Param("Holdperiod",500,0,500,1);
+C01 = ps==1 AND Lstbsg>=Holdperiod AND C<Ref(C,-Lstbsg);
+C02 = ps==-1 AND lstssg>=holdperiod AND C>Ref(C,-lstssg);
+
+tp = Param("tp",30,0,500,0.1);
+
+C05 = ps==1 AND  C<HighestSince(bsig,C)-tp;
+C06 = ps==-1 AND  C>LowestSince(ssig,C)+tp;
+
+//C05 = ps==1 AND  C<Highestsince(ps==1 AND Ref(ps,-1)!=1,C)-tp;
+//C06 = ps==-1 AND  C>Lowestsince(ps==-1 AND Ref(ps,-1)!=-1,C)+tp;
+
+Csig = C01 OR C02 OR C05 OR C06 ;//OR TimeNum()>=151400;// OR NOT timefilter;// OR C03 OR C04;//;
+//csig=0;
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+ps0 = GetPs(bsig,ssig,csig);
+Filter= 1;
+AddColumn(ps0,"ps");

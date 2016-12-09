@@ -1,0 +1,72 @@
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "HLT-ma-5min";
+StrategyID = 210084;
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+function HLT( periods )
+{
+	BuyPower = HHV( High, periods ) - Ref( LLV( Low, periods ), -periods );
+	SellPower = Ref( HHV( High, periods ), -periods ) - LLV( Low, periods );
+	return 100 * (BuyPower - SellPower) /(BuyPower + SellPower);
+}
+
+//OptimizerSetEngine("spso");
+//OptimizerSetOption("Runs",1);
+//OptimizerSetOption("MaxEval",5000);
+
+periodHLT=ParamOptimize("periodHLT",100,80,200,10);
+MAperiod=ParamOptimize("MAperiod",1150,1000,2000,100);
+
+HLTperiod = HLT( periodHLT );
+
+//Plot(HLTperiod,"HLTperiod",colorBlue);
+
+DynamicAverage = MA(HLTperiod,MAperiod);
+
+OneStDev = 1;
+
+howManyStDev = ParamOptimize("howManyStDev", 10, 1, 50, 2); // <=== 3.1
+down = DynamicAverage - howManyStDev * OneStDev; 
+up = DynamicAverage + howManyStDev * OneStDev;
+
+// BSIG, SSIG, CSIG
+SSIG = Cross(down, HLTperiod); // Important: do not use Cross(X4, a)
+BSIG = Cross(HLTperiod, up); // Important: do not use Cross(b, X4)
+ps = GetPs(BSIG, SSIG, 0);
+C01 = ps==-1 AND Cross(HLTperiod, DynamicAverage); // Important: not the zero line
+C02 = ps==1 AND Cross(DynamicAverage,HLTperiod); // Important: not the zero line
+//CSIG = C01 OR C02 OR ForceToCloseTime;
+//CSIG = C01 OR C02;
+
+ps = GetPs(bsig,ssig,0);
+
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+tp = Param("tp",35,0,100,1);
+
+
+C05 = ps==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C06 = ps==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+CSIG = C05 OR C06;// TimeNum() < 91830 OR TimeNum() > 151430 OROR  OR C03 OR C04;
+
+Csig=C01 OR C02 OR C05 OR C06;
+    Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

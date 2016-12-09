@@ -1,0 +1,59 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "30min-MT-p-2-30min";
+StrategyID =106006;
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+SetBarsRequired(-2,-2);
+
+
+//Parameters Setting
+P1=ParamOptimize("P1",82,1,100,1);
+P2=ParamOptimize("P2",8,1,100,1);
+P3=ParamOptimize("P3",40,1,100,1);
+ADXth=ParamOptimize("ADXth",12,1,40,1);
+Tth=ParamOptimize("TTh",0.8,0,5,0.1);
+TCover=ParamOptimize("Tcover",1,-3,3,0.1);
+
+
+
+//Main
+RP1=ROC(C,P1);
+RP2=ROC(C,P2);
+RP3=ROC(C,P3);
+RSUM=RP1+RP2+RP3;
+
+
+bsig=Cross(Rsum,Tth) AND ADX(14)>=ADXth;
+ssig=Cross(-Tth,Rsum) AND ADX(14)>=ADXth;
+
+ps=GetPs(bsig,ssig,0);
+C01= ps==1  AND Rsum<-TCover;
+C02= ps==-1 AND Rsum>Tcover;
+
+csig = c01 OR c02;
+
+    Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+
+PlotPerformance(BSig,Ssig,Csig);
+ps0 = GetPs(bsig,ssig,csig);
+Filter= 1;
+AddColumn(ps0,"ps");
+Trading_night_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+
+Buy = bsig;
+Short = ssig;
+Sell = Cover = csig;

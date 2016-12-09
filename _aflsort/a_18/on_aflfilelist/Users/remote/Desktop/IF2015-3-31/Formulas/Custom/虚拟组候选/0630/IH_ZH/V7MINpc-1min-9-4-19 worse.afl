@@ -1,0 +1,71 @@
+_SECTION_BEGIN("test");
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "V7MINpc-1min-9-4-19";
+StrategyID = "120017";
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+
+tickername=Name();
+
+Period1=Param("Period1",9,0,100,1);
+PDIF=Param("PDIF",4,0,100,1);
+Period2 =Param("Period2 ",19,0,100,1);
+period=Param("period",30,0,100,1);
+fo = Foreign(TickerName, "O" );
+fh = Foreign(TickerName, "H" );
+fl = Foreign(TickerName, "L" );
+fc = Foreign(TickerName, "C" );
+fv = Foreign(TickerName, "V" );
+TIME=TimeNum();
+FSTK=Day()!=Ref(Day(),-1);
+LSTK=GetLastK(TickerName);
+KN=IIf(FSTK,1,BarsSince(FSTK)+1);
+   
+    GUP = KN==Period1 AND fc>Ref(fc,-KN-1);
+    GDN = KN==Period1 AND fc<Ref(fc,-KN-1);
+    bsig1 = GDN;
+    ssig1 = GUP;
+    LstPeriod1 = BarsSince(KN==Period1);
+    rangehi = HHV(fh,KN+1);
+    rangelo = LLV(fl,KN+1);
+//     rghi = Ref(rangehi, -LstPeriod1);
+//     rglo = Ref(rangelo, -LstPeriod1);
+      rghi = Ref(fc, -LstPeriod1);
+      rglo = Ref(fc, -LstPeriod1);
+     PDIFP = PDIF/20000*fc;
+     bsig2 = KN>=Period2 AND fc>rghi+PDIF;
+     ssig2 = KN>=Period2 AND fc<rglo-PDIF;
+    
+     BSIG=bsig1 OR bsig2  AND kn>period;
+     SSIG=ssig1 OR ssig2  AND kn>period;
+     CSIG = GetLastK(TickerName);
+   Holdperiod=Param("Holdperiod",24,1,100,1);
+
+ps = GetPs(bsig,ssig,0);
+
+Lstbsg = BarsSince(bsig);
+Lstssg = BarsSince(ssig);
+
+C01 = ps==1 AND Lstbsg>=Holdperiod AND C>O;//AND C<Ref(C,-Lstbsg);//AND C<Ref(C,-Holdperiod);//
+C02 = ps==-1 AND lstssg>=holdperiod AND C<O;//AND C>Ref(C,-lstssg);//AND C>Ref(C,-Holdperiod);//
+
+csig = csig OR c01 OR c02;
+    Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+_SECTION_END();

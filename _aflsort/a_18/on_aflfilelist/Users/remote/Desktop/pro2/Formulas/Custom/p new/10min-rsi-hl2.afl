@@ -1,0 +1,99 @@
+
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "10min-rsi-hl2";
+StrategyID = 100192;
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+
+
+
+
+//---------MT-----------//
+P1=ParamOptimize("P1",16,1,100,1);
+P2=ParamOptimize("P2",38,1,100,1);
+P3=ParamOptimize("P3",63,1,100,1);
+
+RP1=ROC(C,P1);
+RP2=ROC(C,P2);
+RP3=ROC(C,P3);
+RSUM=RP1+RP2+RP3;
+
+bsig=Cross(Rsum,0);
+ssig=Cross(0,Rsum);
+//---------MT-----------//
+
+//---------RSI-----------//
+period = Param("period",10,0,100,1);
+bs = Param("bs",76,0,100,1);
+
+rsis=RSI(period);
+
+bsig=rsis>bs;
+ssig=rsis<(100-bs);
+//---------RSI-----------//
+
+//---------Volume--------//
+vperiod = Param("vperiod",3,1,100,1);
+nperiod = Param("nperiod",75,1,1000,1);
+
+sv = Sum(V,vperiod)/vperiod;
+isv = sv - Ref(sv,-vperiod);
+
+nisv = (isv-LLV(isv,nperiod))/(HHV(isv,nperiod)-LLV(isv,nperiod));
+vtresh = Param("vtresh",0.85,0,1,0.01);
+
+//bsig = C>Ref(C,-1) AND Ref(nisv,-1)>vtresh;// AND nisv<Ref(nisv,-1) AND Ref(nisv,-2)<Ref(nisv,-1);//AND Ref(C,-2)>Ref(C,-1);// ;
+//ssig = C<Ref(C,-1) AND Ref(nisv,-1)>vtresh;// AND nisv<Ref(nisv,-1) AND Ref(nisv,-2)<Ref(nisv,-1);//AND Ref(C,-2)<Ref(C,-1);// ;;
+//---------Volume--------//
+
+
+//---------vwap----------//
+vwaplen = Param("vwaplen",60,5,1200,1);
+vwap = Sum(C*V,vwaplen)/Sum(V,vwaplen);
+
+//bsig = Cross(C,vwap);
+//ssig = Cross(vwap,C);
+//---------vwap----------//
+
+
+
+//--------Close Signals--------//
+cvperiod = Param("cvperiod",79,1,300,1);
+tp = Param("tp",25,0,500,1);
+
+C01 = C<O AND V==HHV(V,cvperiod);
+C03 = C==LLV(C,cvperiod);// AND V>Ref(V,-1);
+C05 = C<Highestsince(bsig,C)-tp*C/1000;
+
+C02 = C>O AND V==HHV(V,cvperiod);
+C04 = C==HHV(C,cvperiod);// AND V>Ref(V,-1);
+C06 = C>Lowestsince(bsig,C)+tp*C/1000;
+
+csig1 =  C03;//C05;// OR
+csig2 =  C04;//C06;// OR
+//--------Close Signals--------//
+
+cond1 = GetPs(bsig,0,csig1);
+cond2 = GetPs(0,ssig,csig2);
+
+cond = cond1+cond2;
+
+bsig = cond>0;
+ssig = cond<0;
+csig = cond==0;
+
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

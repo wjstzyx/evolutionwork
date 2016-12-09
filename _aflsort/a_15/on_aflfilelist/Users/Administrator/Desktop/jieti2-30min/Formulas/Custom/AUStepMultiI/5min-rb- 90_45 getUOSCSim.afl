@@ -1,0 +1,319 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+
+
+
+function PIR(p,Length)
+{
+Ll=LLV(p,Length);
+Hh=HHV(p,Length);
+return (100*(p-Ll)/(Hh-Ll));
+}
+
+function TP15(bsig, ssig, ps0)
+{
+tp = 15; //Param("tp",15,0,100,1);
+Lstbsg = BarsSince(ps0==1 AND Ref(ps0,-1)!=1);
+Lstssg = BarsSince(ps0==-1 AND Ref(ps0,-1)!=-1);
+C01 = ps0==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C02 = ps0==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+Csig=C01 OR C02;
+ps = GetPs(bsig, ssig, csig);
+return ps;
+}
+
+
+
+
+UOSCSIM_tw=1; //Paramoptimize("UOSCSIM_tw",280,80,700,20);
+
+
+
+UOSCSIM_MAperiod=1; //Paramoptimize("UOSCSIM_MAperiod",35,13,100,1);
+
+
+
+UOSCSIM_erth = 1; //Paramoptimize("UOSCSIM_erth",0.58,0.02,1,0.02);
+
+
+
+
+
+
+
+function getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth)
+
+{
+
+
+
+arrC = C;
+
+arrH = H;
+
+arrL = L;
+
+arrV =V;
+
+
+
+fcma = MA(arrC,UOSCSIM_MAperiod);
+
+fhma = MA(arrH,UOSCSIM_MAperiod);
+
+flma = MA(arrL,UOSCSIM_MAperiod);
+
+
+
+Gh = BBandTop(fhma,UOSCSIM_tw,2);
+
+Gl = BBandBot(flma,UOSCSIM_tw,2);
+
+
+
+GG01 = 1000*(fcma-Gl)/(Gh-Gl);
+
+
+
+
+
+MAperiod2=UOSCSIM_MAperiod * 2;
+
+fcma2 = MA(arrC,MAperiod2);
+
+fhma2 = MA(arrH,MAperiod2);
+
+flma2 = MA(arrL,MAperiod2);
+
+
+
+Gh2 = BBandTop(fhma2,UOSCSIM_tw,2);
+
+Gl2 = BBandBot(flma2,UOSCSIM_tw,2);
+
+
+
+GG012 = 1000*(fcma2-Gl2)/(Gh2-Gl2);
+
+
+
+
+
+MAperiod3=UOSCSIM_MAperiod * 4;
+
+
+
+fcma3 = MA(arrC,MAperiod3);
+
+fhma3 = MA(arrH,MAperiod3);
+
+flma3 = MA(arrL,MAperiod3);
+
+
+
+Gh3 = BBandTop(fhma3,UOSCSIM_tw,2);
+
+Gl3 = BBandBot(flma3,UOSCSIM_tw,2);
+
+
+
+GG013 = 1000*(fcma3-Gl3)/(Gh3-Gl3);
+
+
+
+GGG = (4 * GG01 + 2 * GG012 + 1 * GG013)/(4+2+1);
+
+
+
+
+
+//original ER
+
+dir=abs(Close-Ref(Close,-10));
+
+vola=Sum(abs(Close-Ref(Close,-1)),10) + 0.0001;
+
+ER=dir/vola;
+
+
+
+
+
+//er_th  0.22 0.36 0.44 0.58
+
+
+
+bsig2 = GGG>Ref(GGG,-1) AND er > UOSCSIM_erth;
+
+ssig2 = GGG<Ref(GGG,-1) AND er > UOSCSIM_erth;
+
+
+
+bsig3 =  bsig2;
+
+ssig3 =  ssig2;
+
+bsig=ExRem(bsig3,ssig3);
+
+ssig=ExRem(ssig3,bsig3);
+
+
+
+ps=GetPs(bsig,ssig,0);
+
+
+//add exrem
+bsig=ExRem(bsig,ssig);
+ssig=ExRem(ssig,bsig);
+ps=GetPs(bsig,ssig,0);
+
+//add_tp15ps_exp
+ps = TP15(bsig, ssig, ps);
+return ps;
+
+
+
+
+
+}
+
+
+
+
+
+ps = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);
+
+
+
+ps = 0;
+//30min_MDD
+UOSCSIM_tw = 360;UOSCSIM_MAperiod = 19;UOSCSIM_erth = 0.58;ps1 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps1;
+UOSCSIM_tw = 260;UOSCSIM_MAperiod = 34;UOSCSIM_erth = 0.74;ps2 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps2;
+UOSCSIM_tw = 280;UOSCSIM_MAperiod = 16;UOSCSIM_erth = 0.72;ps3 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps3;
+UOSCSIM_tw = 460;UOSCSIM_MAperiod = 47;UOSCSIM_erth = 0.68;ps4 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps4;
+UOSCSIM_tw = 600;UOSCSIM_MAperiod = 20;UOSCSIM_erth = 0.68;ps5 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps5;
+UOSCSIM_tw = 360;UOSCSIM_MAperiod = 33;UOSCSIM_erth = 0.74;ps6 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps6;
+UOSCSIM_tw = 300;UOSCSIM_MAperiod = 60;UOSCSIM_erth = 0.78;ps7 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps7;
+UOSCSIM_tw = 620;UOSCSIM_MAperiod = 31;UOSCSIM_erth = 0.68;ps8 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps8;
+UOSCSIM_tw = 240;UOSCSIM_MAperiod = 69;UOSCSIM_erth = 0.56;ps9 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps9;
+UOSCSIM_tw = 300;UOSCSIM_MAperiod = 38;UOSCSIM_erth = 0.72;ps10 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps10;
+UOSCSIM_tw = 440;UOSCSIM_MAperiod = 40;UOSCSIM_erth = 0.68;ps11 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps11;
+UOSCSIM_tw = 540;UOSCSIM_MAperiod = 34;UOSCSIM_erth = 0.72;ps12 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps12;
+UOSCSIM_tw = 380;UOSCSIM_MAperiod = 45;UOSCSIM_erth = 0.32;ps13 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps13;
+UOSCSIM_tw = 240;UOSCSIM_MAperiod = 21;UOSCSIM_erth = 0.76;ps14 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps14;
+UOSCSIM_tw = 260;UOSCSIM_MAperiod = 34;UOSCSIM_erth = 0.68;ps15 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps15;
+UOSCSIM_tw = 700;UOSCSIM_MAperiod = 28;UOSCSIM_erth = 0.52;ps16 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps16;
+UOSCSIM_tw = 440;UOSCSIM_MAperiod = 49;UOSCSIM_erth = 0.86;ps17 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps17;
+UOSCSIM_tw = 340;UOSCSIM_MAperiod = 86;UOSCSIM_erth = 0.46;ps18 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps18;
+UOSCSIM_tw = 620;UOSCSIM_MAperiod = 50;UOSCSIM_erth = 0.86;ps19 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps19;
+UOSCSIM_tw = 400;UOSCSIM_MAperiod = 42;UOSCSIM_erth = 0.86;ps20 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps20;
+UOSCSIM_tw = 620;UOSCSIM_MAperiod = 39;UOSCSIM_erth = 0.68;ps21 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps21;
+UOSCSIM_tw = 520;UOSCSIM_MAperiod = 39;UOSCSIM_erth = 0.48;ps22 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps22;
+UOSCSIM_tw = 560;UOSCSIM_MAperiod = 35;UOSCSIM_erth = 0.78;ps23 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps23;
+UOSCSIM_tw = 180;UOSCSIM_MAperiod = 67;UOSCSIM_erth = 0.72;ps24 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps24;
+UOSCSIM_tw = 300;UOSCSIM_MAperiod = 27;UOSCSIM_erth = 0.38;ps25 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps25;
+UOSCSIM_tw = 280;UOSCSIM_MAperiod = 77;UOSCSIM_erth = 0.62;ps26 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps26;
+UOSCSIM_tw = 540;UOSCSIM_MAperiod = 44;UOSCSIM_erth = 0.62;ps27 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps27;
+UOSCSIM_tw = 640;UOSCSIM_MAperiod = 26;UOSCSIM_erth = 0.86;ps28 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps28;
+UOSCSIM_tw = 240;UOSCSIM_MAperiod = 40;UOSCSIM_erth = 0.62;ps29 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps29;
+UOSCSIM_tw = 260;UOSCSIM_MAperiod = 33;UOSCSIM_erth = 0.64;ps30 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps30;
+//30min_NP
+UOSCSIM_tw = 300;UOSCSIM_MAperiod = 15;UOSCSIM_erth = 0.76;ps1 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps1;
+UOSCSIM_tw = 400;UOSCSIM_MAperiod = 13;UOSCSIM_erth = 0.64;ps2 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps2;
+UOSCSIM_tw = 400;UOSCSIM_MAperiod = 13;UOSCSIM_erth = 0.56;ps3 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps3;
+UOSCSIM_tw = 380;UOSCSIM_MAperiod = 13;UOSCSIM_erth = 0.72;ps4 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps4;
+UOSCSIM_tw = 160;UOSCSIM_MAperiod = 61;UOSCSIM_erth = 0.76;ps5 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps5;
+UOSCSIM_tw = 400;UOSCSIM_MAperiod = 36;UOSCSIM_erth = 0.72;ps6 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps6;
+UOSCSIM_tw = 360;UOSCSIM_MAperiod = 23;UOSCSIM_erth = 0.68;ps7 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps7;
+UOSCSIM_tw = 240;UOSCSIM_MAperiod = 69;UOSCSIM_erth = 0.56;ps8 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps8;
+UOSCSIM_tw = 340;UOSCSIM_MAperiod = 62;UOSCSIM_erth = 0.56;ps9 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps9;
+UOSCSIM_tw = 340;UOSCSIM_MAperiod = 20;UOSCSIM_erth = 0.8;ps10 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps10;
+UOSCSIM_tw = 220;UOSCSIM_MAperiod = 75;UOSCSIM_erth = 0.78;ps11 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps11;
+UOSCSIM_tw = 500;UOSCSIM_MAperiod = 24;UOSCSIM_erth = 0.78;ps12 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps12;
+UOSCSIM_tw = 200;UOSCSIM_MAperiod = 80;UOSCSIM_erth = 0.78;ps13 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps13;
+UOSCSIM_tw = 500;UOSCSIM_MAperiod = 44;UOSCSIM_erth = 0.62;ps14 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps14;
+UOSCSIM_tw = 360;UOSCSIM_MAperiod = 78;UOSCSIM_erth = 0.58;ps15 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps15;
+UOSCSIM_tw = 220;UOSCSIM_MAperiod = 56;UOSCSIM_erth = 0.62;ps16 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps16;
+UOSCSIM_tw = 260;UOSCSIM_MAperiod = 94;UOSCSIM_erth = 0.74;ps17 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps17;
+UOSCSIM_tw = 300;UOSCSIM_MAperiod = 100;UOSCSIM_erth = 0.48;ps18 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps18;
+UOSCSIM_tw = 400;UOSCSIM_MAperiod = 33;UOSCSIM_erth = 0.72;ps19 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps19;
+UOSCSIM_tw = 200;UOSCSIM_MAperiod = 18;UOSCSIM_erth = 0.76;ps20 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps20;
+UOSCSIM_tw = 400;UOSCSIM_MAperiod = 22;UOSCSIM_erth = 0.86;ps21 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps21;
+UOSCSIM_tw = 200;UOSCSIM_MAperiod = 79;UOSCSIM_erth = 0.72;ps22 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps22;
+UOSCSIM_tw = 520;UOSCSIM_MAperiod = 39;UOSCSIM_erth = 0.48;ps23 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps23;
+UOSCSIM_tw = 500;UOSCSIM_MAperiod = 15;UOSCSIM_erth = 0.82;ps24 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps24;
+UOSCSIM_tw = 380;UOSCSIM_MAperiod = 67;UOSCSIM_erth = 0.68;ps25 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps25;
+UOSCSIM_tw = 180;UOSCSIM_MAperiod = 67;UOSCSIM_erth = 0.72;ps26 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps26;
+UOSCSIM_tw = 360;UOSCSIM_MAperiod = 35;UOSCSIM_erth = 0.86;ps27 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps27;
+UOSCSIM_tw = 260;UOSCSIM_MAperiod = 33;UOSCSIM_erth = 0.68;ps28 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps28;
+UOSCSIM_tw = 240;UOSCSIM_MAperiod = 41;UOSCSIM_erth = 0.56;ps29 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps29;
+UOSCSIM_tw = 200;UOSCSIM_MAperiod = 79;UOSCSIM_erth = 0.62;ps30 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps30;
+//30min_PF
+UOSCSIM_tw = 420;UOSCSIM_MAperiod = 32;UOSCSIM_erth = 0.76;ps1 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps1;
+UOSCSIM_tw = 280;UOSCSIM_MAperiod = 67;UOSCSIM_erth = 0.76;ps2 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps2;
+UOSCSIM_tw = 360;UOSCSIM_MAperiod = 69;UOSCSIM_erth = 0.6;ps3 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps3;
+UOSCSIM_tw = 240;UOSCSIM_MAperiod = 69;UOSCSIM_erth = 0.56;ps4 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps4;
+UOSCSIM_tw = 400;UOSCSIM_MAperiod = 48;UOSCSIM_erth = 0.68;ps5 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps5;
+UOSCSIM_tw = 360;UOSCSIM_MAperiod = 55;UOSCSIM_erth = 0.86;ps6 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps6;
+UOSCSIM_tw = 400;UOSCSIM_MAperiod = 48;UOSCSIM_erth = 0.56;ps7 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps7;
+UOSCSIM_tw = 500;UOSCSIM_MAperiod = 44;UOSCSIM_erth = 0.62;ps8 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps8;
+UOSCSIM_tw = 340;UOSCSIM_MAperiod = 56;UOSCSIM_erth = 0.86;ps9 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps9;
+UOSCSIM_tw = 420;UOSCSIM_MAperiod = 56;UOSCSIM_erth = 0.7;ps10 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps10;
+UOSCSIM_tw = 440;UOSCSIM_MAperiod = 51;UOSCSIM_erth = 0.74;ps11 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps11;
+UOSCSIM_tw = 520;UOSCSIM_MAperiod = 39;UOSCSIM_erth = 0.48;ps12 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps12;
+UOSCSIM_tw = 340;UOSCSIM_MAperiod = 69;UOSCSIM_erth = 0.6;ps13 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps13;
+UOSCSIM_tw = 400;UOSCSIM_MAperiod = 69;UOSCSIM_erth = 0.76;ps14 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps14;
+UOSCSIM_tw = 700;UOSCSIM_MAperiod = 85;UOSCSIM_erth = 0.6;ps15 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps15;
+UOSCSIM_tw = 180;UOSCSIM_MAperiod = 67;UOSCSIM_erth = 0.72;ps16 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps16;
+UOSCSIM_tw = 180;UOSCSIM_MAperiod = 56;UOSCSIM_erth = 0.86;ps17 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps17;
+UOSCSIM_tw = 500;UOSCSIM_MAperiod = 45;UOSCSIM_erth = 0.72;ps18 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps18;
+UOSCSIM_tw = 480;UOSCSIM_MAperiod = 44;UOSCSIM_erth = 0.86;ps19 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps19;
+UOSCSIM_tw = 280;UOSCSIM_MAperiod = 44;UOSCSIM_erth = 0.86;ps20 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps20;
+UOSCSIM_tw = 340;UOSCSIM_MAperiod = 49;UOSCSIM_erth = 0.78;ps21 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps21;
+UOSCSIM_tw = 240;UOSCSIM_MAperiod = 40;UOSCSIM_erth = 0.62;ps22 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps22;
+UOSCSIM_tw = 420;UOSCSIM_MAperiod = 59;UOSCSIM_erth = 0.8;ps23 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps23;
+UOSCSIM_tw = 180;UOSCSIM_MAperiod = 46;UOSCSIM_erth = 0.86;ps24 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps24;
+UOSCSIM_tw = 660;UOSCSIM_MAperiod = 79;UOSCSIM_erth = 0.44;ps25 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps25;
+UOSCSIM_tw = 340;UOSCSIM_MAperiod = 52;UOSCSIM_erth = 0.84;ps26 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps26;
+UOSCSIM_tw = 460;UOSCSIM_MAperiod = 73;UOSCSIM_erth = 0.5;ps27 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps27;
+UOSCSIM_tw = 640;UOSCSIM_MAperiod = 88;UOSCSIM_erth = 0.22;ps28 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps28;
+UOSCSIM_tw = 680;UOSCSIM_MAperiod = 44;UOSCSIM_erth = 0.54;ps29 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps29;
+UOSCSIM_tw = 380;UOSCSIM_MAperiod = 51;UOSCSIM_erth = 0.82;ps30 = getUOSCSim(UOSCSIM_tw,UOSCSIM_MAperiod,UOSCSIM_erth);ps += ps30;
+
+
+ps_th = Param("ps_th", 45, 0, 100, 1);
+
+bsig=ps >= ps_th;
+ssig=ps <= -ps_th;
+
+bsig=ExRem(bsig,ssig);
+ssig=ExRem(ssig,bsig);
+
+psmerge=GetPs(bsig,ssig,0);
+ps_exit_th = ps_th * 0.66667;
+C01 = psmerge==1 AND ps <= ps_exit_th;
+C02 = psmerge==-1 AND ps >= -ps_exit_th;
+
+tp = 15; //Param("tp",15,0,100,1);
+Lstbsg = BarsSince(psmerge==1 AND Ref(psmerge,-1)!=1);
+Lstssg = BarsSince(psmerge==-1 AND Ref(psmerge,-1)!=-1);
+C03 = psmerge==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C04 = psmerge==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+//Csig=C01 OR C02 OR C03 OR C04;
+csig = C03 OR C04;
+//csig = C01 OR C02;
+
+
+Plotperformance(bsig,ssig,Csig);
+
+ps=GetPs(bsig,ssig,csig);
+
+SIG=ps;
+
+//ProfitDiff = Profit - Ref(Profit, -1);
+//GrossProfit = getGrossProfit(SIG);
+//GrossProfitDiff = GrossProfit - Ref(GrossProfit, -1);
+
+
+
+StrategyName = "5min-rb- 90_45 getUOSCSim";StrategyID = "1010600011";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

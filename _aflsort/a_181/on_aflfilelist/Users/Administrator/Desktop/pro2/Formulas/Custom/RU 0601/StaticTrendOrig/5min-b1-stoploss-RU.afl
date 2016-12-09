@@ -1,0 +1,60 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "5min-b1-stoploss-RU";
+StrategyID =10246;
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+
+
+tw=ParamOptimize("timewinodw",260,100,600,20);
+MAperiod=ParamOptimize("MAperiod",1300,1000,2000,100);
+b=( ( C+2 * StDev( C,tw ) - MA( C,tw) ) / ( 4 * StDev( C,tw ) ) ) ;
+DynamicAverage = MA(b,MAperiod);
+
+//OptimizerSetEngine("spso");
+//OptimizerSetOption("Runs",1);
+//OptimizerSetOption("MaxEval",5000);
+
+OneStDev = 0.05;
+
+howManyStDev = ParamOptimize("howManyStDev", 3.6, 3, 10, 0.1); // <=== 3.1
+down = DynamicAverage - howManyStDev * OneStDev; 
+up = DynamicAverage + howManyStDev * OneStDev;
+
+// BSIG, SSIG, CSIG
+SSIG = Cross(down, b); // Important: do not use Cross(X4, a)
+BSIG = Cross(b, up); // Important: do not use Cross(b, X4)
+
+ps = GetPs(bsig,ssig,0);
+
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+tp = Param("tp",38,0,100,1);
+
+
+C05 = ps==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C06 = ps==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+CSIG = C05 OR C06;// TimeNum() < 91830 OR TimeNum() > 151430 OROR  OR C03 OR C04;
+
+    Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+
+PlotPerformance(BSig,Ssig,Csig);
+ps0 = GetPs(bsig,ssig,csig);
+Filter= 1;
+AddColumn(ps0,"ps");
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

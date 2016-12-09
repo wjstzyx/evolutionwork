@@ -1,0 +1,216 @@
+_SECTION_BEGIN("Trade on the left");
+
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "270min-Lefttrading2-Daily-TF";
+StrategyID = 380050;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+Len=Param("Len",2,1,1000,1);
+AMAf1=Param("AMAf1",0,0,1,0.01);
+AMAf2=Param("AMAf2",0,0,1,0.01);
+EMAperiod=Param("EMAperiod",1,1,100,1);
+AMAf3=Param("AMAf3",0,0,1,0.01);
+/////////////////stationary indicator for multiple frames///////////////
+
+function PIR(p,Length)
+{
+Ll=LLV(p,Length);
+Hh=HHV(p,Length);
+return IIf(Hh==Ll,0,(100*(p-Ll)/(Hh-Ll)));
+}
+
+
+TimeFrameSet(inHourly);
+pr_h = (H+L)/2; 
+len_h = Len; 
+maxh_h = HHV(pr_h,len_h); 
+minl_h = LLV(pr_h,len_h); 
+Array1_h = .33*2*((pr_h-minl_h)/(maxh_h-minl_h)-.5); 
+val1_h = AMA(Array1_h,AMAf1); 
+value1_h = IIf(val1_h>.99,.999,IIf(val1_h<-.99,-.999,val1_h)); 
+Array2_h = .5*log((1+value1_h)/(1-value1_h)); 
+fish_h1 = AMA(Array2_h,AMAf2); 
+fish_h=PIR(fish_h1,len_h); 
+
+TimeFrameRestore();
+expand_fish_h=TimeFrameExpand(fish_h, inHourly);
+/////////////////////////////////////////////////////////
+//***************************************************************//
+//          support and resistant line                         //
+//***************************************************************//
+
+
+
+HaClose =EMA((O+H+L+C)/4,EMAperiod);
+HaClose=(O+H+L+C)/4;
+HaOpen = AMA( Ref( HaClose, -1 ), AMAf3 ); 
+HaOpen=Ref( HaClose, -1 );
+HaHigh = Max( H, Max( HaClose, HaOpen ) ); 
+HaLow = Min( L, Min( HaClose, HaOpen ) ); 
+
+n=Param("n",9,0,100,1);
+
+Prd1=Param("Res_Period1",1,0,200,1);
+                   
+test   = TEMA  ( High , Prd1 ) ;  
+test   = EMA  ( High , Prd1 ) ;  
+//test   = MA  ( High , Prd1 ) ;  
+//test   = TSF  ( High , Prd1 ) ;  
+
+V1=V>=Ref(V,-1);
+V2=V<=Ref(V,-1);
+Vpeak=ExRem(V2,V1);
+Vpeak=1;
+
+PKideal = test > Ref(test,-1) AND Ref(test,1) < test;//Peak
+
+pk1=test>=Ref(test,-1);
+pk2=test<=Ref(test,-1);
+
+pkpeak=ExRem(pk2,pk1);
+
+pk=pkpeak AND Vpeak;
+
+
+PKV1 = ValueWhen(PK,haHigh,1);//PeakValue1
+
+
+MPK=PK;
+
+
+MPKV = ValueWhen(Ref(MPK,-1) == 0 AND MPK == 1, PKV1,1+n); //MajorPeakValue
+
+
+Prd2=Prd1;
+                   
+test2   = TEMA ( Low , Prd2 ) ;   
+test2   = EMA ( Low , Prd2 ) ;   
+
+sp1=test2>=Ref(test2,-1);
+sp2=test2<=Ref(test2,-1);
+
+sppeak=ExRem(sp1,sp2);
+sp=sppeak AND Vpeak;
+
+SPV1 = ValueWhen(SP,haLow,1);
+
+MSP=SP;
+
+MSPV = ValueWhen(Ref(MSP,-1) == 0 AND MSP == 1, SPV1,1+n);
+
+
+Maxminm=Param("Maxminm",2,1,100,1);
+
+MPKVI = ValueWhen(Ref(MPK,-1) == 0 AND MPK == 1, PKV1,1);
+MSPVI = ValueWhen(Ref(MSP,-1) == 0 AND MSP == 1, SPV1,1);
+MPKVMIN=MPKVI;
+MPKVMAX=MPKVI;
+MSPVMIN=MSPVI;
+MSPVMAX=MSPVI;
+for (i=2;i<Maxminm;i++)
+{
+MPKVI = ValueWhen(Ref(MPK,-1) == 0 AND MPK == 1, PKV1,i);
+MPKVMIN=Min(MPKVMIN,MPKVI);
+MPKVMAX=Max(MPKVMAX,MPKVI);
+
+MSPVI = ValueWhen(Ref(MSP,-1) == 0 AND MSP == 1, SPV1,i);
+
+MSPVMIN=Min(MSPVMIN,MSPVI);
+MSPVMAX=Max(MSPVMAX,MSPVI);
+}
+
+
+//Plot(C, "", IIf(O >= C, colorOrange, colorGreen), styleCandle);
+
+/////////////////////////////////////////////////////////
+//***************************************************************//
+//                          volume indicator                         //
+//***************************************************************//
+vperiod = Param("vperiod",1,1,100,1);
+
+sv = MA(V,vperiod);
+
+nperiod = Param("nperiod",1,1,1000,1);
+isv = sv - Ref(sv,-vperiod);
+
+nisv = (isv-LLV(isv,nperiod))/(HHV(isv,nperiod)-LLV(isv,nperiod))*100;
+
+//Plot(nisv,"nisv",colorBlue);
+
+
+/////////////////////////////////////////////////////////
+//***************************************************************//
+//                          trade method                          //
+//***************************************************************//
+Lowlimit=Param("Lowlimit",1,1,100,1);
+volumelimit=Param("volumelimit",1,1,100,1);
+
+
+stationp=expand_fish_h;
+
+bsig1=stationp<Lowlimit;
+ssig1=stationp>100-Lowlimit;
+
+bsig2=L<MSPV;
+ssig2=H>MPKV;
+
+bsig=bsig1 AND bsig2;
+ssig=ssig1 AND ssig2;
+
+
+ps=GetPs(bsig,ssig,0);
+
+C01=ps==1 AND C<MSPVMIN;
+C02=ps==-1 AND C>MPKVMAX;
+
+
+//////////////////////////zhisun/////////////////////////////////////////////////
+
+stdzhisun=ParamOptimize("stdzhisun",0,0,10,0.1);
+zhisunup=BBandTop(C,100,stdzhisun);
+zhisundown=BBandBot(C,100,stdzhisun);
+
+C001=ps==1 AND C<zhisundown;
+C002=ps==-1 AND C>zhisunup;
+
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+tp = Param("tp",0,0,100,1);
+
+
+C05 = ps==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C06 = ps==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+p = Param("p",0,0,100,1);
+C03 = ps==1 AND  C<Ref(C,-Lstbsg)-p;
+C04 = ps==-1 AND  C>Ref(C,-lstssg)+p;
+
+
+Csig=C001 OR C002 OR C01 OR C02 OR C03 OR C04 OR C05 OR C06;
+Csig=C01 OR C02;
+//Csig=C001 OR C002;
+//Csig=C03 OR C04;
+//Csig=C05 OR C06;
+//Csig=C01 OR C02 OR C001 OR C002;
+//Csig=0;
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+ps0 = GetPs(bsig,ssig,csig);
+Filter= 1;
+AddColumn(ps0,"ps");
+
+_SECTION_END();

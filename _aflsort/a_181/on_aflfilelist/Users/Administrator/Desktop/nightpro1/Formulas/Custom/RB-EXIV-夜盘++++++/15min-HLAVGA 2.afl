@@ -1,0 +1,59 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "15min-HLAVGA 2";
+StrategyID ="1022100013";
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+
+function HLAVGA(ParaPeriod,ParaCon,StartPeriod,TickerName)
+{
+fo = Foreign(TickerName, "O" );
+fh = Foreign(TickerName, "H" );
+fl = Foreign(TickerName, "L" );
+fc = Foreign(TickerName, "C" );
+fv = Foreign(TickerName, "V" );
+fopi = Foreign(TickerName, "OpenInt" );
+TIME=TimeNum();
+DSAVG = (fH+fL)/2;
+    
+    RDSAVG = Ref(DSAVG,-1);
+    HHL = HHV(RDSAVG,ParaPeriod);
+    LHL = LLV(RDSAVG,ParaPeriod);
+    fa = (fh+fl)/2;
+BSIG = Ref(fa>HHL,-ParaCon) && fa>=Ref(fa,-ParaCon) && Day()==Ref(Day(),-StartPeriod);
+SSIG = Ref(fa<LHL,-ParaCon) && fa<=Ref(fa,-ParaCon) && Day()==Ref(Day(),-StartPeriod);
+ CSIG =0;//GetLastK(TickerName);
+return GetPs(BSIG,SSIG,CSIG);
+}
+
+
+
+
+TickerNAME = Name();
+
+n1= ParamOptimize("n1", 12, 0, 5000,1);
+n2= ParamOptimize("n2", 5, 0, 5000,1);
+n3= ParamOptimize("n3",1 , 0, 10000,1);
+
+Cond=hlavga(n1,n2,n3,TickerName);
+
+Vote=0;
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond==0;
+
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_night_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

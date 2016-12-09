@@ -1,0 +1,36 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+
+#include "Formulas/Custom/BasicV4/wb.afl";
+#include "Formulas/Custom/BasicV4/exiv.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+StrategyName = "IF01-WBN-34.113_29.185-IVASum-7.2.3.10-15";
+StrategyID = 40453;
+ProType = 0;
+
+
+
+
+
+
+Cond1 =    WBNight(34,113,"IF");
+Cond3 =    WBNight(29,185,"IF");
+
+Cond2 =    EXIVASum(7,2,23,10,0,1000,"IF");
+Cond4 =    EXIVASum(7,2,23,15,0,1000,"IF");
+Cond=(Cond1+Cond3)/2+(Cond2+Cond4)/2;
+
+Vote=0;
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG= Cond<=Vote AND Cond>=-Vote;
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName+"--"+StrategyID);

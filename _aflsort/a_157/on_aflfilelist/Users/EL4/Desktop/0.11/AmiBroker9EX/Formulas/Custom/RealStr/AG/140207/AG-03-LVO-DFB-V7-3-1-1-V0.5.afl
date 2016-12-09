@@ -1,0 +1,66 @@
+_SECTION_BEGIN("TEST1-1");
+#pragma nocache;
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TRADEHelper.afl";
+#include "Formulas/Custom/BasicV2/dfb.afl";
+#include "Formulas/Custom/BasicV2/v7dy.afl";
+#include "Formulas/Custom/BasicV4/LVO.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 500);
+StrategyName = "AG-03-LVO-DFB-V7-3-1-1-V0.5";
+StrategyID = 90010;
+ProType = 1;
+TickerNAME = Name();
+n1= ParamOptimize("Highperiod", 35, 20, 300,1);
+n2= ParamOptimize("maperiod", 2, 1,20,0.1);
+n3= ParamOptimize("PTS",1, 0, 600,1);
+n4= ParamOptimize("StartPeriod",1, 0, 1000, 1);
+n5= ParamOptimize("EndPeriod",1, 0, 1000, 1);
+n6= ParamOptimize("x",1, 0, 1000, 1);
+n7= ParamOptimize("n7",1, 0, 1000, 1);
+N8= ParamOptimize("N8",1, 0, 1000, 1);
+
+condv1=Lvoori3(5,17,5,47,8,tickername);
+condv2=Lvoori4(5,17,5,47,8,tickername);
+Condv3=Lvoori5(4,17,5,47,0,tickername);
+Condv4=Lvoori6(3,0,5,n4,n5,tickername);
+Condv5=Lvoori7(5,0,5,47,0,tickername);
+CondV = CondV1+ CondV2+ CondV3+ CondV4+CondV5;
+CondG1= CondV /5;
+
+Condm1=DFB(23,1,"AG");
+Condm2=DFB(30,1,"AG");
+CondM = CondM1 +CondM2;
+CondG2= CondM /2;
+
+CondG3=V7DYMA(26,97,3,"AG");
+
+
+
+Lvo=ParamOptimize("Lvo",3, 0, 4, 0.5);
+DF= ParamOptimize("DFB", 1, 0, 2.5, 0.5);
+V7= ParamOptimize("V7", 1, 0, 2.5, 0.5);
+
+Cond = Lvo*CondG1 +df*CondG2+V7*CondG3;
+
+Vote=ParamOptimize("vote",0.5, 0,3, 0.5);
+
+
+BSIG=Cond>Vote;// AND  Openlastk(tickername,14) ;
+SSIG=Cond<-Vote ;//AND  Openlastk(tickername,14);
+CSIG=Cond==0 ;//OR GetLastKMINs(tickername,14);
+
+//Csig=0;
+
+
+
+Buy = BSIG;
+Short = SSIG;
+Sell= Cover = CSIG;
+
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName+"--"+StrategyID);
+_SECTION_END();

@@ -1,0 +1,83 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "I-30min-G3 trend";
+StrategyID = 270051;
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+//IF 1MIN (190,230,27,10,10,31)
+
+tw=Param("timewinodw",16,1,1000,1);
+Length=Param("Length",20,10,1000,10);
+Selltrigger=Param("Selltrigger",6,1,100,1);
+stdzhisun=ParamOptimize("stdzhisun",0.1,0,10,0.1);
+tp = Param("tp",100,1,100,1);
+p = Param("p",100,1,100,1);
+
+G3=(H+L)/Sum(C,tw);
+
+
+////////////////////////////////////////////////
+G3=G3;
+
+/////////////////////functions/////////////////////////////////////////
+function PIR(p,Length)
+{
+Ll=LLV(p,Length);
+Hh=HHV(p,Length);
+return (100*(p-Ll)/(Hh-Ll));
+}
+//////////////////////////indicators////////////////////////////////////////////
+
+PIRG3=PIR(G3,Length);
+//Plot(PIRG3,"PIRG3",colorGreen,styleLeftAxisScale);
+
+
+
+ssig=PIRG3<Selltrigger;
+
+bsig=PIRG3>100-Selltrigger;
+
+//////////////////////////zhisun/////////////////////////////////////////////////
+
+zhisunup=BBandTop(C,100,stdzhisun);
+zhisundown=BBandBot(C,100,stdzhisun);
+
+ps=GetPs(bsig,ssig,0);
+C001=ps==1 AND C<zhisundown;
+C002=ps==-1 AND C>zhisunup;
+
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+
+
+
+C05 = ps==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C06 = ps==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+
+C03 = ps==1 AND  C<Ref(C,-Lstbsg)-p;
+C04 = ps==-1 AND  C>Ref(C,-lstssg)+p;
+
+//Csig=C001 OR C002 OR C05 OR C06;
+//Csig=C001 OR C002;
+Csig=C001 OR C002 OR C05 OR C06 OR C03 OR C04;
+
+//Csig=C001 OR C002 OR C03 OR C04;
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+
+ps0 = GetPs(bsig,ssig,csig);
+Filter= 1;
+AddColumn(ps0,"ps");

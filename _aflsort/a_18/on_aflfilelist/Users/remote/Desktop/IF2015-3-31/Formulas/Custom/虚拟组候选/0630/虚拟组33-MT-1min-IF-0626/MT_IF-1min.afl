@@ -1,0 +1,65 @@
+_SECTION_BEGIN("MT");
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "MT_IF";
+StrategyID = "40930";
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+//Parameters Setting
+P1=Param("P1",3,1,100,1);
+P2=Param("P2",18,1,100,1);
+P3=Param("P3",30,1,100,1);
+ADXth=Param("ADXth",20.5,1,40,0.1);
+Tth=Param("TTh",0.734,0,5,0.001);
+TCover=Param("Tcover",1.46,-3,2,0.001);
+Time_Start=Param("Timestart",100000,91500,151500,100);
+Time_End=Param("Timeend",143300,91500,151500,100);
+
+//Main
+RP1=ROC(C,P1);
+RP2=ROC(C,P2);
+RP3=ROC(C,P3);
+RSUM=RP1+RP2+RP3;
+
+BCK1= Cross(Rsum,Tth);
+BCK2= PDI(14)>Ref(PDI(14),-1);
+BCK3= TimeNum()>=Time_Start AND TimeNum()<=Time_End;
+BCK4= ADX(14)>=ADXth;
+
+b1=bck1 AND bck2 AND bck3 AND bck4;
+
+SCK1=Cross(-Tth,Rsum);
+SCK2= MDI(14)>Ref(MDI(14),-1);
+SCK3= TimeNum()>=Time_Start AND TimeNum()<=Time_End;
+SCK4= ADX(14)>=ADXth; 
+s1 = SCK1 AND sck2 AND SCK3 AND SCK4;
+
+bsig=b1;
+ssig=s1;
+
+Csig=TimeNum()>Time_end;
+ps=GetPs(bsig,ssig,Csig);
+C01= ps==1 AND Rsum<-TCover;
+C02= ps==-1 AND Rsum>Tcover;
+Csig= C01 OR C02;
+
+
+    Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+_SECTION_END();

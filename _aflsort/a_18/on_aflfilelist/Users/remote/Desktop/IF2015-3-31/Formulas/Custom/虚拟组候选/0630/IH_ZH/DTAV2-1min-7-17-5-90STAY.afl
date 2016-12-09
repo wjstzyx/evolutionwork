@@ -1,0 +1,64 @@
+_SECTION_BEGIN("test");
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "DTAV2-1min-7-17-5-90";
+StrategyID = "120006";
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+tickername=Name();
+fo = Foreign(TickerName, "O" );
+	fh = Foreign(TickerName, "H" );
+	fl = Foreign(TickerName, "L" );
+	fc = Foreign(TickerName, "C" );
+	fv = Foreign(TickerName, "V" );
+
+LENG=Param("LENG",7,0,100,1);
+//LENGX2=Param("LENGX2",20,0,100,1);
+X1=Param("X1",17,0,100,1);
+X2=Param("X2",5,0,100,1);
+StartPeriod=Param("StartPeriod",90,0,100,1);
+//Period=Param("Period",8,0,100,1);
+
+ISKUP=FC>FO;
+ISKDN=FC<FO;
+KL1=abs(FC-FO);
+FSTBAR=Day()!=Ref(Day(),-1);
+KL2=abs(IIf(FSTBAR,FC-FO,FC-Ref(FC,-1)));
+KL=Min(KL1,KL2);
+LASTBAR=GetLastK(TickerName);
+
+
+LENGX2=LENG;
+KL222=abs(FC-FO);
+LENG222=LENGX2/20000*FC;
+
+BBK222=ISKUP && KL222>=LENG222;
+SSK222=ISKDN && KL222>=LENG222;
+
+NBK=CPPCount(BBK222,X1)>=X2;
+NSK=CPPCount(SSK222,X1)>=X2;
+
+BSIG=Day()==Ref(Day(),-StartPeriod) && NBK AND NOT(NSK);
+SSIG=Day()==Ref(Day(),-StartPeriod) && NSK AND NOT(NBK);
+Lstsig = BarsSince(bsig OR ssig);
+CSIG=LASTBAR ;
+
+
+    Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+_SECTION_END();

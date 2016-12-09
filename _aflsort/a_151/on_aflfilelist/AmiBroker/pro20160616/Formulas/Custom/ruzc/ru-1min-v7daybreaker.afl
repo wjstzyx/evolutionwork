@@ -1,0 +1,107 @@
+_SECTION_BEGIN("1min");
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "ru-1min-v7daybreaker";
+StrategyID  ="1010100000";
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+
+
+function V7DYStartVer(PDIFP,EXIT,TickerName)
+{
+	fo = Foreign(TickerName, "O" );
+	fh = Foreign(TickerName, "H" );
+	fl = Foreign(TickerName, "L" );
+	fc = Foreign(TickerName, "C" );
+
+TIME=TimeNum();
+FSTK=Day()!=Ref(Day(),-1);
+LSTK=(TimeNum()+Interval()*100/60)>=146000;
+KN = BarsSince(FSTK);
+LSTFSTK=BarsSince(FSTK);
+FirstK=FSTK;
+LSTBAR=LSTK;
+FSTBAR=FSTK;
+TT1=FO-Ref(fc ,-1);
+TT2=fc -Ref(fc ,-1);
+TT3=(fc +fo )/2-Ref(fc ,-1);
+TT4=(fh +FL)/2-Ref(fc ,-1);
+BSIGT1=FSTBAR  AND  TT1<0;
+SSIGT1=FSTBAR  AND  TT1>0;
+BSIGT2=FSTBAR  AND  TT2<0;
+SSIGT2=FSTBAR  AND  TT2>0;
+BSIGT3=FSTBAR  AND  TT3<0;
+SSIGT3=FSTBAR  AND  TT3>0;
+BSIGT4=FSTBAR  AND  TT4<0;
+SSIGT4=FSTBAR  AND  TT4>0;
+BSIGTVOTE= (BSIGT1 +BSIGT2 +BSIGT3 +BSIGT4);
+SSIGTVOTE= (SSIGT1 +SSIGT2 +SSIGT3 +SSIGT4);
+BSIGQ1 =BSIGTVOTE>SSIGTVOTE;
+SSIGQ1 =BSIGTVOTE<SSIGTVOTE;
+//V7
+LC=Ref(fc ,-1);
+PDIF=Ref(fc ,-1)/20000*PDIFP;
+JUMP=0;
+RC=Ref(fc ,-1);
+RO=Ref(fo ,-1);
+PDIF3=PDIF;
+GAPP=(fc -RC+fo -RC)/2;
+MARK=Ref(fc ,-LSTFSTK);
+SAMEDAYB=Day()==Ref(Day(),-LSTFSTK);
+SAMEDAYS=Day()==Ref(Day(),-LSTFSTK);
+BSIG60002=SAMEDAYS  AND  fc >MARK+PDIF  AND  LSTFSTK>=EXIT;
+SSIG60002=SAMEDAYB  AND  fc <MARK-PDIF  AND  LSTFSTK>=EXIT;
+//Combination
+//=======================================================================
+
+period = Param("Period",172,1,1000,1);
+
+
+LL = LLV(fl,period);
+HH = HHV(fh,period);
+
+fcma = EMA(fc,period);
+
+HL = GetPs(HH,LL,0) ;
+
+  B1 = LLV(fl,period)>LLV(fcMA,period);
+  S1 = HHV(fh,period)<HHV(fcMA,period);
+	
+	BG = GetPs(b1,s1,0);
+BSIG100 = BG== 1 AND fc>fcma;
+SSIG100 = BG==-1 AND fc<fcma;
+
+//========================================================================
+BSIG=BSIGQ1  OR  BSIG60002 AND bsig100 ;
+SSIG=SSIGQ1  OR  SSIG60002 AND ssig100 ;
+CSIG=LSTK;
+
+	return getCS(BSIG,SSIG,CSIG);
+}
+
+PDIFP=ParamOptimize("PDIFP",128,1,150,1);
+exit=ParamOptimize("exit",13,1,100,1);
+TickerName = Name();
+
+COND =V7DYStartVer(PDIFP,EXIT,TickerName);
+
+
+bsig=  COND==1;
+ssig=  COND==-1;
+csig=  COND==2;
+
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+_SECTION_END();

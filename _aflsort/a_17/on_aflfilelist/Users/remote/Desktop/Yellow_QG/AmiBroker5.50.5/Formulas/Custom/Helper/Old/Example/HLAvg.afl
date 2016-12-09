@@ -1,0 +1,30 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+
+StrategyName = "HLAvg";
+StrategyID = 1007;
+Plot(0,StrategyName,colorBlack);
+TickerList = ParamStr("Instruments", "AB-SQRUZS");
+
+Period = ParamOptimize("HL Period", 5, 1, 10, 1);
+Con = ParamOptimize( "Confirm Period", 2, 1, 5, 1);
+
+fo = Foreign( TickerList , "O" );
+fh = Foreign( TickerList , "H" );
+fl = Foreign( TickerList , "L" );
+fc = Foreign( TickerList , "C" );
+
+TIME=Hour()*10000+Minute()*100;
+DSAVG = (fh+fl)/2;
+HHL = HHV(DSAVG,Period);
+LHL = LLV(DSAVG,Period);
+
+BSIG = Ref(fc>HHL,-Con) && fc>=Ref(fc,-Con);
+SSIG = Ref(fc<LHL,-Con) && fc<=Ref(fc,-Con);
+CSIG = TIME>=145500;
+
+Buy = BSIG;
+Short = SSIG;
+Sell= Cover = CSIG;
+
+PlotPerformance(BSIG,SSIG,CSIG);
+//Trading(stid,StrategyName,BSIG,CSIG);

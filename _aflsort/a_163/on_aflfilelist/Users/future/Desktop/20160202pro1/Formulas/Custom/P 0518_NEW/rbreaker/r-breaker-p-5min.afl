@@ -1,0 +1,89 @@
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "r-breaker-p-5min";
+StrategyID = 100226;
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+// Optimization
+b1 = 0.35; // from www
+b2 = 0.07; // from www
+b3 = 0.25; // from www
+StopLossRatio = ParamOptimize("StopLossRatio", 0.01, 0, 0.01, 0.001);
+
+// Time range
+tn = TimeNum();
+SmoothTimeRange = tn>=091500;
+
+// Yesterday's high, low, close
+yh = TimeFrameGetPrice("H", inDaily, -1);
+yl = TimeFrameGetPrice("L", inDaily, -1);
+yc = TimeFrameGetPrice("C", inDaily, -1);
+
+// x1 to x6, largest to smallest
+//                x1: Break price for long
+//                x2: Observed price for short
+//     yh
+//                x3: Reversal price for short
+//
+//     (yh+yl)/2
+//
+//                x4: Reversal price for long
+//     yl
+//                x5: Observed price for long
+//                x6: Break price for short
+x2 = yh + b1 * (yc - yl); // Observed price for short
+x5 = yl - b1 * (yh - yc); // Observed price for long
+x3 = (1 + b2)/2 * (yh + yl) - b2 * yl; // Reversal price for short
+x4 = (1 + b2)/2 * (yh + yl) - b2 * yh; // Reversal price for long
+x1 = x2 + b3 * (x2 - x5); // Break price for long
+x6 = x5 - b3 * (x2 - x5); // Break price for short
+
+// Today's high and low so far
+fk = Day()!=Ref(Day(),-1); // First K line
+kb = BarsSince(fk); // K-th bar, starting from 0
+th = HHV(H, kb); // Today's high so far
+tl = LLV(L, kb); // Today's low so far
+
+// Break success
+BSIG1 = Cross(C,x1) AND SmoothTimeRange;
+SSIG1 = Cross(x6,C) AND SmoothTimeRange;
+ps1 = GetPs(BSIG1, SSIG1, 0);
+Lstbsg1 = BarsSince(BSIG1);
+Lstssg1 = BarsSince(SSIG1);
+C01 = ps1== 1 AND C<Ref(C,-Lstbsg1)*(1-StopLossRatio);
+C02 = ps1==-1 AND C>Ref(C,-Lstssg1)*(1+StopLossRatio);
+
+// Break failure
+SSIG2 = ps1==0 AND th<x1 AND th>x2 AND Cross(x3,C) AND SmoothTimeRange;
+BSIG2 = ps1==0 AND tl>x6 AND tl<x5 AND Cross(C,x4) AND SmoothTimeRange;
+ps2 = GetPs(BSIG2, SSIG2, 0);
+Lstbsg2 = BarsSince(BSIG2);
+Lstssg2 = BarsSince(SSIG2);
+C03 = ps2== 1 AND C<Ref(C,-Lstbsg2)*(1-StopLossRatio);
+C04 = ps2==-1 AND C>Ref(C,-Lstssg2)*(1+StopLossRatio);
+
+// R-Breaker combines break failure and break success
+BSIG = BSIG1 OR BSIG2;
+SSIG = SSIG1 OR SSIG2;
+CSIG = C01 OR C02 OR C03 OR C04;
+
+// Performance
+cond = GetPs(BSIG, SSIG, CSIG);
+BSIG = cond>0;
+SSIG = cond<0;
+CSIG = cond==0;
+
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

@@ -1,0 +1,50 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "IF-1MIN-13-3";
+StrategyID = "40945";
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine);  
+
+
+fc = Foreign(Name(), "C" );
+fv = Foreign(Name(), "V" );
+foi = Foreign(Name(), "I" );
+
+	FSTK= BarIndex()==0 OR Day()!=Ref(Day(),-1);
+	KN=BarsSince(FSTK)+1;
+	Plot(kn,"kn",colorRed,styleNoLine);
+	tn = TimeNum();
+
+n =  ParamOptimize("n ",13, 1, 50, 1);
+Nx =  ParamOptimize("nx ",3, 0, 20, 1);
+Lst =  ParamOptimize("lst ",13, 1, 50, 1);
+pp =  ParamOptimize("pp ",48, 1,100, 1);
+ssig = Ref(C,-1)-Ref(C,-5)>n AND C<Ref(O,-1)-nx  AND tn>103000;
+bsig = 0;
+
+ps = GetPs(bsig,ssig,0);
+	Lstssg = BarsSince(ssig);
+
+
+
+C1 = ps== -1 AND Lstssg>=Lst;
+C2  = ps== -1 AND C-Ref(C,-Lstssg)>pp;
+
+Csig =  C1 OR  tn>151300 OR C2;
+
+Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

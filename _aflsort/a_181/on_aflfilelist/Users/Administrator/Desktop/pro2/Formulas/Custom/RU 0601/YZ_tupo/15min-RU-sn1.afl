@@ -1,0 +1,82 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "15min-RU-sn1";
+StrategyID =10260;
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+
+//fask = Foreign(Name(), "H" );
+//fbid = Foreign(Name(), "L" );
+//faskv = Foreign(Name(), "2" );
+//fbidv = Foreign(Name(), "1" );
+fc = Foreign(Name(), "C" );
+fv = Foreign(Name(), "V" );
+foi = Foreign(Name(), "I" );
+
+
+eps = 0.001;
+
+
+m=Paramoptimize("m", 12, 0, 200, 1);
+ss=Paramoptimize("ss", 13, 0, 200, 1);//60
+Reff=Paramoptimize("reff",4, 1, 100, 1);//  4   5 
+
+
+
+TN=(TimeNum()>=104500 AND TimeNum()<=131500) OR (TimeNum()>=140000 AND TimeNum()<151400);
+
+
+zf1 = C-Ref(C,-m)>ss*C/1000 ;
+zdf = (HHV(C,Reff)-LLV(C,Reff))< abs(C-Ref(C,-m))/3;
+dq = Ref(C,-1)<=LLV(C,Reff) AND C>Ref(C,-1) ;
+
+
+zf0 = C-Ref(C,-m)<-ss*C/1000 ;
+zdf0 = (HHV(C,Reff)-LLV(C,Reff))< abs(C-Ref(C,-m))/3;
+dq0 = Ref(C,-1)>=HHV(C,Reff) AND C<Ref(C,-1) ;
+
+
+bsig=zf1 AND zdf AND dq  ;// AND TN;
+
+
+
+SSIG=zf0 AND zdf0 AND dq0  ;//AND TN;
+
+
+
+ PS=GetPs(BSIG,SSIG,0);
+
+	Lstbsg = BarsSince(bsig);
+	Lstssg = BarsSince(ssig);
+    
+	//Holdperiod = Paramoptimize("holdperiod", 3200, 1, 99999, 10);
+
+n = Paramoptimize("n",65, 1, 200, 1);
+	C01 = ps==1 AND  C-Ref(C,-Lstbsg)>n*C/1000;
+
+	C02 = ps==-1 AND Ref(C,-lstssg)-C>n*C/1000;  
+Nc = Paramoptimize("nc", 54, 1,300, 1);
+ C03= ps==1 AND HighestSince(bsig,fc,1)-fc>=nc*C/1000;
+ C04= ps== -1 AND LowestSince(ssig,fc,1)-fc<=-nc*C/1000;
+
+//NNum = Paramoptimize("NNum ",20, 1, 200, 1);
+//	C05 = ps==1 AND  Lstbsg >NNum ;
+
+//	C06 = ps==-1 AND Lstssg >NNum ;
+
+ CSIG = C01 OR C02   OR C03 OR C04    ;
+
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

@@ -1,0 +1,30 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+StrategyName = "RB01_sv-3685-634";
+StrategyID = 210038;
+ProType = 1;
+TickerName=Name();
+
+
+
+Cond=  CPPSV6(4045,350);
+
+
+Vote=ParamOptimize("w_Vote",0,0,4,0.5);
+Vote=0;
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond==0  ;
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

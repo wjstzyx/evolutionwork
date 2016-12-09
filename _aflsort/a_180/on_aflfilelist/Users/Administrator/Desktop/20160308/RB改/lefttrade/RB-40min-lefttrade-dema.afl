@@ -1,0 +1,207 @@
+
+// try three import elements:
+
+//1,different time frame set
+//2,support and resistant line
+//3,based on volumn
+
+
+
+
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "RB-40min-lefttrade-dema";
+StrategyID = 210447;
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine);  
+
+
+
+
+
+Len=Param("Len",128,1,1000,1);
+AMAf1=Param("AMAf1",0.01,0,1,0.01);
+AMAf2=Param("AMAf2",0.04,0,1,0.01);
+
+/////////////////stationary indicator for multiple frames///////////////
+
+function PIR(p,Length)
+{
+Ll=LLV(p,Length);
+Hh=HHV(p,Length);
+return IIf(Hh==Ll,0,(100*(p-Ll)/(Hh-Ll)));
+}
+TimeFrameSet(inHourly);
+pr_h = (H+L)/2; 
+len_h = Len; 
+maxh_h = HHV(pr_h,len_h); 
+minl_h = LLV(pr_h,len_h); 
+Array1_h = .33*2*((pr_h-minl_h)/(maxh_h-minl_h)-.5); 
+val1_h = AMA(Array1_h,AMAf1); 
+value1_h = IIf(val1_h>.99,.999,IIf(val1_h<-.99,-.999,val1_h)); 
+Array2_h = .5*log((1+value1_h)/(1-value1_h)); 
+fish_h1 = AMA(Array2_h,AMAf2); 
+fish_h=PIR(fish_h1,len_h); 
+TimeFrameRestore();
+
+TimeFrameSet(inDaily);
+pr_d = (H+L)/2; 
+len_d = Len; 
+maxh_d = HHV(pr_d,len_d); 
+minl_d = LLV(pr_d,len_d); 
+Array1_d = .33*2*((pr_d-minl_d)/(maxh_d-minl_d)-.5); 
+val1_d = AMA(Array1_d,AMAf1); 
+value1_d = IIf(val1_d>.99,.999,IIf(val1_d<-.99,-.999,val1_d)); 
+Array2_d = .5*log((1+value1_d)/(1-value1_d)); 
+fish_d1 = AMA(Array2_d,AMAf2); 
+fish_d=PIR(fish_d1,len_d); 
+TimeFrameRestore();
+
+expand_fish_h=TimeFrameExpand(fish_h, inHourly);
+expand_fish_d=TimeFrameExpand(fish_d, inDaily);
+
+/////////////////////////////////////////////////////////
+//***************************************************************//
+//          support and resistant line                         //
+//***************************************************************//
+
+EMAperiod=Param("EMAperiod",1,1,100,1);
+AMAf3=Param("AMAf3",0.14,0,1,0.01);
+
+HaClose =EMA((O+H+L+C)/4,EMAperiod);
+//HaClose=C;
+HaOpen = AMA( Ref( HaClose, -1 ), AMAf3 ); 
+//HaOpen =  Ref( HaClose, -1 );
+HaHigh = Max( H, Max( HaClose, HaOpen ) ); 
+HaLow = Min( L, Min( HaClose, HaOpen ) ); 
+
+EMAperiod1=Param("EMAperiod1",1,1,1000,1);
+EMAperiod2=Param("EMAperiod2",121,1,1000,1);
+
+Prd1=Param("Res_Period1",1,1,200,1);
+                   
+test   = TEMA  ( High , Prd1 ) ;  
+//test   = EMA  ( High , Prd1 ) ;  
+//test   = MA  ( High , Prd1 ) ;  
+//test   = TSF  ( High , Prd1 ) ;  
+
+PK_now= Ref(test,-1) > Ref(test,-2) AND test < Ref(test,-1);//Peak
+PKV1 = ValueWhen(PK_now,haHigh,1);//PeakValue1
+PKV2 = ValueWhen(PK_now,haHigh,2);//PeakValue2
+PKV3 = ValueWhen(PK_now,haHigh,3);//PeakValue2
+
+MPK_now = PK_now ;//MajorPeak
+
+MPKV_initial = PKV1; //MajorPeakValue
+
+MPKV=DEMA(MPKV_initial,EMAperiod1);
+
+MPKV_now1=ValueWhen(Ref(MPK_now,-1) == 0 AND MPK_now == 1, PKV2,1);
+MPKV_now2=ValueWhen(Ref(MPK_now,-1) == 0 AND MPK_now == 1, PKV2,2);
+MPKV_now3=ValueWhen(Ref(MPK_now,-1) == 0 AND MPK_now == 1, PKV2,3);
+
+MMPKV_now = MPKV_now3 < MPKV_now2 AND MPKV_now2 > MPKV_now1 ;
+
+MMPKV_initial = ValueWhen(MPKV_now3 < MPKV_now2, MPKV_now2,1); //MajorPeakValue
+
+MMPKVI = DEMA(MMPKV_initial,EMAperiod2);
+
+
+                   
+test2   = TEMA ( Low , Prd1 ) ;   
+
+SP_now=test2 > Ref(test2,-1) AND Ref(test2,-1) < Ref(test2,-2);
+
+SPV1 = ValueWhen(SP_now,haLow,1);//PeakValue1
+SPV2 = ValueWhen(SP_now,haLow,2);//PeakValue2
+SPV3 = ValueWhen(SP_now,haLow,3);//PeakValue2
+
+MSP_now = SP_now ;//MajorPeak
+
+MSPV_initial = SPV1;
+
+MSPV=DEMA(MSPV_initial,EMAperiod1);
+
+MSPV_now1=ValueWhen(Ref(MSP_now,-1) == 0 AND MSP_now == 1, SPV2,1);
+MSPV_now2=ValueWhen(Ref(MSP_now,-1) == 0 AND MSP_now == 1, SPV2,2);
+MSPV_now3=ValueWhen(Ref(MSP_now,-1) == 0 AND MSP_now == 1, SPV2,3);
+
+MMSPV_now = MSPV_now3 > MSPV_now2 AND MSPV_now2 < MSPV_now1 ;//MajorPeak
+
+MMSPV_initial = ValueWhen(MSPV_now3 > MSPV_now2,MSPV_now2,1);
+
+MMSPVI = DEMA(MMSPV_initial,EMAperiod2);
+
+
+//Plot(C, "", IIf(O >= C, colorOrange, colorGreen), styleCandle);
+
+/////////////////////////////////////////////////////////
+//***************************************************************//
+//                          trade method                          //
+//***************************************************************//
+Lowlimit=Param("Lowlimit",50,1,100,1);
+
+stationp=expand_fish_d;
+//stationp=expand_fish_h;
+
+
+bsig1=stationp<Lowlimit;
+ssig1=stationp>100-Lowlimit;
+
+bsig2=L<MSPV;
+ssig2=H>MPKV;
+
+
+bsig=bsig1 AND bsig2;
+ssig=ssig1 AND ssig2;
+
+ps=GetPs(bsig,ssig,0);
+
+C01=ps==1 AND C<MMSPVI;
+C02=ps==-1 AND C>MMPKVI;
+
+
+//////////////////////////zhisun/////////////////////////////////////////////////
+
+stdzhisun=ParamOptimize("stdzhisun",10,0,10,0.1);
+zhisunup=BBandTop(C,100,stdzhisun);
+zhisundown=BBandBot(C,100,stdzhisun);
+
+C001=ps==1 AND C<zhisundown;
+C002=ps==-1 AND C>zhisunup;
+
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+tp = Param("tp",9,0,100,1);
+
+
+C05 = ps==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C06 = ps==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+p = Param("p",62,0,100,1);
+C03 = ps==1 AND  C<Ref(C,-Lstbsg)-p;
+C04 = ps==-1 AND  C>Ref(C,-lstssg)+p;
+
+
+Csig=C001 OR C002 OR C01 OR C02 OR C03 OR C04 OR C05 OR C06;
+Csig=C01 OR C02;
+//Csig=C001 OR C002;
+//Csig=C03 OR C04;
+//Csig=C05 OR C06;
+//Csig=C01 OR C02 OR C001 OR C002;
+//Csig=0;
+
+
+
+  Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

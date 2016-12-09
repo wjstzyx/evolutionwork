@@ -1,0 +1,93 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "15min-p-Inverse Fisher and  Fisher Transform of Stochastics-AMA";
+StrategyID =106023;
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+
+
+function FisherSto(array, period, factor) {
+   MaxH = HHV(array, period);
+   MinL = LLV(array, period);
+  
+   Range = MaxH - MinL;
+   sto  = IIf(Range==0,0,(array - MinL)/(MaxH - MinL));
+ 
+   Value1 = AMA(2*(sto - 0.5), factor);
+   //Value1 = 2*(sto - 0.5);
+   Value1 = IIf(Value1 > 0.999, 0.999, IIf(Value1 < -0.999, -0.999, Value1));
+ 
+   //Fish = AMA(log((1 + Value1)/(1 - Value1)), 0.5);
+    //Value2=(4*Value1+3*Ref(Value1,-1)+2*Ref(Value1,-2)+Ref(Value1,-3))/10;
+    Fish = log((1 + Value1)/(1 - Value1));
+   return fish;
+}
+
+ 
+function InverseFisherSto(array, period, factor) {
+   MaxH = HHV(array, period);
+   MinL = LLV(array, period);
+  
+   Range = MaxH - MinL;
+   sto  = IIf(Range==0,0,(array - MinL)/(MaxH - MinL));
+ 
+   Value1 = AMA(2*(sto - 0.5), factor);
+   //Value1 = 2*(sto - 0.5);
+    InverseFish=( ( exp( 2 * Value1 ) - 1 ) / ( exp( 2 * Value1 ) + 1 ) + 1 )*50;
+   return InverseFish;
+}
+ 
+// Parameters
+period = Param("Period", 6, 3, 100, 1);
+AMAf = Param("AMAf", 0.01, 0, 1.0, 0.001);
+factor = Param("factor", 0.002, 0, 1, 0.001);
+//TSFperiod=Param("TSFperiod",100,1,1000,1);
+ 
+//price  = AMA(Avg,AMAf);
+price  = AMA(C,AMAf);
+//price  = TSF(C,TSFperiod);
+
+MaxH = HHV(price, period);
+MinL = LLV(price, period);
+  
+Range = MaxH - MinL;
+sto  = IIf(Range==0,0,(price - MinL)/(MaxH - MinL));
+
+////////////////////////////////////////////////
+
+
+Value1 = AMA(2*(sto), factor);
+Value2=(4*Value1+3*Ref(Value1,-1)+2*Ref(Value1,-2)+Ref(Value1,-3))/10;
+Value3=Value1;
+
+InverseFish=( ( exp( 2 * Value3 ) - 1 ) / ( exp( 2 * Value3 ) + 1 ) + 1 )*50;
+
+
+StoFR1=InverseFish ;
+
+Bsig=StoFR1>Ref(StoFR1,-1);
+Ssig=StoFR1<Ref(StoFR1,-1);
+
+Bsig=StoFR1>Ref(StoFR1,-1) AND Ref(StoFR1,-1)>Ref(StoFR1,-2);
+Ssig=StoFR1<Ref(StoFR1,-1) AND Ref(StoFR1,-1)<Ref(StoFR1,-2);
+
+//Bsig=StoFR1>Ref(StoFR1,-1) AND Ref(StoFR1,-1)>Ref(StoFR1,-2)  AND Ref(StoFR1,-2)>Ref(StoFR1,-3);
+//Ssig=StoFR1<Ref(StoFR1,-1) AND Ref(StoFR1,-1)<Ref(StoFR1,-2)  AND Ref(StoFR1,-2)<Ref(StoFR1,-3);
+
+
+Csig = 0;
+
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_night_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

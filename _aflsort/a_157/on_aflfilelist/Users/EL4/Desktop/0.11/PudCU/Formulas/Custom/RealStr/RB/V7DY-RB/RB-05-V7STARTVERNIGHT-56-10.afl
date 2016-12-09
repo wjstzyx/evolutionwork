@@ -1,0 +1,41 @@
+_SECTION_BEGIN("TEST1");
+#pragma nocache;
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TRADEHelper.afl";
+#include "Formulas/Custom/basic2012/v7dy.afl";
+
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 500);
+TickerNAME = Name();
+StrategyName = "RB-05-V7STARTVERNIGHT-56-10";
+StrategyID = 210021;
+ProType = 1;
+
+
+
+cond=V7DYStartVernight(56,10,tickername);
+
+
+
+
+Vote=0;
+
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+//CSIG=Cond==0;//  OR(TimeNum()+Interval()*100/60)>=151400;
+Csig=0;
+
+
+
+Buy = BSIG;
+Short = SSIG;
+Sell= Cover = CSIG;
+
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName+"--"+StrategyID);
+_SECTION_END();

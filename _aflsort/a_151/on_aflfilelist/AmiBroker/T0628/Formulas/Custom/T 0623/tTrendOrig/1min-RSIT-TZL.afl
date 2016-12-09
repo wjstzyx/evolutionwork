@@ -1,0 +1,58 @@
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "1min-RSIT-TZL";
+StrategyID = 130034;
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+m=ParamOptimize("short",47,1,200,1);
+n=ParamOptimize("long",104,2,500,1);
+tw=ParamOptimize("timewindow",181,1,1000,10);
+
+
+
+Var=EMA(C,m)-EMA(C,n);//macd
+Up=IIf(Var>Ref(Var,-1),abs(Var-Ref(Var,-1)),0); 
+Dn=IIf(Var<Ref(Var,-1),abs(Var-Ref(Var,-1)),0); 
+Ut=Wilders(Up,tw); 
+Dt=Wilders(Dn,tw);
+RSIt=100*(Ut/(Ut+Dt)); 
+
+//Plot(RSIt,"RSIt",colorBlue);
+
+up=ParamOptimize("up",70,50,100,5);
+down=ParamOptimize("down",30,0,50,5);
+
+bsig=RSIt>up;
+ssig=RSIt<down;
+
+Buy=bsig;
+Short=ssig;
+Sell=Cover=0;
+
+ps=GetPs(bsig,ssig,0);
+
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+
+tp = Param("tp",16,0,100,1);
+
+C05 = ps==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C06 = ps==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+CSIG =  C05 OR C06;
+
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

@@ -1,0 +1,50 @@
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "CU-18MIN-QNGAP-2-50";
+StrategyID = 50063;
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine);
+//------------------------para----------------------------------------
+x=ParamOptimize("x",2, 1, 100,1);
+Y=ParamOptimize("Y",50, 1, 100,1);
+//----------------------------------------------------------------------
+
+FSTK=Day()!=Ref(Day(),-1);
+KN=BarsSince(FSTK)+1;
+
+
+sigb01=C>Ref(C,-1)+5*X;
+sigb02=H>Ref(H,-1)+5*X;
+sigb03=L>Ref(L,-1)+5*X;
+sigs01=C<Ref(C,-1)-5*X;
+sigs02=H<Ref(H,-1)-5*X;
+sigs03=L<Ref(L,-1)-5*X;
+
+YESH=TimeFrameGetPrice("H",inDaily,-1);
+YESL=TimeFrameGetPrice("L",inDaily,-1);
+
+UPGAP=Ref(O,-KN+1)>YESH+10*Y;
+DNGAP=Ref(O,-KN+1)<YESL-10*Y;
+
+
+b01=sigb01 AND sigb02 AND sigb03;
+s01=sigs01 AND sigs02 AND sigs03;
+
+bsig=b01 AND kn>1  AND NOT UPGAP;
+ssig=s01 AND kn>1 AND NOT DNGAP;
+
+
+Csig=  TimeNum()>=144400;
+//-----------------------------------------------------------------------------------------------------------------------
+	Buy = bsig ;
+	Sell= CSIG;
+	Short = ssig ;
+	Cover = CSIG;
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

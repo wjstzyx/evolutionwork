@@ -1,0 +1,154 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+function PIR(p,Length)
+{
+Ll=LLV(p,Length);
+Hh=HHV(p,Length);
+return (100*(p-Ll)/(Hh-Ll));
+}
+
+function TP15(bsig, ssig, ps0)
+{
+tp = 15; //Param("tp",15,0,100,1);
+Lstbsg = BarsSince(ps0==1 AND Ref(ps0,-1)!=1);
+Lstssg = BarsSince(ps0==-1 AND Ref(ps0,-1)!=-1);
+C01 = ps0==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C02 = ps0==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+Csig=C01 OR C02;
+ps = GetPs(bsig, ssig, csig);
+return ps;
+}
+
+
+
+BIASAMA_L1=1; //paramoptimize("BIASAMA_L1",16,2,100,1);
+
+BIASAMA_AMAf = 1; //paramoptimize("BIASAMA_AMAf", 0.009,0.001, 1.0, 0.001);
+
+BIASAMA_factor = 1; //paramoptimize("BIASAMA_factor", 0.01,0.001, 1, 0.001);
+
+function getBIASAMA(BIASAMA_L1, BIASAMA_AMAf, BIASAMA_factor)
+
+{
+
+
+
+input=O;
+
+
+
+price  = AMA(input,BIASAMA_AMAf);
+
+
+
+BIAS1=(price-WMA(price,BIASAMA_L1))/WMA(price,BIASAMA_L1);
+
+
+
+////////////////////////////////////////////////
+
+
+
+Value1 = AMA(2*(BIAS1), BIASAMA_factor);
+
+Value2=(4*Value1+3*Ref(Value1,-1)+2*Ref(Value1,-2)+Ref(Value1,-3))/10;
+
+Value3=Value1;
+
+
+
+InverseFish=( ( exp( 2 * Value3 ) - 1 ) / ( exp( 2 * Value3 ) + 1 ) + 1 )*50;
+
+
+
+
+
+StoFR1=InverseFish ;
+
+
+
+Bsig=StoFR1>Ref(StoFR1,-1) AND Ref(StoFR1,-1)>Ref(StoFR1,-2);
+
+Ssig=StoFR1<Ref(StoFR1,-1) AND Ref(StoFR1,-1)<Ref(StoFR1,-2);
+
+
+ps=GetPs(bsig,ssig,0);
+
+
+
+
+//add exrem
+bsig=exrem(bsig,ssig);
+ssig=exrem(ssig,bsig);
+ps=getps(bsig,ssig,0);
+
+//add_tp15ps_exp
+ps = TP15(bsig, ssig, ps);
+return ps;
+
+
+}
+
+ps = 0;
+//30_MD
+BIASAMA_L1 = 36;BIASAMA_AMAf = 0.001;BIASAMA_factor = 1.0;ps1 = getBIASAMA(BIASAMA_L1,BIASAMA_AMAf,BIASAMA_factor);ps += ps1;
+BIASAMA_L1 = 43;BIASAMA_AMAf = 0.001;BIASAMA_factor = 0.817;ps2 = getBIASAMA(BIASAMA_L1,BIASAMA_AMAf,BIASAMA_factor);ps += ps2;
+BIASAMA_L1 = 27;BIASAMA_AMAf = 0.001;BIASAMA_factor = 1.0;ps3 = getBIASAMA(BIASAMA_L1,BIASAMA_AMAf,BIASAMA_factor);ps += ps3;
+BIASAMA_L1 = 100;BIASAMA_AMAf = 0.001;BIASAMA_factor = 0.328;ps4 = getBIASAMA(BIASAMA_L1,BIASAMA_AMAf,BIASAMA_factor);ps += ps4;
+BIASAMA_L1 = 100;BIASAMA_AMAf = 0.289;BIASAMA_factor = 0.001;ps5 = getBIASAMA(BIASAMA_L1,BIASAMA_AMAf,BIASAMA_factor);ps += ps5;
+BIASAMA_L1 = 100;BIASAMA_AMAf = 0.279;BIASAMA_factor = 0.001;ps6 = getBIASAMA(BIASAMA_L1,BIASAMA_AMAf,BIASAMA_factor);ps += ps6;
+BIASAMA_L1 = 100;BIASAMA_AMAf = 0.401;BIASAMA_factor = 0.08;ps7 = getBIASAMA(BIASAMA_L1,BIASAMA_AMAf,BIASAMA_factor);ps += ps7;
+BIASAMA_L1 = 100;BIASAMA_AMAf = 0.305;BIASAMA_factor = 0.001;ps8 = getBIASAMA(BIASAMA_L1,BIASAMA_AMAf,BIASAMA_factor);ps += ps8;
+BIASAMA_L1 = 100;BIASAMA_AMAf = 0.308;BIASAMA_factor = 0.001;ps9 = getBIASAMA(BIASAMA_L1,BIASAMA_AMAf,BIASAMA_factor);ps += ps9;
+BIASAMA_L1 = 100;BIASAMA_AMAf = 0.315;BIASAMA_factor = 0.001;ps10 = getBIASAMA(BIASAMA_L1,BIASAMA_AMAf,BIASAMA_factor);ps += ps10;
+//30_NP
+BIASAMA_L1 = 46;BIASAMA_AMAf = 0.701;BIASAMA_factor = 0.001;ps1 = getBIASAMA(BIASAMA_L1,BIASAMA_AMAf,BIASAMA_factor);ps += ps1;
+BIASAMA_L1 = 45;BIASAMA_AMAf = 0.642;BIASAMA_factor = 0.001;ps2 = getBIASAMA(BIASAMA_L1,BIASAMA_AMAf,BIASAMA_factor);ps += ps2;
+BIASAMA_L1 = 46;BIASAMA_AMAf = 0.778;BIASAMA_factor = 0.001;ps3 = getBIASAMA(BIASAMA_L1,BIASAMA_AMAf,BIASAMA_factor);ps += ps3;
+BIASAMA_L1 = 38;BIASAMA_AMAf = 1.0;BIASAMA_factor = 0.001;ps4 = getBIASAMA(BIASAMA_L1,BIASAMA_AMAf,BIASAMA_factor);ps += ps4;
+BIASAMA_L1 = 39;BIASAMA_AMAf = 0.914;BIASAMA_factor = 0.001;ps5 = getBIASAMA(BIASAMA_L1,BIASAMA_AMAf,BIASAMA_factor);ps += ps5;
+BIASAMA_L1 = 86;BIASAMA_AMAf = 0.711;BIASAMA_factor = 0.001;ps6 = getBIASAMA(BIASAMA_L1,BIASAMA_AMAf,BIASAMA_factor);ps += ps6;
+BIASAMA_L1 = 86;BIASAMA_AMAf = 0.834;BIASAMA_factor = 0.001;ps7 = getBIASAMA(BIASAMA_L1,BIASAMA_AMAf,BIASAMA_factor);ps += ps7;
+BIASAMA_L1 = 85;BIASAMA_AMAf = 0.744;BIASAMA_factor = 0.001;ps8 = getBIASAMA(BIASAMA_L1,BIASAMA_AMAf,BIASAMA_factor);ps += ps8;
+BIASAMA_L1 = 62;BIASAMA_AMAf = 0.937;BIASAMA_factor = 0.001;ps9 = getBIASAMA(BIASAMA_L1,BIASAMA_AMAf,BIASAMA_factor);ps += ps9;
+BIASAMA_L1 = 83;BIASAMA_AMAf = 0.55;BIASAMA_factor = 0.001;ps10 = getBIASAMA(BIASAMA_L1,BIASAMA_AMAf,BIASAMA_factor);ps += ps10;
+//30_PF
+BIASAMA_L1 = 99;BIASAMA_AMAf = 0.316;BIASAMA_factor = 0.005;ps1 = getBIASAMA(BIASAMA_L1,BIASAMA_AMAf,BIASAMA_factor);ps += ps1;
+BIASAMA_L1 = 86;BIASAMA_AMAf = 0.408;BIASAMA_factor = 0.053;ps2 = getBIASAMA(BIASAMA_L1,BIASAMA_AMAf,BIASAMA_factor);ps += ps2;
+BIASAMA_L1 = 100;BIASAMA_AMAf = 0.272;BIASAMA_factor = 0.001;ps3 = getBIASAMA(BIASAMA_L1,BIASAMA_AMAf,BIASAMA_factor);ps += ps3;
+BIASAMA_L1 = 100;BIASAMA_AMAf = 0.362;BIASAMA_factor = 0.039;ps4 = getBIASAMA(BIASAMA_L1,BIASAMA_AMAf,BIASAMA_factor);ps += ps4;
+BIASAMA_L1 = 100;BIASAMA_AMAf = 0.298;BIASAMA_factor = 0.027;ps5 = getBIASAMA(BIASAMA_L1,BIASAMA_AMAf,BIASAMA_factor);ps += ps5;
+BIASAMA_L1 = 62;BIASAMA_AMAf = 0.423;BIASAMA_factor = 0.001;ps6 = getBIASAMA(BIASAMA_L1,BIASAMA_AMAf,BIASAMA_factor);ps += ps6;
+BIASAMA_L1 = 97;BIASAMA_AMAf = 0.269;BIASAMA_factor = 0.001;ps7 = getBIASAMA(BIASAMA_L1,BIASAMA_AMAf,BIASAMA_factor);ps += ps7;
+BIASAMA_L1 = 100;BIASAMA_AMAf = 0.506;BIASAMA_factor = 0.001;ps8 = getBIASAMA(BIASAMA_L1,BIASAMA_AMAf,BIASAMA_factor);ps += ps8;
+BIASAMA_L1 = 100;BIASAMA_AMAf = 0.711;BIASAMA_factor = 0.001;ps9 = getBIASAMA(BIASAMA_L1,BIASAMA_AMAf,BIASAMA_factor);ps += ps9;
+BIASAMA_L1 = 100;BIASAMA_AMAf = 0.215;BIASAMA_factor = 0.001;ps10 = getBIASAMA(BIASAMA_L1,BIASAMA_AMAf,BIASAMA_factor);ps += ps10;
+
+
+ps_th = Param("ps_th", 10, 0, 100, 1);
+
+bsig=ps >= ps_th;
+ssig=ps <= -ps_th;
+
+bsig=ExRem(bsig,ssig);
+ssig=ExRem(ssig,bsig);
+
+psmerge=GetPs(bsig,ssig,0);
+ps_exit_th = ps_th * 0.66667;
+C01 = psmerge==1 AND ps <= ps_exit_th;
+C02 = psmerge==-1 AND ps >= -ps_exit_th;
+
+tp = 15; //Param("tp",15,0,100,1);
+Lstbsg = BarsSince(psmerge==1 AND Ref(psmerge,-1)!=1);
+Lstssg = BarsSince(psmerge==-1 AND Ref(psmerge,-1)!=-1);
+C03 = psmerge==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C04 = psmerge==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+//Csig=C01 OR C02 OR C03 OR C04;
+csig = C03 OR C04;
+//csig = C01 OR C02;
+
+
+Plotperformance(bsig,ssig,Csig);
+
+
+StrategyName = "30min_30_10_getBIASAMA";StrategyID = "1015400016";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

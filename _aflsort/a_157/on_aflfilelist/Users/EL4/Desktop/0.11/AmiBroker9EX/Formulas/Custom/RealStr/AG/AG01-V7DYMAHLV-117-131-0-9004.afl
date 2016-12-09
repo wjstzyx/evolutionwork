@@ -1,0 +1,34 @@
+_SECTION_BEGIN("TEST1");
+#pragma nocache;
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TRADEHelper.afl";
+#include "Formulas/Custom/basicv2/v7dy.afl";
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 500);
+StrategyName = "AG01-V7DYMAHLV-117-131-0-26";
+StrategyID =9004;
+ProType = 1;
+
+
+
+Cond=V7DYMAHLV(117,131,0,"AG");
+
+
+Vote=0;
+
+
+TickerNAME = Name();
+
+BSIG=Cond>Vote AND  Openlastk(tickername,26) ;
+SSIG=Cond<-Vote AND  Openlastk(tickername,26);
+CSIG=Cond==0 OR GetLastKMINs(tickername,26);
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName+"--"+StrategyID);
+_SECTION_END();

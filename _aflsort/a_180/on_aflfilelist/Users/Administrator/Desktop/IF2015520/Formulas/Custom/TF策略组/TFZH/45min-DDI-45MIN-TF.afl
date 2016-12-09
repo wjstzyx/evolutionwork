@@ -1,0 +1,110 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "45min-DDI-45MIN-TF";
+StrategyID = 380010;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+////////////////////////////////////////////////////////////////////
+TR=Max(abs(H-Ref(H,-1)),abs(L-Ref(L,-1)));
+
+DMZ=IIf((H+L)<=(Ref(H,-1)+Ref(L,-1)),0,TR);
+
+DMF=IIf((H+L)>=(Ref(H,-1)+Ref(L,-1)),0,TR);
+
+N=ParamOptimize("N",26,1,50,1);
+//M1=ParamOptimize("M1",5,1,50,1);
+
+DIZ=Sum(DMZ,N)/(Sum(DMZ,N)+Sum(DMF,N));
+
+DIF=Sum(DMF,N)/(Sum(DMZ,N)+Sum(DMF,N));
+
+DDI=DIZ-DIF;
+
+function SMA(array)
+{
+ Value1=array+Ref(array,-1);
+ Value2=Value1+Ref(Value1,-2);
+ Value3=Value2+Ref(Value2,-4);
+
+ SMAv=Value3/8;
+
+ return SMAv;
+}
+
+//ADDI=SMA(DDI);
+
+//AD=MA(ADDI,M1);
+
+//Plot(DDI,"DDI",colorBlue);
+
+//Plot(ADDI,"ADDI",colorYellow);
+
+///////////////////////////////////////////////////////////////////
+G3=DDI;
+//G3=ADDI;
+//G3=AD;
+
+/////////////////////functions/////////////////////////////////////////
+function PIR(p,Length)
+{
+Ll=LLV(p,Length);
+Hh=HHV(p,Length);
+return (100*(p-Ll)/(Hh-Ll));
+}
+//////////////////////////indicators////////////////////////////////////////////
+Length=Param("Length",30,10,1000,10);
+PIRG3=PIR(G3,Length);
+//Plot(PIRG3,"PIRG3",colorGreen,styleLeftAxisScale);
+
+Selltrigger=Param("Selltrigger",12,0,100,1);
+
+ssig=PIRG3<Selltrigger;
+
+bsig=PIRG3>100-Selltrigger;
+
+//////////////////////////zhisun/////////////////////////////////////////////////
+
+stdzhisun=ParamOptimize("stdzhisun",1.7,0,10,0.1);
+zhisunup=BBandTop(C,100,stdzhisun);
+zhisundown=BBandBot(C,100,stdzhisun);
+
+ps=GetPs(bsig,ssig,0);
+C001=ps==1 AND C<zhisundown;
+C002=ps==-1 AND C>zhisunup;
+
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+tp = Param("tp",15,0,100,1);
+
+
+C05 = ps==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C06 = ps==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+p = Param("p",0.5,0,100,0.1);
+C03 = ps==1 AND  C<Ref(C,-Lstbsg)-p;
+C04 = ps==-1 AND  C>Ref(C,-lstssg)+p;
+
+//Csig=C001 OR C002 OR C05 OR C06;
+//Csig=C001 OR C002;
+Csig=C001 OR C002 OR C05 OR C06 OR C03 OR C04;
+
+//Csig=C001 OR C002 OR C03 OR C04;
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+
+ps0 = GetPs(bsig,ssig,csig);
+Filter= 1;
+AddColumn(ps0,"ps");

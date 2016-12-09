@@ -1,0 +1,60 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+
+
+
+
+period = Param("period",10,0,100,1);
+bs = Param("bs",73,70,100,1);
+cc = Param("cc",0,0,100,1);
+
+rsis=RSI(period);
+
+bsig=rsis>bs;
+ssig=rsis<(100-bs);
+csig=0;
+
+ps = GetPs(bsig,ssig,csig);
+
+c00=(rsis<cc AND ps>0) OR (rsis>(100-cc) AND ps<0);
+
+csig=c00;
+ps = GetPs(bsig,ssig,0);
+
+Lstbsg = BarsSince(bsig);
+Lstssg = BarsSince(ssig);
+
+
+Holdperiod = Param("Holdperiod",100,0,100,1);
+
+C01 = ps==1 AND Lstbsg>=Holdperiod AND C<Ref(C,-Lstbsg);//AND C<Ref(C,-Holdperiod);//
+C02 = ps==-1 AND lstssg>=holdperiod AND C>Ref(C,-lstssg);//AND C>Ref(C,-Holdperiod);//
+C011 = Lstbsg>=Holdperiod AND Lstssg>=Holdperiod;
+
+p = Param("p",37,0,100,1);
+C03 = ps==1 AND  C<Ref(C,-Lstbsg)-p;
+C04 = ps==-1 AND  C>Ref(C,-lstssg)+p;
+
+tp = Param("tp",38,0,100,1);
+
+C05 = ps==1 AND  C<HighestSince(ps==1 AND Ref(ps,-1)!=1,C)-tp;
+C06 = ps==-1 AND  C>LowestSince(ps==-1 AND Ref(ps,-1)!=-1,C)+tp;
+
+vperiod = Param("vperiod",100,1,100,1);
+
+lstsig = BarsSince(bsig OR ssig);
+C07 = lstsig>0 AND V==HHV(V,vperiod);
+
+C08 = ps==1 AND C>O AND V==HHV(V,vperiod);
+C09 = ps==-1 AND C<O AND V==HHV(V,vperiod);
+
+csig=  c03 OR c04 OR C05 OR C06;
+      
+
+
+PlotPerformance(BSig,Ssig,Csig);
+
+
+
+
+
+StrategyName = "30min-rsi_12min_rb_0916";StrategyID = "1022100029";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_night_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

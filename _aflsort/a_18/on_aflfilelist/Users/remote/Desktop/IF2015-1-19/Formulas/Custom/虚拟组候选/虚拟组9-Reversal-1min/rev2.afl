@@ -1,0 +1,66 @@
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "IF-1MIN-rev2";
+StrategyID = 40885;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+period=Param("period",5,0,1000);
+bs=Param("bs",0.0038,0,1000,0.0001);
+holdperiod=Param("holdperiod",20,0,1000);
+cc = Param("cc",0.0000,-1,1,0.0001);
+
+vr = Param("vr",.8,0,100,.1);
+maxcut = Param("maxcut",4,0,100,1);
+
+//delta=Ref(MA(C,period),-1)-C;
+
+bsig=Cross(C,MA(C,period)*(1-bs))  AND MA(V,5)>vr*MA(V,20) AND C-O<maxcut;
+ssig=Cross(MA(C,period)*(1+bs),C)  AND MA(V,5)>vr*MA(V,20) AND C-O>-maxcut;
+
+ps = GetPs(bsig,ssig,0);
+
+Lstbsg = BarsSince(bsig);
+Lstssg = BarsSince(ssig);
+
+
+C01 = ps==1 AND Lstbsg>=Holdperiod AND C<Ref(C,-Lstbsg);//AND C<Ref(C,-Holdperiod);//
+C02 = ps==-1 AND lstssg>=holdperiod AND C>Ref(C,-lstssg);//AND C>Ref(C,-Holdperiod);//
+
+p = Param("p",7,0,100,1);
+C03 = ps==1 AND  C<Ref(C,-Lstbsg)-p;
+C04 = ps==-1 AND  C>Ref(C,-lstssg)+p;
+
+tp = Param("tp",26,0,500,1);
+
+C05 = ps==1 AND  C<HighestSince(ps==1 AND Ref(ps,-1)!=1,C)-tp;
+C06 = ps==-1 AND  C>LowestSince(ps==-1 AND Ref(ps,-1)!=-1,C)+tp;
+
+vperiod = Param("vperiod",71,1,100,1);
+
+lstsig = BarsSince(bsig OR ssig);
+C07 = lstsig>0 AND V==LLV(V,vperiod);
+
+C08 = ps==1 AND C>O AND V==HHV(V,vperiod);
+C09 = ps==-1 AND C<O AND V==HHV(V,vperiod);
+
+csig= TimeNum()<=93000 OR TimeNum()>=145900 OR C05 OR C06;//OR C01 OR C02 OR C03 OR C04 
+
+
+    Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+ 

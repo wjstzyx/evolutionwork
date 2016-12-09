@@ -1,0 +1,66 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/BasicV4/TM.afl";
+#include "Formulas/Custom/BasicV4/V7.afl";
+#include "Formulas/Custom/BasicV4/EXR.afl";
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+StrategyName = "IF01-TM-V7-EXR-1.5-0.5-1-V05";
+StrategyID = 40225;
+ProType = 0;
+
+
+
+TM1=TMHLV3(6,10,23,1.6,"IF");
+TM2=TMHLV1(8,19,27,"IF");
+TM3=TMHLV3(6,10,22,1.6,"IF");
+TM4=TMHLV1(8,21,25,"IF");
+TM5=TMHLV2(6,9,26,"IF");
+TM6=TMHLV3(5,8,23,1.6,"IF");
+
+
+
+EXR1=EXRRRM(39,64,4,"IF");
+EXR2=EXRRR(32,68,"IF");
+EXR3=EXRRRMKNC(52,107,11,"IF");
+EXR4=EXRRR(28,53,"IF");
+EXR5=EXRRRM(39,64,4,"IF");
+EXR6=EXRRRMKNC(40,102,18,"IF");
+
+
+
+V71=V7min(13,87,3,"IF");
+V72=V7min(14,114,4,"IF");
+V73=V7min(15,108,2,"IF");
+
+
+
+
+
+Cond_TM= (TM1+TM2+TM3+TM4+TM5+TM6)/6;
+Cond_V7= (V71+V72+V73)/3;
+cond_EXR=(EXR1+EXR2+EXR3+EXR4+EXR5+EXR6)/6;
+
+w_TM= ParamOptimize("w_TM",1.5,0,4,0.5);
+w_V7= ParamOptimize("w_V7",0.5,0,4,0.5);
+w_EXR= ParamOptimize("w_EXR",1,0,4,0.5);
+
+Cond =  w_TM*cond_TM+w_V7*cond_V7+ w_EXR*cond_EXR;
+
+
+
+Vote=ParamOptimize("w_Vote",0.5,0,4,0.5);
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=GetLastK("IF");
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

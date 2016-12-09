@@ -1,0 +1,32 @@
+_SECTION_BEGIN("TEST1");
+#pragma nocache;
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TRADEHelper.afl";
+#include "Formulas/Custom/BasicV4/noontrading.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 500);
+TickerNAME = Name();
+
+StrategyName = "IF01-NOONTRADINGguding2-0-0-0-14";
+StrategyID = 40650;
+ProType =0;
+
+
+
+cond=noontradingguding2(0,0,0,14,"IF");
+
+Vote=0;
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=GetLastK("IF") OR Cond==0;
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+//PlotPerformance(sinPs,sinBS,StrategyName+"--"+StrategyID);
+
+_SECTION_END();

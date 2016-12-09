@@ -1,0 +1,49 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+
+
+	fo = Foreign(TickerName, "O" );				
+	fh = Foreign(TickerName, "H" );				
+	fl = Foreign(TickerName, "L" );				
+	fc = Foreign(TickerName, "C" );				
+	fv = Foreign(TickerName, "v" );				
+	
+	N1 = Param("N1",10,1,1000,1);
+	N2 = Param("N2",43,1,1000,1);
+	
+	
+	up = fc>fo;				
+	dn = fc<fo;				
+					
+	HH = Ref(HHV(fh,N1),-1);				
+	LL = Ref(LLV(fl,N1),-1);				
+	B01= HH>Ref(Hh,-N1) AND UP;				
+	S01= LL<Ref(Ll,-N1) AND DN;				
+//====================================================					
+	range = fh - fl;				
+					
+		Cond = range > Ref(range,-1) AND Ref(range,-1) > Ref(range,-2);
+SumUP = Sum(IIf(UP,fc-fo,0),N2);			
+		SumDN = Sum(IIf(DN,fo-fc,0),N2);			
+		B02 = Cond AND SumUP>SumDN;			
+		S02 = Cond AND SumUP<SumDN;			
+	BSIG = B01 AND NOT(S01) AND B02;				
+	SSIG = S01 AND NOT(B01) AND S02;					
+	Lstsig = BarsSince(BSIG OR SSIG);				
+	sinPS = GetPs(bsig,ssig,0);						
+	fcma = MA(fc,N1);				
+ps=GetPs(bsig,ssig,0);
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+tp = ParamOptimize("tp",9,5,30,1);
+C01= ps==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C02= ps==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+CSIG = C01 OR C02;			
+	Cond = getCS(BSIG,SSIG,CSIG);				
+PlotPerformance(BSig,Ssig,Csig);
+
+
+
+
+
+
+StrategyName = "rb-7min - RB - range";StrategyID = "1012100328";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

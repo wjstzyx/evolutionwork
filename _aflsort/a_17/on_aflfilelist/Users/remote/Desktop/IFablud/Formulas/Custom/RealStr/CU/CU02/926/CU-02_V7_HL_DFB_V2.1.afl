@@ -1,0 +1,58 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/BasicV3/exiv.afl";
+#include "Formulas/Custom/BasicV3/TM.afl";
+#include "Formulas/Custom/BasicV3/hl.afl";
+#include "Formulas/Custom/BasicV3/maa.afl";
+#include "Formulas/Custom/BasicV3/sxv.afl";
+#include "Formulas/Custom/BasicV3/DTA.afl";
+#include "Formulas/Custom/BasicV3/v7.afl";
+#include "Formulas/Custom/BasicV3/DFB.afl";
+#include "Formulas/Custom/BasicV3/TB.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+StrategyName = "CU-02_V7_HL_DFB_V2.1";
+StrategyID = 50027;
+ProType = 1;
+
+
+V71=V7DYStartVer(86,51,"CU");
+V72=V7DYStartVer(83,49,"CU");
+
+
+HL1=HLAVGA(72,59,59,"CU");
+HL2=HLAVG(70,60,55,"CU");
+
+DFB1=DFB(80,57,"CU");
+DFB2=DFB(69,57,"CU");
+
+
+
+
+
+
+
+
+CondHL = (HL1+HL2)/2;
+CondDFB = (DFB1+DFB2)/2;
+CondV7= (V71+V72)/2;
+
+
+
+
+Cond =CondDFB +CondV7+ CondHL ;
+
+Vote=2;
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=GetLastK("CU");
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

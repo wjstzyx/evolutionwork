@@ -1,0 +1,113 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "15min-cor_15min_macd-0-c4";
+StrategyID ="1010500005";
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+ 
+ TimeFrameSet( in15Minute );
+ ma15_10 = C;
+ tmacd1 = MACD(12, 26);
+ tmacd2 = Signal(12,26,9);
+ TimeFrameRestore(); 
+ t1=TimeFrameExpand(tmacd1,in15Minute);
+ t2=TimeFrameExpand(tmacd2,in15Minute);
+ macd1=Ref(t1,-1);
+ macd2=Ref(t2,-1);
+ goldcross= Ref(macd1,-1)<Ref(macd2,-1) AND macd1-macd2>=0 AND macd1-macd2>Ref(MACD1,-1)-Ref(macd2,-1);
+ deadcross= Ref(macd1,-1)>Ref(macd2,-1) AND macd1-macd2<=0 AND macd1-macd2<Ref(MACD1,-1)-Ref(macd2,-1);
+ 
+ gd= GetPs(goldcross,deadcross,0);
+ 
+ 
+ longsample1="c:\\sample\\long_3.csv";
+ longsample2="c:\\sample\\long_test_5.csv";
+ longsample3="c:\\sample\\long_test_6.csv";
+ longsample4="c:\\sample\\long_test_7.csv";
+ longsample5="c:\\sample\\long_test_8.csv";
+ 
+ 
+ 
+ shortsample1="c:\\sample\\short_3.csv";
+ shortsample2="c:\\sample\\short_test_5.csv";
+ shortsample3="c:\\sample\\short_test_6.csv";
+ shortsample4="c:\\sample\\short_test_7.csv";
+ shortsample5="c:\\sample\\short_test_8.csv";
+ 
+ 
+ //Plot(s,"s",colorRed,16);
+ 
+ longcof1=Cor(Close,longsample1,20);
+ longcof2=Cor(Close,longsample2,20);
+ longcof3=Cor(Close,longsample3,20);
+ longcof4=Cor(Close,longsample4,20);
+ longcof5=Cor(Close,longsample5,20);
+ 
+ 
+ shortcof1=Cor(Close,shortsample1,20);
+ shortcof2=Cor(Close,shortsample2,20);
+ shortcof3=Cor(Close,shortsample3,20);
+ shortcof4=Cor(Close,shortsample4,20);
+ shortcof5=Cor(Close,shortsample5,20);
+ 
+cof_long=Paramoptimize("cof_long",0.76, 0.5, 1, 0.02);
+cof_close1=Paramoptimize("cof_close1",1.0, 0.5, 1, 0.02);
+lengthlong = Paramoptimize("lengthlong",60.0, 1, 100, 2);
+zs= Paramoptimize("zs",2.7,0.1,3,0.1);
+cof_short=cof_long;
+ 
+ cof_close2=cof_close1;
+ 
+ lengthshort = lengthlong;
+ 
+ 
+ 
+ bsig= longcof1>1 OR longcof2>1 OR longcof3>cof_long OR longcof4>cof_long OR longcof5>1;
+ bsig= bsig AND TimeNum()>=93000 AND TimeNum()<=145900 AND C>=Ref(C,-1) AND gd==1;
+ 
+ 
+ ssig= shortcof1>1 OR shortcof2>1 OR shortcof3>cof_short OR shortcof4>cof_short OR shortcof5>1;
+ ssig= ssig AND TimeNum()>=93000 AND TimeNum()<=145900 AND C<=Ref(C,-1) AND gd==-1;
+ 
+ Lstbsg = BarsSince(bsig);
+ Lstssg = BarsSince(ssig);
+ co= (BarsSince(bsig)==lengthlong AND C<Ref(C,-lstbsg)) OR (BarsSince(ssig)==lengthshort AND C>Ref(C,-lstssg));
+ 
+ ps=GetPs(bsig,ssig,co);
+ 
+ 
+ hp=HighestSince(ps==1 AND Ref(ps,-1)!=1,C);
+ co1= ps==1 AND (hp-C)/hp*100>=zs;
+ 
+ lp=LowestSince(ps==-1 AND Ref(ps,-1)!=-1,C);
+ co2= ps==-1 AND (C-lp)/lp*100>=zs;
+ 
+ co3= ps==1 AND (shortcof1>cof_close1 OR shortcof2>cof_close1 OR shortcof3>cof_close1 OR shortcof4>cof_close1 OR shortcof5>cof_close1);
+ co4= ps==-1 AND(longcof1>cof_close2 OR longcof2>cof_close2 OR longcof3>cof_close2 OR longcof4>cof_close2 OR longcof5>cof_close2);
+ 
+ csig= co OR co1 OR co2 OR co3 OR co4;
+ 
+     Buy = bsig AND NOT csig;           
+ 
+     Sell= CSIG;        
+ 
+     Short = ssig AND NOT csig;         
+ 
+     Cover = CSIG;          
+ 
+ 
+ PlotPerformance(BSig,Ssig,Csig);
+ ps0 = GetPs(bsig,ssig,csig);
+ Filter= 1;
+ AddColumn(ps0,"ps");
+ Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+ 
+ //Plot(bsig,"bsig",colorRed,16);
+ //Plot(ssig,"ssig",colorRed,16);
+ //Plot(csig,"csig",colorRed,16);
+ 

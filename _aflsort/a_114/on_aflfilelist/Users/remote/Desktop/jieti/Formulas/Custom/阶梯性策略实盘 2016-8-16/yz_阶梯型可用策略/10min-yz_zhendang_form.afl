@@ -1,0 +1,81 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "10min-yz_zhendang_form";
+StrategyID ="1012100130";
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+
+//---------------- 1.  key  price 
+NewDay = (Day()!= Ref(Day(), -1)) OR BarIndex() == 0;  
+
+DayCloseRef1=TimeFrameGetPrice("C",inDaily,-1); 
+DayOpen=TimeFrameGetPrice("O",inDaily);
+WeekOpen=TimeFrameGetPrice("O",inWeekly);
+DayHigh = HighestSince(NewDay,H,1);  
+DayLow = LowestSince(NewDay,L,1);  
+
+period =Paramoptimize("period ",50, 1,300, 1);
+
+DayHigh1 = HighestSince(NewDay,H,2);
+
+//------------------------------------------------------
+hhbar = HHVBars(C,period );
+llbar = LLVBars(C,period );
+Hldistance = abs(hhbar -llbar );
+Latelydistance = IIf(hhbar > llbar ,llbar , hhbar  );
+
+SumCO =Ref(Sum(abs(C-O),Hldistance ) ,-Latelydistance );
+HlCO = HHV(C,period )-LLV(C,period );
+HlCO  = IIf(HlCO >0,HlCO ,1);
+
+entropy =IIf(HlCO==1,1,SumCO /HlCO );
+
+MAentropy  =MA(entropy ,50 );//(entropy+Ref(entropy ,-1))/2 ;//            
+//Plot(entropy ,"entropy ",colorRed);
+//Plot(MAentropy  ,"MAentropy",colorGreen);
+
+abs1 =Sum(abs(C-O),period );
+entropy2=abs1/ abs(C-Ref(C,-period )) ;
+//------------------------------------------------
+
+
+p1 = Param("p1",50,0,100,1);
+V1 = Param("v1",40,0,100,1);
+vola = ( HHV(C,p1 )-LLV(C,p1 ))/C*1000;
+ // --------------------------------------------------------------------------- 
+Bsig =    C>=Ref(HHV(C,p1 ),-1)  AND entropy>2  AND  vola <V1 AND Ref(C,-1)<Ref(HHV(C,p1 ),-2) ;////AND  entropy2>4;  
+Ssig = C<=Ref(LLV(C,p1 ),-1) AND entropy>2  AND  vola <V1   AND Ref(C,-1)<Ref(LLV(C,p1 ),-2)  ;// //AND  entropy2>4;  
+
+
+
+//--------------------------------------------------------
+ps=GetPs(Bsig,Ssig,0);
+Lstbsg = BarsSince(bsig);
+Lstssg = BarsSince(ssig);
+
+tp = Param("tp",8,0,100,1);
+C01= ps==1 AND HighestSince(bsig,C,1)-C>=tp *C/1000 ;// AND V/Ref(MA(V,5),-1)<1   ;
+C02= ps== -1 AND LowestSince(ssig,C,1)-C<=-tp *C/1000 ;// AND V/Ref(MA(V,5),-1)<1  ;
+//zy = Param("zy",100,0,100,1);
+//C03 = ps==1 AND  C-Ref(C,-Lstbsg)>zy *C/1000  ;//  AND V/Ref(MA(V,5),-1)>3 ;
+//C04 = ps==-1 AND Ref(C,-lstssg)-C>zy *C/1000  ;//AND V/Ref(MA(V,5),-1)>3 ;
+
+  
+C05 = ps==1 AND V/Ref(MA(V,5),-1)>2;
+
+C06 = ps==-1 AND  V/Ref(MA(V,5),-1)>2 ; 
+
+Csig=C01 OR C02 ;// OR C03 OR C04 ;// OR C05 OR C06 ;
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

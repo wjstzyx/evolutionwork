@@ -1,0 +1,58 @@
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+StrategyName = "ru-10min-weekline-5-4";
+StrategyID = 10210;
+ProType = 1;
+TickerName=Name();
+
+
+pts= ParamOptimize("pts", 5, 0, 200,1); 
+period= ParamOptimize("period", 4, 0, 200,1); 
+
+
+//===============================================
+FSTK=Day()!=Ref(Day(),-1);				
+KN=BarsSince(FSTK)+1;
+//=====================================================
+
+
+fstday=abs(Day()-Ref(Day(),-1))>1 ;//AND Day()<20;
+Lstday=abs(Day()-Ref(Day(),1))>1 ;//AND Day()<20;
+KN=BarsSince(fstday)+1;
+
+Lwh=TimeFrameGetPrice("h",inWeekly,-1);
+Lwc=TimeFrameGetPrice("c",inWeekly,-1);
+Lwo=TimeFrameGetPrice("o",inWeekly,-1);
+Lwl=TimeFrameGetPrice("l",inWeekly,-1);
+
+up=C>O;
+dn=C<O;
+
+bsig1= C>Lwh;//+pts*C/3000;
+ssig1=C<Lwl;//-pts*C/3000;
+Lstbsig = BarsSince(bsig1 );
+Lstssig = BarsSince(bsig1);  
+bsig=bsig1 AND Sum(bsig1 OR ssig1 ,kn)==1;//AND  kn<2;// ;// AND Lstbsig<Lstssig;
+ssig=ssig1 AND Sum(ssig1 OR bsig1 ,kn)==1 ;//AND  kn<2;//;//AND Lstbsig>Lstssig;
+Lstsig = BarsSince(bsig OR ssig);   
+
+BPeriod= BarsSince(BSIG)<BarsSince(SSIG) AND BarsSince(BSIG)>0;            
+SPeriod= BarsSince(SSIG)<BarsSince(BSIG) AND BarsSince(SSIG)>0;  
+
+C01=bperiod AND (C<Max(Lwo,Lwc) OR Ref(C,-period)-C>pts*C/5000);
+C02=speriod AND (C>Min(Lwo,Lwc) OR C-Ref(C,-period)>pts*C/5000);
+
+Csig= Lstday ;
+csig=Csig OR C01 OR C02 ;//OR C03 OR C04 ;
+
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=GetPs(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

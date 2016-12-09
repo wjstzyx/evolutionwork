@@ -1,0 +1,29 @@
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/RealStr/CU03/OldModel.afl";
+
+StrategyName = "EXVHLCU2";
+StrategyID = 5029;
+
+CondEXVHLCU2 = M_EXVHLCU2(27,31);
+CondSUPERCU3 = M_SUPERCU3(95353,7);
+
+Cond = CondEXVHLCU2 + CondSUPERCU3;
+
+Vote= 0;
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond<=Vote && Cond>=-Vote;
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond<=Vote && Cond>=-Vote;
+
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName);
+PlotPerformance(sinPs,sinBS,StrategyName);

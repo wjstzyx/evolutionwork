@@ -1,0 +1,91 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "1min-SXVV2 2";
+StrategyID ="1022100011";
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+
+function SXVV2(N1,N2,N3,N4,TickerName)
+{
+	fo = Foreign(TickerName, "O" );
+	fh = Foreign(TickerName, "H" );
+	fl = Foreign(TickerName, "L" );
+	fc = Foreign(TickerName, "C" );
+	fv = Foreign(TickerName, "V" );
+	fopi = Foreign(TickerName, "OpenInt" );
+
+	TIME=TimeNum();
+
+
+	FSTK=Day()!=Ref(Day(),-1);
+	KN=IIf(FSTK,1,BarsSince(FSTK)+1);
+	
+	HH = HHV(fh,N4);
+	Ll = LLV(fl,N4);
+    up = fl >Ref(HH,-N4);
+    dn = fh <Ref(Ll,-N4);
+    
+    upv = IIf(up,IIf(KN>N3 ,fv,0),0);
+    dnv = IIf(dn,IIf(KN>N3 ,fv,0),0);
+
+	UPSum = Sum(IIf(up,IIf(KN>N3 ,fv,0),0),N1);
+ 	DNSum = Sum(IIf(dn,IIf(KN>N3 ,fv,0),0),N1);
+
+	B01 = IIf(DNSum>0,UPSum/DNSum > N2/10,0); 
+	S01 = IIf(UPSum>0,DNSum/UPSum> N2/10,0) ;
+
+
+	BSIG=B01 AND KN>N3;
+	SSIG=S01 AND KN>N3;
+
+	LASTBAR=GetLastK(TickerName);
+	CSIG= 0;
+	
+	/*Plot(HH,"hh",colorRed);
+	Plot(Ll,"Ll",colorRed);
+	Plot(upv,"upv",colorRed);
+	Plot(dnv,"dnv",colorRed);
+	Plot(UPSum,"UPSum",colorRed);
+	Plot(DNSum,"DNSum",colorRed);
+	Plot(B01,"B01",colorRed);
+	Plot(S01,"S01",colorRed);*/
+	
+	
+	
+   return GetPs(BSIG,SSIG,CSIG);
+}
+
+
+
+
+
+TickerNAME = Name();
+
+n1= ParamOptimize("n1", 509, 1,1000,1);
+n2= ParamOptimize("n2", 175, 1, 1200,1);
+n3= ParamOptimize("n3", 138, 1, 1600,1);
+n4= ParamOptimize("n4", 138, 1, 1600,1);
+
+Cond=sxvv2(n1,n2,n3,n4,TickerName);
+
+Vote=0;
+
+BSIG=Cond>Vote;// AND (NOT getlastk(Name()));
+SSIG=Cond<-Vote;// AND (NOT getlastk(Name()));
+CSIG=Cond==0;// OR getlastk(Name());
+
+
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_night_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

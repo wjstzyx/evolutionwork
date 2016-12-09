@@ -1,0 +1,66 @@
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "Lud_raw_MA_30m";
+StrategyID = 26008;
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+SetBarsRequired(-2,-2);
+									
+	fo = Foreign(TickerName, "O" );								
+	fh = Foreign(TickerName, "H" );								
+	fl = Foreign(TickerName, "L" );								
+	fc = Foreign(TickerName, "C" );								
+	fv = Foreign(TickerName, "V" );								
+	fopi = Foreign(TickerName, "OpenInt" );								
+									
+	TIME=TimeNum();								
+	FSTK=Day()!=Ref(Day(),-1);								
+	KN=IIf(FSTK,1,BarsSince(FSTK)+1);								
+ //------------------------------									
+   up = fc>fo;									
+   dn = fc<fo;									
+									
+  b01 =   fh>Ref(fh,-1) AND Ref(fh,-1)>Ref(fh,-2) AND fc>Ref(fc,-2); 									
+  s01 =  fh<Ref(fh,-1) AND Ref(fh,-1)<Ref(fh,-2) AND fc<Ref(fc,-2);									
+	bsig = (b01 ) AND kn==4  ;								
+	ssig = (s01 ) AND kn==4 ;								
+									
+ //--------------------------   									
+	CSIG = GetLastK(TickerName);								
+	sinPs=GetPs(BSIG,SSIG,0);								
+									
+	Lstfc = BarsSince(bsig OR ssig );								
+									
+	UR = (HHV(fh,4)-LLV(fl,4));								
+	uup = fc>fo OR fc==fo;								
+	ddn = fc<fo OR fc==fo;								
+	KR01 =sinPs==-1 AND (fh-fl)>Ref(UR ,-1) AND Ref(ddn,-1) AND Ref(ddn,-2)  AND up  ; 								
+	KR02 =sinPs==1 AND (fh-fl)>Ref(UR ,-1)  AND Ref(uup,-1) AND Ref(uup,-2)  AND dn ; 
+	
+	Lstbsg = BarsSince(bsig);
+	Lstssg = BarsSince(ssig);
+
+	n = Paramoptimize("n", 35, 1, 100, 1);
+
+	C01 = sinPs==1 AND  (Ref(C,-Lstbsg)-C)>n;///15  20
+	C02 = sinPs==-1 AND (C- Ref(C,-lstssg))>n; 
+    								
+	CSIG=KR01 OR KR02 OR C01 OR C02 ;// OR C010 OR C020  ; 								
+									
+    Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);									

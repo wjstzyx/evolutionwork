@@ -1,0 +1,101 @@
+//#include "Formulas/Custom/201502/15s/volatility.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+TickerNAME = Name(); 
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+
+StrategyName = "	IF-5min-VPIN_test1_5";
+StrategyID = 40842;
+ProType = 0;
+TickerName=Name();
+
+function VolSlice(value, window_size, window_number) {
+	winvol = HHV(value, window_size) - LLV(value, window_size);
+	res = EMA(winvol, window_size * window_number);
+	return res;
+}
+
+function GetVbuy(odata,cdata,vol,size)
+{
+	dp = cdata-odata;
+	x = IIf(StDev(dp,size)==0,0,dp/StDev(dp,size));
+	cdf = NN(x);
+	return cdf*vol;
+}
+
+bid = Foreign(Name(), "L");
+ask = Foreign(Name(), "H");
+bidv = Foreign(Name(), "1");
+askv = Foreign(Name(), "2");
+pask = Ref(ask, -1);
+pbid = Ref(bid, -1);
+pbidv = Ref(bidv, -1);
+paskv = Ref(askv, -1);
+
+samplesize = Param("samplesize",500,10,5000,10);
+volb = GetVbuy(O,C,V,samplesize);
+pbuy=volb/V;
+
+vols = V-volb;
+
+N = BarsSince(Day()!=Ref(Day(),-1));
+
+sumbv=Sum(volb,N);
+sumsv=Sum(vols,N);
+
+bsig0 = TimeNum()==91500 AND sumbv>sumsv;
+ssig0 = TimeNum()==91500 AND sumbv<sumsv;
+
+d = Param("d",10,1,200,1);
+bsig1 = Sum(sumbv>sumsv,d)==d;
+ssig1 = Sum(sumbv<sumsv,d)==d;
+
+//Plot(sumvb,"sumvb",colorRed);
+//Plot(sumvs,"sumbs",colorGreen);
+
+bsig = bsig0 OR bsig1;
+ssig = ssig0 OR ssig1;
+
+Holdperiod=Param("Holdperiod",10,1,100,1);
+
+ps = GetPs(bsig,ssig,0);
+
+Lstbsg = BarsSince(bsig);
+Lstssg = BarsSince(ssig);
+
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+C01 = ps==1 AND Lstbsg>=Holdperiod AND C<Ref(C,-Lstbsg);//AND C<Ref(C,-Holdperiod);//
+C02 = ps==-1 AND lstssg>=holdperiod AND C>Ref(C,-lstssg);//AND C>Ref(C,-Holdperiod);//
+
+p = Param("p",1,0,100,0.1);
+C03 = ps==1 AND  C<Ref(C,-Lstbsg)-p;
+C04 = ps==-1 AND  C>Ref(C,-lstssg)+p;
+
+tp = Param("tp",9.6,0,50,0.1);
+
+C05 = ps==1 AND  C<HighestSince(bsig,C)-tp;
+C06 = ps==-1 AND  C>LowestSince(ssig,C)+tp;
+
+C05 = ps==1 AND  C<HHV(C,lstbsg)-tp;
+C06 = ps==-1 AND  C>LLV(C,lstssg)+tp;
+
+CSIG = C01 OR C02 OR C03 OR C04 OR C05 OR C06;// TimeNum() < 91830 OR TimeNum() > 151430 OROR  OR C03 OR C04;
+
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+
+/*
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);
+*/
+PlotPerformance(bsig,ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

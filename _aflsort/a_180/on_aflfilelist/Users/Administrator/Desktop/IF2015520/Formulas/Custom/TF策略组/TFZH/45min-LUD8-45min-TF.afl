@@ -1,0 +1,98 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "45min-LUD8-45min-TF";
+StrategyID = 380014;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+function LUDRatioV2(period,period2,Value,M,TickerName)
+{//15mi 10,8,50
+//14mi 10,10,49
+//13mi 14,8,51**
+//16mi 9,9,49**
+//10mi 16,12,34--
+//11mi 14,11,50**
+//12mi 12,12,49--
+//9mi 19,11,52**
+//7mi 26,16,51**
+
+//hs 27mi 1,1,0,0
+	fo = O;	fh = H;	fl = L;	fc = C;	fv = V;	fopi = OpenInt;
+
+	TimeN =(TimeNum()+Interval()*100/60);
+	Per = int(Interval()/60);
+	TIME=TimeNum();
+	FSTK=Day()!=Ref(Day(),-1);
+	KN=IIf(FSTK,1,BarsSince(FSTK)+1);
+ //------------------------------
+    up = fc>fo;
+    dn = fc<fo;
+//==============================================
+	HH= HHV(fh,period);
+    LL = LLV(fl,period);
+	UR = HH -Ref(fo,-KN+1);
+    DR = Ref(fo,-KN+1)-LL;
+    
+	URvalue = UR/(period*Per);
+   DRvalue = DR/(period*Per);  
+ 
+	b01 = URvalue/DRvalue >Value/10 AND fc>Ref(fh,-KN+1);
+   s01 = DRvalue/URvalue >Value/10  AND fc<Ref(fl,-KN+1);
+
+//-------------------------------
+   PHH =  HHV(fh,KN-period);
+   PLL =  HHV(fl,KN-period);
+	PUR = PHH -Ref(fo,-KN+period);
+	PDR = Ref(fo,-KN+period)-PLL;
+	PURvalue = PUR/((KN-period)*Per);
+   PDRvalue = PDR/((KN-period)*Per);  
+
+//=============================================
+ 	bsig = (b01 AND NOT(s01) ) ;
+	ssig = (S01  AND NOT(b01));
+ //--------------------------   
+	Lstfc = BarsSince(bsig OR ssig );
+	CSIG = 0;//GetLastK(TickerName);
+	sinPs=getPS(BSIG,SSIG,CSIG);
+	MAkn= MA(fc,KN);
+	C01 = (fc-MAkn)/fc>m/1000 AND sinps==-1 AND Lstfc>period2/3;
+	C02 = (MAkn-fc)/MAkn>m/1000 AND sinps==1 AND Lstfc>period2/3;
+
+	Csig = Lstfc >period2 ;//OR C01 OR C02;
+    Cond = getCSL(BSIG,SSIG,CSIG);
+	return Cond ;
+}
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 3 );
+OptimizerSetOption("MaxEval", 1000);
+
+TickerNAME = Name();
+
+n1= 16;
+
+//Cond=PLUDHNight(n1,TickerName);
+Cond = LUDRatioV2(3,22,71,16,Name());
+
+Vote=0;
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond==0;
+
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+ps0 = GetPs(bsig,ssig,csig);
+Filter= 1;
+AddColumn(ps0,"ps");

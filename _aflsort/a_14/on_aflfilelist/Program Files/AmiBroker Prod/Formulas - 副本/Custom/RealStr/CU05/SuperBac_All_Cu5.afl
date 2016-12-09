@@ -1,0 +1,38 @@
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Basic2012/HL.afl";
+#include "Formulas/Custom/Basic2012/EXV.afl";
+#include "Formulas/Custom/Basic2012/TopBot.afl";
+#include "Formulas/Custom/Basic2012/VolumeBreak.afl";
+#include "Formulas/Custom/Basic2012/V7DY.afl";
+#include "Formulas/Custom/Basic2012/UDHL.afl";
+
+StrategyName = "SuperBac_All_Cu5";
+StrategyID = 5035;
+
+Cond1=HLAVG(1,5,5,"RU");
+Cond2=HLCAVG(1,7,6,"CU");
+Cond3=EXVORICU3(23,29,50,1,"CU");
+Cond4=EXVORIV2CU3(23,49,315,7,"RU");
+Cond5=VolumeBreakOri(7,8,6,"CU");
+Cond6=VolumeIncreasing(8,8,"RU");
+Cond7=V7DYORIALL(6,31,"RU");
+Cond8=UDHLSTOPMAVFC(14,17,11,5,5,44,7,999,185,"CU");
+Cond9=UDHLSTOPMAVFC(11,40,52,3,1,30,7,90,226,"RU");
+
+Cond=Cond1*5+Cond2*5+Cond3*8+Cond4*8+Cond5*10+Cond6*10+Cond7*12+Cond8*4+Cond9*4;
+
+
+
+Vote= ParamOptimize("Vote", 12, 0, 100, 1);
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond<=Vote && Cond>=-Vote;
+
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName);
+PlotPerformance(sinPs,sinBS,StrategyName);

@@ -1,0 +1,32 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/BasicV4/MAxVrate.afl";
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+StrategyName = "IF07_MAxVrate-7-5";
+StrategyID = 40708;
+ProType = 0;
+TickerName=Name();
+Plot(0,StrategyName,colorBlack,styleNoLine);
+
+N1= ParamOptimize("N1",0,0,1000,1);
+
+Cond= MAxVrate(7,5,10,10,TickerName);
+
+
+Vote=ParamOptimize("w_Vote",0,0,4,0.5);
+Vote=0;
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond==0 ;
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+
+
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

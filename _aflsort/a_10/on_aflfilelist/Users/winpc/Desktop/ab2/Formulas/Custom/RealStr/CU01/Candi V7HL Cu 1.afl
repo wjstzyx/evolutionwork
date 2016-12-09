@@ -1,0 +1,70 @@
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Basic2012/Rev.afl";
+#include "Formulas/Custom/Basic2012/TM.afl";
+#include "Formulas/Custom/Basic2012/YCHL.afl";
+//#include "Formulas/Custom/Basic2012/UDVOL.afl";
+#include "Formulas/Custom/Basic2012/HL.afl";
+//#include "Formulas/Custom/Basic2012/EXV.afl";
+//#include "Formulas/Custom/Basic2012/Cross.afl";
+#include "Formulas/Custom/Basic/V7Dy.afl";
+StrategyName = "Candi V7HL Cu 1";
+StrategyID = 5048;
+ProType=1;
+//Rev
+CondR= MAVOLREVPro(7,95,0,85,1000,1000,"CU");
+CondG1 = CondR;
+
+//YCHL
+CondF1= FCCHLORI(0,51,0,1000,1000,"CU");
+CondF2= FCCHLORI(0,51,0,1000,1000,"CU");
+CondF2= TimeSelect(84,1000,CondF2);
+CondF= CondF1+ CondF2;
+CondG3=CondF/2;
+
+//HL
+
+CondH2= HLAVGA(50,1,69,"CU");
+CondH3= HLAVGA(65,0,69,"CU");
+CondH4= HLAVG(53,0,50,"CU");
+CondH5= HLAVG(63,0,50,"CU");
+CondH6= HLCAVG(50,0,50,"CU");
+CondH7= HLNAVG(56,10,55,"CU");
+CondGHL= (CondH2+CondH3+CondH4+CondH5+CondH6+CondH7);
+CondG5=CondGHL/6;
+
+//V7
+CondV1= V7DYHLV2(21,51,"CU");
+CondV2= V7DYHL(23,6,"CU");
+CondV2 = TimeSelect(48,270,CondV2);
+CondV3= V7DYMAHLV(23,42,39,"CU");
+CondV4= V7DYMA(23,42,39,"CU");
+CondV4 = TimeSelect(52,270,CondV4);
+CondV5= V7DYThreeSegment(31,99,"CU");
+CondV7= V7DYStartVer(12,48,"CU");
+CondV7 = TimeSelect(30,270,CondV7);
+
+CondV= CondV1+CondV2+CondV3+CondV4+CondV5+CondV7;
+CondG8=CondV/6;
+
+
+Rev= ParamOptimize("Rev",2, 0, 3, 0.5);
+YCHL= ParamOptimize("YCHL", 2, 0, 3, 0.5);
+HL= ParamOptimize("HL", 3, 0, 3, 0.5);
+V7= ParamOptimize("V7", 3, 0, 3, 0.5);
+
+Cond = Rev*CondG1 +YCHL*CondG3+HL*CondG5+V7*CondG8;;
+
+Vote= ParamOptimize("Vote", 0, 0, 3, 0.5);
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG1=Cond<=Vote && Cond>=-Vote;
+CSIG=(TimeNum()+Interval()*100/60)>=146000;
+
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

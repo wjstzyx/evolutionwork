@@ -1,0 +1,93 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/BasicV3/exiv.afl";
+#include "Formulas/Custom/BasicV3/exv.afl";
+#include "Formulas/Custom/BasicV3/maa.afl";
+#include "Formulas/Custom/BasicV3/sxv.afl";
+#include "Formulas/Custom/BasicV3/DTA.afl";
+#include "Formulas/Custom/BasicV3/v7.afl";
+#include "Formulas/Custom/BasicV3/HL.afl";
+#include "Formulas/Custom/BasicV3/EXR.afl";
+#include "Formulas/Custom/BasicV3/BOMB.afl";
+#include "Formulas/Custom/BasicV3/EXVC.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+StrategyName = "IF01_EXVC_EXR_LVB_BOMB-1.5-2.5-1.5-3.5-V2";
+StrategyID = 40208;
+ProType = 0;
+EXVC1=EXVAStat_30(15,21,2,"IF");
+EXVC2=exvastat_30(16,14,2,"IF");
+EXVC3=EXVAStat_30(17,19,2,"IF");
+EXVC4=EXVAStat_30(14,23,2,"IF");
+EXVC5=EXV3CU3_30(20,14,11,73,"IF");
+
+
+EXR1=EXRRRM(10,21,8,"IF");
+EXR2=EXRRRMKN(18,25,8,"IF");
+EXR3=EXRRR(11,20,"IF");
+EXR4=EXRRR(17,52,"IF");
+EXR5=EXRRRM(15,18,9,"IF");
+EXR6=EXRRRMKNC(15,25,8,"IF");
+EXR7=EXRRRMKN(15,27,8,"IF");
+EXR8=EXRRRMKN(18,20,8,"IF");
+
+
+
+HL1=LVB2(1.6,8,60,"IF");
+HL2=LVB2(2,8,12,"IF");
+HL3=LVB2(3.4,7,60,"IF");
+HL4=LVB2(3.8,7,59,"IF");
+
+
+BOMB1=BOMBV2(3,7,2,0.34,"IF");
+BOMB2=BOMB(2,4,2,0.34,"IF");
+BOMB3=BOMBV2(1,4,2,0.23,"IF");
+BOMB4=BOMBV2(2,5,1,0.32,"IF");
+BOMB5=BOMBV2(2,7,1,0.32,"IF");
+
+
+
+
+
+
+
+
+
+
+
+
+
+Cond_EXVC= (EXVC1+EXVC2+EXVC3+EXVC4+EXVC5)/5;
+Cond_EXR= (EXR1+EXR2+EXR3+EXR4+EXR5+EXR6+EXR7+EXR8)/8;
+Cond_HL= (HL1+HL2+HL3+HL4)/4;
+cond_BOMB=(BOMB1+BOMB2+BOMB3+BOMB4+BOMB5)/5;
+w_EXC= ParamOptimize("w_EXC",1.5,0,4,0.5);
+w_EXR= ParamOptimize("w_EXR",2.5,0,4,0.5);
+w_LVB= ParamOptimize("w_LVB",1.5,0,4,0.5);
+w_BOMB= ParamOptimize("w_BOMB",3.5,0,4,0.5);
+
+WE = w_EXC*cond_EXVC;
+WR = w_EXR*cond_EXR;
+WL = w_LVB*cond_HL;
+WB = w_BOMB*cond_BOMB;
+Cond =  WE+WR+WL+ WB ;
+
+Vote=ParamOptimize("w_Vote",2,0,4,0.5);
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+
+CSIG =GetLastK("IF");
+
+
+
+
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

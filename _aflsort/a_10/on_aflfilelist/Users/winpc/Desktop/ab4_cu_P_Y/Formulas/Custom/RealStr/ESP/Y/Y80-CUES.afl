@@ -1,0 +1,28 @@
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/basicV4/ESP.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 800);
+
+StrategyName = "Y80-CUES";
+StrategyID = 7012;
+ProType = 1;
+
+Cond=CUES("YY");
+
+
+Vote=0;//ParamOptimize("Vote", 0.5, 0, 1, 0.5);
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+	TimeN =(TimeNum()+Interval()*100/60);
+CSIG=GetLastK("YY") OR Cond==0  OR TimeN >=145900;
+
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName+"--"+StrategyID);

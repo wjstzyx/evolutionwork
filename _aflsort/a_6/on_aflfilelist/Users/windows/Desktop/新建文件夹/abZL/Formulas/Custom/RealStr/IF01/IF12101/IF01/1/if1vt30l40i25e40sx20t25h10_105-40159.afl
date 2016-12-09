@@ -1,0 +1,103 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/BasicV3/dfb.afl";
+#include "Formulas/Custom/BasicV3/exiv.afl";
+#include "Formulas/Custom/BasicV3/exv.afl";
+#include "Formulas/Custom/BasicV3/hl.afl";
+#include "Formulas/Custom/BasicV3/maa.afl";
+#include "Formulas/Custom/BasicV3/sxv.afl";
+#include "Formulas/Custom/BasicV3/tb.afl";
+#include "Formulas/Custom/BasicV3/tm.afl";
+#include "Formulas/Custom/BasicV3/v7.afl";
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 800);
+
+StrategyName = "if1vt30l40i25e40sx20t25h10_105-40159";
+StrategyID = 40159;
+ProType = 0;
+
+EXIV1=EXIV(4,58,0,"IF");
+EXIV2=EXIV(11,65,0,"IF");
+EXIV3=EXIV(24,32,0,"IF");
+EXIV4=EXIV(17,31,0,"IF");
+EXIV5=EXIV(21,62,1,"IF");
+EXIV6=EXIVMA(70,57,44,1,"IF");
+EXIV7=EXIVMA(6,20,37,0,"IF");
+EXIV8=EXIVMA(40,52,96,0,"IF");
+
+EXV1=EXVORIV3CU3(25,20,24,74,"IF");
+EXV2=EXVHH(15,44,10,12,"IF");
+EXV3=EXVHH(23,56,5,11,"IF");
+EXV4=EXVapr4(20,29,"IF");
+EXV5=EXVAStat(37,26,2,"IF");
+EXV6=EXVORIV3CU3(25,10,25,65,"IF");
+EXV7=EXVHH(22,15,19,19,"IF");
+EXV8=EXVORIV3CU3(22,20,18,47,"IF");
+
+SXV1=SumXVolAdd(20,46,15,"IF");
+SXV2=SumXVolume(16,24,28,"IF");
+SXV3=SumXVolume(16,25,13,"IF");
+SXV4=SumXVolAdd(19,46,13,"IF");
+
+TM1=TimeShareFHLLess(8,18,11,1000,330,"IF");
+TM2=TimeShareHLLess(7,16,17,1000,400,"IF");
+TM3=TimeShareFHLLess(5,14,22,1000,300,"IF");
+TM4=TimeShareHLHalfLess(7,30,30,154,450,"IF");
+
+
+
+HL0=HLAVGA(22,8,60,"IF");
+HL1=HLAVGA(24,8,58,"IF");
+HL2=HLAVG(29,7,28,"IF");
+HL3=HLAVGA(22,8,59,"IF");
+HL4=HLAVGA(24,7,60,"IF");
+HL5=HLPAVG(107,110,45,"IF");
+HL6=HLNAVG2(42,5,58,"IF");
+HL7=HLCAVG(16,8,39,"IF");
+
+
+Lv01=Lvb2(1.6,8,24,"IF");
+Lv02=Lvb2(1.3,6,32,"if");
+Lv03=Lvb2(3.0,6,25,"if");
+Lv04=Lvb2(1.4,7,14,"if");
+Lv05=Lvb2(1.7,9,35,"if");
+Lv06=Lvb2(1.1,10,50,"if");
+Lv07=Lvb2(1.8,9,30,"if");
+Cond_lv = (Lv01 +Lv03 + Lv05)/3;
+w_lv = ParamOptimize("w_LV",4,0,4,0.5);
+
+
+cond_HL=(HL0+HL1+HL2+HL3+HL4+HL5+HL6+HL7)/8;
+
+
+
+cond_exiv =(EXIV1+EXIV2+EXIV3+EXIV4+EXIV5+EXIV6+EXIV7+EXIV8)/8;
+cond_exv =(EXV1+EXV2+EXV3+EXV4+EXV5+EXV6+EXV7+EXV8)/8;
+cond_SXV =(SXV1+SXV2+SXV3+SXV4)/4;
+
+cond_TM =(TM1+TM2+TM3+TM4)/4;
+
+w_EXIV = ParamOptimize("w_EXIV",2.5,0,4,0.5);
+w_EXV= ParamOptimize("w_EXV",4,0,4,0.5);
+w_SXV = ParamOptimize("w_SXV",2,0,4,0.5);
+w_TM= ParamOptimize("w_TM",2.5,0,4,0.5);
+w_hl = Paramoptimize("w_HL",1,0,4,0.5);
+
+
+Cond = w_EXIV*cond_exiv + w_SXV*cond_SXV+ w_EXV*cond_EXV+ w_TM*cond_TM + w_hl * Cond_hl + w_lv* Cond_lv;
+
+//Vote=1.5;
+Vote= paramoptimize("vote",3,0,3,0.5); //0.5;
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=GetLastK("IF");
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

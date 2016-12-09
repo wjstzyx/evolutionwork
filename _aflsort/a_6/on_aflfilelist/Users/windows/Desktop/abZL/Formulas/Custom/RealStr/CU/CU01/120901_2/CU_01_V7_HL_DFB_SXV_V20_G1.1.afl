@@ -1,0 +1,83 @@
+_SECTION_BEGIN("CU_01_V7_HL_DFB_SXV_V0_G1");
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/BasicV3/exiv.afl";
+#include "Formulas/Custom/BasicV3/exv.afl";
+#include "Formulas/Custom/BasicV3/hl.afl";
+#include "Formulas/Custom/BasicV3/V7.afl";
+#include "Formulas/Custom/BasicV3/sxv.afl";
+#include "Formulas/Custom/BasicV3/TM.afl";
+#include "Formulas/Custom/BasicV3/DFB.afl";
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+StrategyName = "CU_01_V7_HL_DFB_SXV_V20_G1.1";
+StrategyID = 50017;
+ProType = 1;
+
+
+V71=V7min(33,100,39,"CU");
+V72=V7min(27,100,4,"CU");
+V73=V7min(27,99,14,"CU");
+V74=V7min(30,100,10,"CU");
+V75=V7min(31,93,67,"CU");
+
+HL1=HLNAVG(139,103,38,"CU");
+HL2=HLNAVG2(115,100,0,"CU");
+HL3=HLNAVG(107,102,0,"CU");
+HL4=HLNAVG2(93,100,34,"CU");
+HL5=HLNAVG2(73,129,57,"CU");
+HL6=HLNAVG(95,100,47,"CU");
+HL7=HLNAVG(142,103,48,"CU");
+HL8=HLNAVG2(124,102,0,"CU");
+
+DFB1=DFB(68,55,"CU");
+DFB2=DFB(73,55,"CU");
+DFB3=DFB(66,52,"CU");
+DFB4=DFB(62,50,"CU");
+DFB5=DFB(65,48,"CU");
+
+/*
+SXV1=SumXVolAdd(57,37,2,"CU");
+SXV2=SumXVolAdd(55,49,8,"CU");
+SXV3=SumXVolAdd(99,48,0,"CU");
+SXV4=SumXVolAdd(40,35,10,"CU");
+SXV5=SumXVolume(19,46,32,"CU");
+*/
+
+
+
+
+
+cond_V7=(V71+V72+V73+V74+V75)/5;
+cond_HL=(HL1+HL2+HL3+HL4+HL5+HL6+HL7+HL8)/8;
+cond_DFB=(DFB1+DFB2+DFB3+DFB4+DFB5)/5;
+cond_SXV=0;//(SXV1+SXV2+SXV3+SXV4+SXV5)/5;
+
+
+
+w_V7 = ParamOptimize("w_V7",4,0,4,0.5);
+w_HL= ParamOptimize("w_HL",1.5,0,4,0.5);
+w_DFB= ParamOptimize("w_DFB",4,0,4,0.5);
+w_SXV=0;// ParamOptimize("w_SXV",0,0,4,0.5);
+
+Cond = w_V7 *cond_V7 + w_HL*cond_HL + w_DFB*cond_DFB + w_SXV*cond_SXV;
+
+
+
+
+Vote=2;
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=GetLastK("CU");
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);
+_SECTION_END();

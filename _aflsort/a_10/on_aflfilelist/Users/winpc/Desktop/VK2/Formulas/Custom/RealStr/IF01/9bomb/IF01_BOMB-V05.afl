@@ -1,0 +1,39 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+
+#include "Formulas/Custom/BasicV4/BOMB.afl";
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+StrategyName = "IF01_BOMB-V05";
+StrategyID = 40299;
+ProType = 0;
+
+
+Cond1 =BOMBV2(3,7,2,0.39,"IF");
+Cond2 =BOMBV2(2,6,2,0.29,"IF");
+Cond3 =BOMBV2(2,5,2,0.29,"IF");
+Cond4 =BOMBV2(2,6,2,0.3,"IF");
+Cond5 =BOMBV2(3,6,2,0.35,"IF");
+
+
+
+Cond = (Cond1 +Cond2+Cond3+Cond4+Cond5)/5;
+
+
+
+
+Vote=ParamOptimize("w_Vote",0.5,0,4,0.5);
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond==0;
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName+"--"+StrategyID);

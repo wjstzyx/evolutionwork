@@ -1,0 +1,158 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+function PIR(p,Length)
+{
+Ll=LLV(p,Length);
+Hh=HHV(p,Length);
+return (100*(p-Ll)/(Hh-Ll));
+}
+
+function TP15(bsig, ssig, ps0)
+{
+tp = 15; //Param("tp",15,0,100,1);
+Lstbsg = BarsSince(ps0==1 AND Ref(ps0,-1)!=1);
+Lstssg = BarsSince(ps0==-1 AND Ref(ps0,-1)!=-1);
+C01 = ps0==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C02 = ps0==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+Csig=C01 OR C02;
+ps = GetPs(bsig, ssig, csig);
+return ps;
+}
+
+
+
+RSIreversal_N1 = 1; //paramoptimize("N1",32,1.0,100,1);
+
+RSIreversal_smooth= 1; //paramoptimize("smooth",20, 1, 1000,1);
+
+function getRSIreversal(N1,smooth)
+
+{
+
+arrC = C;
+
+typ=arrC;
+
+
+
+
+
+LC=Ref(typ,-1);
+
+
+
+RSI1=EMA(Max(typ-LC,0),N1)/EMA(abs(typ-LC),N1);
+
+
+
+
+
+Value1 = Wilders(RSI1, smooth);
+
+
+
+Value3=Value1;
+
+
+
+StoFR1=Value3 ;
+
+
+
+Bsig1=StoFR1>Ref(StoFR1,-1) AND Ref(StoFR1,-1)>Ref(StoFR1,-2)  AND Ref(StoFR1,-2)>Ref(StoFR1,-3);
+
+Ssig1=StoFR1<Ref(StoFR1,-1) AND Ref(StoFR1,-1)<Ref(StoFR1,-2)  AND Ref(StoFR1,-2)<Ref(StoFR1,-3);
+
+
+
+bsig=ExRem(Bsig1,Ssig1);
+
+ssig=ExRem(Ssig1,Bsig1);
+
+
+
+
+bsig=ExRem(Bsig,Ssig);
+ssig=ExRem(Ssig,Bsig);
+
+
+ps=GetPs(bsig,ssig,0);
+
+
+
+
+//add exrem
+bsig=exrem(bsig,ssig);
+ssig=exrem(ssig,bsig);
+ps=getps(bsig,ssig,0);
+
+//add_tp15ps_exp
+ps = TP15(bsig, ssig, ps);
+return ps;
+
+
+}
+
+
+ps = 0;
+//15_MD
+N1 = 89;smooth = 428;ps1 = getRSIreversal(N1,smooth);ps += ps1;
+N1 = 96;smooth = 382;ps2 = getRSIreversal(N1,smooth);ps += ps2;
+N1 = 88;smooth = 447;ps3 = getRSIreversal(N1,smooth);ps += ps3;
+N1 = 100;smooth = 388;ps4 = getRSIreversal(N1,smooth);ps += ps4;
+N1 = 85;smooth = 447;ps5 = getRSIreversal(N1,smooth);ps += ps5;
+N1 = 99;smooth = 388;ps6 = getRSIreversal(N1,smooth);ps += ps6;
+N1 = 84;smooth = 448;ps7 = getRSIreversal(N1,smooth);ps += ps7;
+N1 = 100;smooth = 366;ps8 = getRSIreversal(N1,smooth);ps += ps8;
+N1 = 83;smooth = 433;ps9 = getRSIreversal(N1,smooth);ps += ps9;
+N1 = 81;smooth = 519;ps10 = getRSIreversal(N1,smooth);ps += ps10;
+//15_NP
+N1 = 92;smooth = 406;ps1 = getRSIreversal(N1,smooth);ps += ps1;
+N1 = 94;smooth = 378;ps2 = getRSIreversal(N1,smooth);ps += ps2;
+N1 = 88;smooth = 386;ps3 = getRSIreversal(N1,smooth);ps += ps3;
+N1 = 97;smooth = 411;ps4 = getRSIreversal(N1,smooth);ps += ps4;
+N1 = 85;smooth = 406;ps5 = getRSIreversal(N1,smooth);ps += ps5;
+N1 = 100;smooth = 403;ps6 = getRSIreversal(N1,smooth);ps += ps6;
+N1 = 90;smooth = 451;ps7 = getRSIreversal(N1,smooth);ps += ps7;
+N1 = 92;smooth = 470;ps8 = getRSIreversal(N1,smooth);ps += ps8;
+N1 = 99;smooth = 422;ps9 = getRSIreversal(N1,smooth);ps += ps9;
+N1 = 88;smooth = 499;ps10 = getRSIreversal(N1,smooth);ps += ps10;
+//15_PF
+N1 = 94;smooth = 384;ps1 = getRSIreversal(N1,smooth);ps += ps1;
+N1 = 87;smooth = 452;ps2 = getRSIreversal(N1,smooth);ps += ps2;
+N1 = 100;smooth = 391;ps3 = getRSIreversal(N1,smooth);ps += ps3;
+N1 = 100;smooth = 377;ps4 = getRSIreversal(N1,smooth);ps += ps4;
+N1 = 100;smooth = 415;ps5 = getRSIreversal(N1,smooth);ps += ps5;
+N1 = 91;smooth = 432;ps6 = getRSIreversal(N1,smooth);ps += ps6;
+N1 = 100;smooth = 408;ps7 = getRSIreversal(N1,smooth);ps += ps7;
+N1 = 100;smooth = 387;ps8 = getRSIreversal(N1,smooth);ps += ps8;
+N1 = 93;smooth = 369;ps9 = getRSIreversal(N1,smooth);ps += ps9;
+N1 = 100;smooth = 398;ps10 = getRSIreversal(N1,smooth);ps += ps10;
+
+
+ps_th = Param("ps_th", 10, 0, 100, 1);
+
+bsig=ps >= ps_th;
+ssig=ps <= -ps_th;
+
+bsig=ExRem(bsig,ssig);
+ssig=ExRem(ssig,bsig);
+
+psmerge=GetPs(bsig,ssig,0);
+ps_exit_th = ps_th * 0.66667;
+C01 = psmerge==1 AND ps <= ps_exit_th;
+C02 = psmerge==-1 AND ps >= -ps_exit_th;
+
+tp = 15; //Param("tp",15,0,100,1);
+Lstbsg = BarsSince(psmerge==1 AND Ref(psmerge,-1)!=1);
+Lstssg = BarsSince(psmerge==-1 AND Ref(psmerge,-1)!=-1);
+C03 = psmerge==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C04 = psmerge==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+//Csig=C01 OR C02 OR C03 OR C04;
+csig = C03 OR C04;
+//csig = C01 OR C02;
+
+
+Plotperformance(bsig,ssig,Csig);
+
+StrategyName = "15min_30_10_getRSIreversal";StrategyID = "1013500015";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

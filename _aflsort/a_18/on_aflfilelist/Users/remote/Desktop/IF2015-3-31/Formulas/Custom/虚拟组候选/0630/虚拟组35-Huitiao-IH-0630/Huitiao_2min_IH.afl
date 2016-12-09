@@ -1,0 +1,84 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "Huitiao_2min-ih";
+StrategyID = 120001;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+
+//27,0.2,0.4-0.8,0 5min 
+
+period=Param("period",40,0,1000);
+minreaction=Param("minreaction",0.0,0,1000,.01);
+maxreaction=Param("maxreaction",0.13,0,1000,.01);
+mindistance=Param("mindistance",0,0,1000);
+//holdperiod=Param("holdperiod",10,0,1000);
+
+span=hhV(C,period)-llv(C,period);
+
+hightonow=BarsSince(H==HHV(H,period));                 
+lowtonow=BarsSince(L==LLV(L,period));
+
+reaction=IIf(hightonow<lowtonow,(hhV(H,period)-C),(C-LLV(L,period)));
+
+//bsig=(1000*reaction/C>minreaction) AND (1000*reaction/C<maxreaction) AND (hightonow<lowtonow) AND (hightonow>mindistance);
+//ssig=(1000*reaction/C>minreaction) AND (1000*reaction/C<maxreaction) AND (hightonow>lowtonow) AND (lowtonow>mindistance);
+
+bsig = reaction/span>minreaction AND reaction/span<maxreaction AND (hightonow<lowtonow) AND (hightonow>mindistance) AND C>O;
+ssig = reaction/span>minreaction AND reaction/span<maxreaction AND (hightonow>lowtonow) AND (lowtonow>mindistance) AND C<O;
+
+ps = GetPs(bsig,ssig,0);
+
+
+
+Holdperiod = Param("Holdperiod",100,0,100,1);
+
+
+Lstbsg = BarsSince(bsig);
+Lstssg = BarsSince(ssig);
+
+//Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+//Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+C01 = ps==1 AND Lstbsg>=Holdperiod AND C<Ref(C,-Lstbsg);//AND C<Ref(C,-Holdperiod);//
+C02 = ps==-1 AND lstssg>=holdperiod AND C>Ref(C,-lstssg);//AND C>Ref(C,-Holdperiod);//
+
+p = Param("p",7.1,0,100,0.1);
+C03 = ps==1 AND  C<Ref(C,-Lstbsg)-p;//*C/1000;
+C04 = ps==-1 AND  C>Ref(C,-lstssg)+p;//*C/1000;
+
+tp = Param("tp",20,0,200,0.5); //65
+
+C05 = ps==1 AND  C<Highestsince(bsig,C)-tp;
+C06 = ps==-1 AND  C>Lowestsince(ssig,C)+tp;
+
+C05 = ps==1 AND  C<Highestsince(ps==1 AND Ref(ps,-1)!=1,C)-tp;
+C06 = ps==-1 AND  C>Lowestsince(ps==-1 AND Ref(ps,-1)!=-1,C)+tp;
+
+vperiod = Param("vperiod",76,1,500,1);
+
+lstsig = BarsSince(bsig OR ssig);
+C07 = lstsig>0 AND V==HHV(V,vperiod);
+
+csig= C01 OR C02 OR C03 OR C04 OR C05 OR C06 OR C07;// OR TimeNum()>=151000;
+
+//csig=(ps!=0) AND ((Min(BarsSince(C==LLV(C,period)),BarsSince(C==hhV(C,period)))==holdperiod) OR (reaction>maxreaction));
+//csig = TimeNum()>=151000 OR csig;
+
+Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

@@ -1,0 +1,83 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "30min-ASI-AMA";
+StrategyID = 270146;
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+
+
+
+M=Param("M",4,1,100,1);
+AMAf = Param("AMAf", 0.031, 0, 1.0, 0.001);
+factor = Param("factor", 0.01, 0, 1, 0.001);
+
+typC=AMA(C,AMAf);
+typH=AMA(H,AMAf);
+typL=AMA(L,AMAf);
+typO=AMA(O,AMAf);
+
+
+LC=Ref(typC,-1);
+
+AA=abs(typH-LC);
+
+BB=abs(typL-LC);
+
+CC=abs(typH-Ref(typL,-1));
+
+DD=abs(LC-Ref(typO,-1));
+
+R=IIf(AA>BB AND AA>CC,AA+BB/2+DD/4,IIf(BB>CC AND BB>AA,BB+AA/2+DD/4,CC+DD/4));
+
+X=(typC-LC+(typC-typO)/2+LC-Ref(typO,-1));
+
+SI=IIf(R==0,0,16*X/R*Max(AA,BB));
+
+
+ASI=Sum(SI,M);
+ASI=EMA(SI,M);
+
+////////////////////////////////////////////////
+
+//Value1=ASI;
+Value1 = AMA(2*(ASI), factor);
+//Value2=(4*Value1+3*Ref(Value1,-1)+2*Ref(Value1,-2)+Ref(Value1,-3))/10;
+Value3=Value1;
+
+InverseFish=( ( exp( 2 * Value3 ) - 1 ) / ( exp( 2 * Value3 ) + 1 ) + 1 )*50;
+
+
+//Value3=0.5*log((1+1.98*(Value2-0.5))/(1-1.98*(Value2-0.5)));
+
+//Plot(Fish,"Fish ",colorGreen);
+StoFR1=InverseFish ;
+
+Bsig=StoFR1>Ref(StoFR1,-1);
+Ssig=StoFR1<Ref(StoFR1,-1);
+
+//Bsig=StoFR1>Ref(StoFR1,-1) AND Ref(StoFR1,-1)>Ref(StoFR1,-2);
+//Ssig=StoFR1<Ref(StoFR1,-1) AND Ref(StoFR1,-1)<Ref(StoFR1,-2);
+
+//Bsig=StoFR1>Ref(StoFR1,-1) AND Ref(StoFR1,-1)>Ref(StoFR1,-2)  AND Ref(StoFR1,-2)>Ref(StoFR1,-3);
+//Ssig=StoFR1<Ref(StoFR1,-1) AND Ref(StoFR1,-1)<Ref(StoFR1,-2)  AND Ref(StoFR1,-2)<Ref(StoFR1,-3);
+
+
+
+
+
+
+
+csig=0;
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

@@ -4,11 +4,9 @@ import os
 import re
 import sys
 import time
-from dbconn import MSSQL
-ms = MSSQL(host="192.168.0.3\SQLEXPRESS",user="future",pwd="K@ra0Key",db="future")
-# ms05 = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 import datetime
-
+import sys
+from dbconn import MSSQL
 
 def format_bar_interval(day,minites,resultlist):
     day=day
@@ -36,15 +34,6 @@ def format_bar_interval(day,minites,resultlist):
         else:
             break
         fromtime2= fromtime2+datetime.timedelta(minutes=minites)
-
-
-    # tempstr=""
-    # for item in result1:
-    #     temp="('%s',%s)" % (item,minites)
-    #     tempstr=tempstr+","+temp
-    # tempstr=tempstr.strip(",")
-    # tempstr="insert into [Future].[dbo].[Kbars_merge]([intervaldate],[period]) values %s" %(tempstr)
-    # ms.insert_sql(tempstr)
    
 # format_bar_interval('2016-12-05',15)
 def total_day_generate(resultlist,fromdate='2014-01-01',interval=15):
@@ -58,14 +47,12 @@ def total_day_generate(resultlist,fromdate='2014-01-01',interval=15):
         format_bar_interval(fromtime1,interval,resultlist)
 
 
-
-
 # total_day_generate(15)
 
 
 
-def get_Kbarinfo(period,stockdate):
-    sql="select a.*,b.O,c.C from  (select Symbol,MIN(StockDate) as openstockdate,MAX(StockDate) as closestockdate,MAX(H) as H,MIN(L) as L,SUM(V) as V,SUM(OPI) as OPI from TSymbol_quotes_backup where StockDate>='%s'  AND DATEDIFF(MINUTE,'%s',StockDate)<%s  group by Symbol ) a inner join  TSymbol_quotes_backup b on a.Symbol=b.Symbol and a.openstockdate=b.StockDate inner join TSymbol_quotes_backup c on a.Symbol=c.Symbol and a.closestockdate=c.StockDate " % (stockdate,stockdate,period)
+def get_Kbarinfo(ms,period,stockdate):
+    sql="select a.*,b.O,c.C from  (select Symbol,MIN(StockDate) as openstockdate,MAX(StockDate) as closestockdate,MAX(H) as H,MIN(L) as L,SUM(V) as V,SUM(OPI) as OPI from TSymbol where StockDate>='%s'  AND DATEDIFF(MINUTE,'%s',StockDate)<%s  group by Symbol ) a inner join  TSymbol b on a.Symbol=b.Symbol and a.openstockdate=b.StockDate inner join TSymbol c on a.Symbol=c.Symbol and a.closestockdate=c.StockDate " % (stockdate,stockdate,period)
     # print sql 
     res=ms.dict_sql(sql)
     #put in table
@@ -79,7 +66,7 @@ def get_Kbarinfo(period,stockdate):
 
 
 
-def get_Kbarinfo_history(period,stockdate):
+def get_Kbarinfo_history(ms,period,stockdate):
     sql="select a.*,b.O,c.C from  (select Symbol,MIN(StockDate) as openstockdate,MAX(StockDate) as closestockdate,MAX(H) as H,MIN(L) as L,SUM(V) as V,SUM(OPI) as OPI from TSymbol_quotes_backup where StockDate>='%s'  AND DATEDIFF(MINUTE,'%s',StockDate)<%s  group by Symbol ) a inner join  TSymbol_quotes_backup b on a.Symbol=b.Symbol and a.openstockdate=b.StockDate inner join TSymbol_quotes_backup c on a.Symbol=c.Symbol and a.closestockdate=c.StockDate " % (stockdate,stockdate,period)
     # print sql 
     res=ms.dict_sql(sql)
@@ -110,26 +97,13 @@ def get_Kbarinfo_history(period,stockdate):
 
 
 
-
-
-def general_Kbars(intervaltime):
-    sql="select * from [Future].[dbo].[Kbars_merge]  where period=%s and intervaldate>='2015-01-02 12:30:00'  and  intervaldate<='2016-12-07' order by [intervaldate] " % (intervaltime)
-    #'2016-03-19 12:30:00'
-    res=ms.dict_sql(sql)
-    for item in res:
-        print item 
-        get_Kbarinfo(intervaltime,item['intervaldate'])
-
-# general_Kbars(15)
-
 def write_heart(type,name):
     ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
     sql="update [LogRecord].[dbo].[quotes_python_heart] set [updatetime]=getdate() where type='%s' and name='%s' and [isactive]=1" % (type,name)
     ms.insert_sql(sql)
 
 
-
-def main_fun(starttime,period,type='history'):
+def main_fun(ms,starttime,period,type='history'):
     if period in (5,15,20,30,60):
         if type=='history':
             resultlist=[]
@@ -137,11 +111,11 @@ def main_fun(starttime,period,type='history'):
             #resultlist中存储着所需要的K线的开始时间 [datetime.datetime(2014, 1, 1, 9, 0), datetime.datetime(2014, 1, 1, 9, 15), datetime.datetime(2014, 1, 1, 9, 30)
             for myitem in resultlist:
                 print myitem
-                get_Kbarinfo_history(period,myitem)
+                get_Kbarinfo_history(ms,period,myitem)
         if type=='now':
             #从Tsymbol_nmin 表中选择最新的Kbar时间
             resultlist=[]
-            total_day_generate(fromdate='2016-01-01',interval=period,resultlist=resultlist)
+            total_day_generate(fromdate='2016-09-01',interval=period,resultlist=resultlist)
             sql="  select distinct  top(2)   stockdate from [Future].[dbo].[TSymbol_%smin] order by stockdate desc" % (period)
             res=ms.dict_sql(sql)
             if not res:
@@ -154,8 +128,8 @@ def main_fun(starttime,period,type='history'):
                 oldtime=res[1]['stockdate']
                 fromtime=res[0]['stockdate']
             print oldtime,fromtime
-            get_Kbarinfo(period,oldtime)
-            get_Kbarinfo(period,fromtime)
+            get_Kbarinfo(ms,period,oldtime)
+            get_Kbarinfo(ms,period,fromtime)
             lasttime=100
             while(1):
                 sql="select datediff(MINUTE,'%s',max(stockdate)) as diff from Tsymbol" % (fromtime)
@@ -166,13 +140,13 @@ def main_fun(starttime,period,type='history'):
                         if item>oldtime:
                             fromtime=item
                             break
-                get_Kbarinfo(period,oldtime)
-                get_Kbarinfo(period,fromtime)
+                get_Kbarinfo(ms,period,oldtime)
+                get_Kbarinfo(ms,period,fromtime)
                 time.sleep(5)
                 nowtime=int(datetime.datetime.now().strftime('%H%M'))
                 print nowtime
                 if lasttime!=nowtime:
-                    write_heart('Kbars','15min')
+                    write_heart('Kbars','%s' % (period))
                     lasttime=nowtime
 
                 #写心跳
@@ -188,4 +162,24 @@ def main_fun(starttime,period,type='history'):
     #产生目标K线时间list
 
 
-main_fun(starttime='2015-01-05',period=15,type='now')
+
+if len(sys.argv)==3:
+    database=sys.argv[1]
+    period=int(sys.argv[2])
+else:
+    database='ms05111'
+    period=511
+
+if database=='ms03':
+    try:
+        ms03 = MSSQL(host="192.168.0.3\SQLEXPRESS",user="future",pwd="K@ra0Key",db="future")
+    except:
+        pass
+    db=ms03
+if database=='ms05':
+    try:
+        ms05 = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+    except:
+        pass
+    db=ms05
+main_fun(db,starttime='2015-01-05',period=period,type='now')

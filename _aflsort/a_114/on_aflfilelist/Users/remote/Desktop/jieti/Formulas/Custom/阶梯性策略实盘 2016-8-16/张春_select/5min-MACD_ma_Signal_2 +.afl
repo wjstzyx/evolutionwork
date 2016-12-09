@@ -1,0 +1,74 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "5min-MACD_ma_Signal_2 +";
+StrategyID = "1012100167";
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+tw=Param("timewinodw",300,80,700,20);
+
+
+stdzhisun=0;
+s1=12;
+s2=26;
+s3 = 9;
+
+MAperiod=Param("MAperiod",40,13,500,1);
+
+G03=1000*MA(MACD(s1,s2),MAperiod);
+G04 = 1000*MA(Signal(s1,s2,s3),MAperiod);
+
+zhisunup=BBandTop(C,tw,stdzhisun);
+zhisundown=BBandBot(C,tw,stdzhisun);
+
+G13 = MA(HHV(G03,MAperiod),tw);
+G23 = MA(LLV(G03,MAperiod),tw);
+G33 = 1000*(G03-G13)/(G13-G23);
+
+
+
+
+Bsig1=G33>Ref(G33,-1) AND G33>Ref(G33,-2) AND Cross(g03,g04);
+Ssig1=G33<Ref(G33,-1) AND G33<Ref(G33,-2) AND Cross(G04,G03);
+
+
+bsig=ExRem(bsig1,ssig1);
+ssig=ExRem(ssig1,bsig1);
+
+/////zhisun1/////////////
+ps=GetPs(bsig,ssig,0);
+C001=ps== 1 AND C<zhisundown;
+C002=ps==-1 AND C>zhisunup;
+
+
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+tp = ParamOptimize("tp",10.5,0,50,0.1);
+
+C05 = ps==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C06 = ps==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+CSIG = C001 OR C002 OR C05 OR C06;// OR 
+
+    Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

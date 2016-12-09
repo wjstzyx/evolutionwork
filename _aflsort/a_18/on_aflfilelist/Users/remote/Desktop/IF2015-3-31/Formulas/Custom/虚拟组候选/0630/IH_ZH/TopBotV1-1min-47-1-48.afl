@@ -1,0 +1,57 @@
+_SECTION_BEGIN("test");
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "TopBotV1-1min-47-1-48";
+StrategyID = "120013";
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+
+tickername=Name();
+
+fo = Foreign(TickerName, "O" );
+	fh = Foreign(TickerName, "H" );
+	fl = Foreign(TickerName, "L" );
+	fc = Foreign(TickerName, "C" );
+	TIME=TimeNum();
+	FSTK=Day()!=Ref(Day(),-1);
+
+	KN=IIf(FSTK,1,BarsSince(FSTK)+1);
+
+ParaCon=Param("ParaCon",47,0,100,1);
+N2=Param("N2",1,0,100,1);
+N1=Param("N1",48,0,100,1);
+	H0=fh;
+	H1=Ref(fh ,-1);
+	H2=Ref(fh ,-2);
+	L0=fl;
+	L1=Ref(fl,-1);
+	L2=Ref(fl,-2);
+	TOP=H1>H0 AND H1>H2 AND L1>L0 AND L1>L2;
+	BOT=H1<H0 AND H1<H2 AND L1<L0 AND L1<L2;
+	
+	B01 = CPPCount(BOT,ParaCon)>N2;
+	S01 = CPPCount(TOP,ParaCon)>N2;
+	fcma = MA(fc,N1);
+	BSIG= B01 AND fc>fcma  AND KN>0  AND NOT(S01);
+	SSIG= S01 AND fc<fcma  AND KN>0  AND NOT(B01); 
+
+	CSIG = GetLastK(TickerName);
+
+    Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+_SECTION_END();

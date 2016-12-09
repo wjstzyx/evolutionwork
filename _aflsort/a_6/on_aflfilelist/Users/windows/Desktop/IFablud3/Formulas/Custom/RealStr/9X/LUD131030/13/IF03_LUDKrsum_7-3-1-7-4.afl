@@ -1,0 +1,30 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/BasicV4/lud.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+StrategyName = "IF03_LUDKrsum_7-3-1-7-4";
+StrategyID = 40564;
+ProType = 0;
+TickerName=Name();
+
+
+
+
+Cond= LUDKrsum(7,3,1,7,4,TickerName);
+
+
+Vote=ParamOptimize("w_Vote",0,0,4,0.5);
+Vote=0;
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond==0 ;
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

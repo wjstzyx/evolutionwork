@@ -1,0 +1,54 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+
+#include "Formulas/Custom/BasicV4/bomb.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 800);
+
+StrategyName = "IF01-EXIV-LVB-HL-0.5-1-1.5-V0";
+StrategyID =40236;
+ProType = 0;
+
+BOMB1=Bomb_EXIV(13,10,25,48,127,"IF");
+BOMB2=Bomb_EXIV(13,10,28,47,127,"IF");
+
+
+BOMB3=Bomb_LVB(1.3,4,9,84,135,"IF");
+BOMB4=Bomb_LVB(0.8,7,10,97,135,"IF");
+
+
+
+
+BOMB5=Bomb_HLR(34,18,90,115,"IF");
+BOMB6=Bomb_HLR(43,10,90,115,"IF");
+BOMB7=Bomb_HLR(43,10,90,115,"IF");
+BOMB8=Bomb_HLRv2(39,66,115,"IF");
+
+
+cond_EXIV =(Bomb1+Bomb2)/2;
+cond_LVB=(Bomb3+Bomb4)/2;
+cond_HL=(Bomb5+Bomb6+Bomb7+Bomb8)/4;
+
+
+
+
+w_EXIV = ParamOptimize("w_EXIV ",0.5,0,4,0.5);
+w_LVB= ParamOptimize("w_LVB",1,0,4,0.5);
+w_HL = ParamOptimize("w_HL ",1.5,0,4,0.5);
+
+Cond = w_EXIV *cond_EXIV + w_LVB*cond_LVB+w_HL *cond_HL ;
+
+Vote=ParamOptimize("w_Vote",0,0,4,0.5);
+
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond==0;
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

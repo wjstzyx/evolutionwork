@@ -1,0 +1,216 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+
+
+
+function PIR(p,Length)
+{
+Ll=LLV(p,Length);
+Hh=HHV(p,Length);
+return (100*(p-Ll)/(Hh-Ll));
+}
+
+function TP15(bsig, ssig, ps0)
+{
+tp = 15; //Param("tp",15,0,100,1);
+Lstbsg = BarsSince(ps0==1 AND Ref(ps0,-1)!=1);
+Lstssg = BarsSince(ps0==-1 AND Ref(ps0,-1)!=-1);
+C01 = ps0==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C02 = ps0==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+Csig=C01 OR C02;
+ps = GetPs(bsig, ssig, csig);
+return ps;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+LudJumpRB_period = 1; //Paramoptimize("LudJumpRB_period",2,2,20,1);
+
+LudJumpRB_value = 1; //Paramoptimize("LudJumpRB_value",18,10,40,1);
+
+
+
+function getLudJump(period,Value)
+
+{
+
+
+
+
+	fo = O;	fh = H;	fl = L;	fc = C;	fv = V;	fopi = OpenInt;
+
+//rb
+
+	//60mi 2,18
+
+	//30mi 4,18
+
+	//15mi 7,22
+
+	TimeN =(TimeNum()+Interval()*100/60);
+
+	TIME=TimeNum();
+
+	FSTK=Day()!=Ref(Day(),-1);
+
+	KN=IIf(FSTK,1,BarsSince(FSTK)+1);
+
+ //------------------------------
+
+    up = fc>fo;
+
+    dn = fc<fo;
+
+//==============================================
+
+	GUP = Ref(fo,-KN+1) >Ref(fc,-KN);
+
+	GDN =  Ref(fo,-KN+1) <Ref(fc,-KN);
+
+	b02 = GUP AND fc>Ref(fh,-KN) AND KN==period AND NOT fc<Ref(fo,-KN+1);
+
+	s02 = GDN AND fc<Ref(fl,-KN) AND KN==period AND NOT fc>Ref(fo,-KN+1);
+
+//=============================================
+
+	bsig = b02 AND NOT s02 ;//AND kn>period;
+
+	ssig = s02 AND NOT b02 ;//AND kn>period;
+
+ //--------------------------   
+
+	CSIG = GetLastK(TickerName);
+
+	sinPs=GetPs(BSIG,SSIG,CSIG);
+
+	Lstfc = BarsSince(bsig OR ssig );
+
+
+
+
+
+	MAv = MA(fv,KN-period);
+
+	C08 = sinps==-1 AND  dn AND fv/MAv>Value/10 AND timeN>=140000;//AND fc>Ref(fh,-KN) AND KN==1;
+
+	C09 = sinps==1 AND  up AND fv/MAv>Value/10 AND timeN>=140000;//AND fc<Ref(fl,-KN)AND KN==1;
+
+	Csig =C08 OR C09;
+
+
+
+  ps = getCSL(BSIG,SSIG,0);
+
+	
+//add exrem
+bsig=ExRem(bsig,ssig);
+ssig=ExRem(ssig,bsig);
+ps=GetPs(bsig,ssig,0);
+
+//add_tp15ps_exp
+ps = TP15(bsig, ssig, ps);
+return ps;
+
+
+
+
+
+	
+
+}
+
+
+
+ps = getLudJump(LudJumpRB_period,LudJumpRB_value);
+
+
+
+
+
+
+
+
+
+//In-Sample Date Range:2013/10/01 to 2016/09/30
+//Out-Sample Date Range:2016/10/01 to 2016/12/30
+ps = 0;
+//30min_MDD
+LudJumpRB_period = 7;LudJumpRB_value = 10;ps1 = getLudJump(LudJumpRB_period,LudJumpRB_value);ps += ps1;
+LudJumpRB_period = 7;LudJumpRB_value = 15;ps2 = getLudJump(LudJumpRB_period,LudJumpRB_value);ps += ps2;
+LudJumpRB_period = 7;LudJumpRB_value = 25;ps3 = getLudJump(LudJumpRB_period,LudJumpRB_value);ps += ps3;
+LudJumpRB_period = 7;LudJumpRB_value = 13;ps4 = getLudJump(LudJumpRB_period,LudJumpRB_value);ps += ps4;
+LudJumpRB_period = 7;LudJumpRB_value = 29;ps5 = getLudJump(LudJumpRB_period,LudJumpRB_value);ps += ps5;
+LudJumpRB_period = 5;LudJumpRB_value = 25;ps6 = getLudJump(LudJumpRB_period,LudJumpRB_value);ps += ps6;
+LudJumpRB_period = 3;LudJumpRB_value = 13;ps7 = getLudJump(LudJumpRB_period,LudJumpRB_value);ps += ps7;
+LudJumpRB_period = 3;LudJumpRB_value = 10;ps8 = getLudJump(LudJumpRB_period,LudJumpRB_value);ps += ps8;
+LudJumpRB_period = 2;LudJumpRB_value = 15;ps9 = getLudJump(LudJumpRB_period,LudJumpRB_value);ps += ps9;
+LudJumpRB_period = 2;LudJumpRB_value = 40;ps10 = getLudJump(LudJumpRB_period,LudJumpRB_value);ps += ps10;
+//30min_NP
+LudJumpRB_period = 7;LudJumpRB_value = 10;ps1 = getLudJump(LudJumpRB_period,LudJumpRB_value);ps += ps1;
+LudJumpRB_period = 7;LudJumpRB_value = 19;ps2 = getLudJump(LudJumpRB_period,LudJumpRB_value);ps += ps2;
+LudJumpRB_period = 7;LudJumpRB_value = 27;ps3 = getLudJump(LudJumpRB_period,LudJumpRB_value);ps += ps3;
+LudJumpRB_period = 7;LudJumpRB_value = 12;ps4 = getLudJump(LudJumpRB_period,LudJumpRB_value);ps += ps4;
+LudJumpRB_period = 7;LudJumpRB_value = 18;ps5 = getLudJump(LudJumpRB_period,LudJumpRB_value);ps += ps5;
+LudJumpRB_period = 7;LudJumpRB_value = 38;ps6 = getLudJump(LudJumpRB_period,LudJumpRB_value);ps += ps6;
+LudJumpRB_period = 7;LudJumpRB_value = 37;ps7 = getLudJump(LudJumpRB_period,LudJumpRB_value);ps += ps7;
+LudJumpRB_period = 7;LudJumpRB_value = 17;ps8 = getLudJump(LudJumpRB_period,LudJumpRB_value);ps += ps8;
+LudJumpRB_period = 7;LudJumpRB_value = 14;ps9 = getLudJump(LudJumpRB_period,LudJumpRB_value);ps += ps9;
+LudJumpRB_period = 7;LudJumpRB_value = 23;ps10 = getLudJump(LudJumpRB_period,LudJumpRB_value);ps += ps10;
+//30min_PF
+LudJumpRB_period = 7;LudJumpRB_value = 15;ps1 = getLudJump(LudJumpRB_period,LudJumpRB_value);ps += ps1;
+LudJumpRB_period = 7;LudJumpRB_value = 34;ps2 = getLudJump(LudJumpRB_period,LudJumpRB_value);ps += ps2;
+LudJumpRB_period = 7;LudJumpRB_value = 25;ps3 = getLudJump(LudJumpRB_period,LudJumpRB_value);ps += ps3;
+LudJumpRB_period = 7;LudJumpRB_value = 22;ps4 = getLudJump(LudJumpRB_period,LudJumpRB_value);ps += ps4;
+LudJumpRB_period = 5;LudJumpRB_value = 19;ps5 = getLudJump(LudJumpRB_period,LudJumpRB_value);ps += ps5;
+LudJumpRB_period = 5;LudJumpRB_value = 26;ps6 = getLudJump(LudJumpRB_period,LudJumpRB_value);ps += ps6;
+LudJumpRB_period = 5;LudJumpRB_value = 34;ps7 = getLudJump(LudJumpRB_period,LudJumpRB_value);ps += ps7;
+LudJumpRB_period = 5;LudJumpRB_value = 40;ps8 = getLudJump(LudJumpRB_period,LudJumpRB_value);ps += ps8;
+LudJumpRB_period = 5;LudJumpRB_value = 27;ps9 = getLudJump(LudJumpRB_period,LudJumpRB_value);ps += ps9;
+LudJumpRB_period = 5;LudJumpRB_value = 28;ps10 = getLudJump(LudJumpRB_period,LudJumpRB_value);ps += ps10;
+
+
+ps_th = Param("ps_th", 1, 0, 100, 1);
+
+bsig=ps >= ps_th;
+ssig=ps <= -ps_th;
+
+bsig=ExRem(bsig,ssig);
+ssig=ExRem(ssig,bsig);
+
+psmerge=GetPs(bsig,ssig,0);
+ps_exit_th = ps_th * 0.66667;
+C01 = psmerge==1 AND ps <= ps_exit_th;
+C02 = psmerge==-1 AND ps >= -ps_exit_th;
+
+tp = 15; //Param("tp",15,0,100,1);
+Lstbsg = BarsSince(psmerge==1 AND Ref(psmerge,-1)!=1);
+Lstssg = BarsSince(psmerge==-1 AND Ref(psmerge,-1)!=-1);
+C03 = psmerge==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C04 = psmerge==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+//Csig=C01 OR C02 OR C03 OR C04;
+csig = C03 OR C04;
+//csig = C01 OR C02;
+
+
+Plotperformance(bsig,ssig,Csig);
+
+ps=GetPs(bsig,ssig,csig);
+
+SIG=ps;
+
+//ProfitDiff = Profit - Ref(Profit, -1);
+//GrossProfit = getGrossProfit(SIG);
+//GrossProfitDiff = GrossProfit - Ref(GrossProfit, -1);
+
+
+
+StrategyName = "30min-rb-wf 30_1 getLudJump19";StrategyID = "1010800004";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

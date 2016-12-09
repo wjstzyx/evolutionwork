@@ -1,0 +1,89 @@
+_SECTION_BEGIN("CU_01_V7_HL_TM_MAA_V25_G1");
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/BasicV3/exiv.afl";
+#include "Formulas/Custom/BasicV3/exv.afl";
+#include "Formulas/Custom/BasicV3/hl.afl";
+#include "Formulas/Custom/BasicV3/MAA.afl";
+#include "Formulas/Custom/BasicV3/V7.afl";
+#include "Formulas/Custom/BasicV3/TM.afl";
+#include "Formulas/Custom/BasicV3/DFB.afl";
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+StrategyName = "CU_01_V7_HL_TM_MAA_V25_G1.3";
+StrategyID = 50011;
+ProType = 1;
+
+
+v71=V7min(46,100,0,"CU");
+V72=V7min(34,100,25,"CU");
+V73=V7min(27,98,10,"CU");
+v74=V7min(30,100,61,"CU");
+V75=V7min(27,100,4,"CU");
+
+HL1=HLNAVG(84,101,0,"CU");
+HL2=HLAVG(102,131,37,"CU");
+HL3=HLNAVG2(68,125,57,"CU");
+HL4=HLNAVG(99,100,0,"CU");
+HL5=HLAVG(81,130,58,"CU");
+HL6=HLNAVG(94,100,46,"CU");
+HL7=HLNAVG(132,103,52,"CU");
+HL8=HLAVG(88,133,59,"CU");
+
+TM1=TimeShareHLHalfLess(29,35,42,154,450,"CU");
+TM2=TimeShareHLHalfLess(30,33,45,154,450,"CU");
+TM3=TimeShareHLHalfLess(26,28,26,154,450,"CU");
+TM4=TimeShareHLHalfLess(25,31,46,154,450,"CU");
+TM5=TimeShareHLHalfLess(25,35,27,154,450,"CU");
+TM6=TimeShareHLLess(52,51,5,1000,400,"CU");
+TM7=TimeShareHLHalfLess(25,33,44,154,450,"CU");
+TM8=TimeShareHLHalfLess(26,33,47,154,450,"CU");
+
+MAA1=MAArrangeRoll(42,15,0,1000,1000,"CU");
+MAA2=MAArrangeRoll(33,11,0,1000,1000,"CU");
+MAA3=MAArrangeRoll(41,13,0,1000,1000,"CU");
+MAA4=MAArrangeRoll(51,11,0,1000,1000,"CU");
+MAA5=MAArrangeRoll(43,9,0,1000,1000,"CU");
+MAA6=MAArrangeRoll(45,13,1,1000,1000,"CU");
+
+
+
+
+
+
+
+
+
+cond_V7=(V71+V72+V73+V74+V75)/5;
+cond_HL=(HL1+HL2+HL3+HL4+HL5+HL6+HL7+HL8)/8;
+cond_TM=(TM1+TM2+TM3+TM4+TM5+TM6+TM7+TM8)/8;
+cond_MAA=(MAA1+MAA2+MAA3+MAA4+MAA5+MAA6)/6;
+
+
+
+w_V7 = ParamOptimize("w_V7",3.5,0,4,0.5);
+w_HL= ParamOptimize("w_HL",0.5,0,4,0.5);
+w_TM= ParamOptimize("w_TM",3,0,4,0.5);
+w_MAA= ParamOptimize("w_MAA",2,0,4,0.5);
+
+Cond = w_V7 *cond_V7 + w_HL*cond_HL + w_TM*cond_TM + w_MAA*cond_MAA;
+
+
+
+
+Vote=2.5;
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=GetLastK("CU");
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);
+_SECTION_END();

@@ -1,0 +1,64 @@
+_SECTION_BEGIN("test");
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "LVB2pc_3MIN-2-8-5";
+StrategyID = "120010";
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+tickername=Name();
+
+period1=Param("period1",2,0,100,1);
+period2=Param("period2",8,0,100,1);
+PTS=Param("PTS",5,0,100,1);
+period=Param("period",13,0,100,1);
+fo = Foreign(TickerName, "O" );
+fh = Foreign(TickerName, "H" );
+fl = Foreign(TickerName, "L" );
+fc = Foreign(TickerName, "C" );
+fv = Foreign(TickerName, "V" );
+TIME=TimeNum();
+FSTK=Day()!=Ref(Day(),-1);
+//LSTK=TIME>=151000;
+KN=IIf(FSTK,1,BarsSince(FSTK)+1);
+Vlt = HHV(fc, period1) - LLV(fc, period1);
+Lv = Vlt<=LLV(Vlt,period2);
+price = (fh+fl)/2;
+Lstlv=IIf(Lv,0,BarsSince(Lv));
+Lstlvp = Ref(price,-Lstlv);
+//p=pts/20000*fc;
+p=pts*Vlt;
+bsig = NOT(Lv) AND fc>Lstlvp+p AND Lstlv<kn AND kn>period;
+ssig = NOT(Lv) AND fc<Lstlvp-p AND Lstlv<kn AND kn>period;
+LASTBAR=GetLastK(TickerName);
+CSIG= LASTBAR;
+   Holdperiod=Param("Holdperiod",16,1,100,1);
+
+ps = GetPs(bsig,ssig,0);
+
+Lstbsg = BarsSince(bsig);
+Lstssg = BarsSince(ssig);
+
+C01 = ps==1 AND Lstbsg>=Holdperiod AND C>O;//AND C<Ref(C,-Lstbsg);//AND C<Ref(C,-Holdperiod);//
+C02 = ps==-1 AND lstssg>=holdperiod AND C<O;//AND C>Ref(C,-lstssg);//AND C>Ref(C,-Holdperiod);//
+
+csig = csig OR c01 OR c02;
+
+
+    Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+_SECTION_END();

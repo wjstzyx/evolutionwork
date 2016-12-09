@@ -1,0 +1,77 @@
+//#include "Formulas/Custom/201502/15s/volatility.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+TickerNAME = Name(); 
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+
+StrategyName = "	IF-1min-150000";
+StrategyID = 40867;
+ProType = 0;
+TickerName=Name();
+
+tlabel0 = Param("tlabel0",91500,91500,151500,100);
+tlabel1 = Param("tlabel1",145900,91500,151500,100);
+tlabel2 = Param("tlabel2",130000,91500,151500,100);
+tlabel3 = Param("tlabel3",145900,91500,151500,100);
+
+label0 = TimeNum()==tlabel0;
+label1 = TimeNum()==tlabel1;
+label2 = TimeNum()==tlabel2;
+label3 = TimeNum()==tlabel3;
+
+lstprice0 = ValueWhen(label0,O,1);
+lstprice1 = ValueWhen(label1,C,1);
+lstprice2 = ValueWhen(label2,O,1);
+lstprice3 = ValueWhen(label3,C,1);
+
+r1 = lstprice1-lstprice0;
+r2 = lstprice3-lstprice2;
+
+d1 = Param("d1",0,0,50,0.1);
+d2 = Param("d2",0,0,50,0.1);
+
+otime = Param("otime",145900,91500,151500,100);
+bsig =  r1>d1 AND r2>d1 AND TimeNum()==otime ;//AND DayOfWeek()!=1;//
+ssig = r1<-d1 AND r2<-d2 AND TimeNum()==otime;
+ssig = 0;
+
+timec = Param("timec",151400,91500,151500,100);
+
+ps = GetPs(bsig,ssig,0);
+lstbsg = BarsSince(bsig);
+lstssg = BarsSince(ssig);
+
+p = Param("p",5,0,50,0.1);
+C01 = ps==1 AND C-Ref(C,-lstbsg)<-p;
+C02 = ps==-1 AND C-Ref(C,-lstssg)>p;
+
+Holdperiod = Param("Holdperiod",10,0,100,1);
+C03 = ps==1 AND lstbsg == Holdperiod;
+C04 = ps==-1 AND lstssg == Holdperiod;
+
+vperiod = Param("vperiod",15,1,1000,1);
+C05 = ps==1 AND C>O AND V==HHV(V,vperiod);
+C06 = ps==-1 AND C<O AND V==HHV(V,vperiod);
+
+tp = Param("tp",5.2,0,200,0.1);
+C07 = ps==1 AND HighestSince(bsig,C)-C>tp;
+C08 = ps==-1 AND C-LowestSince(ssig,C)>tp;
+
+csig =  c01 OR c02 OR C07 OR C08 ;//TimeNum()==timec OROR C05 OR C06;//OR c03 OR c04  ;
+
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+
+/*
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);
+*/
+PlotPerformance(bsig,ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

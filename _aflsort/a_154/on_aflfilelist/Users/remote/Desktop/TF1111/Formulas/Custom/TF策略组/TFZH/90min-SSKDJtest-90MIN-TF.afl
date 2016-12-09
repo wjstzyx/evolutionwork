@@ -1,0 +1,145 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "90min-SSKDJtest-90MIN-TF";
+StrategyID = 380041;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+function Supersmoother(array) 
+{ 
+	PI = 3.1415926 ; 
+	SQ2 = sqrt( 2 ); 
+    a1 = exp( -SQ2 * PI /10); 
+    b1 = 2 * a1 * cos( SQ2 * PI / 10); 
+    c2 = b1; 
+    c3 = -a1 * a1; 
+    c1 = 1 - c2 - c3; 
+
+    Filt = Nz( array ); 
+
+    for ( i = 2; i < BarCount; i++ ) 
+    { 
+         Filt[ i ] = c1 * ( array[ i ] + array[ i - 1 ] ) / 2 + 
+                     c2 * Filt[ i - 1 ] + 
+                     c3 * Filt[ i - 2]; 
+    } 
+
+    return Filt; 
+} 
+
+function Rooffilter( array ) 
+{
+	sq05=sqrt(0.5);
+	pi=3.1415926;
+	alpha1=(cos(sq05*pi/48)+sin(sq05*pi/48)-1)/cos(sq05*pi/48);
+	Hp=array;
+ 	for ( i =2 ; i < BarCount; i++ ) 
+    { 
+	HP[ i ] = ( ( 1 - alpha1 / 2 ) ^ 2 ) * 
+	( Close[ i ] - 2 * Close[ i -1 ] + Close[ i - 2 ] ) + 
+	  2 * ( 1 - alpha1 ) * HP[ i - 1 ] - 
+	HP[ i -2 ] * ( 1 - alpha1 ) ^ 2; 
+ } 
+	return Hp;
+}
+k=Param("Period",2,1,100,1);
+lowlev = Param("lowlev",19,0,100,1);
+uplev = Param("uplev",0,0,100,1);
+ADX_Level = Param("ADX Level", 34, 1, 100 );
+t1 = Param("t1",91500,91500,151500,100);
+t2 = Param("t2",91500,91500,151500,100);
+t3 = Param("t3",112100,91500,151500,100);
+t4 = Param("t4",142700,91500,151500,100);
+Holdperiod=Param("Holdperiod",500,0,500,1);
+p = Param("p",0.6,0,100,0.1);
+tp = Param("tp",3.6,0,500,0.1);
+Hpfilt=rooffilter(C);
+smfilt=supersmoother(HPfilt);
+
+Highestc=HHV(smfilt,K);
+Lowestc=LLV(smfilt,K);
+
+function getstoc(){
+for (i=2; i<BarCount;i++)
+{
+	PI = 3.1415926 ; 
+	SQ2 = sqrt( 2 ); 
+    a1 = exp( -SQ2 * PI /10); 
+    b1 = 2 * a1 * cos( SQ2 * PI / 10); 
+    c2 = b1; 
+    c3 = -a1 * a1; 
+    c1 = 1 - c2 - c3; 
+
+//if (smfilt[i]>Highestc[i])
+//{Highestc[i]=smfilt[i];}
+//if (smfilt[i]<Lowestc[i])
+//{Lowestc[i]=smfilt[i];}
+stoc[i]=(smfilt[i]-Lowestc[i])/(Highestc[i]-Lowestc[i]);
+}
+return stoc;
+}
+
+Ostoc=getstoc();
+newstoc=Supersmoother(Ostoc);
+realostoc=100*Ostoc;
+realnewstoc=100*newstoc;
+
+
+
+bsig0=Cross(lowlev,realnewstoc) ;
+ssig0=Cross(realnewstoc,uplev) ;
+
+BCK2= PDI(14)>Ref(PDI(14),-1);
+BCK4= ADX(14)>=ADX_Level;
+
+
+SCK2= MDI(14)>Ref(MDI(14),-1);
+SCK4= ADX(14)>=ADX_Level; 
+
+
+
+
+timefilter = (TimeNum()>=t1 AND TimeNum()<=t2) OR (TimeNum()>=t3 AND TimeNum()<=t4);
+
+bsig0 = bsig0  AND timefilter AND bck4 ;//AND bck2;;//bck3 //
+ssig0 = ssig0  AND timefilter AND sck4;//;//sck3 AND sck2
+
+//bsig=ExRem(bsig0,ssig0); 
+//ssig=ExRem(ssig0,bsig0);
+
+bsig = bsig0;
+ssig = ssig0;
+
+Lstbsg = BarsSince(bsig);
+Lstssg = BarsSince(ssig);
+
+ps=GetPs(bsig,ssig,0);
+
+
+C01 = ps==1 AND Lstbsg>=Holdperiod AND C<Ref(C,-Lstbsg);
+C02 = ps==-1 AND lstssg>=holdperiod AND C>Ref(C,-lstssg);
+
+
+C03 = ps==1 AND  C<Ref(C,-Lstbsg)-p;
+C04 = ps==-1 AND  C>Ref(C,-lstssg)+p;
+
+
+C05 = ps==1 AND  C<Highestsince(bsig,C)-tp;
+C06 = ps==-1 AND  C>Lowestsince(ssig,C)+tp;
+
+Csig =  C05 OR C06 OR C03 OR C04;//;//OR TimeNum()>=151400;;// C01 OR C02 OR
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+ps0 = GetPs(bsig,ssig,csig);
+Filter= 1;
+AddColumn(ps0,"ps");

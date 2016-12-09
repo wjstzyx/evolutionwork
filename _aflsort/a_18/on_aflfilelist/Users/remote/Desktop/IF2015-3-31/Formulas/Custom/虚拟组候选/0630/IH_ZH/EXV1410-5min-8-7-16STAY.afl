@@ -1,0 +1,72 @@
+_SECTION_BEGIN("test");
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "EXV1410-5min-8-7-16";
+StrategyID = "120008";
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+tickername=Name();
+	fo = O;	fh = H;	fl = L;	fc = C;	fv = V;	fopi = OpenInt;
+PERIOD=Param("PERIOD",8,0,100,1);
+B=Param("B",7,0,100,1);
+M=Param("M",16,0,100,1);
+	TimeN =(TimeNum()+Interval()*100/60);
+	TIME=TimeNum();
+	FSTK=Day()!=Ref(Day(),-1);
+	FSTK =IIf(IsEmpty(FSTK),1,FSTK);
+	KN=IIf(FSTK,1,BarsSince(FSTK)+1);
+    R = abs(fc-fo);
+ //================== 
+   up = fc>fo;
+   dn = fc<fo;
+//if 7mi 14,9,26	
+//if 7mi 11,9,26	
+//if 5mi 19,6,26	
+//if 5mi 21,6,25	
+
+	MAV3=fv;
+	EXV= fv>=HHV(fv,Period);
+	
+
+	LSTEXV=IIf(EXV,0,Ref(BarsSince(EXV),-1)+1);
+
+
+
+
+//=======================
+    MAfc = MA(fc,lstexv+1);
+//======================
+	b01=NOT(EXV) AND fh>MAfc  AND LSTEXV<b ;
+	s01=NOT(EXV) AND fl<MAfc  AND LSTEXV<b ;
+//=======================
+	bsig = (b01 ) AND NOT(s01 ) AND kn>=period ;
+	ssig = (s01 ) AND NOT(b01) AND kn>=period;
+
+ //--------------------------   
+	CSIG = GetLastK(TickerName);
+	sinPs=GetPs(BSIG,SSIG,CSIG);
+	Lstfc = BarsSince(bsig OR ssig );
+ 	
+    c05 = sinPs ==1 AND R>Ref(r,-lstfc) AND dn AND lstfc>=m;
+    c06 = sinPs ==-1  AND R>Ref(r,-lstfc) AND up AND lstfc>=m; 
+ 
+	Csig= csig OR c05 OR c06 ;
+
+    Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+_SECTION_END();

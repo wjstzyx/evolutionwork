@@ -1,0 +1,74 @@
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Basic2012/HL.afl";
+#include "Formulas/Custom/Basic2012/EXV.afl";
+#include "Formulas/Custom/Basic2012/TopBot.afl";
+#include "Formulas/Custom/Basic2012/VolumeBreak.afl";
+#include "Formulas/Custom/Basic2012/V7DY.afl";
+#include "Formulas/Custom/Basic2012/UDHL.afl";
+
+
+StrategyName = "myV7HLRU03";
+StrategyID = 1058;
+
+C11=HLAVG(5,8,31,"RU");
+C12=HLCAVG(7,1,31,"RU");
+C13=HLNAVG(10,4,33,"RU");
+C21=EXVORI(26,35, "RU");
+C22=EXVORIV2CU3(22,38,260,4, "RU");
+C31=V7DYORIALL(200, 46 ,"RU");
+C32=V7DYORIALL(300, 43 ,"RU");
+C41=VolumeBreakOri(19,9,34,"RU");
+W11 = 1;
+W12 = 2;
+W13 = 1;
+W21 = 1.5;
+W22 = 1;
+W31 = 1;
+W32 = 1;
+W41 = 2;
+CondHL = C11*W11+C12*W12+C13*W13+C21*W21+C22*W22+C31*W31+C32*W32+C41*W41;
+
+
+
+C011=HLAVG(10,1,30,"rU");
+C012=HLCAVG(7,1,30,"rU");
+C013=HLNAVG(12,3,33,"RU");
+C014=HLNAVG(10,4,33,"RU");
+C015=HLNAVG2(16,3,33,"RU");
+C016=HLAVGA(8,2,33,"RU");
+C017=HLNAVG(31,2,37,"CU");
+HLCOND=C011+C012+C013+C014+C015+C016+C017*3;
+C11=GetSig123(HlCOND);
+C21=EXVORI(26,35,"RU");
+C22=EXVORICU3(24,21,145,6, "RU");
+C23=EXVORIV2CU3(22,38,260,4,"RU");
+C31=V7DYORIALL(210, 44 ,"RU");
+C32=V7DYORIALL(120, 46 ,"RU");
+C41=VolumeBreakOri(19,9,34,"RU");
+W11 = 1.5;
+W21 = 0.5;
+W22 = 1;
+W23 = 0.5;
+W31 = 1.5;
+W32 = 2.5;
+W41 = 1;
+CondV7 = C11*W11+C21*W21+C22*W22+C23*W23+C31*W31+C32*W32+C41*W41;
+
+Cond = CondHL+CondV7;
+
+Vote= ParamOptimize("Vote", 6, 0, 10, 1);
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+VCover= ParamOptimize("Vcover",4,0,10,1); //default val 0 or 2
+CSIG1=Cond<=VCover && Cond>=-VCover;
+CSIG2 = (TimeNum()+Interval()*100/60)>=146000;
+CSIG = CSIG1 OR CSIG2;
+
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName);
+PlotPerformance(sinPs,sinBS,StrategyName);

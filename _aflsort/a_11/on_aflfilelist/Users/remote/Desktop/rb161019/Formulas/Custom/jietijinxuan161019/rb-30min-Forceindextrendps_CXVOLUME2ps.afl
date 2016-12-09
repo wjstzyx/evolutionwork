@@ -1,0 +1,105 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+
+
+function PIR(p,Length)
+{
+Ll=LLV(p,Length);
+Hh=HHV(p,Length);
+return (100*(p-Ll)/(Hh-Ll));
+}
+
+
+
+Forceindextrend_tw=Param("Forceindextrend_timewinodw",1,1,1000,1);
+Forceindextrend_Length=Param("Forceindextrend_Length",30,10,1000,10);
+Forceindextrend_Selltrigger=Param("Forceindextrend_Selltrigger",1,1,100,1);
+
+
+
+function getForceindextrend(arrC,arrV,Forceindextrend_tw,Forceindextrend_Length,Forceindextrend_Selltrigger)
+{
+
+G3=(arrC-Ref(arrC,-1))*arrV*Forceindextrend_tw/Sum(arrV,Forceindextrend_tw);
+
+
+PIRG3=PIR(G3,Forceindextrend_Length);
+
+ssig=PIRG3<Forceindextrend_Selltrigger;
+
+bsig=PIRG3>100-Forceindextrend_Selltrigger;
+
+ps=GetPs(bsig,ssig,0);
+
+return ps;
+}
+
+ps=getForceindextrend(C,V,Forceindextrend_tw,Forceindextrend_Length,Forceindextrend_Selltrigger);
+
+ps1=ps;
+
+
+CXVOLUME2_period=Param("CXVOLUME2_period",11,1,40,1);
+
+function getCXVOLUME2(arrH,arrL,arrV,CXVOLUME2_period)
+{
+PlusDM= IIf(arrH>Ref(arrH,-1) AND arrL>=Ref(arrL,-1), arrH-Ref(arrH,-1),
+                 IIf(arrH>Ref(arrH,-1) AND arrL<Ref(arrL,-1)
+                 AND arrH-Ref(arrH,-1)>Ref(arrL,-1)-arrL,
+                arrH-Ref(arrH,-1),0));
+
+Vm=IIf(EMA(arrV,CXVOLUME2_period)<=0,0,log(EMA(arrV,CXVOLUME2_period)));
+
+Buypower=PlusDM*Vm;
+
+
+
+MinDM = IIf(arrL<Ref(arrL,-1)   AND  arrH<=Ref(arrH,-1), Ref(arrL,-1)-arrL,
+               IIf(arrH>Ref(arrH,-1) AND arrL<Ref(arrL,-1)
+               AND arrH-Ref(arrH,-1)<Ref(arrL,-1)-arrL, Ref(arrL,-1)-arrL, 0));
+
+Sellpower=MinDM*Vm;
+
+Wm=Wilders(Wilders(Buypower,CXVOLUME2_period)-Wilders(Sellpower,CXVOLUME2_period),CXVOLUME2_period);
+
+Bsig=Cross(Wm,0);
+Ssig=Cross(0,Wm);
+
+ps = GetPs(bsig,ssig,0);
+
+return ps;
+}
+
+ps=getCXVOLUME2(H,L,V,CXVOLUME2_period);
+ps2=ps;
+
+
+ps=ps1+ps2;
+
+bsig1=ps>=2;
+ssig1=ps<=-2;
+
+bsig=ExRem(bsig1,ssig1);
+ssig=ExRem(ssig1,bsig1);
+
+psmerge=GetPs(bsig,ssig,0);
+
+tp = Param("tp",15,0,100,1);
+
+Lstbsg = BarsSince(psmerge==1 AND Ref(psmerge,-1)!=1);
+Lstssg = BarsSince(psmerge==-1 AND Ref(psmerge,-1)!=-1);
+
+C01 = psmerge==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C02 = psmerge==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+Csig=C01 OR C02;
+
+
+Plotperformance(bsig,ssig,Csig);
+
+
+
+
+
+
+
+StrategyName = "rb-30min-Forceindextrendps_CXVOLUME2ps";StrategyID = "1012100356";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

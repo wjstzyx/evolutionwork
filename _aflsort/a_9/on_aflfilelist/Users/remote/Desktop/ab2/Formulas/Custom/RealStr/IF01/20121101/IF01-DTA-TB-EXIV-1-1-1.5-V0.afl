@@ -1,0 +1,63 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/BasicV4/DTA.afl";
+#include "Formulas/Custom/BasicV4/TB.afl";
+#include "Formulas/Custom/BasicV4/EXIV.afl";
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+StrategyName = "IF01-DTA-TB-EXIV-1-1-1.5-V0";
+StrategyID = 40231;
+ProType = 0;
+
+
+DTA1=DTAV2(105,43,2.6,18,"IF");
+DTA2=DTAV2(96,40,2.6,17,"IF");
+DTA3=DTAV2(47,25,2,21,"IF");
+
+TB1=TopBotV1(40,31,7,"IF");
+TB2=TopBotV1(34,13,6,"IF");
+TB3=TopBotV2(40,16,7,"IF");
+TB4=TopBotV2(34,7,6,"IF");
+TB5=TopBotV2(40,25,7,"IF");
+TB6=TopBotV2(25,2,5,"IF");
+
+
+EXIV1=EXIV(19,55,0,"IF");
+EXIV2=EXIV(17,57,0,"IF");
+EXIV3=EXIVMA(41,43,20,0,"IF");
+EXIV4=EXIV(47,55,0,"IF");
+EXIV5=EXIVMA(36,38,20,0,"IF");
+EXIV6=EXIV(50,44,0,"IF");
+
+
+
+
+
+
+Cond_DTA= (DTA1+DTA2+DTA3)/3;
+Cond_TB= (TB1+TB2+TB3+TB4+TB5+TB6)/6;
+cond_EXIV=(EXIV1+EXIV2+EXIV3+EXIV4+EXIV5+EXIV6)/6;
+
+w_DTA= ParamOptimize("w_DTA",1,0,4,0.5);
+w_TB= ParamOptimize("w_TB",1,0,4,0.5);
+w_EXIV= ParamOptimize("w_EXIV",1.5,0,4,0.5);
+
+Cond =  w_DTA*cond_DTA+w_TB*cond_TB+ w_EXIV*cond_EXIV;
+
+
+
+Vote=ParamOptimize("w_Vote",0,0,4,0.5);
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=GetLastK("IF");
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

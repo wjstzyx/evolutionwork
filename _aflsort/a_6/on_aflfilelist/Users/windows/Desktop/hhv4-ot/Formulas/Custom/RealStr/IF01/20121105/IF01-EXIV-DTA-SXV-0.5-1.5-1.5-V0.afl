@@ -1,0 +1,53 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+
+#include "Formulas/Custom/BasicV4/bomb.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 800);
+
+StrategyName = "IF01-EXIV-DTA-SXV-0.5-1.5-1.5-V0";
+StrategyID = 40235;
+ProType = 0;
+
+BOMB1=Bomb_EXIV(13,10,25,48,127,"IF");
+BOMB2=Bomb_EXIV(13,10,28,47,127,"IF");
+
+
+
+BOMB3=DTAV2BC(6,5,0.2,95,135,"IF");
+BOMB4=DTAV2BC(8,6,0.2,95,135,"IF");
+
+
+BOMB5=Bomb_SXVV2(8,4,40,76,115,"IF");
+BOMB6=Bomb_SXVV2(7,5,40,76,115,"IF");
+BOMB7=Bomb_SXVV2(6,5,38,76,115,"IF");
+
+
+cond_EXIV =(Bomb1+Bomb2)/2;
+cond_DTA=(Bomb3+Bomb4)/2;
+
+cond_SXV=(Bomb5+Bomb6+Bomb7)/3;
+
+
+
+
+w_EXIV = ParamOptimize("w_EXIV ",0.5,0,4,0.5);
+w_DTA= ParamOptimize("w_DTA",1.5,0,4,0.5);
+w_SXV= ParamOptimize("w_SXV",1.5,0,4,0.5);
+
+Cond = w_EXIV *cond_EXIV + w_DTA*cond_DTA+w_SXV*cond_SXV;
+
+Vote=ParamOptimize("w_Vote",0,0,4,0.5);
+
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond==0;
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

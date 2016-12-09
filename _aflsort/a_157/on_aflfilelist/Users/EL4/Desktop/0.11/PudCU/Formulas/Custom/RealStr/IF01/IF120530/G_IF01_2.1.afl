@@ -1,0 +1,128 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/BasicV2/MAA.afl";
+#include "Formulas/Custom/BasicV2/EXV.afl";
+#include "Formulas/Custom/BasicV2/TM.afl";
+#include "Formulas/Custom/BasicV2/SXV.afl";
+#include "Formulas/Custom/BasicV2/V7DY.afl";
+
+
+
+StrategyName = "IF01_G_IF01_2.1_4072";
+StrategyID = 4072;
+ProType = 0;
+//--------------------------------------------
+//MAA
+
+CondM1 =  MAArrangeRoll(15,6,0,1000,1000,"IF"); 	
+CondM1 = TimeSelect(46,270,CondM1);	
+CondM2 =  MAArrangeRoll(17,9,0,1000,1000,"IF"); 	
+CondM2 = TimeSelect(46,270,CondM2);	
+CondM3 =  MAArrangeRoll(16,6,0,1000,1000,"IF"); 	
+CondM3 = TimeSelect(46,270,CondM3);	
+CondM4 =  MAArrangeRoll(15,8,0,1000,1000,"IF"); 	
+CondM4 = TimeSelect(46,270,CondM4);	
+CondM5 =  MAArrangeRoll(19,10,0,1000,1000,"IF"); 	
+CondM5 = TimeSelect(46,270,CondM5);	
+
+
+CondMAA = CondM1+CondM2+CondM3+CondM4+CondM5;
+CondMAA =CondMAA/5; 
+//EXV4
+CondEA1 =  EXVapr4(10,9,"IF"); 	
+CondEA2 =  EXVapr4(8,9,"IF"); 	
+CondEA3 =  EXVapr4(13,9,"IF"); 	
+CondEA4 =  EXVapr4(9,9,"IF"); 	
+CondEA5 =  EXVapr4(15,9,"IF"); 	
+CondEA6 =  EXVapr4(14,9,"IF"); 	
+CondEA7 =  EXVapr4(16,9,"IF"); 	
+
+CondEA = CondEA1+CondEA2+CondEA3+CondEA4+CondEA5+CondEA6+CondEA7;
+CondEA =CondEA/7;
+//EXVHH
+
+
+CondEH1 =  EXVHH(17,9,5,19,"IF"); 	
+CondEH2 =  EXVHH(14,9,3,19,"IF"); 	
+CondEH3 =  EXVHH(25,13,6,14,"IF"); 	
+CondEH4 =  EXVHH(14,16,8,8,"IF"); 	
+CondEH5 =  EXVHH(14,16,7,16,"IF"); 	
+
+CondEH = CondEH1+CondEH2+CondEH3+CondEH4+CondEH5;
+CondEH = CondEH/5;
+
+//EXVIV3
+
+CondEIV1 =  EXVORIV3CU3(22,21,18,34,"IF"); 
+CondEIV2 =  EXVORIV3CU3(22,19,18,34,"IF"); 
+CondEIV3 =  EXVORIV3CU3(24,7,18,34,"IF"); 
+CondEIV4 =  EXVORIV3CU3(24,12,18,33,"IF"); 
+CondEIV5 =  EXVORIV3CU3(24,9,18,34,"IF"); 
+CondEIV6 =  EXVORIV3CU3(25,11,19,32,"IF"); 
+CondEIV7 =  EXVORIV3CU3(23,7,17,35,"IF"); 
+
+CondEIV = CondEIV1+ CondEIV2 +CondEIV3+ CondEIV4 +CondEIV5+ CondEIV6 +CondEIV7 ;
+CondEIV =CondEIV/7;
+//TM
+
+CondT1 =  TimeShareFHLLess(4,12,12,1000,330,"IF"); 	
+CondT1 = TimeSelect(32,270,CondT1);	
+CondT2 =  TimeShareFHLLess(4,11,14,1000,330,"IF"); 	
+CondT2 = TimeSelect(32,270,CondT2);	
+CondT3 =  TimeShareFHLLess(6,18,11,1000,330,"IF"); 	
+CondT3 = TimeSelect(32,270,CondT3);	
+
+
+CondTM = CondT1+CondT2+CondT3;
+CondTM =CondTM/3;
+//SXV
+
+CondS1 =  SumXVolume(15,23,12,"IF"); 
+CondS2 =  SumXVolume(16,25,11,"IF"); 
+CondS3 =  SumXVolume(13,30,19,"IF"); 
+CondS4 =  SumXVolume(13,30,30,"IF"); 
+CondS5 =  SumXVolume(14,26,30,"IF"); 
+CondS6 =  SumXVolume(16,25,30,"IF"); 
+
+
+CondSXV = CondS1 + CondS2+CondS3+CondS4+CondS5+CondS6; 
+CondSXV = CondSXV/6;
+//V7
+CondV1 =  V7DYLONGK(27,61,4,15,"IF"); 
+CondV2 =  V7DYLONGK(26,61,4,15,"IF"); 
+CondV3 =  V7DYLONGK(28,61,4,15,"IF"); 
+CondV4 =  V7DYLONGK(26,60,4,15,"IF"); 
+CondV5 =  V7DYLONGK(27,60,4,15,"IF"); 
+CondV6 =  V7DYLONGK(29,61,4,15,"IF"); 
+CondV7 =  V7DYLONGK(30,61,4,13,"IF"); 
+CondV8 =  V7DYLONGK(29,60,4,14,"IF"); 
+CondV = CondV1 + CondV2 + CondV3 +CondV4 +CondV5 + CondV6 + CondV7 +CondV8;
+CondV = CondV/8;
+//---------------------------------------------
+
+MAA = ParamOptimize("MAA", 2.5, 0.5,6,0.5);
+EXV4 = ParamOptimize("EXV4", 5, 0.5, 5, 0.5);
+EXVH = ParamOptimize("EXVH", 1, 0.5, 5, 0.5);
+EXVIV3 = ParamOptimize("EXVIV3", 1, 0.5, 5, 0.5);
+TM = ParamOptimize("TM", 1.5, 0.5, 6, 0.5);
+SXV = ParamOptimize("SXV", 2.5, 0.5, 6, 0.5);
+V7L = ParamOptimize("V7L", 1.5, 0.5, 6, 0.5);
+
+CondG1 =MAA *CondMAA +EXV4*CondEA +EXVH*CondEH +EXVIV3*CondEIV +TM * CondTM +SXV*CondSXV +V7L *CondV; 
+
+
+Cond = CondG1;
+
+Vote=0.5;// ParamOptimize( "Vote", 0, 0, 5, 0.5);
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond<=Vote && Cond>=-Vote;
+CSIG = (TimeNum()+Interval()*100/60)>=151500;
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

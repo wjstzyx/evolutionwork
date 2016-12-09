@@ -1,0 +1,102 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/BasicV2/SXV.afl";
+#include "Formulas/Custom/BasicIF/All01MIF.afl";
+//#include "Formulas/Custom/BasicV2/EXV.afl";
+#include "Formulas/Custom/BasicIF/EXVNEWV.afl";
+#include "Formulas/Custom/BasicV2/maa.afl";
+#include "Formulas/Custom/BasicV2/v7dy.afl";
+
+StrategyName = "IF01_SXV_EXV_Gsig_4067";
+StrategyID = 4067;
+ProType = 0;
+
+
+CondEXV=EXVHH(1.4,300,3,24,"IF");
+CondEXV1=EXVAStat(23,10,2,"IF");
+CondEXV2=EXVAStat(24,19,2,"IF");
+CondEXV3=EXIV(18,31,0,"IF");
+CondEXV4=EXIV(19,30,0,"IF");
+CondEXV5=EXIV(16,33,0,"IF");
+CondEXV6=EXIVMA(19,26,9,0,"IF");
+CondEXV7=EXIVMA(18,24,9,0,"IF");
+CondEXV8=EXIVMA(17,28,6,0,"IF");
+CondE1 = (CondEXV6+CondEXV7+CondEXV8);
+CondE2 = (CondEXV3+CondEXV4+CondEXV5);
+CondE3 = (CondEXV+CondEXV1+CondEXV2);
+//CondEXV = CondEXV;
+
+//SXV
+//------------------------
+CondS1 =  SumXVolume(13,28,32,"IF"); 
+CondS2 =  SumXVolume(16,25,32,"IF"); 
+CondS3 =0;//  SumXVolume(13,30,32,"IF"); 
+CondS4 =  SumXVolume(18,22,32,"IF"); 
+CondS5 =  SumXVolume(12,30,32,"IF"); 
+CondS6 =  SumXOpiAdd(16,21,31,"IF"); 
+CondS7 =  SumXOpiAdd(16,22,29,"IF"); 
+CondS8 =0;//  SumXOpiAddOC(23,16,29,"IF"); 
+CondS9 =  SumXVolAdd(27,40,32,"IF"); 
+CondS10 =0;//  SumXVolAdd(32,28,33,"IF"); 
+CondSXV = (CondS1+CondS2+CondS3+CondS4+CondS5+CondS6+CondS7+CondS8+CondS9+CondS10);
+//MAA
+
+CondM1= MAArrange(4,10,0,1000,1000,"IF");
+CondM1= TimeSelect(44,275,CondM1);
+CondM2= MAArrange(11,11,0,1000,1000,"IF");
+CondM2= TimeSelect(44,275,CondM2);
+CondM4= MAArrangeRoll(23,11,0,1000,1000,"IF");
+CondM4= TimeSelect(44,275,CondM4);
+CondM5= MAArrangeRoll(24,11,0,1000,1000,"IF");
+CondM5= TimeSelect(44,275,CondM5);
+//CondM6= MAArrangeCount(11,9,1,1000,1000,"IF");//
+//CondM6= TimeSelect(44,275,CondM6);
+
+CondMAA = (CondM1+CondM2+CondM4+CondM5);
+/*
+CondV71=V7DYThreeSegment(13,78,"IF");
+CondV72=V7DYMA(23,80,59,"IF");
+CondV73=V7DYMAHLV(21,85,58,"IF");
+CondV7 = (CondV71+CondV72+CondV73)/3;
+*/
+CondV7L1=V7DYLONGK(34,33,4,13,"IF");
+CondV7L2=V7DYLONGK(29,27,4,18,"IF");
+CondV7L = (CondV7L1+CondV7L2);
+//==================
+CondSXV  = GetSig123(CondSXV );
+CondE1 = GetSig123(CondE1);
+CondE2 = GetSig123(CondE2);
+CondE3 = GetSig123(CondE3);
+CondMAA = GetSig123(CondMAA);
+CondV7L = GetSig123(CondV7L);
+
+
+//==================
+//1,1.5,1,1,1.5,0---1,1.5,0.5,1,1
+SXV = ParamOptimize("SXV", 4.5, 0.5,5,0.5);
+EXV1 = ParamOptimize("EXV1", 3.5, 0.5, 5, 0.5);
+EXV2 = ParamOptimize("EXV2", 2.5, 0.5, 4, 0.5);
+EXV3 = ParamOptimize("EXV3", 1.5, 0.5, 4, 0.5);
+MAA = ParamOptimize("MAA", 2.5, 0.5, 4, 0.5);
+V7L = ParamOptimize("V7L", 2, 0.5, 4, 0.5);
+
+CondG1 =SXV *CondSXV +EXV1 *CondE1 +EXV2 *CondE2+EXV3 *CondE3+MAA*CondMAA+V7L *CondV7L; 
+
+
+Cond = CondG1;
+
+Vote= ParamOptimize( "Vote", 0, 0, 2, 0.5);
+
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond<=Vote && Cond>=-Vote;
+CSIG = (TimeNum()+Interval()*100/60)>=151500;
+
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

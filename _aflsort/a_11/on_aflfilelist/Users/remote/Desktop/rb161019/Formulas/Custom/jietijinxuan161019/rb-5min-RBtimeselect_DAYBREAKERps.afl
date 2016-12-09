@@ -1,0 +1,126 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+
+
+function PIR(p,Length)
+{
+Ll=LLV(p,Length);
+Hh=HHV(p,Length);
+return (100*(p-Ll)/(Hh-Ll));
+}
+
+
+
+
+
+
+///////LAST DAY HIGH LOW///////////////////////////////////////////////////
+RBtimeselect_LOST=Param("RBtimeselect_LOST",100000,90000,150000,100);  //Observation Start Time
+RBtimeselect_LOET=Param("RBtimeselect_LOET",145000,90000,150000,100);   //Observation End Time
+
+RBtimeselect_TOST=Param("TOST",90000,90000,150000,100);  //Observation Start Time
+RBtimeselect_TOET=Param("TOET",91000,90000,150000,100);   //Observation End Time
+
+RBtimeselect_TST=Param("RBtimeselect_TST",110000,90000,150000,100);  //Trading Start Time
+RBtimeselect_TET=Param("RBtimeselect_TET",150000,90000,150000,100);   //Trading End Time
+
+
+RBtimeselect_ADXval=Param("RBtimeselect_ADXval",20,1,100,1);
+
+FSTK=Day()!=Ref(Day(),-1);
+KN=IIf(FSTK,1,BarsSince(FSTK)+1);	
+
+KNtotal=ValueWhen(Day()!=Ref(Day(),-1),Ref(KN,-1),1); //
+
+Lob_end = Cross(TimeNum(),RBtimeselect_LOET);  //detect the observation end time
+Lob_st = Cross(TimeNum(),RBtimeselect_LOST);   //detect the observation start time 
+ 
+Highest_sinceL = HighestSince(Lob_st,C,1); //capture the 1 hour high
+Lowest_sinceL = LowestSince(Lob_st,C,1);  //capture the 1 hour low
+ 
+LORBH = ValueWhen(Lob_end ,Highest_sinceL,1); //
+LORBL = ValueWhen(Lob_end ,Lowest_sinceL,1);  
+
+LORBHKN =ValueWhen(C==LORBH,KN,1); //
+LORBLKN =ValueWhen(C==LORBL,KN,1); //
+/////////////THIS DAY HIGH LOW//////////////////////////////////////////////
+
+
+Tob_end = Cross(TimeNum(),RBtimeselect_TOET);  //detect the observation end time
+Tob_st = Cross(TimeNum(),RBtimeselect_TOST);   //detect the observation start time 
+ 
+Highest_sinceT = HighestSince(Tob_st,C,1); //capture the 1 hour high
+Lowest_sinceT = LowestSince(Tob_st,C,1);  //capture the 1 hour low
+ 
+TORBH = ValueWhen(Tob_end ,Highest_sinceT,1); //
+TORBL = ValueWhen(Tob_end ,Lowest_sinceT,1);  
+
+TORBHKN =ValueWhen(C==TORBH,KN,1); //
+TORBLKN =ValueWhen(C==TORBL,KN,1); //
+
+///////////////////////////////////TRADING TIME///////////////////////////////////////////////////////////////////////////
+
+
+
+ssig=C<Min(LORBL,TORBL) AND TimeNum()>RBtimeselect_TST AND TimeNum()<RBtimeselect_TET AND ADX(14)>RBtimeselect_ADXval;
+bsig=C>Max(LORBH,TORBH) AND TimeNum()>RBtimeselect_TST AND TimeNum()<RBtimeselect_TET AND ADX(14)>RBtimeselect_ADXval;
+
+
+ps = GetPs(bsig,ssig,0);
+
+ps1=ps;
+
+
+DayBreaker_otime = Param("DayBreaker_otime",93000,90000,150000,1000);
+
+yh = TimeFrameGetPrice("H", inDaily, -1);
+yl = TimeFrameGetPrice("L", inDaily, -1);
+yc = TimeFrameGetPrice("C", inDaily, -1);
+yo = TimeFrameGetPrice("O", inDaily, -1);
+
+bsig1 = C>yh AND TimeNum()>=DayBreaker_otime;
+ssig1 = C<yl AND TimeNum()>=DayBreaker_otime;
+
+Lstbsig = BarsSince(bsig1 );
+Lstssig = BarsSince(bsig1);  
+
+firstbar = Day()!=Ref(Day(),-1);
+kn = BarsSince(firstbar);
+
+bsig=bsig1 AND CPPCount(bsig1 OR ssig1 ,kn)==1;
+ssig=ssig1 AND CPPCount(ssig1 OR bsig1 ,kn)==1 ;
+
+ps=GetPs(bsig,ssig,0);
+ps2=ps;
+
+
+ps=ps1+ps2;
+
+bsig1=ps>=2;
+ssig1=ps<=-2;
+
+bsig=ExRem(bsig1,ssig1);
+ssig=ExRem(ssig1,bsig1);
+
+psmerge=GetPs(bsig,ssig,0);
+
+tp = Param("tp",15,0,100,1);
+
+Lstbsg = BarsSince(psmerge==1 AND Ref(psmerge,-1)!=1);
+Lstssg = BarsSince(psmerge==-1 AND Ref(psmerge,-1)!=-1);
+
+C01 = psmerge==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C02 = psmerge==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+Csig=C01 OR C02;
+
+
+
+Plotperformance(bsig,ssig,Csig);
+
+
+
+
+
+
+
+StrategyName = "rb-5min-RBtimeselect_DAYBREAKERps";StrategyID = "1012100364";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

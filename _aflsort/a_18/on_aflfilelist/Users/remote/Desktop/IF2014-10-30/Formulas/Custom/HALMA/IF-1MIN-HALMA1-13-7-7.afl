@@ -1,0 +1,71 @@
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "IF-1MIN-HALMA1-13-7-7";
+StrategyID = 40714;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine);   
+
+ 
+//------------------------para----------------------------------------             
+           
+period= ParamOptimize("period", 13, 0, 200,1);            
+num=ParamOptimize("num",7, 1, 200,1); //81
+period2= ParamOptimize("period2", 7, 0, 200,1);               
+
+//===============================================
+up=C>O;
+dn=C<O;
+
+b01=CPPCount(C>MA(C,5),period)==period;
+s01=CPPCount(C<MA(C,5),period)==period;
+
+Lstb01=BarsSince(b01);
+Lsts01=BarsSince(s01);
+
+b02=Lstb01>=1 AND Lstb01<=num  AND C>MA(C,5) AND up;
+s02=Lsts01>=1 AND Lsts01<=num AND C<MA(C,5) AND dn;
+
+bsig=b02;
+ssig=s02;
+
+         
+
+CSIG=0;            
+
+Lstsig = BarsSince(bsig OR ssig);              
+
+BPeriod= BarsSince(BSIG)<BarsSince(SSIG) AND BarsSince(BSIG)>0;            
+SPeriod= BarsSince(SSIG)<BarsSince(BSIG) AND BarsSince(SSIG)>0;            
+
+Csig1=V==HHV(V,period);
+
+
+C01=bperiod AND V==HHV(V,period) AND up;
+C02=speriod AND V==HHV(V,period) AND dn;
+C03=bperiod AND V==HHV(V,period2) AND up;
+C04=speriod AND V==HHV(V,period2) AND dn;
+      
+
+CSIG= csig1;//
+Csig=C01 OR C02;//    
+CSIG=V==HHV(V, period2);//   
+CSIG=C03 OR C04;//13,7,7  12,5,4
+               
+
+//------------------------------------------------------------------------------------------------------------               
+
+    Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

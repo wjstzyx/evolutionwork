@@ -1,0 +1,167 @@
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/RealStr/IF15/test.afl";
+
+StrategyID = 400100;
+StrategyName = "WS_IF15TRY";
+ProType = 0;
+//K=0-good trend  181
+CondK01=ARIFK(1,0,0,0,"IF");//114
+CondK02=ARIFK(2,0,0,0,"IF");//120
+CondK03=ARIFK(3,0,0,0,"IF");//113
+CondK04=ARIFK(4,0,0,0,"IF");//117
+CondK05=ARIFK(14,2,0,1,"IF");//141
+CondK06=ARIFK(18,3,0,1,"IF");//154
+CondK07=ARIFK(16,5,0,1,"IF");//152
+CondK08=ARIFK(18,4,0,1,"IF");//140
+CondK09=ARIFK(10,4,0,1,"IF");//143
+CondK10=ARIFK(9,4,0,1,"IF");//137
+Cond0 = CondK01 + CondK02 + CondK03 + CondK04 + CondK05 + CondK06 + CondK07 + CondK08 + CondK09 + CondK10;
+
+//K=1-mere profit 147
+CondK11=ARIFK(2,0,1,0,"IF");//146
+CondK17=ARIFK(1,2,1,1,"IF");//117
+CondK12=ARIFK(3,0,1,0,"IF");//173
+CondK13=ARIFK(5,1,1,0,"IF");//145
+CondK14=ARIFK(6,1,1,0,"IF");//161
+CondK15=ARIFK(22,0,1,0,"IF");//161
+CondK16=ARIFK(24,1,1,0,"IF");//147
+Cond1 = CondK11 + CondK12 + CondK13 + CondK14 + CondK15 + CondK16 + CondK17;
+
+//k2-mere profit 113
+CondK21=ARIFK(16,8,2,1,"IF");//129
+CondK22=ARIFK(26,10,2,1,"IF");//124
+CondK23=ARIFK(16,9,2,1,"IF");//121
+CondK24=ARIFK(23,8,2,1,"IF");//109
+CondK25=ARIFK(10,6,2,0,"IF");//102
+Cond2 = CondK21 + CondK22 + CondK23 + CondK24 + CondK25;
+
+//k3-tiny tip 90
+CondK31=ARIFK(2,5,3,0,"IF");
+CondK32=ARIFK(4,2,3,1,"IF");
+Cond3=CondK31+CondK32;
+
+//k4-good trend 157
+CondK41=ARIFK(21,2,4,0,"IF");
+CondK42=ARIFK(19,4,4,0,"IF");
+CondK43=ARIFK(18,2,4,0,"IF");
+CondK44=ARIFK(27,1,4,0,"IF");//
+Cond4=CondK41+CondK42+CondK43+CondK44;
+
+//k5-mere profit 143
+CondK51=ARIFK(3,5,5,0,"IF");
+Cond5=CondK51;
+
+//k6-good trend 201
+CondK61=ARIFK(0,2,6,0,"IF");//118
+CondK62=ARIFK(0,3,6,0,"IF");//153
+CondK63=ARIFK(0,4,6,0,"IF");//161
+CondK64=ARIFK(0,5,6,0,"IF");//161
+CondK65=ARIFK(0,6,6,0,"IF");//150
+Cond6=CondK61+CondK62+CondK63+CondK64+CondK65;
+
+//k7-Reversal time 256
+CondK71=ARIFK(2,0,7,1,"IF");//310
+Cond7=CondK71;
+
+//k8-good trend Reversal 230
+CondK81=ARIFK(27,3,8,1,"IF");//218
+CondK82=ARIFK(27,2,8,1,"IF");//208
+CondK83=ARIFK(15,4,8,1,"IF");//202
+CondK84=ARIFK(29,2,8,1,"IF");//194
+CondK85=ARIFK(28,4,8,1,"IF");//192
+CondK86=ARIFK(18,4,8,1,"IF");//194
+CondK87=ARIFK(18,2,8,1,"IF");//193
+CondK88=ARIFK(29,3,8,1,"IF");//193
+CondK89=ARIFK(16,4,8,1,"IF");//188
+CondK810=ARIFK(30,0,8,1,"IF");//184
+CondK811=ARIFK(29,1,8,1,"IF");//190
+Cond8 = 3*CondK81 + CondK82 + CondK83 + CondK84 + CondK85 + CondK86 + CondK87 + CondK88 + CondK89 + CondK810 + CondK811;
+
+//k9-mere profit 135
+CondK91=ARIFK(2,0,9,1,"IF");//112
+CondK92=ARIFK(3,0,9,1,"IF");//96
+CondK93=ARIFK(6,3,9,0,"IF");//93
+CondK94=ARIFK(17,7,9,1,"IF");//88
+CondK95=ARIFK(30,10,9,0,"IF");//87
+Cond9=CondK91+CondK92+CondK93+CondK94+CondK95;
+
+//k10-good trend 209
+Cond101=ARIFK(19,3,10,0,"IF");//150
+Cond102=ARIFK(28,3,10,0,"IF");//141
+Cond103=ARIFK(23,3,10,0,"IF");//131
+Cond104=ARIFK(22,3,10,0,"IF");//130
+Cond105=ARIFK(28,4,10,0,"IF");//125
+Cond106=ARIFK(24,3,10,0,"IF");//124
+Cond107=ARIFK(4,8,10,1,"IF");//113
+Cond10=3*Cond101+Cond102+Cond103+Cond104+Cond105+Cond106+4*Cond107;
+
+
+//k11-good trend   ----need more work to choose parameters
+Cond111=ARIFK(6,0,11,0,"IF");
+Cond112=ARIFK(7,0,11,0,"IF");
+Cond113=ARIFK(25,0,11,0,"IF");
+Cond114=ARIFK(8,1,11,0,"IF");
+Cond115=ARIFK(28,8,11,0,"IF");
+Cond11=Cond111+Cond112+Cond113+Cond114+Cond115;
+Cond=Cond11;
+
+//k12-mere profit   ----need more work to choose parameters
+Cond121=ARIFK(4,1,12,1,"IF");//115
+Cond122=ARIFK(0,3,12,0,"IF");//104
+Cond123=ARIFK(3,5,12,0,"IF");//94
+Cond12=Cond121+Cond122+Cond123;
+
+//k13-good trend 154
+Cond131=ARIFK(5,1,13,1,"IF");//150
+Cond132=ARIFK(1,4,13,0,"IF");//138
+Cond133=ARIFK(5,3,13,1,"IF");//133
+Cond134=ARIFK(18,0,13,1,"IF");//130
+Cond135=ARIFK(0,5,13,0,"IF");//127
+Cond13=Cond131+Cond132+Cond133+Cond134+Cond135;
+
+//k14-good trend
+Cond141=ARIFK(2,0,14,1,"IF");//249
+Cond142=ARIFK(0,6,14,0,"IF");//231
+Cond143=ARIFK(0,4,14,0,"IF");//226
+Cond144=ARIFK(1,4,14,0,"IF");//225
+Cond145=ARIFK(0,5,14,0,"IF");//218
+Cond146=ARIFK(0,3,14,0,"IF");//218
+Cond147=ARIFK(6,1,14,1,"IF");//211
+Cond148=ARIFK(4,2,14,1,"IF");//183
+Cond149=ARIFK(0,1,14,0,"IF");//164
+Cond14=Cond141+Cond142+Cond143+Cond144+Cond145+Cond146+Cond147+Cond148+Cond149;
+
+//k15-mere profit
+Cond151=ARIFK(17,0,15,1,"IF");//117
+Cond152=ARIFK(28,6,15,0,"IF");//87
+Cond153=ARIFK(0,2,15,0,"IF");//86
+Cond154=ARIFK(0,3,15,0,"IF");//82
+Cond155=ARIFK(15,0,15,1,"IF");//78
+Cond15=Cond151+Cond152+Cond153+Cond154+Cond155;
+
+
+//k16-mere profit
+Cond161=ARIFK(6,8,16,0,"IF");
+Cond162=ARIFK(15,0,16,1,"IF");
+Cond163=ARIFK(11,0,16,1,"IF");
+Cond164=ARIFK(13,10,16,1,"IF");
+Cond165=ARIFK(3,8,16,0,"IF");
+Cond166=ARIFK(0,1,16,0,"IF");
+Cond16=Cond161+Cond162+Cond163+Cond164+Cond165+Cond166;
+
+Cond=Cond0+Cond1+Cond2+Cond3+Cond4+Cond5+Cond6+Cond7+Cond8+Cond9+Cond10+Cond11+Cond12+Cond13+Cond14+Cond15+Cond16;
+Cond=Cond1+Cond3+Cond5+Cond7+Cond8+Cond10+Cond11+Cond12+Cond13+Cond14+Cond15+Cond16;
+
+Vote=0;
+BSIG=Cond<-Vote;
+SSIG=Cond>Vote;
+CSIG=(TimeNum()+Interval()*100/60)>=151500;
+
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+PlotPerformance(sinPs,sinBS,StrategyName);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

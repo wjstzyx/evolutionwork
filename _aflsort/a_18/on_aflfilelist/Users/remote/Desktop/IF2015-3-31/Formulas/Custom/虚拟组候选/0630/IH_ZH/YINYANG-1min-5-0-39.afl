@@ -1,0 +1,70 @@
+_SECTION_BEGIN("test");
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "YINYANG-1min-5-0-39";
+StrategyID = "120020";
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+tickername=Name();
+
+ParaPeriod1=Param("ParaPeriod1",5,0,100,1);
+X=Param("X",0,0,100,1);
+//period2=Param("period2",100,0,100,1);
+period=Param("period",39,0,100,1);
+fo = Foreign(TickerName, "O" );
+fh = Foreign(TickerName, "H" );
+fl = Foreign(TickerName, "L" );
+fc = Foreign(TickerName, "C" );
+fv = Foreign(TickerName, "V" );
+ 
+	FSTK=Day()!=Ref(Day(),-1);		
+   IIf(IsEmpty(Ref(fstk,-1)),1,FSTK);			
+	LSTK=GetLastK(TickerName);		
+	KN=IIf(FSTK,1,BarsSince(FSTK)+1);	
+Plot(kn,"kn",colorRed);
+//-----------------------------------------------------------
+lineUP=fc >FO;
+lineDN=fc <FO;
+
+b01=CPPCount(Lineup,ParaPeriod1+x)>=ParaPeriod1;
+s01=CPPCount(lineDN,ParaPeriod1+x)>=ParaPeriod1;
+
+	//P=PTS/100000*fc;
+//=======================
+dn=fc <FO ;//AND abs(FC-FO)<P;
+up=  fc >FO ;//AND FC-FO<P;
+
+LY=dn OR up;
+//======================
+
+BSIG=B01 ;//ND Ly;
+SSIG=S01 ;//AND Ly;
+
+	CSIG=LSTK ;
+Lstsig = BarsSince(bsig OR ssig);              
+
+BPeriod= BarsSince(BSIG)<BarsSince(SSIG) AND BarsSince(BSIG)>0;            
+SPeriod= BarsSince(SSIG)<BarsSince(BSIG) AND BarsSince(SSIG)>0;  
+
+C03=bperiod AND LSTSIG>=PERIOD AND lineUP;
+C04=speriod AND LSTSIG>=PERIOD AND lineDN;
+
+CSIG= CSIG OR C03 OR C04;//
+    Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+_SECTION_END();

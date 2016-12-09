@@ -1,0 +1,50 @@
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/BasicIF/All01MIF.afl";
+#include "Formulas/Custom/BasicIF/EXVNewV.afl";
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+StrategyName = "IF01_EXV_MA_DTA_EXIV_Combin_G1_4057";
+StrategyID = 4057;
+ProType = 0;
+//Group 1
+CondEXV=EXVHH(1.4,300,3,24,"IF");
+CondMA=MAC(21,21,77,"IF");
+CondDTA=DTAV2IF(39,17,2.7,87,"IF");
+
+CondEXV1=EXVAStat(23,10,2,"IF");
+CondEXV2=EXVAStat(24,19,2,"IF");
+CondEXV3=EXIV(18,31,0,"IF");
+CondEXV4=EXIV(19,30,0,"IF");
+CondEXV5=EXIV(16,33,0,"IF");
+CondEXV6=EXIVMA(19,26,9,0,"IF");
+CondEXV7=EXIVMA(18,24,9,0,"IF");
+CondEXV8=EXIVMA(17,28,6,0,"IF");
+CondEXV=(CondEXV1+CondEXV2+CondEXV3+CondEXV4+CondEXV5+CondEXV6+CondEXV7+CondEXV8)/8;
+
+WEXVHH = ParamOptimize("WEXVHH", 2.5, 0, 3, 0.5);
+WMAC = ParamOptimize("WMAC", 1, 0, 3, 0.5);
+WDTA = ParamOptimize("WDTA", 0.5, 0, 3, 0.5);
+WEXIV = ParamOptimize("WEXIV ", 3, 0, 3, 0.5);
+WMAA = ParamOptimize("WMAA ", 3, 0, 3, 0.5);
+
+CondG1 = WEXVHH*CondEXV+WMAC*CondMA+WDTA*CondDTA+WEXIV*CondEXV;
+
+
+Cond = CondG1;
+
+Vote= ParamOptimize( "Vote", 0, 0, 5, 0.5);
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG = (TimeNum()+Interval()*100/60)>=151500;
+
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

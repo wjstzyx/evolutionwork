@@ -1,0 +1,73 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+
+
+
+function getHLsig(r,Ticker)
+{
+	SetForeign(Ticker);
+	
+	dayopen = Day()!=Ref(Day(),-1);
+	
+	kn = BarsSince(dayopen)+1;
+
+
+	yhigh1 = TimeFrameGetPrice( "H", inDaily, -1 );
+	ylow1 = TimeFrameGetPrice( "L", inDaily, -1 );
+
+	yhigh2 = TimeFrameGetPrice( "H", inDaily, -2 );
+	ylow2 = TimeFrameGetPrice( "L", inDaily, -2 );
+
+	yhigh = Max(yhigh1,yhigh2);
+	ylow = Min(ylow1,ylow2);
+
+	thigh = HighestSince(dayopen,H,1);
+	tlow = LowestSince(dayopen,L,1);
+
+	chigh = Max(yhigh,thigh);
+	clow = Min(ylow,tlow);
+	
+	barfilter = TimeNum()>=130000 AND TimeNum()<=150000;
+
+	bsig1 =  C-clow>r*C/1000 AND C-clow>chigh-C AND barfilter;//AND daytime C==HHV(C,HLperiod) AND
+	ssig1 =  chigh-C>r*C/1000  AND chigh-C>C-clow AND barfilter;//AND daytimeC==LLV(C,HLperiod) AND
+	
+	ps0 = GetPs(bsig1,ssig1,0);
+	
+	RestorePriceArrays();
+	
+	return ps0;
+}
+
+r = Param("r",10,0,100,1);
+
+psrb = getHLsig(r,"RB");
+
+sumps = psrb;
+
+bsig = sumps>0;
+ssig = sumps<0;
+
+ps = GetPs(bsig,ssig,0);
+
+lstbsg = BarsSince(Cross(bsig,0));
+lstssg = BarsSince(Cross(ssig,0));
+
+
+tp = ParamOptimize("tp",25,0,50,5);
+
+
+C01 = ps==1 AND  C<HHV(C,lstbsg+1)-tp*C/1000;
+C02 = ps==-1 AND  C>LLV(C,lstssg+1)+tp*C/1000;
+
+csig = C01 OR C02;
+
+
+plotperformance(bsig,ssig,csig);
+
+
+
+
+
+
+
+StrategyName = "10min-rb reversal afternoon";StrategyID = "1012100199";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

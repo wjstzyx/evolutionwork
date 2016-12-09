@@ -1,0 +1,76 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/BasicV3/dfb.afl";
+#include "Formulas/Custom/BasicV3/exiv.afl";
+#include "Formulas/Custom/BasicV3/exv.afl";
+#include "Formulas/Custom/BasicV3/hl.afl";
+#include "Formulas/Custom/BasicV3/maa.afl";
+#include "Formulas/Custom/BasicV3/sxv.afl";
+#include "Formulas/Custom/BasicV3/tb.afl";
+#include "Formulas/Custom/BasicV3/tm.afl";
+#include "Formulas/Custom/BasicV3/v7.afl";
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 800);
+
+StrategyName = "IF_01_EXIV-EXV-SXV-TM_NP_V0-G1.1";
+StrategyID = 40081;
+ProType = 0;
+
+EXIV1=EXIV(7,40,0,"IF");
+EXIV2=EXIV(28,59,0,"IF");
+EXIV3=EXIV(16,32,0,"IF");
+EXIV4=EXIVMA(12,20,58,0,"IF");
+EXIV5=EXIV(19,17,0,"IF");
+EXIV6=EXIVMA(15,20,63,0,"IF");
+EXIV7=EXIVMA(18,42,9,0,"IF");
+EXIV8=EXIV(32,52,0,"IF");
+
+EXV1=EXVORIV3CU3(25,21,19,33,"IF");
+EXV2=EXVHH(22,24,51,47,"IF");
+EXV3=EXVapr4(14,37,"IF");
+EXV4=EXVapr4(14,14,"IF");
+EXV5=EXVapr4(21,23,"IF");
+EXV6=EXVHH(21,15,19,18,"IF");
+EXV7=EXVAStat(47,40,2,"IF");
+EXV8=EXVAStat(46,23,2,"IF");
+
+SXV1=SumXVolume(16,25,33,"IF");
+SXV2=SumXVolAdd(20,47,13,"IF");
+SXV3=SumXVolume(16,25,38,"IF");
+SXV4=SumXVolume(15,29,38,"IF");
+
+TM1=TimeShareFHLLess(4,20,28,1000,300,"IF");
+TM2=TimeShareHLLess(7,16,17,1000,400,"IF");
+TM3=TimeShareHLLess(6,24,22,1000,400,"IF");
+TM4=TimeShareFHLLess(6,14,21,1000,300,"IF");
+
+
+
+
+cond_exiv =(EXIV1+EXIV2+EXIV3+EXIV4+EXIV5+EXIV6+EXIV7+EXIV8)/8;
+cond_exv =(EXV1+EXV2+EXV3+EXV4+EXV5+EXV6+EXV7+EXV8)/8;
+cond_SXV =(SXV1+SXV2+SXV3+SXV4)/4;
+
+cond_TM =(TM1+TM2+TM3+TM4)/4;
+
+w_EXIV = ParamOptimize("w_EXIV",2,0,4,0.5);
+w_EXV= ParamOptimize("w_EXV",4,0,4,0.5);
+w_SXV = ParamOptimize("w_SXV",3.5,0,4,0.5);
+w_TM= ParamOptimize("w_TM",0,0,4,0.5);
+
+Cond = w_EXIV*cond_exiv + w_SXV*cond_SXV+ w_EXV*cond_EXV+ w_TM*cond_TM ;
+
+Vote=0;
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=GetLastK("IF");
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

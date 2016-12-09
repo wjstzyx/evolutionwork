@@ -1,0 +1,87 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "60min-signalbolling-zhisun-1HOUR-TF";
+StrategyID = 380026;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs",1);
+OptimizerSetOption("MaxEval",5000);
+
+tw=ParamOptimize("timewinodw",70,10,1000,10);
+stdzhisun=ParamOptimize("stdzhisun",2,0,10,0.1);
+s1=ParamOptimize("s1",10,0,1000,1);
+s2=ParamOptimize("s2",15,0,1000,1);
+s3=ParamOptimize("s3",15,0,1000,1);
+MAperiod=ParamOptimize("MAperiod",14,1,100,1);
+
+maG03=1000*MA(Signal(s1,s2,s3),MAperiod);
+maG13=BBandTop(maG03,tw,2);
+maG23=BBandBot(maG03,tw,2);
+maG33=10000*(maG03-maG23)/(maG13-maG23);
+
+G03=1000*Signal(s1,s2,s3);
+G13=BBandTop(G03,tw,2);
+G23=BBandBot(G03,tw,2);
+G33=10000*(G03-G23)/(G13-G23);
+
+zhisunup=BBandTop(C,tw,stdzhisun);
+zhisundown=BBandBot(C,tw,stdzhisun);
+
+//Bsig1=G33>Ref(G33,-1) ;
+//Ssig1=G33<Ref(G33,-1) ;
+//PlotPerformance(Bsig,Ssig,0);
+
+//Bsig1=maG33>Ref(maG33,-1) ;
+//Ssig1=maG33<Ref(maG33,-1) ;
+//PlotPerformance(Bsig,Ssig,0);
+
+Bsig1=maG33>Ref(maG33,-1) AND Ref(maG33,-1)>Ref(maG33,-2) ;
+Ssig1=maG33<Ref(maG33,-1) AND Ref(maG33,-1)<Ref(maG33,-2) ;
+
+//Bsig1=maG33>Ref(maG33,-1) AND maG33>Ref(maG33,-2) ;
+//Ssig1=maG33<Ref(maG33,-1) AND maG33<Ref(maG33,-2) ;
+
+//Bsig1=maG33>Ref(maG33,-1) ;
+//Ssig1=maG33<Ref(maG33,-1) ;
+
+
+bsig=ExRem(bsig1,ssig1);
+ssig=ExRem(ssig1,bsig1);
+
+/////zhisun1/////////////
+ps=GetPs(bsig,ssig,0);
+
+
+C05 = ps==1 AND  maG33<Ref(maG33,-1);
+C06 = ps==-1 AND maG33>Ref(maG33,-1);
+
+
+//C05 = ps==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+//C06 = ps==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+C001=ps==1 AND C<zhisundown;
+C002=ps==-1 AND C>zhisunup;
+
+Csig=C001 OR C002 OR C05 OR C06;
+
+//Csig=C001 OR C002;
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+
+
+ps0 = GetPs(bsig,ssig,csig);
+Filter= 1;
+AddColumn(ps0,"ps");

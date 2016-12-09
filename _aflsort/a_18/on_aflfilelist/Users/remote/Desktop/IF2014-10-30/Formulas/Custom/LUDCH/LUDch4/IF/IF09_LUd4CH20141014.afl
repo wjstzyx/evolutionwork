@@ -1,0 +1,32 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/BasicV4/day/LUDCH.afl";
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+
+StrategyName = "IF09_LUd4CH20141014";
+StrategyID = 40741;
+ProType = 0;
+TickerName=Name();
+
+
+N1= ParamOptimize("N1",0,0,1000,1);
+
+Cond= LUd4CH20141014(4,26,20,TickerName);
+
+
+Vote=ParamOptimize("w_Vote",0,0,4,0.5);
+Vote=0;
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond==0 ;
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+
+
+//PlotPerformance(bsig,ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

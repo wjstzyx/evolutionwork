@@ -1,0 +1,57 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/BasicV4/PMM.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 800);
+
+StrategyName = "IF01-EXV-DFB-LVB-BOMB-1-05-1-4-V0";
+StrategyID = 40255;
+ProType = 0;
+
+
+PMM1=PMM_EXV1(33,15,4,195,235,"IF");
+PMM2=PMM_EXV1(33,15,9,195,235,"IF");
+
+PMM3=PMM_DFB(18,107,195,235,"IF");
+PMM4=PMM_DFB(24,119,195,235,"IF");
+PMM5=PMM_LVB(0.9,14,72,194,235,"IF");
+PMM6=PMM_LVB(0.8,12,52,194,235,"IF");
+
+
+PMM7=PMM_Bombv3(2,9,1,0.28,195,234,"IF");
+PMM8=PMM_Bombv3(3,7,2,0.36,192,234,"IF");
+
+
+
+cond_EXV=(PMM1+PMM2)/2;
+cond_DFB=(PMM3+PMM4)/2;
+cond_LVB=(PMM5+PMM6)/2;
+cond_Bomb=(PMM7+PMM8)/2;
+
+
+
+w_EXV= ParamOptimize("w_EXV",1,0,4,0.5);
+w_DFB= ParamOptimize("w_DFB",0.5,0,4,0.5);
+w_LVB= ParamOptimize("w_LVB",1,0,4,0.5);
+w_Bomb= ParamOptimize("w_Bomb",4,0,4,0.5);
+Cond = w_EXV*cond_EXV+ w_DFB*cond_DFB+w_LVB*cond_LVB+w_Bomb*cond_Bomb;
+
+
+
+
+
+
+Vote=ParamOptimize("w_Vote",0,0,4,0.5);
+
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond==0;
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName+"--"+StrategyID);

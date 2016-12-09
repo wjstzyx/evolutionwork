@@ -1,0 +1,54 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/BasicV3/exiv.afl";
+#include "Formulas/Custom/BasicV3/TM.afl";
+#include "Formulas/Custom/BasicV3/hl.afl";
+#include "Formulas/Custom/BasicV3/maa.afl";
+#include "Formulas/Custom/BasicV3/sxv.afl";
+#include "Formulas/Custom/BasicV3/DTA.afl";
+#include "Formulas/Custom/BasicV3/v7.afl";
+#include "Formulas/Custom/BasicV3/DFB.afl";
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+StrategyName = "CU-02_DFB_TM_SXV_V2.2";
+StrategyID = 50022;
+ProType = 1;
+
+DFB1=DFB(74,53,"CU");
+DFB2=DFB(80,57,"CU");
+
+
+TM1=TimeShareHLLess(57,83,59,1000,400,"CU");
+TM2=TimeShareHLHalfLess(30,70,47,154,450,"CU");
+
+
+SXV1=SumXVolAdd(44,43,24,"CU");
+SXV2=SumXVolume(19,35,51,"CU");
+
+
+
+
+CondDFB = (DFB1+DFB2)/2;
+CondTM = (TM1+TM2)/2;
+CondSXV = (SXV1+SXV2)/2;
+
+
+
+
+Cond =CondDFB +CondTM  + CondSXV ;
+
+Vote=2;
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=GetLastK("CU");
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

@@ -1,0 +1,78 @@
+//#include "Formulas/Custom/201502/15s/volatility.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+TickerNAME = Name(); 
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+
+StrategyName = "IF-6min-FORCE-4-4-5-29";
+StrategyID = 40821;
+ProType = 0;
+TickerName=Name();
+
+     
+x= ParamOptimize("x", 4, 0, 20000,1); 
+y= ParamOptimize("y", 4, 0, 200,1); 
+PERIOD= ParamOptimize("PERIOD",5, 0, 200,1);
+period2= ParamOptimize("period2", 29, 0, 200,1); 
+//vols = volslice(Close, 60, 30);
+//vols2 = CppVolSlice(Close, 60, 30);
+//Plot(vols, "vols", colorRed);
+//Plot(vols2, "vols_cpp", colorGreen);
+
+//Vlt = Volslice(Close, wsize, wnum);
+//yy = Close*pp/10000;
+//Vltfilter = Vlt>yy;
+
+//Plot(Vlt,"v",colorRed);
+fstk = Day()!=Ref(Day(),-1);
+KN=IIf(FSTK,1,BarsSince(FSTK)+1);
+//===============================================
+up=C>O;
+dn=C<O;
+RANGE=(C-O);
+
+force=V*range;
+
+Sumf=Sum(force,kn);
+
+b01=L==LLV(L,period);
+s01=H==HHV(H,period);
+
+Lstb01=BarsSince(b01);
+Lsts01=BarsSince(s01);
+
+
+bsig = lstb01>x AND Sumf>0  AND sumf>Ref(sumf,-1) AND Ref(sumf,-1)>Ref(sumf,-2) AND kn>period2;
+ssig =lsts01>x AND Sumf<0  AND sumf<Ref(sumf,-1) AND Ref(sumf,-1)<Ref(sumf,-2)AND kn>period2;
+
+
+//bsig=Ref(bsig,-1) AND NOT bsig;
+//ssig=Ref(ssig,-1) AND NOT ssig;
+  
+Csig = TimeNum() >= 150900;
+Lstsig = BarsSince(bsig OR ssig);
+sinPs=GetPs(BSIG,SSIG,CSIG);
+
+
+//C01=sinPs==1 AND Lstsig>=x AND C==LLV(C,period) ;//AND C<Lstdc;
+//C02=sinPs==-1 AND Lstsig>=x AND C==HHV(C,period) ;//AND C>Lstdc;
+c05=sinPs==1 AND CPPCount(dn,y)==y ;//AND C<Lstdc;
+C06=sinPs==-1 AND CPPCount(up,y)==y;//AND C>Lstdc;
+Csig= C05 OR C06 OR Csig;
+
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+
+/*
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);
+*/
+PlotPerformance(bsig,ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

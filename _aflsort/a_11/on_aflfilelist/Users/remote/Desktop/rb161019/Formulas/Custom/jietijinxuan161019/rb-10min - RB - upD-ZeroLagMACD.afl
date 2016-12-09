@@ -1,0 +1,105 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+
+
+
+TIME = TimeNum();
+MAperiod = ParamOptimize("MAperiod",14,1,500,1);
+M = ParamOptimize("M",36,1,1000,1);
+tw = ParamOptimize("TimeW",90,0,300,10);
+
+fc = C;fo = O;fh = H;fl = L;fv = V;fopi = OpenInt;
+
+
+
+FSTK = Day() != Ref(Day(),-1);
+KN = BarsSince(FSTK)+1;
+
+
+ P = 12;
+ Q = 26;
+ R = 9;
+
+	EMA1 = EMA(fc,P);
+	EMA2 = EMA(EMA1,P);
+	Difference = EMA1 - EMA2;
+	ZeroLagEMAp = EMA1 + Difference;
+	
+	EMA3 = EMA(fc,Q);
+	EMA4 = EMA(EMA3,Q);
+	Difference = EMA3 - EMA4;
+	ZeroLagEMAq = EMA3 + Difference;
+	ZeroLagMACD = ZeroLagEMAp - ZeroLagEMAq;
+
+	EMA5 = EMA(ZeroLagMACD,R);
+	EMA6 = EMA(EMA5,R);
+	Difference = EMA5 - EMA6;
+	ZeroLagTRIG = EMA5 + Difference;
+
+
+up = fc>fo;
+dn = fc<fo;
+
+sup = Sum(IIf(up,fh-fo,0),M);
+sdn = Sum(IIf(dn,fo-fl,0),M);
+
+
+MI = ZeroLagMACD -  Ref(ZeroLagMACD,-1);		
+fcma = MA(fc,M);		
+Mfc = fcma+MI;		
+		
+		
+G03 = 1000*MA(Mfc,MAperiod);		
+
+G13=BBandTop(G03,tw,2);
+G23=BBandBot(G03,tw,2);
+
+G33=1000*(G03-G23)/(G13-G23);
+
+B02=G33>Ref(G33,-1) AND G33>Ref(G33,-2) ;
+S02=G33<Ref(G33,-1) AND G33<Ref(G33,-2) ;
+
+
+fcST = StdErr(fc,M);
+fcSD = StDev(fc,M);
+
+upT = BBandTop(MA(fo,M)+fcSD,tw);
+dnT = BBandBot(MA(fo,M)-fcSD,tw);
+
+B01  = sup>sdn;
+s01  = sup<sdn;
+
+
+bsig =  fc>Ref(fo,-KN+1)+fcST AND fc>upT AND KN>2 AND b02;//AND b01;
+ssig =  fc<Ref(fo,-KN+1)-fcST AND fc<dnT AND Kn>2 AND s02;//AND s01;
+
+
+
+	ps=GetPs(bsig,ssig,0);
+
+
+	Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+	Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+
+	tp = ParamOptimize("tp",8,5,30,1);
+
+
+	C01= ps==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+	C02= ps==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+
+	C03 = Getlastk(TickerName);
+ CSIG = C01 OR C02;
+  	Cond = getCS(BSIG,SSIG,CSIG);
+
+
+
+
+
+PlotPerformance(BSig,Ssig,Csig);
+
+
+
+
+
+StrategyName = "rb-10min - RB - upD-ZeroLagMACD";StrategyID = "1012100340";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

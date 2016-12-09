@@ -1,0 +1,90 @@
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+
+StrategyName = "EXVHLCU2";
+Instruments = 2;
+StrategyID = 2001;
+
+EXVT=ParamOptimize("EXVT",27,0,100,5);
+PTS=ParamOptimize("PTS",31,0,100,5);
+
+TIME=Hour()*10000+Minute()*100;
+
+
+FSTK=Day()!=Ref(Day(),-1);
+LSTK=TIME>=145700;
+KN=IIf(FSTK,1,BarsSince(FSTK)+1);
+MA1=MA(Close,5);
+MA2=MA(Close,10);
+MA3=MA(Close,20);
+UPMA=MA1>MA2 && MA2>MA3;
+DNMA=MA1<MA2 && MA2<MA3;
+MAV=MA(V,90);
+EXVTX=EXVT/10;
+EXV=(V>EXVTX*MAV) && V>=HHV(V,4);
+EXVUP=EXV && Close>Ref(Open,-1);
+EXVDN=EXV && Close<Ref(Open,-1);
+
+LSTEXV=IIf(EXV,0,BarsSince(EXV));
+PRICE1=IIf(Ref(EXVUP,-LSTEXV),High,0);
+PRICE2=IIf(Ref(EXVDN,-LSTEXV),Low, 0);
+PRICE=PRICE1+PRICE2;
+LSTEXVP=Ref(PRICE,-LSTEXV);
+BSIG1=EXV && Close<Ref(Open,-1);
+SSIG1=EXV && Close>Ref(Open,-1);
+P=PTS/20000*Close;
+BSIG2=NOT(EXV) && Close>LSTEXVP+P && LSTEXV<KN;
+SSIG2=NOT(EXV) && Close<LSTEXVP-P && LSTEXV<KN;
+BG=BSIG1 || BSIG2;
+SG=SSIG1 || SSIG2;
+BGX=BG && NOT(SG);
+SGX=SG && NOT(BG);
+CSIGAA=LSTK;
+LSTCSIGAA=BarsSince(CSIGAA);
+Avg=(High+Low)/2;
+GAPP=(Close-Ref(Close,-10)+Ref(Open,-9)-Ref(Close,-10))/2;
+BSIG3=(Close>=HHV(Avg,23) && Day()==Ref(Day(),-17));
+SSIG3=(Close<=LLV(Avg,23) && Day()==Ref(Day(),-17));
+BreakUP2= Close>=HHV(Avg,8);
+BreakDown2= Close<=LLV(Avg,8);
+BSIG4=(Ref(BreakUP2,-3) && Close>Ref(Close,-3) && Day()==Ref(Day(),-17));
+SSIG4=(Ref(BreakDown2,-3) && Close<Ref(Close,-3) && Day()==Ref(Day(),-17));
+LSTBSIG1=BarsSince(BSIG3);
+LSTSSIG1=BarsSince(SSIG3);
+LSTBSIG2=BarsSince(BSIG4);
+LSTSSIG2=BarsSince(SSIG4);
+BSIGB=LSTBSIG2<LSTSSIG2 && LSTBSIG2<LSTCSIGAA && LSTBSIG1<LSTSSIG1 && LSTBSIG1<LSTCSIGAA;
+SSIGB=LSTSSIG2<LSTBSIG2 && LSTSSIG2<LSTCSIGAA && LSTSSIG1<LSTBSIG1 && LSTSSIG1<LSTCSIGAA;
+BSIGA=BGX && NOT(SGX);
+SSIGA=SGX && NOT(BGX);
+
+LSTBSIGA=BarsSince(BSIGA);
+LSTSSIGA=BarsSince(SSIGA);
+LSTBSIGB=BarsSince(BSIGB);
+LSTSSIGB=BarsSince(SSIGB);
+CONDBA=(BSIGA || (LSTBSIGA<LSTSSIGA && LSTBSIGA<LSTCSIGAA)) && NOT(SSIGA) && NOT(CSIGAA);
+CONDSA=(SSIGA || (LSTSSIGA<LSTBSIGA && LSTSSIGA<LSTCSIGAA)) && NOT(BSIGA) && NOT(CSIGAA);
+CONDCA=NOT(CONDBA) && NOT(CONDSA);
+CONDBB=(BSIGB || (LSTBSIGB<LSTSSIGB && LSTBSIGB<LSTCSIGAA)) && NOT(SSIGB) && NOT(CSIGAA);
+CONDSB=(SSIGB || (LSTSSIGB<LSTBSIGB && LSTSSIGB<LSTCSIGAA)) && NOT(BSIGB) && NOT(CSIGAA);
+CONDCB=NOT(CONDBB) && NOT(CONDSB);
+CONDB=(CONDBA && CONDBB) || (CONDBA && CONDCB) || (CONDBB && CONDCA);
+CONDS=(CONDSA && CONDSB) || (CONDSA && CONDCB) || (CONDSB && CONDCA);
+CONDC=NOT(CONDB) && NOT(CONDS);
+
+Buy=CONDB;
+Short=CONDS;
+Sell=Cover=CONDC;
+
+
+BSIG=CONDB;
+SSIG=CONDS;
+CSIG=CONDC;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+
+//Trading(5029,"EXVHLCU2",sinBS,sinPs);
+Trading_log(BSIG,SSIG,CSIG,5029,"EXVHLCU2");
+PlotPerformance(sinPs,sinBS);
+//PlotPerformance(CONDB,CONDS,CONDC,StrategyName);
+//Trading_log(CONDB,CONDS,CONDC,Instruments,StrategyID,StrategyName);

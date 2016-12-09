@@ -1,0 +1,37 @@
+_SECTION_BEGIN("TEST1");
+#pragma nocache;
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TRADEHelper.afl";
+#include "Formulas/Custom/BasicV4/udk.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 500);
+TickerNAME = Name();
+
+StrategyName = "Jzs-05-UDKdeadline-14.3-22-121-6";
+StrategyID = 24008;
+ProType =1;
+
+n1= ParamOptimize("Highperiod", 1, 0, 2000,1);
+
+n3= ParamOptimize("PTS",1, 0, 200,1);
+n4= ParamOptimize("StartPeriod",1, 0, 1000, 1);
+
+
+
+cond=UDKdeadline(14.3,22,121,6,"J" );
+
+Vote=0;
+
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond==0;
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName+"--"+StrategyID);
+_SECTION_END();

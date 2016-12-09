@@ -1,0 +1,91 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "1min-AR-pbuy-lastwintrade-new3";
+StrategyID ="1012100133";
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+
+FSTK=Day()!=Ref(Day(),-1);
+KN=IIf(FSTK,1,BarsSince(FSTK)+1);
+
+Lookback=Param("Lookback",450,10,1000,10);
+
+AR=Sum(H-O,Lookback)-Sum(O-L,Lookback);
+
+AR=MA(H-O,Lookback)-MA(O-L,Lookback);
+
+Cstudy=AR;
+
+stdc=StDev(Cstudy,Lookback);
+
+xc=IIf(stdc==0,0,Cstudy/stdc);
+
+pbuyc=NN(xc);
+
+
+Limit=Param("Limit",0.5,0,1,0.1);
+
+tst=Param("tst",110500,90000,150000,100);
+ted=Param("ted",150000,90000,150000,100);
+
+bsig1=pbuyc>Limit AND TimeNum()>tst AND TimeNum()<ted;
+ssig1=pbuyc<1-Limit AND TimeNum()>tst AND TimeNum()<ted;
+
+bsig=bsig1 AND CPPCount(bsig1 OR ssig1,kn)==1;
+ssig=ssig1 AND CPPCount(bsig1 OR ssig1,kn)==1;
+
+ps1 = GetPs(bsig,ssig,0);
+
+
+SIG=ps1;
+
+///////////////////////////
+Sel_BarIndex= BarIndex();
+i=1;
+ThisBar_P    = Sel_BarIndex-ValueWhen(SIG!=Ref(SIG,-1),BarIndex(),0);
+LastBar_P    = Sel_BarIndex-ValueWhen(SIG!=Ref(SIG,-1),BarIndex(),i);
+LastBar_P2   = Sel_BarIndex-ValueWhen(SIG!=Ref(SIG,-1),BarIndex(),i+1);
+
+ThisBarLen=LastBar_P-ThisBar_P;
+
+LastBarLen=LastBar_P2-LastBar_P;
+
+LastBar_P3   = Sel_BarIndex-ValueWhen(SIG!=Ref(SIG,-1),BarIndex(),i+2);
+LastBar_P4   = Sel_BarIndex-ValueWhen(SIG!=Ref(SIG,-1),BarIndex(),i+3);
+
+LLBarLen=LastBar_P4-LastBar_P3;
+
+////////////////////////////////
+thisTradeClosetemp=ValueWhen(SIG!=Ref(SIG,-1),C,1);
+thisTradeClose=IIf(SIG!=Ref(SIG,-1),Ref(thisTradeClosetemp,-1),thisTradeClosetemp);
+PSumTradeC=IIf(Ref(SIG,-1)==1,C-thisTradeClose,IIf(Ref(SIG,-1)==-1,thisTradeClose-C,0));
+
+periorSumTradeC=ValueWhen(SIG!=Ref(SIG,-1),PSumTradeC,1);
+pperiorSumTradeC=ValueWhen(SIG!=Ref(SIG,-1),PSumTradeC,2);
+thisSumTradeC=ValueWhen(SIG!=Ref(SIG,-1),PSumTradeC,0);
+
+
+/////////////////////////////
+
+bsig=ps1==1 AND Ref(ps1,-1)!=1 AND periorSumTradeC<=0;
+ssig=ps1==-1 AND Ref(ps1,-1)!=-1 AND periorSumTradeC<=0;
+
+ps2=GetPs(bsig,ssig,0);
+
+C01=ps2==1 AND ps1!=1;
+C02=ps2==-1 AND ps1!=-1;
+
+Csig=C01 OR C02;
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

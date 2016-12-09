@@ -1,0 +1,42 @@
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+
+StrategyName = "Try7";
+StrategyID = 500001;
+
+TIME=TimeNum();
+FSTK=Day()!=Ref(Day(),-1);
+//7
+LAST7K=TIME>=140000 && TIME<143000;
+DAYTREND6=Close-Ref(Close,-8);
+BSIG71=LAST7K&& DAYTREND6>0;
+SSIG71=LAST7K&& DAYTREND6<0;
+DAYTREND7=Ref(Close,-5)-Ref(Close,-7);
+BSIG72=LAST7K&& DAYTREND7>0;
+SSIG72=LAST7K&& DAYTREND7<0;
+DAYTREND8=Ref(Close,-7)-Ref(Close,-13);
+BSIG73=LAST7K&& DAYTREND8<0;
+SSIG73=LAST7K&& DAYTREND8>0;
+DAYTREND9=Ref(Close,-9)-Ref(Close,-32);
+BSIG74=LAST7K&& DAYTREND9<0;
+SSIG74=LAST7K&& DAYTREND9>0;
+DAYTREND10=Ref(Close,-8)-Ref(Close,-13);
+BSIG75=LAST7K&& DAYTREND10<0;
+SSIG75=LAST7K&& DAYTREND10>0;
+BSIGVOTE7= (BSIG71 + BSIG72 + BSIG73+ BSIG74+ BSIG75);
+SSIGVOTE7= (SSIG71 + SSIG72 + SSIG73+ SSIG74+ SSIG75);
+VB7=BSIGVOTE7>SSIGVOTE7;
+VS7=BSIGVOTE7<SSIGVOTE7;
+//
+
+BSIG= VB7;
+SSIG= VS7;
+CSIG=TIME>=143000;
+
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+PlotPerformance(sinPs,sinBS,StrategyName);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName);

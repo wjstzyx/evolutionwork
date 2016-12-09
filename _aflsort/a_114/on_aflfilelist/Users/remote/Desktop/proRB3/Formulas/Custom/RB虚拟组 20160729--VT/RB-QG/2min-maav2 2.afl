@@ -1,0 +1,78 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "2min-maav2 2";
+StrategyID ="1012100055";
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+function MAAV2(N1,N2,N3,tw,tp,TickerName)
+{
+	fo = Foreign(TickerName, "O" );
+	fh = Foreign(TickerName, "H" );
+	fl = Foreign(TickerName, "L" );
+	fc = Foreign(TickerName, "C" );
+	fv = Foreign(TickerName, "V" );
+	fopi = Foreign(TickerName, "OpenInt" );
+
+	TIME=TimeNum();
+
+	FSTK=Day()!=Ref(Day(),-1);
+	KN=IIf(FSTK,1,BarsSince(FSTK)+1);
+
+
+//--------------------------------
+
+	Btop = BBandTop( fc, N1, 0 );
+	Bbot = BBandBot( fc, N1, 0 );
+
+  fcMA = MA((Btop +Bbot )/2,N2) ;
+
+  B01 = CPPCount(fl>fcMA,N2)>N3;
+  S01 = CPPCount(fh<fcMA,N2)>N3;//=N3;
+//--------------------------------
+
+	BSIG=B01 AND NOT(S01) ;
+	SSIG=S01 AND NOT(B01) ;
+
+
+	BSIG=B01 AND KN >N1;
+	SSIG=S01 AND KN >N1;
+
+
+CSIG = 0;
+   Cond = GetPs(BSIG,SSIG,CSIG);
+	return Cond ;
+}
+
+
+
+TickerNAME = Name();
+
+n1= ParamOptimize("n1", 18, 1,1200,1);
+n2= ParamOptimize("n2", 52, 1, 5000,1);
+n3= ParamOptimize("n3", 48, 1, 1000,1);
+tw=ParamOptimize("timewinodw",100,0,7000,20);
+tp = ParamOptimize("tp",17.1,0,5000,0.1);
+
+Cond=MAAV2(n1,n2,N3,tw,tp,TickerName);
+
+Vote=0;
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond==0;// OR getlastk(Name());
+
+
+Buy = BSIG;
+Short = SSIG;
+Sell= Cover = CSIG;
+
+PlotPerformance(bsig,ssig,csig);
+
+
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

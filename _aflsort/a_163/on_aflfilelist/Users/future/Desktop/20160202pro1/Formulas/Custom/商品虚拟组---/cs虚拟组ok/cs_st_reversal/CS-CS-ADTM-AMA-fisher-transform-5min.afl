@@ -1,0 +1,118 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "CS-CS-ADTM-AMA-fisher-transform-5min";
+StrategyID = 540028;
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+//////////////////////////////////////////////////////////////////////////
+N1=Param("N1",36,0,100,1);
+AMAf = Param("AMAf", 0.005, 0, 1.0, 0.001);
+factor = Param("factor", 0.011, 0, 1, 0.001);
+
+input=O;
+//input=(H+L)/2;
+
+price=AMA(input,AMAf);
+
+//TSFperiod=Param("TSFperiod",20,1,1000,1);
+//price=TSF(input,TSFperiod);
+
+DMZ=IIf(price<=Ref(price,-1),0,Max(abs(H-Ref(H,-1)),abs(L-Ref(L,-1))));
+DMZ=IIf(price<=Ref(price,-1),0,Max(abs(H-O),abs(O-Ref(O,-1))));
+//DMZ=IIf(price<=Ref(price,-1),0,Max((H-O),(O-Ref(O,-1))));
+
+
+DMF=IIf(price>=Ref(price,-1),0,Max(abs(H-Ref(H,-1)),abs(L-Ref(L,-1))));
+DMF=IIf(price>=Ref(price,-1),0,Max(abs(H-O),abs(O-Ref(O,-1))));
+//DMF=IIf(price>=Ref(price,-1),0,Max((H-O),(O-Ref(O,-1))));
+
+ADMZ=MA(DMZ,N1);
+ADMZ=EMA(DMZ,N1);
+//ADMZ=Wilders(DMZ,N1);
+//ADMZ=TSF(DMZ,N1);
+
+ADMF=MA(DMF,N1);
+ADMF=EMA(DMF,N1);
+//ADMF=Wilders(DMF,N1);
+//ADMF=TSF(DMF,N1);
+
+SRDM=IIf(ADMZ>ADMF,(ADMZ-ADMF)/ADMZ,IIf(ADMZ==ADMF,0,(ADMZ-ADMF)/ADMF));
+//SRDM=(ADMZ-ADMF)/(ADMZ+ADMF);
+////////////////////////////////////////////////////////////////////////////////////
+//Plot(SRDM,"SRDM",colorBlue);
+
+////////////////////////////////////////////////
+
+
+Value1 = AMA(2*(SRDM), factor);
+Value2=(4*Value1+3*Ref(Value1,-1)+2*Ref(Value1,-2)+Ref(Value1,-3))/10;
+Value3=Value1;
+
+InverseFish=( ( exp( 2 * Value3 ) - 1 ) / ( exp( 2 * Value3 ) + 1 ) + 1 )*50;
+
+//Fish = 0.5*log((1+1.98*(Value3-0.5))/(1-1.98*(Value3-0.5)));
+
+StoFR1=InverseFish ;
+
+Bsig1=StoFR1>Ref(StoFR1,-1);
+Ssig1=StoFR1<Ref(StoFR1,-1);
+
+//Bsig=StoFR1>Ref(StoFR1,-1) AND Ref(StoFR1,-1)>Ref(StoFR1,-2);
+//Ssig=StoFR1<Ref(StoFR1,-1) AND Ref(StoFR1,-1)<Ref(StoFR1,-2);
+
+//Bsig=StoFR1>Ref(StoFR1,-1) AND Ref(StoFR1,-1)>Ref(StoFR1,-2)  AND Ref(StoFR1,-2)>Ref(StoFR1,-3); 
+//Ssig=StoFR1<Ref(StoFR1,-1) AND Ref(StoFR1,-1)<Ref(StoFR1,-2)   AND Ref(StoFR1,-2)<Ref(StoFR1,-3);
+
+//Plotperformance(bsig,ssig,0);
+bsig=ExRem(Bsig1,Ssig1);
+ssig=ExRem(Ssig1,Bsig1);
+
+
+//////////////////////////zhisun/////////////////////////////////////////////////
+
+stdzhisun=ParamOptimize("stdzhisun",3,0,10,0.1);
+
+period=Param("period",100,10,2000,10);
+
+zhisunup=BBandTop(C,period,stdzhisun);
+zhisundown=BBandBot(C,period,stdzhisun);
+
+//zhiyinup=BBandTop(C,100,stdzhiyin);
+//zhiyindown=BBandBot(C,100,stdzhiyin);
+
+ps=GetPs(bsig,ssig,0);
+
+C001=ps==1 AND C<zhisundown;
+C002=ps==-1 AND C>zhisunup;
+
+//C01=ps==1 AND C>zhiyinup;
+//C02=ps==-1 AND C<zhiyindown;
+
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+pp = Param("pp",46,0,100,1);
+C003 = ps==1 AND  C<Ref(C,-Lstbsg)-pp;
+C004 = ps==-1 AND  C>Ref(C,-lstssg)+pp;
+
+Csig=C001 OR C002 OR C003 OR C004;
+Csig=C001 OR C002;
+
+
+csig=0;
+
+
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+

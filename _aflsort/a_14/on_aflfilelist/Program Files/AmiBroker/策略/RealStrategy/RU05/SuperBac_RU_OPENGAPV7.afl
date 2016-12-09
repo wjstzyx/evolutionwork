@@ -1,0 +1,69 @@
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+
+StrategyName = "SuperBac_RU_OPENGAP_V7";
+SignalPeriod = 5;
+Instruments = 1;
+StrategyID = 1003;
+Plot(0,StrategyName,colorBlack);
+
+EXIT=ParamOptimize("EXIT",19,0,200,1);//24--26
+PDIFP=ParamOptimize("PDIFP",116,0,200,5);//8  --40
+
+TIME=TimeNum();
+FSTK=Day()!=Ref(Day(),-1);
+LSTK=TIME>=145500;
+
+LSTFSTK=BarsSince(FSTK);
+FirstK=FSTK;
+LSTBAR=TIME>=145500;
+FSTBAR=FSTK;
+TT1=Open-Ref(Close,-1);
+TT2=Close-Ref(Close,-1);
+TT3=(Close+Open)/2-Ref(Close,-1);
+TT4=(High+Low)/2-Ref(Close,-1);
+BSIGT1=FSTBAR  AND  TT1<0;
+SSIGT1=FSTBAR  AND  TT1>0;
+BSIGT2=FSTBAR  AND  TT2<0;
+SSIGT2=FSTBAR  AND  TT2>0;
+BSIGT3=FSTBAR  AND  TT3<0;
+SSIGT3=FSTBAR  AND  TT3>0;
+BSIGT4=FSTBAR  AND  TT4<0;
+SSIGT4=FSTBAR  AND  TT4>0;
+BSIGTVOTE= (BSIGT1 +BSIGT2 +BSIGT3 +BSIGT4);
+SSIGTVOTE= (SSIGT1 +SSIGT2 +SSIGT3 +SSIGT4);
+BSIGQ1 =BSIGTVOTE>SSIGTVOTE;
+SSIGQ1 =BSIGTVOTE<SSIGTVOTE;
+//V7
+LC=Ref(Close,-1);
+PDIF=Ref(Close,-1)/20000*PDIFP;
+JUMP=0;
+RC=Ref(Close,-1);
+RO=Ref(Open,-1);
+PDIF3=PDIF;
+GAPP=(Close-RC+Open-RC)/2;
+MARK=Ref(Close,-LSTFSTK);
+SAMEDAYB=Day()==Ref(Day(),-LSTFSTK);
+SAMEDAYS=Day()==Ref(Day(),-LSTFSTK);
+BSIG60002=SAMEDAYS  AND  Close>MARK+PDIF  AND  LSTFSTK>=EXIT;
+SSIG60002=SAMEDAYB  AND  Close<MARK-PDIF  AND  LSTFSTK>=EXIT;
+//Combination
+BSIG=BSIGQ1  OR  BSIG60002;
+SSIG=SSIGQ1  OR  SSIG60002;
+CSIG=LSTK;
+
+Buy=BSIG;
+Sell=CSIG;
+Short=SSIG;
+Cover=CSIG;
+
+
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+
+//Trading(5029,"EXVHLCU2",sinBS,sinPs);
+Trading_log(BSIG,SSIG,CSIG,1037,"SuperBac_RU_OPENGAPV7");
+PlotPerformance(sinPs,sinBS);
+
+//PlotPerformance(BSIG,SSIG,CSIG,StrategyName);
+//Trading_log(BSIG,SSIG,CSIG,Instruments,StrategyID,StrategyName);

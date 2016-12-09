@@ -1,0 +1,71 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+
+//IF 5MIN (5,140,28,2.1,10,40)
+
+Trixperiod=ParamOptimize("Trixperiod",5,1,100,1);
+
+Length1=Param("Length1",30,10,1000,10);
+Selltrigger1=Param("Selltrigger1",1,1,100,1);
+G3=Trix( Trixperiod );
+////////////////////////////////////////////////
+G3=G3;
+
+/////////////////////functions/////////////////////////////////////////
+function PIR(p,Length)
+{
+Ll=LLV(p,Length);
+Hh=HHV(p,Length);
+return (100*(p-Ll)/(Hh-Ll));
+}
+//////////////////////////indicators////////////////////////////////////////////
+
+PIRG3=PIR(G3,Length1);
+//Plot(PIRG3,"PIRG3",colorGreen,styleLeftAxisScale);
+
+ssig1=PIRG3<Selltrigger1;
+
+bsig1=PIRG3>100-Selltrigger1;
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+N=Param("N",5,0,100,1);
+Length2=Param("Length2",80,10,1000,10);
+Selltrigger2=Param("Selltrigger2",25,0,100,1);
+
+A=IIf(C<Ref(C,-N),(C-Ref(C,-N))/Ref(C,N),IIf(C==Ref(C,-N),0,(C-Ref(C,-N))/C));
+
+MI=EMA(A,N);
+
+//////////////////////////////////////////////////////////////////
+G3=MI;
+
+PIRG3=PIR(G3,Length2);
+
+ssig2=PIRG3<Selltrigger2;
+
+bsig2=PIRG3>100-Selltrigger2;
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+bsig = bsig1 AND bsig2;
+ssig = ssig1 AND ssig2;
+
+bsig = ExRem(bsig, ssig);
+ssig = ExRem(ssig, bsig);
+//////////////////////////zhisun/////////////////////////////////////////////////
+ps=GetPs(bsig,ssig,0);
+tp = Paramoptimize("tp",15,0,50,1);
+
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+C05 = ps==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C06 = ps==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+Csig = C05 OR C06;
+
+
+PlotPerformance(BSig,Ssig,Csig);
+
+
+
+
+
+
+StrategyName = "rb-30min-Formula 4and5";StrategyID = "1012100357";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

@@ -1,0 +1,35 @@
+//#include "Formulas/Custom/Helper/BacktestHelper.afl";
+
+//#include "Formulas/Custom/Instruments/BACKTESTSETTING.afl";
+
+StrategyName = "V7DYV2C";
+StrategyID = 9999;
+Plot(0,StrategyName,colorBlack,styleNoLine);
+
+
+#include "Formulas/Custom/RU_DAY/RU.afl";
+
+PDIFP=ParamOptimize("PDIFP",23,0,100,1);
+WINP=ParamOptimize("WINP",36,0,100,1);	
+
+	//cond1=ru5mdta();
+
+	COND2=V7dyv2c(PDIFP,WINP);
+
+	buopenp= (COND2==1);
+	seopenp= COND2==-1;
+	Closep=COND2==2;
+	ps=getps(buopenp,seopenp,Closep);
+
+	// Performance
+	Buy = buopenp;
+	Sell= Closep;
+	Short = seopenp;
+	Cover = Closep;
+
+//if (showtrade) showbar(buopenp,seopenp,Closep);
+//	Plot(ps,"ps",colorBlack,16|2048);
+	Plot(StrategyID,"StrategyID",colorBrown,16|2048);
+
+PlotPerformance(ps,Cond2);
+trading(StrategyID,"V7DY",Cond2,ps);

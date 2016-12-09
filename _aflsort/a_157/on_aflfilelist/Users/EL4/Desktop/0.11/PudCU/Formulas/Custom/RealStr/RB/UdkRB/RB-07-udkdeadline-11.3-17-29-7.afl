@@ -1,0 +1,41 @@
+_SECTION_BEGIN("TEST1");
+#pragma nocache;
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TRADEHelper.afl";
+#include "Formulas/Custom/Basicv4/UDK.afl";
+
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 500);
+TickerNAME = Name();
+StrategyName = "RB-07-udkdeadline-11.3-17-29-7";
+StrategyID = 210018;
+ProType = 1;
+
+
+
+cond=udKdeadline(11.3,17,29,7,"RB");
+
+
+
+
+Vote=0;
+
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond==0;//  OR(TimeNum()+Interval()*100/60)>=151400;
+//Csig=0;
+
+
+
+Buy = BSIG;
+Short = SSIG;
+Sell= Cover = CSIG;
+
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName+"--"+StrategyID);
+_SECTION_END();

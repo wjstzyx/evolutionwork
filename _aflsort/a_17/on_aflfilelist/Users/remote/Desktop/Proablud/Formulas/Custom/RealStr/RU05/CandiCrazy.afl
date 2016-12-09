@@ -1,0 +1,109 @@
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Basic2012/HL.afl";
+#include "Formulas/Custom/Basic2012/EXV.afl";
+#include "Formulas/Custom/Basic2012/TopBot.afl";
+#include "Formulas/Custom/Basic/VolumeBreak.afl";
+#include "Formulas/Custom/Basic2012/V7DY.afl";
+#include "Formulas/Custom/Basic2012/UDHL.afl";
+
+StrategyName = "CandiCrazy";
+StrategyID = 1045;
+ProType = 1;
+CondHL1=HLAVG(1,8,22,"RU");
+CondHL2=HLAVG(7,0,20,"RU");
+CondHL4=HLCAVG(6,1,18,"RU");
+CondHL5=HLCAVG(7,1,18,"RU");
+
+CondHL8=HLNAVG(8,1,20,"RU");
+CondHL9=HLNAVG(11,0,20,"RU");
+CondHL10=HLAVG(3,2,2,"RU");
+CondHL11=HLAVG(1,7,18,"RU");
+CondHL12=HLCAVG(2,4,17,"CU");
+CondHL13=HLCAVG(2,6,17,"RU");
+CondHL14=HLCAVG(8,0,17,"RU");
+CondHL16=HLNAVG(8,1,17,"RU");
+CondHL17=HLNAVG(9,1,20,"RU");
+
+HLCOND=CondHL1+CondHL2+CondHL4+CondHL5+CondHL8+CondHL9+CondHL10+CondHL11+CondHL12+CondHL13+CondHL14+CondHL16+CondHL17;
+
+CondEXV2=EXVORI(22,10,"RU");
+CondEXV3=EXVORI(24,10,"RU");
+
+CondEXV5=EXVORICU3(23,10,450,7,"RU");
+CondEXV6=EXVORICU3(20,1,390,6,"RU");
+
+CondEXV8=EXVORIV2CU3(22,9,300,6,"RU");
+CondEXV9=EXVORIV2CU3(23,14,450,5,"RU");
+CondEXV10=EXVORIV3CU3(21,42,270,38,"CU");
+
+CondEXV12=EXVORI(22,18,"RU");
+
+CondEXV14=EXVORICU3(22,12,120,6,"RU");
+CondEXV15=EXVORICU3(24,14,150,7,"RU");
+
+CondEXV17=EXVORIV2CU3(23,12,90,5,"RU");
+CondEXV18=EXVORIV3CU3(24,14,300,4,"CU");
+CondEXV19=EXVORIV3CU3(29,36,270,22,"RU");
+CondEXV20=EXVORIV3CU3(41,40,330,21,"RU");
+
+EXVCOND=CondEXV2+CondEXV3+CondEXV5+CondEXV6+CondEXV8+CondEXV9+CondEXV10+CondEXV12+CondEXV14+CondEXV15+CondEXV17+CondEXV18+CondEXV19+CondEXV20;
+
+CondV71=V7DYORIALL(98,55,"RU");
+CondV72=V7DYORIALL(19,57,"RU");
+CondV73=V7DYORIALL(44,59,"RU");
+CondV74=V7DYStartVer(125,18,"RU");
+
+V7DYCOND=CondV71+CondV72+CondV73+CondV74;
+
+
+/*
+CondHL1=HLAVG(5,2,2,"CU");
+CondHL2=HLCAVG(8,0,17,"RU");
+CondHL3=HLNAVG(8,1,17,"RU");
+CondHL4=HLAVG(7,0,20,"RU");
+CondHL5=HLCAVG(6,1,18,"RU");
+CondHL6=HLNAVG(11,0,20,"RU");
+HLCOND=CondHL1+CondHL2+CondHL3+CondHL4+CondHL5+CondHL6;
+
+CondEXV1=EXVORI(22,10,"RU");
+CondEXV2=EXVORICU3(20,1,390,6,"RU");
+CondEXV3=EXVORIV2CU3(24,5,90,5,"CU");
+CondEXV4=EXVORI(19,36,"RU");
+CondEXV5=EXVORICU3(22,12,120,6,"RU");
+CondEXV6=EXVORIV2CU3(24,12,90,5,"CU");
+EXVCOND=CondEXV1+CondEXV2+CondEXV3+CondEXV4+CondEXV5+CondEXV6;
+
+CondV71=V7DYORIALL(98,55,"RU");
+CondV72=V7DYORIALL(19,57,"RU");
+CondV73=V7DYORIALL(44,59,"RU");
+CondV74=V7DYStartVer(125,18,"RU");
+
+V7DYCOND=CondV71+CondV72+CondV73+CondV74;
+*/
+
+
+//Best para:3,2,1
+WHL=Paramoptimize("HL",3,0,5,1);
+WEXV=Paramoptimize("EXV",2,0,5,1);
+WV7=Paramoptimize("V7",1,0,5,1);
+
+Cond = WV7*V7DYCOND+WEXV*EXVCOND+WHL*HLCOND;
+
+Vote= ParamOptimize("Vote", 1, 0, 10, 1);
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond<=Vote && Cond>=-Vote;
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond<=Vote && Cond>=-Vote;
+//CSIG=(TimeNum()+Interval()*100/60)>=146000;
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

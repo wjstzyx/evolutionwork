@@ -1,0 +1,32 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/BasicV4/EXIV.afl";
+#include "Formulas/Custom/BasicV4/HL.afl";
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+StrategyName = "IF01-V4E_EXIVSum-33-21_18-3-48-15";
+StrategyID = 40421;
+ProType = 0;
+
+Cond1=V4EORI(33,21,0,10000,"IF");
+
+Cond2=EXIVASum(18,3,48,15,0,10000,"IF");
+
+Cond=Cond1+Cond2;
+
+
+
+Vote=0;
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=GetLastK("IF") OR Cond==0;
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName+"--"+StrategyID);

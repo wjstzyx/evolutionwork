@@ -1,0 +1,191 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "45min-CR-zhisun-45MIN-TF";
+StrategyID = 130018;
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+
+
+
+
+N=Param("N",6,1,1000,1);
+M1=Param("M1",1,1,100,1);
+M2=Param("M2",1,1,100,1);
+M3=Param("M3",1,1,100,1);
+ZigChange=Param("Zig",40,40,100,10);
+Length=Param("Length",10,10,1000,10);
+Lambda=Param("Lambda",1,1,100,1);
+Selltrigger=Param("Selltrigger",22,0,100,1);
+stdzhisun=ParamOptimize("stdzhisun",0.7,0,10,0.1);
+tp = Param("tp",2,0,100,1);
+p = Param("p",1,0,100,1);
+
+MID=(H+L+C)/3;
+
+CR=Sum(Max(0,H-Ref(MID,-1)),N)/Sum(Max(0,Ref(MID,-1)-L),N)*100;
+
+CRMA1=Ref(MA(CR,M1),M1/2.5+1);
+
+CRMA2=Ref(MA(CR,M2),M2/2.5+1);
+
+CRMA3=Ref(MA(CR,M3),M3/2.5+1);
+
+//bsig=Cross(N1,CR);
+
+//ssig=Cross(CR,N2);
+
+//Plot(CR,"CR",colorBlue);
+//Plot(CRMA1,"CRMA1",colorYellow);
+
+////////////////////////////////////////////////////
+G3=CR;
+
+
+G4=Zig(G3*1000,ZigChange);
+
+Buy=(G4>Ref(G4,-1)) ;
+Sell=(G4<(Ref(G4,-1)));
+//PlotPerformance(Buy,Sell,0);
+
+/////////////////////functions/////////////////////////////////////////
+
+function Softmax(p,Lambda,Length)
+{
+// p-price or data series
+//Lambda--linearity parameter//6
+//Length--lookback length//100
+
+pi=3.14159;
+e=2.71828;
+
+m=MA(p,Length);
+s=StDev(p,Length);
+
+a=(p-m)/((Lambda*s)/(2*pi));
+y=1/(1+e^(-a));
+return 100*y;
+}
+
+function zscore(p,Length)
+{
+
+// Transforms input data p
+// to z-score with mean 0 and 
+// standard deviation 1.
+
+zs=(p-MA(p,Length))/StDev(p,Length);
+
+return zs;
+}
+
+function rescale(p,inputmin,inputmax,Outputmin,Outputmax)
+{
+Outputrange=Outputmax-Outputmin;
+inputrange=inputmax-inputmin;
+x=(p-inputmin)*(Outputrange/inputrange);
+return x;
+}
+
+function PIR(p,Length)
+{
+Ll=LLV(p,Length);
+Hh=HHV(p,Length);
+return (100*(p-Ll)/(Hh-Ll));
+}
+
+function Fisher(array)
+// Figure 1.7 on p. 7
+{
+  F = array;
+  F = .25 * log((1+ array)/(1 - array)) + .5 * Ref(F, -1);
+  return F;
+}
+
+function Normalize(array, arraylen)
+// Figure 1.7 on p. 7
+{
+  MaxH = HHV(array, arraylen);
+  MinL = LLV(array, arraylen);
+  Value1[0] = array[0];  // Initialize as array
+
+  for(i = 1; i < BarCount; i++)
+  {
+     Value1[i] = .5 * 2 * ((array[i] - MinL[i]) / (MaxH[i] - MinL[i]) - .5) + .5 * Value1[i-1];
+     if (Value1[i] > .9999) Value1[i] = .9999;
+     if (Value1[i] < -.9999) Value1[i] = -.9999;
+  }
+  return Value1;
+}
+
+function InverseFisher(array)
+{
+  e2y = exp(2 * array);
+  return (e2y - 1)/(e2y + 1);
+}
+
+//////////////////////////indicators////////////////////////////////////////////
+
+
+
+FisherG3=Fisher(G3);
+InverseFisherG3=InverseFisher(FisherG3);
+zscoreG3=zscore(G3,Length);
+PIRG3=PIR(G3,Length);
+SoftmaxG3=Softmax(G3,Lambda,Length);
+
+
+
+
+//Plot(FisherG3,"FisherG3",colorYellow);
+//Plot(InverseFisherG3,"InverseFisherG3",colorRed);
+//Plot(zscoreG3,"zscoreG3",colorGreen,styleLeftAxisScale);
+//Plot(PIRG3,"PIRG3",colorGreen,styleLeftAxisScale);
+
+
+
+
+ssig=PIRG3<Selltrigger;
+
+bsig=PIRG3>100-Selltrigger;
+
+//////////////////////////zhisun/////////////////////////////////////////////////
+
+
+zhisunup=BBandTop(C,100,stdzhisun);
+zhisundown=BBandBot(C,100,stdzhisun);
+
+ps=GetPs(bsig,ssig,0);
+C001=ps==1 AND C<zhisundown;
+C002=ps==-1 AND C>zhisunup;
+
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+
+C05 = ps==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C06 = ps==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+
+C03 = ps==1 AND  C<Ref(C,-Lstbsg)-p;
+C04 = ps==-1 AND  C>Ref(C,-lstssg)+p;
+
+//Csig=C001 OR C002 OR C05 OR C06;
+//Csig=C001 OR C002;
+Csig=C001 OR C002 OR C05 OR C06 OR C03 OR C04;
+
+
+
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

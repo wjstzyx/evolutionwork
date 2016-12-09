@@ -1,0 +1,68 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "5min-CCI-ma-5min-0-sr";
+StrategyID ="1010500002";
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+ 
+tw=ParamOptimize("timewindow",660,200,800,20);
+MAperiod=ParamOptimize("MAperiod",1700,900,2000,100);
+howManyStDev = ParamOptimize("howManyStDev",13, 8, 20, 1); // <=== 3.1
+tp = ParamOptimize("tp",22,0,50,1);
+C3=CCI(tw);
+ 
+ DynamicAverage = MA(C3,MAperiod);
+ 
+ //Plot(C3,"C3",colorBlue);
+ 
+ //OptimizerSetEngine("spso");
+ //OptimizerSetOption("Runs",1);
+ //OptimizerSetOption("MaxEval",5000);
+ 
+ OneStDev = 10;
+ 
+ down = DynamicAverage - howManyStDev * OneStDev; 
+ up = DynamicAverage + howManyStDev * OneStDev;
+ 
+ // BSIG, SSIG, CSIG
+ SSIG = Cross(down, C3); // Important: do not use Cross(X4, a)
+ BSIG = Cross(C3, up); // Important: do not use Cross(b, X4)
+ ps = GetPs(BSIG, SSIG, 0);
+ C01 = ps==-1 AND Cross(C3, DynamicAverage); // Important: not the zero line
+ C02 = ps==1 AND Cross(DynamicAverage, C3); // Important: not the zero line
+ //CSIG = C01 OR C02 OR ForceToCloseTime;
+ //CSIG = C01 OR C02;
+ 
+ ps = GetPs(bsig,ssig,0);
+ 
+ Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+ Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+ 
+ 
+ 
+ C05 = ps==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+ C06 = ps==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+ 
+ CSIG = C05 OR C06;// TimeNum() < 91830 OR TimeNum() > 151430 OROR  OR C03 OR C04;
+ 
+ Csig=C01 OR C02 OR C05 OR C06;
+ 
+     Buy = bsig AND NOT csig;           
+ 
+     Sell= CSIG;        
+ 
+     Short = ssig AND NOT csig;         
+ 
+     Cover = CSIG;          
+ 
+ 
+ PlotPerformance(BSig,Ssig,Csig);
+ ps0 = GetPs(bsig,ssig,csig);
+ Filter= 1;
+ AddColumn(ps0,"ps");
+ Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

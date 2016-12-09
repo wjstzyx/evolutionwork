@@ -1,0 +1,74 @@
+
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "time3hlavga";
+StrategyID = 110061;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+tickername=Name();
+fo = Foreign("IC", "O" );
+	fh = Foreign("IC", "H" );
+	fl = Foreign("IC", "L" );
+	fc = Foreign("IC", "C" );
+	fv = Foreign("IC", "V" );
+
+
+
+//LENG=Param("LENG",12,0,100,1);
+//LENGX2=Param("LENGX2",20,0,100,1);
+ParaCon=Param("ParaCon",23,0,100,1);
+ParaPeriod=Param("ParaPeriod",3,0,100,1);
+StartPeriod=Param("StartPeriod",0,0,100,1);
+//Period=Param("Period",8,0,100,1);
+
+    //======================
+   TIME=TimeNum();
+	DSAVG = (fH+fL)/2;
+    //======================
+    TimeN =(TimeNum()+Interval()*100/60);
+    con1= TimeN>=104500 AND TimeN<131500;
+    con2 = TimeN>=134500 AND TimeN<145000;  
+  //con2:if3mi 9,2
+
+	close1 = timeN>=131500;
+	close2 = timeN>=145000;
+	close3 = timeN>=150000;
+	
+	timecon1 = TimeN<104500;
+	Timecon2 = TimeN<134500;
+	//fo = IIf(timecon1,0,fo);fc = IIf(timecon1,0,fc);fh = IIf(timecon1,0,fh);
+	//fl = IIf(timecon1,0,fl);fv = IIf(timecon1,0,fv);
+
+
+
+	fo = IIf(timecon2,0,fo);fc = IIf(timecon2,0,fc);fh = IIf(timecon2,0,fh);
+	fl = IIf(timecon2,0,fl);fv = IIf(timecon2,0,fv);	
+    //======================   
+    RDSAVG = Ref(DSAVG,-1);
+    HHL = HHV(RDSAVG,ParaPeriod);
+    LHL = LLV(RDSAVG,ParaPeriod);
+    fa = (fh+fl)/2;
+BSIG = Ref(fa>HHL,-ParaCon) && fa>=Ref(fa,-ParaCon) && Day()==Ref(Day(),-StartPeriod) AND con2;
+SSIG = Ref(fa<LHL,-ParaCon) && fa<=Ref(fa,-ParaCon) && Day()==Ref(Day(),-StartPeriod) AND con2;
+ CSIG =GetLastK(TickerName) OR close2;
+
+
+
+
+    Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

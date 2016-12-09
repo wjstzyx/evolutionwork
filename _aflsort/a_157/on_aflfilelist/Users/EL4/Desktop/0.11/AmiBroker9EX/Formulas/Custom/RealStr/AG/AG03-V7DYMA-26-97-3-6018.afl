@@ -1,0 +1,33 @@
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/BasicV2/V7DY.afl";
+#include "Formulas/Custom/BasicV2/DFB.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 800);
+
+StrategyName = "AG03-V7DYMA-26-97-3-144";
+StrategyID = 6018;
+ProType = 1;
+
+Cond=V7DYMA(26,97,3,"AG");
+
+
+
+
+
+
+Vote=0;//ParamOptimize("Vote", 0.5, 0, 1, 0.5);
+
+TickerNAME = Name();
+
+BSIG=Cond>Vote AND  Openlastk(tickername,81) ;
+SSIG=Cond<-Vote AND  Openlastk(tickername,81);
+CSIG=Cond==0 OR GetLastKMINs(tickername,81);
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName+"--"+StrategyID);

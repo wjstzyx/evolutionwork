@@ -1,0 +1,77 @@
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Basic/HL.afl";
+#include "Formulas/Custom/Basic/EXV.afl";
+#include "Formulas/Custom/Basic/TopBot.afl";
+#include "Formulas/Custom/Basic/VolumeBreak.afl";
+#include "Formulas/Custom/Basic/V7DY.afl";
+#include "Formulas/Custom/Basic/UDHL.afl";
+
+StrategyName = "SuperBac_2_V1";
+StrategyID = 5033;
+ProType = 1;
+
+//EXV
+Cond1 =0;// EXVORIV3CU3(35,33,80,28,"CU");  //1
+Cond2 = EXVORI(31,8,"RU");                //2
+Cond3 = EXVORIV3CU3(37,72,500,25,"RU"); //3
+Cond4 = EXVORIV2CU3(31,9,65,4,"RU");    //4
+//HL
+Cond5 = HLAVG(16,0,"CU");                 //5
+Cond6 = HLAVG(13,3,"CU");                 //6
+Cond7 = HLAVG(12,4,"CU");                 //7
+Cond8 =0;// HLAVG(16,0,"RU");                   //8
+Cond9 = HLNAVG(15,2,"CU");                //9
+Cond10 = HLNAVG(13,3,"CU");                //10
+Cond11 = HLNAVG(13,4,"CU");                //11
+
+
+//VB
+Cond12 = VolumeBreakOri(15,9,"CU");
+Cond13 = VolumeBreakOri(15,7,"CU");
+
+//Cond14 = VolumeBreakOri(13,6,"RU");
+//UDHL
+Cond15=0;//UDHLSTOP(16 ,7,1000,188,"RU");
+Cond16=0;//UDHLSTOP(16 ,6,1000,224,"CU");
+Cond17=UDHLORI(16 ,"CU");
+
+//BT
+Cond18=TopBotOri(11,"CU");
+
+
+//V7
+Cond19  = V7DYORIALL(0,54,"RU");
+Cond20  =0;// V7DYORIALL(20,51,"CU");
+
+
+CondS1 = Cond5+Cond6+Cond7+Cond8+Cond9+Cond10+Cond11;//HL
+CondS2 = Cond1+Cond2+Cond3+Cond4;//EXV
+CondS3 = Cond12+Cond13;//VB
+CondS4 = Cond15+Cond16+Cond17;//UD
+CondS5 = Cond18;//BT
+CondS6 = Cond19+Cond20;//V7
+
+Hl=Paramoptimize("hl",3,0,10,1);
+exv=Paramoptimize("exv",3,0,10,1);
+Vb=Paramoptimize("vb",1,0,10,1);
+ud=Paramoptimize("ud",1,0,10,1);
+bt=Paramoptimize("bt",0,0,10,1);
+V7=Paramoptimize("v7",2,0,10,1);
+
+
+Cond = Hl*GetSig123(CondS1)+exv*GetSig123(CondS2)+Vb*GetSig123(CondS3)+ud*GetSig123(CondS4)+bt*GetSig123(CondS5)+V7*GetSig123(CondS6);
+	
+
+Vote= ParamOptimize("Vote", 2, 0, 50, 1);
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+//CSIG=Cond<=Vote && Cond>=-Vote;
+CSIG=(TimeNum()+Interval()*100/60)>=146000;
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

@@ -1,0 +1,94 @@
+
+
+
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "CPPUD2NEW-1min-test";
+StrategyID = 110015;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+tickername=Name();
+fo = Foreign(TickerName, "O" );
+fh = Foreign(TickerName, "H" );
+fl = Foreign(TickerName, "L" );
+fc = Foreign(TickerName, "C" );
+fv = Foreign(TickerName, "v" );
+fstk = Day()!=Ref(Day(),-1);
+KN=IIf(FSTK,1,BarsSince(FSTK)+1);
+fstv=Ref(fv,-kn+1);
+
+pts2=Param("pts2",30,0,100,1);
+//pts=Param("pts",3,0,100,1);
+//StartPeriod=Param("StartPeriod",40,0,100,1);
+x=Param("x",2,0,100,1);
+
+//-----------------------------------------------------------------
+up=C>O;
+dn=C<O;
+Longk=abs(C-O)>pts2*C/20000;
+
+//upline=fh-Max(fc,fo)>pts*C/200000  AND fh-Max(fc,fo)>Min(C,O)-L  AND ( C<Ref(O,-1))AND NOT Longk;
+//dnline=Min(fc,fo)-fl>pts*C/200000  AND Min(fc,fo)-fl>H-Max(C,O)  AND ( C>Ref(O,-1) ) AND NOT Longk;
+upline= fh-Max(fc,fo)>Min(C,O)-L  AND ( C<Ref(O,-1))AND NOT Longk;
+dnline= Min(fc,fo)-fl>H-Max(C,O)  AND ( C>Ref(O,-1) ) AND NOT Longk;
+//upline= fh-Max(fc,fo)>Min(C,O)-L  AND ( C<Ref(O,-1));//AND NOT Longk
+//dnline= Min(fc,fo)-fl>H-Max(C,O)  AND ( C>Ref(O,-1) );
+
+Plot(dnline,"dnline",colorGreen);
+
+bsig= CPPCount(dnline,x)==x AND dn;//AND C>MA(C,20);//AND KN>OpenPERIOD ;
+ssig= CPPCount(upline,x)==x AND up;//AND C<MA(C,20);//AND KN>OpenPERIOD ;
+
+csig=GetLastK(TickerName);
+csig=TimeNum()>=151400;
+
+//Plot(csig,"csig",colorBlue);
+
+Lstsig = BarsSince(bsig OR ssig);
+sinPs=GetPs(BSIG,SSIG,CSIG);
+
+C03=sinPs==-1 AND Ref(CPPCount(C>O,3)==3,-1);
+C04=sinPs==1 AND  Ref(CPPCount(C<O,3)==3,-1);
+//C01=sinps==-1 AND V==HHV(V,period) AND C<O;
+//C02=sinps==1 AND V==HHV(V,period) AND C>O;
+csig=  C03 OR C04  OR Csig;//C01 OR C02  OR 
+
+Holdperiod=Param("Holdperiod",15,1,100,1);
+
+ps = GetPs(bsig,ssig,0);
+
+Lstbsg = BarsSince(bsig);
+Lstssg = BarsSince(ssig);
+
+C01 = ps==1 AND Lstbsg>=Holdperiod AND C<Ref(C,-Lstbsg);//AND C<Ref(C,-Holdperiod);//
+C02 = ps==-1 AND lstssg>=holdperiod AND C>Ref(C,-lstssg);//AND C>Ref(C,-Holdperiod);//
+
+p = Param("p",28.5,0,100,0.1);
+C03 = ps==1 AND  C<Ref(C,-Lstbsg)-p;
+C04 = ps==-1 AND  C>Ref(C,-lstssg)+p;
+
+tp = Param("tp",34,0,50,0.1);
+
+C05 = ps==1 AND  C<Highestsince(bsig,C)-tp;
+C06 = ps==-1 AND  C>Lowestsince(ssig,C)+tp;
+
+csig = csig OR c01 OR c02 OR c03 OR c04;// OR c05 OR c06;
+
+    Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+

@@ -1,0 +1,66 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+StrategyName = "IF02-V4E-V4E23-EXVHH-1-1-2-V1";
+StrategyID = 40280;
+ProType = 0;
+
+
+
+//#include"Formulas/Custom/BasicV3/exv.afl";cond=EXVHH(21,12,19,18,"IF");//1
+//#include"Formulas/Custom/BasicV3/exv.afl";cond=EXVHH(20,10,17,19,"IF");//1
+//#include"Formulas/Custom/BasicV3/exv.afl";cond=EXVHH(22,8,19,16,"IF");//1
+//#include"Formulas/Custom/BasicV3/exv.afl";cond=EXVHH(20,10,22,13,"IF");//1
+//#include"Formulas/Custom/BasicV3/exv.afl";cond=EXVHH(22,14,19,18,"IF");//1
+//#include"Formulas/Custom/BasicV3/exv.afl";cond=EXVHH(23,8,37,15,"IF");//1
+//#include"Formulas/Custom/BasicV3/exv.afl";cond=EXVAStat(24,26,2,"IF");//1
+//#include"Formulas/Custom/BasicV3/exv.afl";cond=EXVAStat(22,26,2,"IF");//1
+//#include"Formulas/Custom/BasicV3/exv.afl";cond=EXVORIV3CU3(25,18,19,39,"IF");//1
+//#include"Formulas/Custom/BasicV3/exv.afl";cond=EXVORIV3CU3(25,20,19,39,"IF");//1
+//#include"Formulas/Custom/BasicV3/exv.afl";cond=EXVHH(17,7,10,19,"IF");//2
+//#include"Formulas/Custom/BasicV3/exv.afl";cond=EXVORIV3CU3(25,18,19,38,"IF");//1
+//#include"Formulas/Custom/BasicV3/exv.afl";cond=EXVAStat(24,45,2,"IF");//1
+//#include"Formulas/Custom/BasicV3/exv.afl";cond=EXVHH(20,6,21,10,"IF");//1
+//#include"Formulas/Custom/BasicV3/exv.afl";cond=EXVORIV3CU3(25,17,19,38,"IF");//1
+//#include"Formulas/Custom/BasicV3/EXR.afl";cond=EXRRR(13,22,"IF");//1
+//#include"Formulas/Custom/BasicV3/EXR.afl";cond=EXRRRMKN(16,21,8,"IF");//1
+//#include"Formulas/Custom/BasicV3/exv.afl";cond=EXVAStat(25,46,2,"IF");//1
+//#include"Formulas/Custom/BasicV3/exv.afl";cond=EXVORIV3CU3(25,10,25,65,"IF");//1
+//#include"Formulas/Custom/BasicV3/exv.afl";cond=EXVORIV2CU3(15,7,4,17,"IF");//2
+//#include"Formulas/Custom/BasicIF/EXVNewV.afl";cond=EXIV(21,19,0,"IF");//3
+//#include"Formulas/Custom/BasicV3/exv.afl";cond=EXVORIV3CU3(17,25,11,65,"IF");//2
+//#include"Formulas/Custom/BasicV3/EXR.afl";cond=EXRRRM(13,21,8,"IF");//1
+//#include"Formulas/Custom/BasicV3/EXR.afl";cond=EXRRRM(15,29,8,"IF");//1
+//#include"Formulas/Custom/BasicV3/exv.afl";cond=EXVAStat(38,44,2,"IF");//1
+//#include"Formulas/Custom/BasicV3/exv.afl";cond=EXVORIV2CU3(16,18,5,15,"IF");//2
+//#include"Formulas/Custom/BasicV4/EXIV.afl";cond=EXIVMA(53,51,33,0,"IF");//1
+//#include"Formulas/Custom/BasicV3/exv.afl";cond=EXVORIV3CU3(29,16,57,62,"IF");//1
+//#include"Formulas/Custom/BasicV3/exv.afl";cond=EXVAStat(47,40,2,"IF");//1
+//#include"Formulas/Custom/BasicV3/exv.afl";cond=EXVAStat(46,25,2,"IF");//1
+//#include"Formulas/Custom/BasicV3/exv.afl";cond=EXVHH(21,15,66,38,"IF");//1
+//#include"Formulas/Custom/BasicV3/exv.afl";cond=EXVAStat(47,46,2,"IF");//1
+//#include"Formulas/Custom/BasicV3/exv.afl";cond=EXVAStat(51,40,2,"IF");//1
+//#include"Formulas/Custom/BasicV3/exv.afl";cond=EXVHH(26,41,68,36,"IF");//1
+//#include"Formulas/Custom/BasicV2/maa.afl";cond=TimeSelect(46,270,MAArrangeRoll(17,9,0,1000,1000,"IF"));//1
+//#include"Formulas/Custom/BasicV4/EXIV.afl";cond=EXIVMA(50,72,29,0,"IF");//1
+//#include"Formulas/Custom/BasicV4/TM.afl";cond=TMHLV3(5,8,24,1.6,"IF");//1
+#include"Formulas/Custom/BasicV3/BOMB.afl";cond=BOMBV2(2,6,2,0.28,"IF");//1
+
+
+Vote=0;
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=GetLastK("IF");
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName+"--"+StrategyID);

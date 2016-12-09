@@ -1,0 +1,100 @@
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "IF-1MIN-revesal_test1";
+StrategyID = 40888;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+
+min15bar = Minute()%15;
+
+p = Param("P",8,0,15,1);
+timefilter = min15bar<=p OR min15bar>=15-p;
+
+
+period = Param("period",70,0,500,1);
+
+//fangliang = V==HHV(V,period);
+//volfilter = Sum(fangliang,10)>0;
+
+vr = Param("vr",1.3,0,100,.1);
+vperiod1 = Param("vperiod1",3,1,30,1);
+vperiod2 = Param("vperiod2",20,1,500,1);
+volfilter = MA(V,vperiod1)>vr*MA(V,vperiod2);
+
+newh = C==HHV(C,period);
+newl = C==LLV(C,period);
+
+lstnewh = BarsSince(newh);
+lstnewl = BarsSince(newl);
+
+locfilter1 = Sum(newh,p)>0 AND lstnewh<lstnewl;
+locfilter2 = Sum(newl,p)>0 AND lstnewh>lstnewl;
+
+patternfilter1 = Ref(C,-1)<Ref(O,-1) AND C>O;
+patternfilter2 = Ref(C,-1)>Ref(O,-1) AND C<O;
+
+range = abs(C-O);
+
+rangefilter = range>Ref(range,-1);
+
+bsig = patternfilter1 AND timefilter AND volfilter AND locfilter2 AND rangefilter;//
+ssig = patternfilter2 AND timefilter AND volfilter AND locfilter1 AND rangefilter;//
+
+//Plot(bsig,"bsig",colorRed);
+//Plot(ssig,"ssig",colorGreen);
+
+ps = GetPs(bsig,ssig,0);
+
+Lstbsg = BarsSince(bsig);
+Lstssg = BarsSince(ssig);
+
+Holdperiod = Param("Holdperiod",3,0,120,1);
+
+C01 = ps==1 AND Lstbsg>=Holdperiod AND C<Ref(C,-Lstbsg);//AND C<Ref(C,-Holdperiod);//
+C02 = ps==-1 AND lstssg>=holdperiod AND C>Ref(C,-lstssg);//AND C>Ref(C,-Holdperiod);//
+
+p = Param("p",5,0,100,1);
+C03 = ps==1 AND  C<Ref(C,-Lstbsg)-p;
+C04 = ps==-1 AND  C>Ref(C,-lstssg)+p;
+
+tp = Param("tp",14,0,500,1);
+
+C05 = ps==1 AND  C<Highestsince(ps==1 AND Ref(ps,-1)!=1,C)-tp;
+C06 = ps==-1 AND  C>Lowestsince(ps==-1 AND Ref(ps,-1)!=-1,C)+tp;
+
+vperiod = Param("vperiod",71,1,100,1);
+
+lstsig = BarsSince(bsig OR ssig);
+C07 = lstsig>0 AND V==llV(V,vperiod);
+
+C08 = ps==1 AND C>O AND V==HHV(V,vperiod);
+C09 = ps==-1 AND C<O AND V==HHV(V,vperiod);
+
+rsip = Param("rsip",10,1,100,1);
+
+C10 = ps==1 AND RSI(rsip)>80;
+C11 = ps==-1 AND RSI(rsip)<20;
+
+csig= TimeNum()<=92500 OR TimeNum()>=151400 OR C03 OR C04 OR C01 OR C02 OR C05 OR C06 ;// OR C10 OR C11; ////C03 OR C04 OR
+
+//Plot(csig,"csig",colorBlue);
+
+
+    Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+ 

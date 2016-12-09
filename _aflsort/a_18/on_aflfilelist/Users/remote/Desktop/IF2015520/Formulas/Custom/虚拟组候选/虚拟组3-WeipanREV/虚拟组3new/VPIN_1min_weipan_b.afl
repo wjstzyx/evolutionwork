@@ -1,0 +1,109 @@
+//#include "Formulas/Custom/201502/15s/volatility.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+TickerNAME = Name(); 
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+
+StrategyName = "	IF-VPIN_1min_weipan_b";
+StrategyID = 40864;
+ProType = 0;
+TickerName=Name();
+
+function VolSlice(value, window_size, window_number) {
+	winvol = HHV(value, window_size) - LLV(value, window_size);
+	res = EMA(winvol, window_size * window_number);
+	return res;
+}
+
+function GetVbuy(odata,cdata,vol,size)
+{
+	dp = cdata-odata;
+	x = IIf(StDev(dp,size)==0,0,dp/StDev(dp,size));
+	cdf = NN(x);
+	return cdf*vol;
+}
+
+bid = Foreign(Name(), "L");
+ask = Foreign(Name(), "H");
+bidv = Foreign(Name(), "1");
+askv = Foreign(Name(), "2");
+pask = Ref(ask, -1);
+pbid = Ref(bid, -1);
+pbidv = Ref(bidv, -1);
+paskv = Ref(askv, -1);
+
+samplesize = Param("samplesize",90,10,5000,10);
+volb = GetVbuy(O,C,V,samplesize);
+pbuy=volb/V;
+
+//Plot(pbuy,"pbuy",colorRed);
+vols = V-volb;
+
+N = BarsSince(Day()!=Ref(Day(),-1));
+
+vp = Param("vp",140,1,1000,1);
+dV = Sum(volb,vp)-Sum(vols,vp);
+//Plot(dV,"dV",colorBlue);
+//Plot(0,"zero",colorRed);
+
+sumvb=Sum(volb,N);
+sumvs=Sum(vols,N);
+
+bpp = Param("bpp",0.97,0,1,0.01);
+
+//Plot(sumvb,"sumvb",colorRed);
+//Plot(sumvs,"sumvs",colorGreen);
+
+otime = Param("otime",141500,91500,151500,100);
+bsig = pbuy>bpp AND dV<0 AND TimeNum()>otime;//AND sumvs>sumvb 
+ssig = pbuy<1-bpp AND dV>0 AND TimeNum()>otime;//AND sumvs<sumvb
+//ssig=0;
+
+timec = Param("timec",151500,91500,151500,100);
+timec2 = Param("timec2",151500,91500,151500,100);
+
+ps = GetPs(bsig,ssig,0);
+lstbsg = BarsSince(bsig);
+lstssg = BarsSince(ssig);
+
+p = Param("p",10.5,0,50,0.1);//10
+C01 = ps==1 AND C-Ref(C,-lstbsg)<-p;
+C02 = ps==-1 AND C-Ref(C,-lstssg)>p;
+
+Holdperiod = Param("Holdperiod",10,0,100,1);
+C03 = ps==1 AND lstbsg == Holdperiod;
+C04 = ps==-1 AND lstssg == Holdperiod;
+
+vperiod = Param("vperiod",500,1,1000,1);
+C05 = ps==1 AND C>O AND V==HHV(V,vperiod);
+C06 = ps==-1 AND C<O AND V==HHV(V,vperiod);
+
+tp = Param("tp",37.5,0,200,0.1);
+C07 = ps==1 AND HighestSince(bsig,C)-C>tp;
+C08 = ps==-1 AND C-LowestSince(ssig,C)>tp;
+
+C09 = ps==1 AND C-Ref(C,-lstbsg)<0 AND TimeNum()==151400;
+C10 = ps==-1 AND C-Ref(C,-lstssg)>0 AND TimeNum()==151400;
+
+otime3 = Param("otime3",92800,91500,151500,100);
+otime4 = Param("otime4",93300,91500,151500,100);
+C11 = ps==1 AND pbuy<1-bpp AND TimeNum()>otime3 AND TimeNum()<otime4;
+C12 = ps==-1 AND pbuy>bpp AND TimeNum()>otime3 AND TimeNum()<otime4;
+
+csig = c01 OR c02 OR  C07 OR C08 OR C05 OR C06 OR C09 OR C10 ;//OR C11 OR C12;// OR TimeNum()==timec OR TimeNum()==timec2;// OROR c03 OR c04  
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+
+/*
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);
+*/
+PlotPerformance(bsig,ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

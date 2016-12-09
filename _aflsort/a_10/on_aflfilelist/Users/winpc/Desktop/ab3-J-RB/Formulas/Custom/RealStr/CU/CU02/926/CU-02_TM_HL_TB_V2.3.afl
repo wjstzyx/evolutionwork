@@ -1,0 +1,59 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/BasicV3/exiv.afl";
+#include "Formulas/Custom/BasicV3/TM.afl";
+#include "Formulas/Custom/BasicV3/hl.afl";
+#include "Formulas/Custom/BasicV3/maa.afl";
+#include "Formulas/Custom/BasicV3/sxv.afl";
+#include "Formulas/Custom/BasicV3/DTA.afl";
+#include "Formulas/Custom/BasicV3/v7.afl";
+#include "Formulas/Custom/BasicV3/DFB.afl";
+#include "Formulas/Custom/BasicV3/TB.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+StrategyName = "CU-02_TM_HL_TB_V2.3";
+StrategyID = 50026;
+ProType = 1;
+
+
+TM1=TimeShareFHLLess(12,27,11,1000,330,"CU");
+TM2=TimeShareFHLLess(14,30,7,1000,330,"CU");
+
+
+
+HL1=HLAVGA(72,59,59,"CU");
+HL2=HLAVGA(71,60,58,"CU");
+
+
+TB1=TopBotTwo(33,41,"CU");
+TB2=TopBotTwo(30,53,"CU");
+
+
+
+
+
+
+
+CondHL = (HL1+HL2)/2;
+CondTM = (TM1+TM2)/2;
+CondTB = (TB1+TB2)/2;
+
+
+
+
+Cond =CondTB +CondTM  + CondHL ;
+
+Vote=2;
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=GetLastK("CU");
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

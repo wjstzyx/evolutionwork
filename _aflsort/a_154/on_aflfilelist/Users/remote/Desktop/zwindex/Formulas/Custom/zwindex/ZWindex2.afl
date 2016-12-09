@@ -1,0 +1,72 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "ZWindex2";
+StrategyID ="1072100000";
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+fc=Foreign("Index", "c");
+
+zf=Param("zf",0.002, 0, 0.02, 0.001);
+
+opentime=Param("opentime",94400,90000,146000,100);
+closetime=Param("closetime",151300,90000,146000,100);
+
+timeok= (TimeNum()>=94300 AND TimeNum()<=94300+700);
+
+
+bsig= timeok  AND fC>Ref(fc,-15) AND Ref(fc,-15)>Ref(fc,-30) AND Ref(fc,-30)>Ref(fc,-45) AND fc>Ref(fc,-45)*(1+zf) AND fc<Ref(fc,-45)*1.015;
+
+ssig= timeok  AND fc<Ref(fc,-15) AND Ref(fc,-15)<Ref(fc,-30) AND Ref(fc,-30)<Ref(fc,-45) AND fc<Ref(fc,-45)*(1-zf) AND fc>Ref(fc,-45)*0.985;
+
+
+Lstbsg = BarsSince(bsig);
+Lstssg = BarsSince(ssig);
+
+
+co=0;
+
+ps=GetPs(bsig,ssig,co);
+
+
+zs= Param("zs",100,0.1,100,0.1);
+hp=HighestSince(ps==1 AND Ref(ps,-1)!=1,fC);
+co1= ps==1 AND (hp-fC)/hp*100>=zs;
+
+lp=LowestSince(ps==-1 AND Ref(ps,-1)!=-1,fC);
+co2= ps==-1 AND (fC-lp)/lp*100>=zs ;
+
+co3= ps==1 AND fC<Ref(fc,-15)*0.996 AND (TimeNum()>=140000 AND TimeNum()<=145900);
+co4= ps==-1 AND fc>Ref(fc,-15)*1.004  AND (TimeNum()>=140000 AND TimeNum()<=145900);
+
+
+lb=BarsSince(Ref(bsig,-1)!=1 AND bsig==1);
+ls=BarsSince(Ref(ssig,-1)!=1 AND ssig==1);
+
+co5= ps==1 AND fC<Ref(fC,-lb)*0.99;
+co6= ps==-1 AND fC>Ref(fC,-ls)*1.01;
+
+co7= ps==1 AND fC>Ref(fC,-lb)*1.03;
+co8= ps==-1 AND fC<Ref(fC,-ls)*0.97;
+
+DayStart=Day()!=Ref(Day(),-1);
+ThisDayOpenfc= Ref(fc,-BarsSince(DayStart));
+co11= ps==1 AND fc<thisdayopenfc*0.99;
+co12= ps==-1 AND fc>thisdayopenfc*1.01;
+
+
+//csig= co OR co1 OR co2 OR co3 OR co4  OR co7 OR co8 OR  co5 OR co6;
+Csig= Co11 OR Co12;
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

@@ -1,0 +1,100 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+
+function PIR(p,Length)
+{
+Ll=LLV(p,Length);
+Hh=HHV(p,Length);
+return (100*(p-Ll)/(Hh-Ll));
+}
+
+
+
+OSCPpbuy_Lookback1=Param("OSCPpbuy_Lookback1",5,1,200,2);
+OSCPpbuy_Lookback2=Param("OSCPpbuy_Lookback2",450,10,1000,10);
+
+OSCPpbuy_Limit=Param("OSCPpbuy_Limit",0.8,0,1,0.1);
+
+OSCPpbuy_tst=Param("OSCPpbuy_tst",111000,90000,150000,100);
+OSCPpbuy_ted=Param("OSCPpbuy_ted",150000,90000,150000,100);
+
+OscPV=EMA(C,OSCPpbuy_Lookback1)-EMA(C,OSCPpbuy_Lookback2);
+
+Cstudy=OscPV;
+
+stdc=StDev(Cstudy,OSCPpbuy_Lookback2);
+
+xc=IIf(stdc==0,0,Cstudy/stdc);
+
+pbuyc=NN(xc);
+
+
+bsig1=pbuyc>OSCPpbuy_Limit AND TimeNum()>OSCPpbuy_tst AND TimeNum()<OSCPpbuy_ted;
+ssig1=pbuyc<1-OSCPpbuy_Limit AND TimeNum()>OSCPpbuy_tst AND TimeNum()<OSCPpbuy_ted;
+
+bsig=bsig1;
+ssig=ssig1;
+
+ps = GetPs(bsig,ssig,0);
+
+ps1=ps;
+
+
+tw=Param("timewinodw",100,80,600,20);
+MAperiod=Param("MAperiod",10,1,20,1);
+
+s1=12;
+s2=26;
+s3=9;
+
+G03=1000*Signal(s1,s2,s3);
+G13=BBandTop(G03,tw,2);
+G23=BBandBot(G03,tw,2);
+G33=10000*(G03-G23)/(G13-G23);
+
+maG03=1000*MA(Signal(s1,s2,s3),MAperiod);
+
+maG13=BBandTop(maG03,tw,2);
+maG23=BBandBot(maG03,tw,2);
+maG33=10000*(maG03-maG23)/(maG13-maG23);
+
+Bsig1=maG33>Ref(maG33,-1) AND maG33>Ref(maG33,-2) ;
+Ssig1=maG33<Ref(maG33,-1) AND maG33<Ref(maG33,-2) ;
+
+bsig=ExRem(bsig1,ssig1);
+ssig=ExRem(ssig1,bsig1);
+
+ps=GetPs(bsig,ssig,0);
+
+ps2=ps;
+
+
+ps=ps1+ps2;
+
+bsig1=ps>=2;
+ssig1=ps<=-2;
+
+bsig=ExRem(bsig1,ssig1);
+ssig=ExRem(ssig1,bsig1);
+
+psmerge=GetPs(bsig,ssig,0);
+
+tp = Param("tp",15,0,100,1);
+
+Lstbsg = BarsSince(psmerge==1 AND Ref(psmerge,-1)!=1);
+Lstssg = BarsSince(psmerge==-1 AND Ref(psmerge,-1)!=-1);
+
+C01 = psmerge==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C02 = psmerge==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+Csig=C01 OR C02;
+
+
+Plotperformance(bsig,ssig,Csig);
+
+
+
+
+
+
+
+StrategyName = "rb-1min-OSCPpbuy_Signalmaps--";StrategyID = "1012100309";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

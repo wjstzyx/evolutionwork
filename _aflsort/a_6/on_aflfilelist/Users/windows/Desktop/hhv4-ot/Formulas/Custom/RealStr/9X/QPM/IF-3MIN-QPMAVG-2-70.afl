@@ -1,0 +1,65 @@
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "IF-3MIN-QPMAVG-2-70";
+StrategyID = 40726;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+//------------------------para----------------------------------------
+Y=ParamOptimize("Y",2, 1, 100,1);
+x=ParamOptimize("x",70, 1, 225,1);
+//----------------------------------------------------------------------
+
+FSTK=Day()!=Ref(Day(),-1);
+KN=BarsSince(FSTK)+1;
+RANGE=abs(C-O);
+
+
+up=C>O OR (H>Ref(H,-1)AND L>Ref(L,-1));
+dn=C<O OR (H<Ref(H,-1)AND L<Ref(L,-1));
+up=C>O;// OR (H>Ref(H,-1)AND L>Ref(L,-1));
+dn=C<O ;//OR (H<Ref(H,-1)AND L<Ref(L,-1));
+
+
+YEH=TimeFrameGetPrice("H",inDaily,-1);
+YEL=TimeFrameGetPrice("L",inDaily,-1);
+YEc=TimeFrameGetPrice("c",inDaily,-1);
+YEo=TimeFrameGetPrice("o",inDaily,-1);
+
+yeavg=TimeFrameGetPrice("avg",inDaily,-1);
+bsig=  C>yeavg AND C==HHV(C,kn) AND kn>x ;// AND up;//AND C>O;
+ssig= C<yeavg AND C==LLV(C,kn)AND kn>x ;// AND dn;// AND C<O;
+
+
+Csig= TimeNum()>=151200;
+Lstsig = BarsSince(bsig OR ssig);
+sinPs=GetPs(BSIG,SSIG,CSIG);
+
+paraperiod2=Param("paraperiod2",16,0,50,1);//5
+
+obuy= sinps==1 AND Ref(sinps,-1)!=1;
+osell= sinps==-1 AND Ref(sinps,-1)!=-1;
+
+Lbuy=BarsSince(Obuy);
+Lsell=BarsSince(Osell);
+
+
+C03=sinPs==1 AND CPPCount(dn ,y)==y ;//AND C<Lstdc;
+C04=sinPs==-1 AND CPPCount(up ,y)==y ;//AND C>Lstdc;
+
+C05=sinPs==1 AND C-Ref(C,-Lbuy)>0.8   AND Lbuy>=paraperiod2;
+C06=sinPs==-1 AND  Ref(C,-Lsell)-C>0.8 AND Lsell>=paraperiod2 ;
+
+Csig=C03 OR C04 OR  Csig OR C05 OR C06 ;//OR V==HHV(V,period);
+//-----------------------------------------------------------------------------------------------------------------------
+	Buy = bsig ;
+	Sell= CSIG;
+	Short = ssig ;
+	Cover = CSIG;
+
+PlotPerformance(BSig,Ssig,Csig);

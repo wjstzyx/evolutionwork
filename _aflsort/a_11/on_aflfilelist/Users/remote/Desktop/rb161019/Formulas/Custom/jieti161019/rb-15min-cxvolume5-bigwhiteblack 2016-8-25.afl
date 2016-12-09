@@ -1,0 +1,76 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+
+
+Cstudy=IIf(High - Low==0,0,(Close - Open)/(High - Low));
+
+Lookback=Param("Lookback",10,0,300,5);
+stdc=StDev(Cstudy,Lookback);
+xc=IIf(stdc==0,0,Cstudy/stdc);
+pbuyc=NN(xc);
+
+Limit=Param("Limit",0.1,0,1,0.05);
+
+bigwhite=pbuyc>Limit;
+bigblack=pbuyc<1-Limit;
+
+situation1=bigwhite OR bigblack;
+
+
+MinVC=ValueWhen(situation1==1,C,1);
+
+
+CohC=C;
+
+
+period=Param("period",12,1,40,1);
+
+PlusDM=IIf(bigwhite,CohC-Ref(CohC,-1),0);
+
+
+Vm=1;
+
+Buypower=PlusDM*Vm;
+
+
+
+MinDM = IIf(bigblack, Ref(CohC,-1)-CohC, 0);
+
+Sellpower=MinDM*Vm;
+
+Wm=Wilders(Wilders(Buypower,period)-Wilders(Sellpower,period),period);
+
+Bsig=Cross(Wm,0);
+Ssig=Cross(0,Wm);
+
+ps = GetPs(bsig,ssig,0);
+
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+HHVbsg=IIf(lstbsg==0,C,HHV(C,lstbsg));
+LLVssg=IIf(lstssg==0,C,LLV(C,lstssg));
+
+HHVbsg=HHV(C,lstbsg);
+LLVssg=LLV(C,lstssg);
+
+
+
+//////////////////////////////////////////////////////////////////
+tp = Param("tp",14,0,100,1);
+
+
+C05 = ps==1 AND  C<HHVbsg-tp*C/1000;
+C06 = ps==-1 AND  C>LLVssg+tp*C/1000;
+
+CSIG =C05 OR C06; 
+
+
+
+PlotPerformance(BSig,Ssig,Csig);
+
+
+
+
+
+
+StrategyName = "rb-15min-cxvolume5-bigwhiteblack 2016-8-25";StrategyID = "1012100297";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

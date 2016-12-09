@@ -1,0 +1,76 @@
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Basic2012/HL.afl";
+#include "Formulas/Custom/Basic2012/EXV.afl";
+#include "Formulas/Custom/Basic2012/TopBot.afl";
+#include "Formulas/Custom/Basic2012/VolumeBreak.afl";
+#include "Formulas/Custom/Basic2012/V7DY.afl";
+#include "Formulas/Custom/Basic2012/UDHL.afl";
+
+StrategyName = "CandiRealHL1_RU03";
+StrategyID = 1042;
+ProType = 1;
+HL1Cond=HLAVG(10,1,30,"RU");
+HL2Cond=HLNAVG(34,6,30,"CU");
+HL3Cond=HLCAVG(1,8,10,"RU");
+HL4Cond=HLNAVG(8,1,20,"RU");
+
+HLCOND=HL1Cond+HL2Cond+HL3Cond+HL4Cond;
+
+EXV1Cond=EXVORI(28,24,"CU");
+EXV2Cond=EXVORICU3(25,40,210,5,"RU");
+EXV3Cond=EXVORIV2CU3(19,35,390,7,"RU");
+EXV4Cond=EXVORICU3(29,20,120,5,"CU");
+EXV5Cond=EXVORICU3(27,32,330,5,"RU");
+EXV6Cond=EXVORIV2CU3(22,38,240,7,"RU");
+EXVCOND=EXV1Cond+EXV2Cond+EXV3Cond+EXV4Cond+EXV5Cond+EXV6Cond;
+
+V7DY1Cond=V7DYORIALL(44,59,"RU");
+V7DY2Cond=V7DYStartVer(159,30,"CU");
+V7DYCOND=V7DY1Cond+V7DY2Cond;
+
+VB1Cond=VolumeBreakOri(18,28,41,"RU");
+VB2Cond=VolumeDecreasing(13,30,"RU");
+VBCond=VB1Cond+VB2Cond;
+
+Cond1 = HLCOND+GetSig123(EXVCOND)+GetSig123(V7DYCOND);
+
+HL1Cond=HLAVG(10,2,22,"CU");
+HL2Cond=HLCAVG(9,1,24,"RU");
+HL3Cond=HLCAVG(3,3,18,"CU");
+HL4Cond=HLCAVG(7,1,18,"RU");
+HLCOND=HL1Cond+HL2Cond+HL3Cond+HL4Cond;
+
+EXV1Cond=EXVORI(29,30,"CU");
+EXV2Cond=EXVORICU3(27,22,330,3,"CU");
+EXV3Cond=EXVORIV2CU3(25,48,300,6,"RU");
+EXV4Cond=EXVORI(27,19,"CU");
+EXV5Cond=EXVORICU3(26,33,270,6,"RU");
+EXV6Cond=EXVORIV2CU3(24,25,180,5,"RU");
+EXVCOND=EXV1Cond+EXV2Cond+EXV3Cond+EXV4Cond+EXV5Cond+EXV6Cond;
+
+V7DY1Cond=V7DYORIALL(44,59,"RU");
+V7DY2Cond=V7DYStartVer(159,30,"CU");
+V7DYCOND=V7DY1Cond+V7DY2Cond;
+
+VB1Cond=VolumeBreakOri(18,28,41,"RU");
+VB2Cond=VolumeDecreasing(13,30,"RU");
+VBCond=VB1Cond+VB2Cond;
+
+Cond2 = HLCOND+GetSig123(EXVCOND)+GetSig123(V7DYCOND);
+
+Cond = Cond1+Cond2;
+
+Vote= ParamOptimize("Vote", 0, 0, 10, 1);
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond<=Vote && Cond>=-Vote;
+
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

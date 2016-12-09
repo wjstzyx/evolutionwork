@@ -1,0 +1,40 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+
+StrategyName = "DifTime";
+StrategyID = 1007;
+Plot(0,StrategyName,colorBlack);
+
+Period1 = ParamOptimize("HL Period1", 5, 2, 100, 1);
+Con1 = ParamOptimize( "Confirm Period1", 2, 1, 100, 1);
+
+Period2 = ParamOptimize("HL Period2", 3, 2, 100, 1);
+Con2 = ParamOptimize( "Confirm Period2", 2, 1, 100, 1);
+
+TimeFrameSet( in5Minute ); // switch to 5 minute frame 
+TIME=TimeNum();
+DSAVG = (H+L)/2;
+HHL1 = HHV(DSAVG,Period1);
+LHL1 = LLV(DSAVG,Period1);
+BSIG1 = Ref(C>HHL1,-Con1) && C>=Ref(C,-Con1);
+SSIG1 = Ref(C<LHL1,-Con1) && C<=Ref(C,-Con1);
+TimeFrameRestore(); // restore time frame to original 
+
+
+TimeFrameSet( in1Minute ); // switch now to hourly 
+TIME=TimeNum();
+DSAVG = (H+L)/2;
+HHL2 = HHV(DSAVG,Period2);
+LHL2 = LLV(DSAVG,Period2);
+BSIG2 = Ref(C>HHL2,-Con2) && C>=Ref(C,-Con2);
+SSIG2 = Ref(C<LHL2,-Con2) && C<=Ref(C,-Con2);
+TimeFrameRestore(); // restore time frame to original 
+
+BSIG = BSIG1 && BSIG2;
+SSIG = SSIG1 && SSIG2;
+CSIG = TIME>=145900;
+
+Buy = BSIG;
+Short = SSIG;
+Sell= Cover = CSIG;
+
+PlotPerformance(BSIG,SSIG,CSIG);

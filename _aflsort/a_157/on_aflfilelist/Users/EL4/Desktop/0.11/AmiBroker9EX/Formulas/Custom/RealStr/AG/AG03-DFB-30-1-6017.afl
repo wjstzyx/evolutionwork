@@ -1,0 +1,30 @@
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/BasicV2/V7DY.afl";
+#include "Formulas/Custom/BasicV2/DFB.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 800);
+
+StrategyName = "AG03-DFB-30-1-204";
+StrategyID = 6017;
+ProType = 1;
+
+Cond=DFB(30,1,"AG");
+
+
+
+Vote=0;//ParamOptimize("Vote", 0.5, 0, 1, 0.5);
+
+TickerNAME = Name();
+
+BSIG=Cond>Vote AND  Openlastk(tickername,21) ;
+SSIG=Cond<-Vote AND  Openlastk(tickername,21);
+CSIG=Cond==0 OR GetLastKMINs(tickername,21);
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName+"--"+StrategyID);

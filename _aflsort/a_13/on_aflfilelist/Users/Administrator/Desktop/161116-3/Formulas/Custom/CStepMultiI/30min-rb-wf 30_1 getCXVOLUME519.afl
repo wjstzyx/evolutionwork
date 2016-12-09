@@ -1,0 +1,162 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+
+
+
+function PIR(p,Length)
+{
+Ll=LLV(p,Length);
+Hh=HHV(p,Length);
+return (100*(p-Ll)/(Hh-Ll));
+}
+
+function TP15(bsig, ssig, ps0)
+{
+tp = 15; //Param("tp",15,0,100,1);
+Lstbsg = BarsSince(ps0==1 AND Ref(ps0,-1)!=1);
+Lstssg = BarsSince(ps0==-1 AND Ref(ps0,-1)!=-1);
+C01 = ps0==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C02 = ps0==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+Csig=C01 OR C02;
+ps = GetPs(bsig, ssig, csig);
+return ps;
+}
+
+
+
+
+
+
+CXVOLUME5_period=1; //Paramoptimize("CXVOLUME5_period",11,1,40,1);
+
+
+
+function getCXVOLUME5(CXVOLUME5_period)
+
+{
+
+PlusDM=IIf(H-Ref(H,-1)>Ref(L,-1)-L,C-Ref(C,-1),0);
+
+
+
+Buypower=PlusDM;
+
+
+
+MinDM = IIf(H-Ref(H,-1)<Ref(L,-1)-L, Ref(C,-1)-C, 0);
+
+
+
+Sellpower=MinDM;
+
+
+
+Wm=Wilders(Wilders(Buypower,CXVOLUME5_period)-Wilders(Sellpower,CXVOLUME5_period),CXVOLUME5_period);
+
+
+
+Bsig=Cross(Wm,0);
+
+Ssig=Cross(0,Wm);
+
+
+
+ps = GetPs(bsig,ssig,0);
+
+
+
+
+//add exrem
+bsig=ExRem(bsig,ssig);
+ssig=ExRem(ssig,bsig);
+ps=GetPs(bsig,ssig,0);
+
+//add_tp15ps_exp
+ps = TP15(bsig, ssig, ps);
+return ps;
+
+
+
+
+
+}
+
+
+
+ps=getCXVOLUME5(CXVOLUME5_period);
+
+
+//In-Sample Date Range:2013/10/01 to 2016/09/30
+//Out-Sample Date Range:2016/10/01 to 2016/12/30
+ps = 0;
+//30min_MDD
+CXVOLUME5_period = 7;ps1 = getCXVOLUME5(CXVOLUME5_period);ps += ps1;
+CXVOLUME5_period = 8;ps2 = getCXVOLUME5(CXVOLUME5_period);ps += ps2;
+CXVOLUME5_period = 6;ps3 = getCXVOLUME5(CXVOLUME5_period);ps += ps3;
+CXVOLUME5_period = 5;ps4 = getCXVOLUME5(CXVOLUME5_period);ps += ps4;
+CXVOLUME5_period = 14;ps5 = getCXVOLUME5(CXVOLUME5_period);ps += ps5;
+CXVOLUME5_period = 4;ps6 = getCXVOLUME5(CXVOLUME5_period);ps += ps6;
+CXVOLUME5_period = 11;ps7 = getCXVOLUME5(CXVOLUME5_period);ps += ps7;
+CXVOLUME5_period = 12;ps8 = getCXVOLUME5(CXVOLUME5_period);ps += ps8;
+CXVOLUME5_period = 20;ps9 = getCXVOLUME5(CXVOLUME5_period);ps += ps9;
+CXVOLUME5_period = 17;ps10 = getCXVOLUME5(CXVOLUME5_period);ps += ps10;
+//30min_NP
+CXVOLUME5_period = 7;ps1 = getCXVOLUME5(CXVOLUME5_period);ps += ps1;
+CXVOLUME5_period = 9;ps2 = getCXVOLUME5(CXVOLUME5_period);ps += ps2;
+CXVOLUME5_period = 10;ps3 = getCXVOLUME5(CXVOLUME5_period);ps += ps3;
+CXVOLUME5_period = 13;ps4 = getCXVOLUME5(CXVOLUME5_period);ps += ps4;
+CXVOLUME5_period = 8;ps5 = getCXVOLUME5(CXVOLUME5_period);ps += ps5;
+CXVOLUME5_period = 6;ps6 = getCXVOLUME5(CXVOLUME5_period);ps += ps6;
+CXVOLUME5_period = 15;ps7 = getCXVOLUME5(CXVOLUME5_period);ps += ps7;
+CXVOLUME5_period = 5;ps8 = getCXVOLUME5(CXVOLUME5_period);ps += ps8;
+CXVOLUME5_period = 14;ps9 = getCXVOLUME5(CXVOLUME5_period);ps += ps9;
+CXVOLUME5_period = 4;ps10 = getCXVOLUME5(CXVOLUME5_period);ps += ps10;
+//30min_PF
+CXVOLUME5_period = 10;ps1 = getCXVOLUME5(CXVOLUME5_period);ps += ps1;
+CXVOLUME5_period = 13;ps2 = getCXVOLUME5(CXVOLUME5_period);ps += ps2;
+CXVOLUME5_period = 15;ps3 = getCXVOLUME5(CXVOLUME5_period);ps += ps3;
+CXVOLUME5_period = 14;ps4 = getCXVOLUME5(CXVOLUME5_period);ps += ps4;
+CXVOLUME5_period = 4;ps5 = getCXVOLUME5(CXVOLUME5_period);ps += ps5;
+CXVOLUME5_period = 11;ps6 = getCXVOLUME5(CXVOLUME5_period);ps += ps6;
+CXVOLUME5_period = 12;ps7 = getCXVOLUME5(CXVOLUME5_period);ps += ps7;
+CXVOLUME5_period = 20;ps8 = getCXVOLUME5(CXVOLUME5_period);ps += ps8;
+CXVOLUME5_period = 17;ps9 = getCXVOLUME5(CXVOLUME5_period);ps += ps9;
+CXVOLUME5_period = 16;ps10 = getCXVOLUME5(CXVOLUME5_period);ps += ps10;
+
+
+ps_th = Param("ps_th", 1, 0, 100, 1);
+
+bsig=ps >= ps_th;
+ssig=ps <= -ps_th;
+
+bsig=ExRem(bsig,ssig);
+ssig=ExRem(ssig,bsig);
+
+psmerge=GetPs(bsig,ssig,0);
+ps_exit_th = ps_th * 0.66667;
+C01 = psmerge==1 AND ps <= ps_exit_th;
+C02 = psmerge==-1 AND ps >= -ps_exit_th;
+
+tp = 15; //Param("tp",15,0,100,1);
+Lstbsg = BarsSince(psmerge==1 AND Ref(psmerge,-1)!=1);
+Lstssg = BarsSince(psmerge==-1 AND Ref(psmerge,-1)!=-1);
+C03 = psmerge==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C04 = psmerge==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+//Csig=C01 OR C02 OR C03 OR C04;
+csig = C03 OR C04;
+//csig = C01 OR C02;
+
+
+Plotperformance(bsig,ssig,Csig);
+
+ps=GetPs(bsig,ssig,csig);
+
+SIG=ps;
+
+//ProfitDiff = Profit - Ref(Profit, -1);
+//GrossProfit = getGrossProfit(SIG);
+//GrossProfitDiff = GrossProfit - Ref(GrossProfit, -1);
+
+
+
+StrategyName = "30min-rb-wf 30_1 getCXVOLUME519";StrategyID = "1015100001";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

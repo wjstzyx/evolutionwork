@@ -1,0 +1,63 @@
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/BasicV2/DFB.afl";
+#include "Formulas/Custom/BasicV2/MMT.afl";
+#include "Formulas/Custom/BasicV2/EXV.afl";
+#include "Formulas/Custom/BasicV2/TM.afl";
+#include "Formulas/Custom/BasicV2/MAA.afl";
+#include "Formulas/Custom/BasicV2/V7DY.afl";
+#include "Formulas/Custom/BasicV2/DTA.afl";
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+StrategyName = "IF03_MAA_V7_DFB_TM_EXV_MMT_DTA_Crazy_IF03_V1_4050";
+StrategyID = 4050;
+ProType = 0;
+
+
+cond1 = v7min(5,20,1,"IF"); //242/205
+cond2 = v7min(1,14,9,"IF");  //209/188
+Cond3 = DFB(72,25,"IF");  //181/158
+
+Cond5=MAArrange(4,3,0,1000,1000,"IF");
+Cond5=timeselect(15,300,Cond5); //294/243
+Cond6=MAArrangeroll(5,2,0,1000,1000,"IF");
+Cond5=timeselect(20,300,Cond5); //250/194
+Cond7=MAArrangecount(5,5,2,1000,1000,"IF");
+Cond7=timeselect(14,300,Cond7);  //267/225
+
+Cond=Cond5;
+
+Cond9 = mmt(10,2,25,"IF"); //176/120
+Cond10 = mmt(7,3,24,"IF"); //180/117
+Cond11 = mmt(4,5,25,"IF");  //175/112
+Cond12 = mmt(2,10,24,"IF"); //180/124
+
+Cond13=EXVORIif(10,10,"IF");
+Cond14=EXVORIV3CU3if(12,12,215, 27, "if");
+Cond15=EXVORICU3if(12,8,150,4,"IF");
+Cond16=EXVORIV2CU3if(12,20,125,8,"IF");
+
+Cond17 = EXVapr4if(20,8,"IF");
+
+Cond18=DTAV2IF(36,17,2.7,11,"IF");
+
+wexv=Paramoptimize("Wexv",1.5,0,3,0.25);
+
+Cond = Cond18+(Cond1+Cond2)/1+Cond3+(Cond5+Cond6+Cond7)/3+(Cond9+Cond10+Cond11+Cond12)/4+((Cond13+Cond14+Cond15+Cond16)/4+Cond17*3)*Wexv; //271/229
+
+Vote=ParamOptimize("Vote",1,0,10,0.5);
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond==0;
+
+//CSIG=(TimeNum()+Interval()*100/60)>=151500;
+
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+PlotPerformance(sinPs,sinBS,StrategyName);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,0);

@@ -1,0 +1,76 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "P-30min-CR-fisher-transform-AMA";
+StrategyID =100103;
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+
+N=Param("N",17,1,1000,1);
+AMAf = Param("AMAf", 0.01, 0, 1.0, 0.001);
+factor = Param("factor", 0.012, 0, 1, 0.001);
+
+MID=(H+L+C)/3;
+typMID=AMA(MID,AMAf);
+typH=AMA(H,AMAf);
+typL=AMA(L,AMAf);
+
+
+CRinput1=Sum(Max(0,typH-Ref(typMID,-1)),N);
+CRinput2=Sum(Max(0,Ref(typMID,-1)-typL),N);
+
+CRinput1=EMA(Max(0,typH-Ref(typMID,-1)),N);
+CRinput2=EMA(Max(0,Ref(typMID,-1)-typL),N);
+
+CR=(CRinput1-CRinput2)/(CRinput1+CRinput2);
+
+
+////////////////////////////////////////////////
+
+
+Value1 = AMA(2*(CR), factor);
+Value2=(4*Value1+3*Ref(Value1,-1)+2*Ref(Value1,-2)+Ref(Value1,-3))/10;
+Value3=Value2;
+//Value3=CR;
+InverseFish=( ( exp( 2 * Value3 ) - 1 ) / ( exp( 2 * Value3 ) + 1 )+1 )*50;
+
+
+//Value3=0.5*log((1+1.98*(Value2-0.5))/(1-1.98*(Value2-0.5)));
+
+//Plot(Fish,"Fish ",colorGreen);
+StoFR1=InverseFish ;
+
+Bsig=StoFR1>Ref(StoFR1,-1);
+Ssig=StoFR1<Ref(StoFR1,-1);
+
+Bsig=StoFR1>Ref(StoFR1,-1) AND Ref(StoFR1,-1)>Ref(StoFR1,-2);
+Ssig=StoFR1<Ref(StoFR1,-1) AND Ref(StoFR1,-1)<Ref(StoFR1,-2);
+
+//Bsig=StoFR1>Ref(StoFR1,-1) AND Ref(StoFR1,-1)>Ref(StoFR1,-2)  AND Ref(StoFR1,-2)>Ref(StoFR1,-3);
+//Ssig=StoFR1<Ref(StoFR1,-1) AND Ref(StoFR1,-1)<Ref(StoFR1,-2)  AND Ref(StoFR1,-2)<Ref(StoFR1,-3);
+
+
+
+ps=GetPs(bsig,ssig,0);
+C01=ps==1 AND StoFR1<=Ref(StoFR1,-1);
+C02=ps==-1 AND StoFR1>=Ref(StoFR1,-1);
+
+Csig=C01 OR C02;
+
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+
+ps0 = GetPs(bsig,ssig,Csig);
+Filter= 1;
+AddColumn(ps0,"ps");

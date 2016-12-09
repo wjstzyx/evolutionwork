@@ -1,0 +1,98 @@
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/BasicV2/MAA.afl";
+#include "Formulas/Custom/BasicV2/TM.afl";
+#include "Formulas/Custom/BasicV2/V7Dy.afl";
+#include "Formulas/Custom/BasicV2/HL.afl";
+#include "Formulas/Custom/BasicV2/EXV.afl";
+#include "Formulas/Custom/BasicV2/DFB.afl";
+StrategyName = "ZN_GetSinG1";
+StrategyID = 8005;
+ProType = 1;
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 200);
+
+//V7
+CondV7 =  V7DYStartVer(19,33,"ZN");
+CondG1 = GetSig123(CondV7) ;
+
+//HL
+CondH1 =0;//  HLAVGA(70,4,9,"ZN");			
+			
+CondH2 =0;//  HLAVG(59,3,4,"ZN");			
+CondH3 =0;//  HLAVG(71,3,4,"ZN");			
+CondH4 =0;//  HLAVG(81,3,4,"ZN");			
+			
+CondH5 =0;//  HLNAVG(78,10,33,"ZN");			
+CondH6 =0;//  HLNAVG(78,7,32,"ZN");			
+CondH7 =0;//  HLNAVG(78,6,32,"ZN");			
+CondH8 =0;//  HLNAVG(83,3,33,"ZN");		
+
+CondH =	(CondH1 +CondH2 +CondH3 +CondH4 +CondH5 +CondH6 +CondH7 +CondH8) ;
+CondG2 = GetSig123(CondH);
+//MAA
+CondM1= MAArrangeRoll(5,3,0,1000,1000,"ZN");	
+CondM1= TimeSelect(30,270,CondM1);	
+	
+CondM2= MAArrangeRoll(5,3,1,1000,1000,"ZN");	
+CondM2= TimeSelect(33,270,CondM2);	
+	
+CondM3= MAArrangeCount(14,13,0,1000,1000,"ZN");	
+CondM3= TimeSelect(33,270,CondM3);	
+	
+CondM4= MAArrangeCount(21,14,0,1000,1000,"ZN");	
+CondM4= TimeSelect(33,270,CondM4);	
+	
+CondM5= MAArrangeCount(20,16,1,1000,1000,"ZN");	
+CondM5= TimeSelect(33,270,CondM5);	
+	
+CondM6= MAArrangeCount(14,15,2,1000,1000,"ZN");	
+CondM6= TimeSelect(33,270,CondM6);	
+CondM =	(CondM1 +CondM2 +CondM3 +CondM4 +CondM5 +CondM6 ) ;
+CondG3 = GetSig123(CondM);
+//TM
+CondT1 =  TimeShareHLLess(12,56,37,1000,1000,"ZN");
+CondT1 = TimeSelect(33,222,CondT1);
+
+CondT2 =  TimeShareHLHalfLess(27,54,53,1000,1000,"ZN");
+CondT2 = TimeSelect(10,222,CondT2);
+
+CondT3 =  TimeShareHLHalfLess(27,53,7,1000,1000,"ZN");
+CondT3 = TimeSelect(10,222,CondT3);
+CondT =	(CondT1 +CondT2 +Condt3 ) ;
+CondG4 = GetSig123(CondT);
+//DFB
+CondDF =  DFB(66,14,"ZN");
+CondG5 = CondDF ;
+
+//EXV
+CondE =  EXVapr4(79,10,"RU");
+CondG6 = CondE ;
+
+
+
+
+V7= ParamOptimize("V7",0.5, 0, 2, 0.5);
+HL = ParamOptimize("HL", 0, 0, 2, 0.5);
+MAA= ParamOptimize("MAA", 1.5, 0, 2, 0.5);
+
+TM= ParamOptimize("TM", 0.5, 0, 2, 0.5);
+WDFB= ParamOptimize("DFB", 0.5, 0, 2, 0.5);
+EXV= ParamOptimize("EXV", 1.5, 0, 2, 0.5);
+
+Cond = V7*CondG1 +HL *CondG2+MAA*CondG3+TM*CondG4+WDFB*CondG5+Exv*CondG6;
+
+Vote= ParamOptimize("Vote", 0.5, 0, 3, 0.5);
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG1=Cond<=Vote && Cond>=-Vote;
+CSIG2=(TimeNum()+Interval()*100/60)>=146000;
+CSIG =CSIG2;
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

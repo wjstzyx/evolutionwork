@@ -1,0 +1,37 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/BasicV4/ludch.afl";
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+StrategyName = "30min-RB30_LUd4CH20141014-4-20-5";
+StrategyID = 130046;
+ProType = 1;
+TickerName=Name();
+
+para1 = Param("para1",5,1,100,1);
+para2 = Param("para2",40,1,100,1);
+para3 = Param("para3",12,1,100,1);
+
+Cond= LUd4CH20141014(para1,para2,para3,TickerName);
+
+
+
+Vote=ParamOptimize("w_Vote",0,0,4,0.5);
+Vote=0;
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond==0 ;//OR filttimebbzl();
+
+
+
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

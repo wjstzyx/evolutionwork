@@ -1,0 +1,93 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "5min-PP-ULTIMATE AMA--FINISHED";
+StrategyID =310173;
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+
+
+
+
+r1 = Param("Fast avg", 9, 2, 200, 1 );
+r2 = Param("Med avg", 42, 2, 200, 1 );
+r3 = Param("Slow avg", 46, 2, 200, 1 );
+
+AMAf = Param("AMAf", 0.5, 0, 1.0, 0.001);
+factor = Param("factor", 0.228, 0, 1, 0.001);
+
+input=(C+H+L)/3;
+//input=C;
+
+
+typH=AMA(H,AMAf);
+typL=AMA(L,AMAf);
+typC=AMA(C,AMAf);
+
+//G3=(typH+typL)/Sum(typC,tw);
+
+
+/*
+bp=C-Min(L,Ref(C,-1));
+tr=Max(H,Ref(C,-1))-Min(L,Ref(C,-1));
+
+Avg7=Sum(bp,7)/Sum(tr,7);
+Avg14=Sum(bp,14)/Sum(tr,14);
+Avg28=Sum(bp,28)/Sum(tr,28);
+
+UltOsc=100*(4*Avg7+2*Avg14+Avg28)/(4+2+1);*/
+
+bp=typC-Min(typL,Ref(typC,-1));
+tr=Max(typH,Ref(typC,-1))-Min(typL,Ref(typC,-1));
+
+Avg7=IIf(Sum(tr,r1)==0,0,Sum(bp,r1)/Sum(tr,r1));
+Avg14=IIf(Sum(tr,r2)==0,0,Sum(bp,r2)/Sum(tr,r2));
+Avg28=IIf(Sum(tr,r3)==0,0,Sum(bp,r3)/Sum(tr,r3));
+
+UltOsc=(4*Avg7+2*Avg14+Avg28)/(4+2+1);
+
+G3=UltOsc;
+
+////////////////////////////////////////////////
+
+Value1 = AMA(2*(G3), factor);
+Value2=(4*Value1+3*Ref(Value1,-1)+2*Ref(Value1,-2)+Ref(Value1,-3))/10;
+Value3=Value1;
+
+InverseFish=( ( exp( 2 * Value3 ) - 1 ) / ( exp( 2 * Value3 ) + 1 ) + 1 )*50;
+
+
+//Value3=0.5*log((1+1.98*(Value2-0.5))/(1-1.98*(Value2-0.5)));
+
+//Plot(Fish,"Fish ",colorGreen);
+StoFR1=InverseFish ;
+
+Bsig=StoFR1>Ref(StoFR1,-1);
+Ssig=StoFR1<Ref(StoFR1,-1);
+
+Bsig=StoFR1>Ref(StoFR1,-1) AND Ref(StoFR1,-1)>Ref(StoFR1,-2);
+Ssig=StoFR1<Ref(StoFR1,-1) AND Ref(StoFR1,-1)<Ref(StoFR1,-2);
+
+Bsig=StoFR1>Ref(StoFR1,-1) AND Ref(StoFR1,-1)>Ref(StoFR1,-2)  AND Ref(StoFR1,-2)>Ref(StoFR1,-3);
+Ssig=StoFR1<Ref(StoFR1,-1) AND Ref(StoFR1,-1)<Ref(StoFR1,-2)  AND Ref(StoFR1,-2)<Ref(StoFR1,-3);
+
+Csig = 0;
+
+
+
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+//RIPAM 
+//Trading_night_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+//YEPAN

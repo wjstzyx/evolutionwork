@@ -1,0 +1,95 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "60min-Hlcount-1hour";
+StrategyID = 380024;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+//£¨5£¬46£¬0.5£¬3.6£©
+d = Param("d",5,1,200,1);
+Holdperiod=Param("Holdperiod",46,1,100,1);
+p = Param("p",0.5,0,100,0.1);
+tp = Param("tp",3.6,0,50,0.1);
+
+
+fc = Foreign(Name(), "C" );
+eps = 0.001;
+
+fc_before=Ref(fc,-1);
+//fc_before=Sum(fc_before,2);
+//fc=Sum(fc,2);
+HighP=IIf( fc>fc_before,fc ,fc_before);
+Lowp = IIf( fc>fc_before,fc_before,fc);
+
+highp_before = Ref(HighP,-1);
+lowp_before =  Ref(Lowp ,-1);
+
+eps = 0.001;
+Count_h= HighP>highp_before+eps AND Lowp>lowp_before+eps;
+Count_l=HighP<highp_before-eps AND Lowp<lowp_before-eps;
+
+daystart = Day()!=Ref(Day(),-1) OR BarIndex()==0;
+
+tdopen = ValueWhen(daystart,C,1);
+
+N = BarsSince(daystart);
+
+sumbv=Sum(Count_h,N);
+sumsv=Sum(Count_l,N);
+
+bsig0 = TimeNum()==91500 AND sumbv>sumsv;
+ssig0 = TimeNum()==91500 AND sumbv<sumsv;
+
+
+bsig1 = Sum(sumbv>sumsv,d)==d;
+ssig1 = Sum(sumbv<sumsv,d)==d;
+
+//Plot(sumvb,"sumvb",colorRed);
+//Plot(sumvs,"sumbs",colorGreen);
+
+bsig =bsig1 ;//AND C>tdopen;//
+ssig =ssig1 ;//AND C<tdopen;// 
+
+
+
+ps = GetPs(bsig,ssig,0);
+
+Lstbsg = BarsSince(bsig);
+Lstssg = BarsSince(ssig);
+
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+C01 = ps==1 AND Lstbsg>=Holdperiod AND C<Ref(C,-Lstbsg);//AND C<Ref(C,-Holdperiod);//
+C02 = ps==-1 AND lstssg>=holdperiod AND C>Ref(C,-lstssg);//AND C>Ref(C,-Holdperiod);//
+
+C03 = ps==1 AND  C<Ref(C,-Lstbsg)-p;
+C04 = ps==-1 AND  C>Ref(C,-lstssg)+p;
+
+
+C05 = ps==1 AND  C<HighestSince(bsig,C)-tp;
+C06 = ps==-1 AND  C>LowestSince(ssig,C)+tp;
+
+C05 = ps==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C06 = ps==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+CSIG = C01 OR C02 OR C03 OR C04 OR C05 OR C06;// TimeNum() < 91830 OR TimeNum() > 151430 OROR  OR C03 OR C04;
+
+//csig=Day()!=Ref(Day(),1) OR csig;
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);   
+
+ps0 = GetPs(bsig,ssig,csig);
+Filter= 1;
+AddColumn(ps0,"ps");

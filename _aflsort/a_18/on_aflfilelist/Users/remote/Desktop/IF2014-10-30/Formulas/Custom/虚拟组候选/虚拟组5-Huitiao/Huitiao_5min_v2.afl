@@ -1,0 +1,80 @@
+//#include "Formulas/Custom/201502/15s/volatility.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+TickerNAME = Name(); 
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+
+StrategyName = "	IF-Huitiao_5min_v2";
+StrategyID = 40869;
+ProType = 0;
+TickerName=Name();
+
+period=Param("period",27,0,1000);
+minreaction=Param("minreaction",.1,0,1000,.1);
+maxreaction=Param("maxreaction",0.6,0,1000,.1);
+mindistance=Param("mindistance",2,0,1000);
+//holdperiod=Param("holdperiod",10,0,1000);
+
+span=hhV(C,period)-llv(C,period);
+
+hightonow=BarsSince(C==HHV(C,period));                 
+lowtonow=BarsSince(C==LLV(C,period));
+
+reaction=IIf(hightonow<lowtonow,(hhV(C,period)-C),(C-LLV(C,period)));
+
+bsig=(1000*reaction/C>minreaction) AND (1000*reaction/C<maxreaction) AND (hightonow<lowtonow) AND (hightonow>mindistance);
+ssig=(1000*reaction/C>minreaction) AND (1000*reaction/C<maxreaction) AND (hightonow>lowtonow) AND (lowtonow>mindistance);
+csig=0;
+
+ps = GetPs(bsig,ssig,0);
+
+
+
+Holdperiod = Param("Holdperiod",30,0,100,1);
+
+
+Lstbsg = BarsSince(bsig);
+Lstssg = BarsSince(ssig);
+
+//Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+//Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+C01 = ps==1 AND Lstbsg>=Holdperiod AND C<Ref(C,-Lstbsg);//AND C<Ref(C,-Holdperiod);//
+C02 = ps==-1 AND lstssg>=holdperiod AND C>Ref(C,-lstssg);//AND C>Ref(C,-Holdperiod);//
+
+p = Param("p",7.2,0,100,0.1);
+C03 = ps==1 AND  C<Ref(C,-Lstbsg)-p;
+C04 = ps==-1 AND  C>Ref(C,-lstssg)+p;
+
+tp = Param("tp",30,0,50,0.1);
+
+C05 = ps==1 AND  C<Highestsince(ps==1 AND Ref(ps,-1)!=1,C)-tp;
+C06 = ps==-1 AND  C>Lowestsince(ps==-1 AND Ref(ps,-1)!=-1,C)+tp;
+
+vperiod = Param("vperiod",76,1,100,1);
+
+lstsig = BarsSince(bsig OR ssig);
+C07 = lstsig>0 AND V==HHV(V,vperiod);
+
+C08 = ps==1 AND C>O AND V==HHV(V,vperiod);
+C09 = ps==-1 AND C<O AND V==HHV(V,vperiod);
+
+csig= C01 OR C02 OR C03 OR C04 OR C05 OR C06 OR C07;// OR TimeNum()>=151000;
+
+
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+
+/*
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);
+*/
+PlotPerformance(bsig,ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

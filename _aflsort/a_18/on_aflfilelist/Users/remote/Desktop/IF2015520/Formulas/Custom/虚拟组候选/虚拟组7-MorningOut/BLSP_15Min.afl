@@ -1,0 +1,83 @@
+//#include "Formulas/Custom/201502/15s/volatility.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+TickerNAME = Name(); 
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+
+StrategyName = "	IF-BLSP_15Min";
+StrategyID = 40871;
+ProType = 0;
+
+TickerName=Name();
+lastKK = (60 / Interval()) * 270;
+//Plot(lastKK,"lastKK",colorRed);
+
+ppp = Param("ppp",15,0,27000,1);
+point = Param("point",0,0,27000,0.2);
+point1 = Param("point1",0,0,27000,0.2);
+
+daystart = BarIndex() == 0 OR DateNum() != Ref(DateNum(), -1);
+kn = BarsSince(daystart);
+
+fc = Foreign(Name(),"C");
+fv = Foreign(Name(),"V");
+fo = Foreign(Name(),"O");
+fh = Foreign(Name(),"H");
+fl = Foreign(Name(),"L");
+
+pc = ValueWhen(Ref(kn,-1) == lastKK - 1, Ref(fc,-1));
+nc = ValueWhen(Ref(kn,-1) == lastKK - 1, fc);
+//Plot(pc,"pc",colorRed,styleNoLine,stylenorescale);
+
+gaokai = nc - pc > point1 * nc / 10000;
+dikai = pc - nc > point1 * pc / 10000;
+
+bsig1 = fc > pc AND dikai AND kn > ppp;
+ssig1 = fc < pc AND gaokai AND kn > ppp;
+
+bsig2 = DateNum() == ValueWhen(bsig1,DateNum());
+ssig2 = DateNum() == ValueWhen(ssig1,DateNum());
+
+//Plot(bsig2,"bsig",colorRed);
+
+ps = GetPs(bsig1,ssig1,0);
+
+xb = ps == 1 AND Ref(ps,-1) != 1;
+xs = ps == -1 AND Ref(ps,-1) != -1;
+
+lstbsg = BarsSince(xb);
+lstssg = BarsSince(xs);
+
+c03 = ps == 1 AND fc - Ref(fc,-lstbsg) > point1 + 0.1;
+c04 = ps == -1 AND Ref(fc,-lstssg) - fc > point1 + 0.1;
+
+
+lstbsg = BarsSince(bsig2);
+lstssg = BarsSince(ssig2);
+
+
+c01 = ps == 1 AND Ref(fc,-lstbsg) - fc > point + 0.1;
+c02 = ps == -1 AND fc - Ref(fc, -lstssg) > point + 0.1;
+
+c05 = ps == 1 AND TimeNum() == 151400 AND fc > Ref(fc,-lstbsg);
+c06 = ps == -1 AND TimeNum() == 151400 AND fc < Ref(fc,-lstssg);
+
+nonight= (DateNum()==1120117 OR DateNum()==1120214 OR DateNum()==1120313 OR DateNum()==1120417 OR DateNum()==1120515 OR DateNum()==1120612 OR DateNum()==1120717 OR DateNum()==1120814 OR DateNum()==1120918 OR DateNum()==1121017 OR DateNum()==1121114 OR DateNum()==1121217
+OR DateNum()==1130115 OR DateNum()==1130206 OR DateNum()==1130313 OR DateNum()==1130417 OR DateNum()==1130514 OR DateNum()==1130618 OR DateNum()==1130717 OR DateNum()==1130813 OR DateNum()==1130917 OR DateNum()==1131016 OR DateNum()==1131113 OR DateNum()==1131218
+OR DateNum()==1140116 OR DateNum()==1140218 OR DateNum()==1140318 OR DateNum()==1140416 OR DateNum()==1140514 OR DateNum()==1140618 OR DateNum()==1140716 OR DateNum()==1140813 OR DateNum()==1140917 OR DateNum()==1141015 OR DateNum()==1141118 OR DateNum()==1141216 OR DateNum()==1150114) AND Ref(Day(),1)!=Day();
+
+geye = IIf(nonight,TimeNum()>145900,0);
+
+csig = c01 OR c02 OR c03 OR c04 OR geye;// OR c05 OR c06;
+
+Buy=BSIG2;
+Short=SSIG2;
+Sell=Cover=CSIG;
+
+
+PlotPerformance(bsig2,ssig2,Csig);
+Trading_log(BSIG2,SSIG2,CSIG,StrategyID,StrategyName,ProType);

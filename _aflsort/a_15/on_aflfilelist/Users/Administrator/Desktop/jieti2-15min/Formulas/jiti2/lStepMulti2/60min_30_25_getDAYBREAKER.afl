@@ -1,0 +1,149 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+function PIR(p,Length)
+{
+Ll=LLV(p,Length);
+Hh=HHV(p,Length);
+return (100*(p-Ll)/(Hh-Ll));
+}
+
+function TP15(bsig, ssig, ps0)
+{
+tp = 15; //Param("tp",15,0,100,1);
+Lstbsg = BarsSince(ps0==1 AND Ref(ps0,-1)!=1);
+Lstssg = BarsSince(ps0==-1 AND Ref(ps0,-1)!=-1);
+C01 = ps0==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C02 = ps0==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+Csig=C01 OR C02;
+ps = GetPs(bsig, ssig, csig);
+return ps;
+}
+
+
+
+DayBreaker_otime = 1; //paramoptimize("DayBreaker_otime",93000,90000,150000,1000);
+
+function getDaybreaker(DayBreaker_otime)
+
+{
+
+
+
+yh = TimeFrameGetPrice("H", inDaily, -1);
+
+yl = TimeFrameGetPrice("L", inDaily, -1);
+
+yc = TimeFrameGetPrice("C", inDaily, -1);
+
+yo = TimeFrameGetPrice("O", inDaily, -1);
+
+
+
+bsig1 = C>yh AND TimeNum()>=DayBreaker_otime;
+
+ssig1 = C<yl AND TimeNum()>=DayBreaker_otime;
+
+
+
+Lstbsig = BarsSince(bsig1 );
+
+Lstssig = BarsSince(bsig1);  
+
+
+
+firstbar = Day()!=Ref(Day(),-1);
+
+kn = BarsSince(firstbar);
+
+
+
+bsig=bsig1 AND CPPCount(bsig1 OR ssig1 ,kn)==1;
+
+ssig=ssig1 AND CPPCount(ssig1 OR bsig1 ,kn)==1 ;
+
+
+
+bsig=ExRem(Bsig,Ssig);
+ssig=ExRem(Ssig,Bsig);
+
+ps=GetPs(bsig,ssig,0);
+
+
+
+
+//add exrem
+bsig=exrem(bsig,ssig);
+ssig=exrem(ssig,bsig);
+ps=getps(bsig,ssig,0);
+
+//add_tp15ps_exp
+ps = TP15(bsig, ssig, ps);
+return ps;
+
+
+}
+
+ps = 0;
+//60_MD
+DayBreaker_otime = 104000;ps1 = getDAYBREAKER(DayBreaker_otime);ps += ps1;
+DayBreaker_otime = 108000;ps2 = getDAYBREAKER(DayBreaker_otime);ps += ps2;
+DayBreaker_otime = 106000;ps3 = getDAYBREAKER(DayBreaker_otime);ps += ps3;
+DayBreaker_otime = 103000;ps4 = getDAYBREAKER(DayBreaker_otime);ps += ps4;
+DayBreaker_otime = 110000;ps5 = getDAYBREAKER(DayBreaker_otime);ps += ps5;
+DayBreaker_otime = 101000;ps6 = getDAYBREAKER(DayBreaker_otime);ps += ps6;
+DayBreaker_otime = 109000;ps7 = getDAYBREAKER(DayBreaker_otime);ps += ps7;
+DayBreaker_otime = 102000;ps8 = getDAYBREAKER(DayBreaker_otime);ps += ps8;
+DayBreaker_otime = 107000;ps9 = getDAYBREAKER(DayBreaker_otime);ps += ps9;
+DayBreaker_otime = 90000;ps10 = getDAYBREAKER(DayBreaker_otime);ps += ps10;
+//60_NP
+DayBreaker_otime = 105000;ps1 = getDAYBREAKER(DayBreaker_otime);ps += ps1;
+DayBreaker_otime = 109000;ps2 = getDAYBREAKER(DayBreaker_otime);ps += ps2;
+DayBreaker_otime = 110000;ps3 = getDAYBREAKER(DayBreaker_otime);ps += ps3;
+DayBreaker_otime = 101000;ps4 = getDAYBREAKER(DayBreaker_otime);ps += ps4;
+DayBreaker_otime = 106000;ps5 = getDAYBREAKER(DayBreaker_otime);ps += ps5;
+DayBreaker_otime = 108000;ps6 = getDAYBREAKER(DayBreaker_otime);ps += ps6;
+DayBreaker_otime = 103000;ps7 = getDAYBREAKER(DayBreaker_otime);ps += ps7;
+DayBreaker_otime = 102000;ps8 = getDAYBREAKER(DayBreaker_otime);ps += ps8;
+DayBreaker_otime = 107000;ps9 = getDAYBREAKER(DayBreaker_otime);ps += ps9;
+DayBreaker_otime = 104000;ps10 = getDAYBREAKER(DayBreaker_otime);ps += ps10;
+//60_PF
+DayBreaker_otime = 105000;ps1 = getDAYBREAKER(DayBreaker_otime);ps += ps1;
+DayBreaker_otime = 109000;ps2 = getDAYBREAKER(DayBreaker_otime);ps += ps2;
+DayBreaker_otime = 110000;ps3 = getDAYBREAKER(DayBreaker_otime);ps += ps3;
+DayBreaker_otime = 101000;ps4 = getDAYBREAKER(DayBreaker_otime);ps += ps4;
+DayBreaker_otime = 106000;ps5 = getDAYBREAKER(DayBreaker_otime);ps += ps5;
+DayBreaker_otime = 108000;ps6 = getDAYBREAKER(DayBreaker_otime);ps += ps6;
+DayBreaker_otime = 103000;ps7 = getDAYBREAKER(DayBreaker_otime);ps += ps7;
+DayBreaker_otime = 102000;ps8 = getDAYBREAKER(DayBreaker_otime);ps += ps8;
+DayBreaker_otime = 107000;ps9 = getDAYBREAKER(DayBreaker_otime);ps += ps9;
+DayBreaker_otime = 104000;ps10 = getDAYBREAKER(DayBreaker_otime);ps += ps10;
+
+
+ps_th = Param("ps_th",25, 0, 100, 1);
+
+bsig=ps >= ps_th;
+ssig=ps <= -ps_th;
+
+bsig=ExRem(bsig,ssig);
+ssig=ExRem(ssig,bsig);
+
+psmerge=GetPs(bsig,ssig,0);
+ps_exit_th = ps_th * 0.66667;
+C01 = psmerge==1 AND ps <= ps_exit_th;
+C02 = psmerge==-1 AND ps >= -ps_exit_th;
+
+tp = 15; //Param("tp",15,0,100,1);
+Lstbsg = BarsSince(psmerge==1 AND Ref(psmerge,-1)!=1);
+Lstssg = BarsSince(psmerge==-1 AND Ref(psmerge,-1)!=-1);
+C03 = psmerge==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C04 = psmerge==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+//Csig=C01 OR C02 OR C03 OR C04;
+csig = C03 OR C04;
+//csig = C01 OR C02;
+
+
+Plotperformance(bsig,ssig,Csig);
+
+
+
+StrategyName = "60min_30_25_getDAYBREAKER";StrategyID = "1012000021";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

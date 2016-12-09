@@ -1,0 +1,135 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+function PIR(p,Length)
+{
+Ll=LLV(p,Length);
+Hh=HHV(p,Length);
+return (100*(p-Ll)/(Hh-Ll));
+}
+
+function TP15(bsig, ssig, ps0)
+{
+tp = 15; //Param("tp",15,0,100,1);
+Lstbsg = BarsSince(ps0==1 AND Ref(ps0,-1)!=1);
+Lstssg = BarsSince(ps0==-1 AND Ref(ps0,-1)!=-1);
+C01 = ps0==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C02 = ps0==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+Csig=C01 OR C02;
+ps = GetPs(bsig, ssig, csig);
+return ps;
+}
+
+
+
+RMItrend_RMIperiods = 1; //paramoptimize( "RMItrend_RMIPeriods",3, 1, 200, 1 );
+
+RMItrend_RMImomentum = 1; //paramoptimize( "RMItrend_RMIMomentum",5, 1, 200, 1 );
+
+
+
+RMItrend_Length=1; //paramoptimize("RMItrend_Length",30,10,1000,10);
+
+RMItrend_Selltrigger=1; //paramoptimize("RMItrend_Selltrigger",1,1.0,100,1);
+
+
+
+function getRMItrend(RMItrend_RMIperiods, RMItrend_RMImomentum, RMItrend_Length,RMItrend_Selltrigger)
+
+{ 
+
+
+
+G3=RMI(RMItrend_RMIperiods, RMItrend_RMImomentum);
+
+/////////////////////functions/////////////////////////////////////////
+
+
+PIRG3=PIR(G3,RMItrend_Length);
+
+ssig=PIRG3<RMItrend_Selltrigger;
+bsig=PIRG3>100-RMItrend_Selltrigger;
+
+
+bsig=ExRem(Bsig,Ssig);
+ssig=ExRem(Ssig,Bsig);
+
+ps=GetPs(bsig,ssig,0);
+
+
+
+
+//add exrem
+bsig=exrem(bsig,ssig);
+ssig=exrem(ssig,bsig);
+ps=getps(bsig,ssig,0);
+
+//add_tp15ps_exp
+ps = TP15(bsig, ssig, ps);
+return ps;
+
+
+}
+
+ps = 0;
+//15_MD
+RMItrend_RMIPeriods = 4;RMItrend_RMIMomentum = 70;RMItrend_Length = 670;RMItrend_Selltrigger = 90;ps1 = getRMItrend(RMItrend_RMIPeriods,RMItrend_RMIMomentum,RMItrend_Length,RMItrend_Selltrigger);ps += ps1;
+RMItrend_RMIPeriods = 93;RMItrend_RMIMomentum = 13;RMItrend_Length = 180;RMItrend_Selltrigger = 63;ps2 = getRMItrend(RMItrend_RMIPeriods,RMItrend_RMIMomentum,RMItrend_Length,RMItrend_Selltrigger);ps += ps2;
+RMItrend_RMIPeriods = 6;RMItrend_RMIMomentum = 63;RMItrend_Length = 510;RMItrend_Selltrigger = 18;ps3 = getRMItrend(RMItrend_RMIPeriods,RMItrend_RMIMomentum,RMItrend_Length,RMItrend_Selltrigger);ps += ps3;
+RMItrend_RMIPeriods = 27;RMItrend_RMIMomentum = 37;RMItrend_Length = 490;RMItrend_Selltrigger = 92;ps4 = getRMItrend(RMItrend_RMIPeriods,RMItrend_RMIMomentum,RMItrend_Length,RMItrend_Selltrigger);ps += ps4;
+RMItrend_RMIPeriods = 136;RMItrend_RMIMomentum = 158;RMItrend_Length = 560;RMItrend_Selltrigger = 69;ps5 = getRMItrend(RMItrend_RMIPeriods,RMItrend_RMIMomentum,RMItrend_Length,RMItrend_Selltrigger);ps += ps5;
+RMItrend_RMIPeriods = 1;RMItrend_RMIMomentum = 36;RMItrend_Length = 290;RMItrend_Selltrigger = 19;ps6 = getRMItrend(RMItrend_RMIPeriods,RMItrend_RMIMomentum,RMItrend_Length,RMItrend_Selltrigger);ps += ps6;
+RMItrend_RMIPeriods = 46;RMItrend_RMIMomentum = 89;RMItrend_Length = 300;RMItrend_Selltrigger = 52;ps7 = getRMItrend(RMItrend_RMIPeriods,RMItrend_RMIMomentum,RMItrend_Length,RMItrend_Selltrigger);ps += ps7;
+RMItrend_RMIPeriods = 112;RMItrend_RMIMomentum = 40;RMItrend_Length = 370;RMItrend_Selltrigger = 50;ps8 = getRMItrend(RMItrend_RMIPeriods,RMItrend_RMIMomentum,RMItrend_Length,RMItrend_Selltrigger);ps += ps8;
+RMItrend_RMIPeriods = 200;RMItrend_RMIMomentum = 165;RMItrend_Length = 690;RMItrend_Selltrigger = 71;ps9 = getRMItrend(RMItrend_RMIPeriods,RMItrend_RMIMomentum,RMItrend_Length,RMItrend_Selltrigger);ps += ps9;
+RMItrend_RMIPeriods = 100;RMItrend_RMIMomentum = 127;RMItrend_Length = 50;RMItrend_Selltrigger = 67;ps10 = getRMItrend(RMItrend_RMIPeriods,RMItrend_RMIMomentum,RMItrend_Length,RMItrend_Selltrigger);ps += ps10;
+//15_NP
+RMItrend_RMIPeriods = 8;RMItrend_RMIMomentum = 59;RMItrend_Length = 530;RMItrend_Selltrigger = 89;ps1 = getRMItrend(RMItrend_RMIPeriods,RMItrend_RMIMomentum,RMItrend_Length,RMItrend_Selltrigger);ps += ps1;
+RMItrend_RMIPeriods = 4;RMItrend_RMIMomentum = 70;RMItrend_Length = 670;RMItrend_Selltrigger = 90;ps2 = getRMItrend(RMItrend_RMIPeriods,RMItrend_RMIMomentum,RMItrend_Length,RMItrend_Selltrigger);ps += ps2;
+RMItrend_RMIPeriods = 14;RMItrend_RMIMomentum = 51;RMItrend_Length = 510;RMItrend_Selltrigger = 72;ps3 = getRMItrend(RMItrend_RMIPeriods,RMItrend_RMIMomentum,RMItrend_Length,RMItrend_Selltrigger);ps += ps3;
+RMItrend_RMIPeriods = 16;RMItrend_RMIMomentum = 50;RMItrend_Length = 530;RMItrend_Selltrigger = 66;ps4 = getRMItrend(RMItrend_RMIPeriods,RMItrend_RMIMomentum,RMItrend_Length,RMItrend_Selltrigger);ps += ps4;
+RMItrend_RMIPeriods = 12;RMItrend_RMIMomentum = 64;RMItrend_Length = 360;RMItrend_Selltrigger = 83;ps5 = getRMItrend(RMItrend_RMIPeriods,RMItrend_RMIMomentum,RMItrend_Length,RMItrend_Selltrigger);ps += ps5;
+RMItrend_RMIPeriods = 10;RMItrend_RMIMomentum = 62;RMItrend_Length = 830;RMItrend_Selltrigger = 90;ps6 = getRMItrend(RMItrend_RMIPeriods,RMItrend_RMIMomentum,RMItrend_Length,RMItrend_Selltrigger);ps += ps6;
+RMItrend_RMIPeriods = 20;RMItrend_RMIMomentum = 66;RMItrend_Length = 400;RMItrend_Selltrigger = 62;ps7 = getRMItrend(RMItrend_RMIPeriods,RMItrend_RMIMomentum,RMItrend_Length,RMItrend_Selltrigger);ps += ps7;
+RMItrend_RMIPeriods = 16;RMItrend_RMIMomentum = 38;RMItrend_Length = 480;RMItrend_Selltrigger = 87;ps8 = getRMItrend(RMItrend_RMIPeriods,RMItrend_RMIMomentum,RMItrend_Length,RMItrend_Selltrigger);ps += ps8;
+RMItrend_RMIPeriods = 6;RMItrend_RMIMomentum = 87;RMItrend_Length = 540;RMItrend_Selltrigger = 81;ps9 = getRMItrend(RMItrend_RMIPeriods,RMItrend_RMIMomentum,RMItrend_Length,RMItrend_Selltrigger);ps += ps9;
+RMItrend_RMIPeriods = 37;RMItrend_RMIMomentum = 58;RMItrend_Length = 210;RMItrend_Selltrigger = 61;ps10 = getRMItrend(RMItrend_RMIPeriods,RMItrend_RMIMomentum,RMItrend_Length,RMItrend_Selltrigger);ps += ps10;
+//15_PF
+RMItrend_RMIPeriods = 4;RMItrend_RMIMomentum = 70;RMItrend_Length = 670;RMItrend_Selltrigger = 90;ps1 = getRMItrend(RMItrend_RMIPeriods,RMItrend_RMIMomentum,RMItrend_Length,RMItrend_Selltrigger);ps += ps1;
+RMItrend_RMIPeriods = 116;RMItrend_RMIMomentum = 1;RMItrend_Length = 510;RMItrend_Selltrigger = 65;ps2 = getRMItrend(RMItrend_RMIPeriods,RMItrend_RMIMomentum,RMItrend_Length,RMItrend_Selltrigger);ps += ps2;
+RMItrend_RMIPeriods = 93;RMItrend_RMIMomentum = 13;RMItrend_Length = 180;RMItrend_Selltrigger = 63;ps3 = getRMItrend(RMItrend_RMIPeriods,RMItrend_RMIMomentum,RMItrend_Length,RMItrend_Selltrigger);ps += ps3;
+RMItrend_RMIPeriods = 34;RMItrend_RMIMomentum = 44;RMItrend_Length = 400;RMItrend_Selltrigger = 78;ps4 = getRMItrend(RMItrend_RMIPeriods,RMItrend_RMIMomentum,RMItrend_Length,RMItrend_Selltrigger);ps += ps4;
+RMItrend_RMIPeriods = 6;RMItrend_RMIMomentum = 63;RMItrend_Length = 510;RMItrend_Selltrigger = 18;ps5 = getRMItrend(RMItrend_RMIPeriods,RMItrend_RMIMomentum,RMItrend_Length,RMItrend_Selltrigger);ps += ps5;
+RMItrend_RMIPeriods = 73;RMItrend_RMIMomentum = 35;RMItrend_Length = 550;RMItrend_Selltrigger = 59;ps6 = getRMItrend(RMItrend_RMIPeriods,RMItrend_RMIMomentum,RMItrend_Length,RMItrend_Selltrigger);ps += ps6;
+RMItrend_RMIPeriods = 23;RMItrend_RMIMomentum = 46;RMItrend_Length = 520;RMItrend_Selltrigger = 35;ps7 = getRMItrend(RMItrend_RMIPeriods,RMItrend_RMIMomentum,RMItrend_Length,RMItrend_Selltrigger);ps += ps7;
+RMItrend_RMIPeriods = 83;RMItrend_RMIMomentum = 1;RMItrend_Length = 540;RMItrend_Selltrigger = 65;ps8 = getRMItrend(RMItrend_RMIPeriods,RMItrend_RMIMomentum,RMItrend_Length,RMItrend_Selltrigger);ps += ps8;
+RMItrend_RMIPeriods = 110;RMItrend_RMIMomentum = 47;RMItrend_Length = 460;RMItrend_Selltrigger = 100;ps9 = getRMItrend(RMItrend_RMIPeriods,RMItrend_RMIMomentum,RMItrend_Length,RMItrend_Selltrigger);ps += ps9;
+RMItrend_RMIPeriods = 27;RMItrend_RMIMomentum = 37;RMItrend_Length = 490;RMItrend_Selltrigger = 92;ps10 = getRMItrend(RMItrend_RMIPeriods,RMItrend_RMIMomentum,RMItrend_Length,RMItrend_Selltrigger);ps += ps10;
+
+
+ps_th = Param("ps_th", 10, 0, 100, 1);
+
+bsig=ps >= ps_th;
+ssig=ps <= -ps_th;
+
+bsig=ExRem(bsig,ssig);
+ssig=ExRem(ssig,bsig);
+
+psmerge=GetPs(bsig,ssig,0);
+ps_exit_th = ps_th * 0.66667;
+C01 = psmerge==1 AND ps <= ps_exit_th;
+C02 = psmerge==-1 AND ps >= -ps_exit_th;
+
+tp = 15; //Param("tp",15,0,100,1);
+Lstbsg = BarsSince(psmerge==1 AND Ref(psmerge,-1)!=1);
+Lstssg = BarsSince(psmerge==-1 AND Ref(psmerge,-1)!=-1);
+C03 = psmerge==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C04 = psmerge==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+//Csig=C01 OR C02 OR C03 OR C04;
+csig = C03 OR C04;
+//csig = C01 OR C02;
+
+
+Plotperformance(bsig,ssig,Csig);
+
+
+StrategyName = "15min_30_10_getRMItrend";StrategyID = "1015900014";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

@@ -1,0 +1,75 @@
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/BasicV2/TM.afl";
+#include "Formulas/Custom/BasicV2/V7DY.afl";
+#include "Formulas/Custom/BasicV2/DFB.afl";
+#include "Formulas/Custom/BasicV2/MAA.afl";
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 800);
+
+StrategyName = "AU03 G2_GSign";
+StrategyID = 6004;
+ProType = 1;
+//V7
+CondV1 =  V7DYHLV2(14,9,"AU");
+CondV2 =  V7DYHLV2(15,19,"AU");
+CondV3 =  V7DYHLV2(11,18,"AU");
+CondV4 =  V7DYHLV2(16,22,"AU");
+CondV5 =  V7DYHL(9,4,"AU");
+CondV6 =  V7DYHL(10,2,"AU");
+CondV7 =  V7DYMA(17,18,0,"AU");
+CondV8 =  V7DYMA(19,21,1,"AU");
+	
+CondV = CondV1+ CondV2+ CondV3+ CondV4+CondV5+ CondV6+ CondV7+ CondV8;
+CondG1= GetSig123(CondV);
+//Maa
+CondM1 =  MAArrangeCount(32,56,30,1000,1000,"AU");
+CondM2 =  MAArrangeCount(35,46,30,1000,1000,"AU");
+CondM3 =  MAArrangeCount(34,45,30,1000,1000,"AU");
+
+CondM = CondM1 +CondM2+CondM3;
+CondG2= GetSig123(CondM);
+
+//DFB
+CondD1 =  DFB(42,0,"AU");
+CondD2 =  DFB(44,0,"AU");
+CondD3 =  DFB(54,0,"AU");
+CondD4 =  DFB(52,0,"AU");
+CondD5 =  DFB(47,0,"AU");
+CondD =CondD1+CondD2+CondD3+ CondD4+CondD5;
+CondG3= GetSig123(CondD);
+//TM
+CondT1 =  TimeShareHLHalfLess(32,102,39,1000,1000,"AU");
+CondT2 =  TimeShareHLHalfLess(37,81,40,1000,1000,"AU");
+CondT3 =  TimeShareFHLLess(27,95,36,1000,1000,"AU");
+CondT4 =  TimeShareFHLLess(28,85,37,1000,1000,"AU");
+CondT5 =  TimeShareFHLLess(28,85,37,1000,1000,"AU");
+CondT6 =  TimeShareHLLess(29,85,48,1000,1000,"AU");
+CondT7 =  TimeShareHLLess(29,85,48,1000,1000,"AU");
+
+CondT = CondT1 +CondT2 +CondT3 +CondT4 +CondT5 +CondT6 +CondT7 ;
+
+CondG4=GetSig123(CondT);
+
+
+V7= ParamOptimize("V7",0.5, 0.5, 2.5, 0.5);
+Maa= ParamOptimize("Maa", 1.5, 0.5, 2.5, 0.5);
+DF= ParamOptimize("DFB", 0.5, 0.5, 2.5, 0.5);
+TM= ParamOptimize("TM", 1.5, 0.5, 2.5, 0.5);
+
+Cond = V7*CondG1 +Maa*CondG2+DF*CondG3+TM*CondG4;
+
+Vote=ParamOptimize("Vote", 0.5, 0, 1, 0.5);
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG1=Cond<=Vote && Cond>=-Vote;
+CSIG=(TimeNum()+Interval()*100/60)>=146000;
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

@@ -1,0 +1,71 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "YY-5Min-midday2";
+StrategyID = "1010700002";
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine);  
+
+bidp = Foreign(Name(), "L");
+askp = Foreign(Name(), "H");
+bidv = Foreign(Name(), "1");
+askv = Foreign(Name(), "2");
+fc = Foreign(Name(), "c");
+//fc = Foreign("YY", "c");
+//SetForeign("YY");
+
+length = Param("length", 13, 1, 100, 1);
+t1= Param("t1",104700,100000,150000,100);
+t2= Param("t2",131300,110000,150000,100);
+zs= Param("zs",1.5,0.1,100,0.1);
+
+
+bsig= TimeNum()>= t1 AND TimeNum()<=t2 AND C==HHV(C,length);
+ssig= TimeNum()>= t1 AND TimeNum()<=t2 AND C==LLV(C,length);
+
+ps=GetPs(bsig,ssig,0);
+
+bindex= BarsSince( ps==1 AND Ref(ps,-1)!=1);
+sindex= BarsSince( ps==-1 AND Ref(ps,-1)!=-1);
+
+//bp= Ref(C,-bindex);
+//sp= Ref(C,-bindex);
+hp=HighestSince(ps==1 AND Ref(ps,-1)!=1,fC);
+lp=LowestSince(ps==-1 AND Ref(ps,-1)!=-1,fC);
+
+//co1= ps==1 AND (hp-C)/hp*100>=zs AND TimeNum()> t2;
+//co2= ps==-1 AND  (C-lp)/lp*100>=zs AND TimeNum()> t2;
+co1= ps==-1 AND (hp-fC)/hp*100>=zs;
+co2= ps==1 AND (fC-lp)/lp*100>=zs;
+
+//csig= TimeNum()>=151400;
+//Plot(bsig,"bsig",colorRed,16);
+//Plot(ssig,"ssig",colorRed,16);
+//Plot(ps,"ps",colorRed,16);
+
+csig= co1 OR Co2;
+//csig=0;
+
+
+
+//ps=GetPs(bsig,ssig,Csig);
+
+//RestorePriceArrays();
+
+//Plot(ps,"ps of YY",colorRed);
+
+PlotPerformance(bsig,ssig,Csig);
+   Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+ps0 = GetPs(bsig,ssig,csig);
+Filter= 1;
+AddColumn(ps0,"ps");
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

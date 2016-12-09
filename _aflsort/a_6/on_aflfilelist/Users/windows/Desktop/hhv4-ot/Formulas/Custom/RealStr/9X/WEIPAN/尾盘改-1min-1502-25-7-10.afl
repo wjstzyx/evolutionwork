@@ -1,0 +1,64 @@
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "IF-1MIN-weipan1502-25-7-10";
+StrategyID = 40814;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+time= ParamOptimize("time", 1502, 1430, 1515,1); 
+period= ParamOptimize("period", 25, 0, 200,1); 
+//period2= ParamOptimize("period2", 60, 0, 200,1); 
+x= ParamOptimize("x", 7, 0, 200,1);
+y= ParamOptimize("y", 10, 0, 200,1);
+//paraperiod2= ParamOptimize("paraperiod2", 8, 0, 200,1); 
+
+//===============================================
+FSTK=Day()!=Ref(Day(),-1);				
+KN=BarsSince(FSTK)+1;
+
+
+Cond2=TimeNum()>=time*100;
+
+b01=L==LLV(L,period);
+s01=H==HHV(H,period);
+
+Lstb01=BarsSince(b01);
+Lsts01=BarsSince(s01);
+
+//Plot(Lstb01,"b",colorRed);
+
+b02=Lstb01>x AND Lstb01<y AND LLV(L,Lstb01)>Ref(L,-Lstb01) AND H>Ref(H,-Lstb01);
+s02=Lsts01>x AND Lsts01<y AND HHV(H,Lsts01)<Ref(H,-Lsts01) AND L<Ref(L,-Lsts01);
+
+b03=H==HHV(H,Lstb01-1);
+s03=L==LLV(L,Lsts01-1);
+
+bsig=b02 AND b03 AND Cond2 ;//;
+ssig=s02 AND s03 AND Cond2 ;//;
+
+
+
+Lstsig = BarsSince(bsig OR ssig);   
+//CSIG =Lstsig==paraperiod2;
+
+BPeriod= BarsSince(BSIG)<BarsSince(SSIG) AND BarsSince(BSIG)>0;            
+SPeriod= BarsSince(SSIG)<BarsSince(BSIG) AND BarsSince(SSIG)>0;  
+ 
+//C01=bperiod AND V==HHV(V,period2) AND up;
+//C02=speriod AND V==HHV(V,period2) AND dn;
+
+
+Csig=TimeNum()>=151400 ;//OR (bsig AND Lstsig>0) OR (ssig AND Lstsig>0);
+
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName+"--"+StrategyID);

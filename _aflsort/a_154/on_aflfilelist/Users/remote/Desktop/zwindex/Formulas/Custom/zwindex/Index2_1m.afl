@@ -1,0 +1,69 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();
+//¨®?¨¤¡ätick2a¨º?
+//¦Ì?¨¨?¨ªa2?¨ºy?Y	
+
+name2 = "Index2";
+fc = Foreign(name2, "c");
+DayStart=Day()!=Ref(Day(),-1);
+ThisDayOpenfc= Ref(fc,-BarsSince(DayStart));
+
+
+
+cof=Index2_cor(fc,thisdayopenfc);
+
+rsv1= (fc-LLV(fc,120)) / (HHV(fc,120)-LLV(fc,120)) * 100;
+rsv2= (fc-LLV(fc,240)) / (HHV(fc,240)-LLV(fc,240)) * 100;
+rsv3= (fc-LLV(fc,360)) / (HHV(fc,360)-LLV(fc,360)) * 100;
+
+rsv4= (C-LLV(C,120)) / (HHV(C,120)-LLV(C,120)) * 100;
+rsv5= (C-LLV(C,240)) / (HHV(C,240)-LLV(C,240)) * 100;
+rsv6= (C-LLV(C,360)) / (HHV(C,360)-LLV(C,360)) * 100;
+
+
+zf=Param("zf",0.005, 0, 0.02, 0.001);
+
+
+opentime=Param("opentime",93900,90000,146000,100);
+addtime=Param("addtime",500,0,10000,100);
+
+
+
+rsv2p=Param("rsv2p",10, 0, 100, 1);
+
+ssig1= rsv1<=5 OR rsv2<=5 OR rsv3<=5;
+bsig1= rsv1>=95 OR rsv2>=95 OR rsv3>=95;
+ssigclose= rsv1<=10 OR rsv2<=10 OR rsv3<=10  OR rsv5<=10 OR rsv6<=10;//
+bsigclose= rsv1>=90 OR rsv2>=90 OR rsv3>=90  OR rsv5>=90 OR rsv6>=90;//
+
+
+ssig= ssig1 AND cof==1; 
+bsig= bsig1 AND cof==1;
+
+
+Lstbsg = BarsSince(bsig);
+Lstssg = BarsSince(ssig);
+
+
+
+ps=GetPs(bsig,ssig,0);
+
+
+co11= ps==1 AND Index2_corr(fc,thisdayopenfc)==1;
+co12= ps==-1 AND Index2_corr(fc,thisdayopenfc)==-1;
+
+csig= co11 OR co12;
+PlotPerformance(bsig,ssig,csig);
+
+
+StrategyName = "Index2_1m";
+StrategyID = "1072100001";
+ProType = 1;
+Buy = BSIG;
+Short = SSIG;
+Sell = Cover = CSIG;
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

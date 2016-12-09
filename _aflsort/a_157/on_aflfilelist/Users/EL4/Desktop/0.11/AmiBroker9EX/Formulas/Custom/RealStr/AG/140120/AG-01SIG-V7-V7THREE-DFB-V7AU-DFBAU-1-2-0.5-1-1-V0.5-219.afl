@@ -1,0 +1,88 @@
+_SECTION_BEGIN("TEST1-1");
+#pragma nocache;
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TRADEHelper.afl";
+#include "Formulas/Custom/BasicV4/dfb.afl";
+#include "Formulas/Custom/BasicV2/v7dy.afl";
+
+
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 500);
+StrategyName = "AG-01SIG-V7-V7THREE-DFB-V7AU-DFBAU-1-2-0.5-1-1-V0.5-219";
+StrategyID = 90003;
+ProType = 1;
+TickerNAME = Name();
+n1= ParamOptimize("Highperiod", 35, 20, 300,1);
+n2= ParamOptimize("maperiod", 2, 1,20,0.1);
+n3= ParamOptimize("PTS",1, 0, 600,1);
+n4= ParamOptimize("StartPeriod",1, 0, 1000, 1);
+n5= ParamOptimize("EndPeriod",1, 0, 1000, 1);
+n6= ParamOptimize("x",1, 0, 1000, 1);
+n7= ParamOptimize("n7",1, 0, 1000, 1);
+N8= ParamOptimize("N8",1, 0, 1000, 1);
+
+condv1=V7DYMAHLV3new(109,95,1,0,216,219,tickername);
+condv2=V7DYMAHLV4new(109,95,1,90,0,219,tickername);
+Condv3=V7DYMAnew(100,114,1,219,"AG");
+Condv4=V7DYMAHLVnew(109,95,1,219,"AG");
+Condv5=V7DYMAHLVnew(112,115,1,219,"AG");
+Condv6=V7DYMAHLVnew(114,132,1,219,"AG");
+Condv7=V7DYMAHLVnew(117,131,0,219,"AG");
+CondV = CondV1+ CondV2+ CondV3+ CondV4+CondV5+ CondV6+ CondV7;
+CondG1= GetSig123(CondV) ;
+condm1=V7DYThreeSegmentag2new(25,216,219,tickername);
+condm2=V7DYThreeSegmentag2new(25,216,219,tickername);
+Condm3=V7DYThreeSegmentagnew(25,0,219,"AG");
+CondM = CondM1 +CondM2+CondM3;
+CondG2=GetSig123(CondM);
+Condd1=DFBag(21,5,219,"AG");
+Condd2=DFBag(24,3,219,"AG");
+Condd3=DFBag(39,2,219,"AG");
+CondD =CondD1+CondD2+CondD3;
+CondG3= GetSig123(CondD );
+//V7
+CondV1 =  V7DYHLV2new(15,25,219,"au");
+CondV2 =  V7DYHLnew(10,7,219,"au");
+CondV3 =  V7DYHLnew(9,6,219,"au");
+CondV4 =  V7DYMAnew(27,42,0,219,"au");
+CondVv = CondV1+ CondV2+ CondV3+ CondV4;
+
+CondG4= GetSig123(CondVv);
+//DFB
+CondDd =  DFBag(11,3,219,"au");
+
+CondG5=  GetSig123(CondDD) ;
+
+
+V7=1;// ParamOptimize("V7",1, 0, 2.5, 0.5);
+V7three= 2;//ParamOptimize("V7three", 2, 0, 2.5, 0.5);
+DF= 0.5;//ParamOptimize("DFB", 0.5, 0, 2.5, 0.5);
+V7AU= 1;//ParamOptimize("V7AU", 1, 0, 2.5, 0.5);
+DFAU= 1;//ParamOptimize("DFAU", 1, 0, 2.5, 0.5);
+
+Cond = V7*CondG1 +V7three*CondG2+DF*CondG3+V7AU*CondG4+DFAU*CondG5;
+
+
+
+Vote=0.5;//ParamOptimize("vote",0.5, 0,3, 0.5);
+
+
+BSIG=Cond>Vote AND  Openlastk(tickername,6) ;
+SSIG=Cond<-Vote AND  Openlastk(tickername,6);
+CSIG=Cond==0 OR GetLastKMINs(tickername,6);
+//Csig=0;
+
+
+
+Buy = BSIG;
+Short = SSIG;
+Sell= Cover = CSIG;
+
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName+"--"+StrategyID);
+
+_SECTION_END();

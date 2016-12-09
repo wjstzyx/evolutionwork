@@ -1,0 +1,59 @@
+//#include "Formulas/Custom/201502/15s/volatility.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+TickerNAME = Name(); 
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+
+StrategyName = "	IF-150000_1min_NoWeekday_weipan_long";
+StrategyID = 40868;
+ProType = 0;
+TickerName=Name();
+bidp = Foreign(Name(), "L");
+askp = Foreign(Name(), "H");
+bidv = Foreign(Name(), "1");
+askv = Foreign(Name(), "2");
+
+function VolSlice(value, window_size, window_number) {
+	winvol = HHV(value, window_size) - LLV(value, window_size);
+	res = EMA(winvol, window_size * window_number);
+	return res;
+}
+
+function VolSliceOC(window_size) {
+	OC=abs(Ref(C,-1)-C);
+	res = MA(OC, window_size);
+	return res;
+}
+eps=0.001;
+
+
+
+
+
+param1 = Param("param1",0.1,-10,100,0.01);
+dofw = Param("dofw",1,1,5,1);
+length=Param("length",15,1,1000,1);
+
+bsig= DayOfWeek()!=dofw && TimeNum()==145900;
+bsig= bsig && (C-Ref(C,-10))/Ref(C,-10)*100>param1;
+csig= BarsSince(bsig)==length OR TimeNum()==151400;
+
+ssig=0;
+
+
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+
+/*
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);
+*/
+PlotPerformance(bsig,ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

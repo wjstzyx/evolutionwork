@@ -1,0 +1,89 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+
+
+tw=Param("timewinodw",280,80,700,20);
+
+MAperiod=Param("MAperiod",35,13,100,1);
+
+
+
+fcma = MA(C,MAperiod);
+fhma = MA(H,MAperiod);
+flma = MA(L,MAperiod);
+
+Gh = BBandTop(fhma,tw,2);
+Gl = BBandBot(flma,tw,2);
+
+GG01 = 1000*(fcma-Gl)/(Gh-Gl);
+
+///////////////////////////////////////////////
+MAperiod2=MAPeriod * 2;
+fcma2 = MA(C,MAperiod2);
+fhma2 = MA(H,MAperiod2);
+flma2 = MA(L,MAperiod2);
+
+Gh2 = BBandTop(fhma2,tw,2);
+Gl2 = BBandBot(flma2,tw,2);
+
+GG012 = 1000*(fcma2-Gl2)/(Gh2-Gl2);
+
+///////////////////////////////////////////////
+MAperiod3=MAPeriod * 4;
+
+fcma3 = MA(C,MAperiod3);
+fhma3 = MA(H,MAperiod3);
+flma3 = MA(L,MAperiod3);
+
+Gh3 = BBandTop(fhma3,tw,2);
+Gl3 = BBandBot(flma3,tw,2);
+
+GG013 = 1000*(fcma3-Gl3)/(Gh3-Gl3);
+
+GGG = (4 * GG01 + 2 * GG012 + 1 * GG013)/(4+2+1);
+
+
+dir=abs(Close-Ref(Close,-10));
+vola=Sum(abs(Close-Ref(Close,-1)),10) + 0.0001;
+ER=dir/vola;
+
+
+er_th = paramoptimize("ER_th",0.58,0,1,0.02);
+
+
+
+bsig2 = GGG>Ref(GGG,-1) AND er > er_th;
+ssig2 = GGG<Ref(GGG,-1) AND er > er_th;
+
+
+bsig3 =  bsig2;
+ssig3 =  ssig2;
+bsig=ExRem(bsig3,ssig3);
+ssig=ExRem(ssig3,bsig3);
+
+ps=GetPs(bsig,ssig,0);
+
+
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+tp = ParamOptimize("tp",6,0,50,1);
+
+C05 = ps==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C06 = ps==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+CSIG = C05 OR C06;
+
+
+
+
+
+
+
+PlotPerformance(BSig,Ssig,Csig);
+
+
+
+
+
+
+StrategyName = "rb-15min-rb-UOsc_sim-(timewindos_280,MAperiod_35,er_0";StrategyID = "1012100334";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

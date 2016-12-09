@@ -1,0 +1,80 @@
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Basic2012/HL.afl";
+#include "Formulas/Custom/Basic2012/EXV.afl";
+#include "Formulas/Custom/Basic2012/TopBot.afl";
+#include "Formulas/Custom/Basic2012/VolumeBreak.afl";
+#include "Formulas/Custom/Basic2012/V7DY.afl";
+#include "Formulas/Custom/Basic2012/UDHL.afl";
+
+StrategyName = "myExv2CombinRU03";
+StrategyID = 1060;
+
+C11=HLAVG(10,1,30,"rU");
+C12=HLNAVG(12,3,33,"cU");
+C13=HLNAVG(16,2,34,"RU");
+C14=HLAVGA(4,8,33,"RU");
+C21=EXVORI(26,35,"RU");
+C22=EXVORICU3(24,21,145,6, "RU");
+C23=EXVORIV2CU3(22,38,260,4,"RU");
+C31=V7DYORIALL(200, 46 ,"RU");
+C32=V7DYORIALL(300, 43 ,"RU");
+C41=VolumeDecreasing(13,37,"RU");
+W11 = 0.5;
+W12 = 0.5;
+W13 = 0.5;
+W14 = 0.5;
+W21 = 1;
+W22 = 2;
+W23 = 1;
+W31 = 1;
+W32 = 1;
+W41 = 2.5;
+CondEXV2 = C11*W11+C12*W12+C13*W13+C14*W14+C21*W21+C22*W22+C31*W31+C32*W32+C41*W41;
+
+
+C11=HLAVG(5,8,31,"rU");
+C12=HLNAVG(31,2,37,"cU");
+C13=HLAVGa(8,2,33,"RU");
+EXV1Cond=EXVORI(28,24,"CU");
+EXV2Cond=EXVORICU3(25,40,210,5,"RU");
+EXV3Cond=EXVORIV2CU3(19,35,390,7,"RU");
+EXV4Cond=EXVORICU3(29,20,120,5,"CU");
+EXV5Cond=EXVORICU3(27,32,330,5,"RU");
+EXV6Cond=EXVORIV2CU3(22,38,240,7,"RU");
+C21=EXV1Cond+EXV2Cond+EXV3Cond+EXV4Cond+EXV5Cond+EXV6Cond;
+C31=V7DYORIALL(200, 46 ,"RU");
+C32=V7DYORIALL(300, 43 ,"RU");
+C41=VolumeIncreasing(13,37,"RU");
+W11 = 0.5;
+W12 = 1;
+W13 = 0.5;
+W21 = 3/6;
+W23 = 1;
+W31 = 1;
+W32 = 1;
+W41 = 0.5;
+CondEXV1 = C11*W11+C12*W12+C13*W13+C21*W21+C31*W31+C32*W32+C41*W41;
+
+
+
+
+Cond=CondEXV2+CondEXV1;
+Vote= ParamOptimize("Vote", 4, 0, 10, 1);
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+
+VCover= ParamOptimize("Vcover",4,0,10,1); //default val 0 or 2
+
+CSIG1=Cond<=VCover && Cond>=-VCover;
+CSIG2 = (TimeNum()+Interval()*100/60)>=146000;
+CSIG =  CSIG2;
+
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName);
+PlotPerformance(sinPs,sinBS,StrategyName);

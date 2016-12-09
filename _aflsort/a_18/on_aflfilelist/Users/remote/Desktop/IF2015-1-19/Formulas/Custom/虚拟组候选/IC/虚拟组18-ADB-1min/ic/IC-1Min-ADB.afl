@@ -1,0 +1,161 @@
+//--------------------------------Initialization--------------------------------
+_SECTION_BEGIN("DynamicBuffer");
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "IC-1Min-ADB";
+StrategyID = 110006;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+//1 minute break through strategy, only for afternoon
+fstk = Day()!=Ref(Day(),-1);
+fstk[0]=1;
+KN=IIf(FSTK,1,BarsSince(FSTK)+1);
+//--------------------------------Strategy--------------------------------
+//-------------------------Parameters Setting--------------------------------
+Delta_R=Param("Delta_R",4,0,10,0.01);
+//Timer starts when the intrady instant price has exceeded
+//the highest price in the morning for adjusted Delta_R points
+Delta_F=Param("Delta_F",2.4,0,10,0.01);
+//Timer starts when the intrady instant price has fallen
+//below the lowest price in the morning for adjusted Delta_F points
+Buffer=Param("Buffer",5,0,15,1);
+//Buffer time for identifying a certain trend
+Filter_Ratio=Param("Flt_Rt",1.2,0,5,0.01);
+//Inverse filter
+Loss_lmt=Param("Loss_lmt",6.0,0,150,0.1);
+//Cover positions when the loss of a trade reaches the adjusted limit point
+Blin_Range=Param("Blin_Range",11,2,30,1);
+Blin_Width=Param("Blin_width",2.65,0,5,0.01);
+//Bollinger bands setting
+Pft_lmt=Param("Pft_lmt",17.00,0,50,0.01);
+//Cover positions when the profit of a trade reaches the adjusted limit point
+Time_Start=Param("Time_str",145,136,265,1);
+Time_End=Param("Time_end",215,136,265,1);
+//Time interval setting
+//-------------------------------------------------------------------------------
+T=TimeNum();
+N=LastValue(Idx=BarIndex());
+//Total number of bars, starting from zero
+HHVTEM=HHV(C,135);
+H_Morning=IIf(KN>=136,Ref(HHVTEM,-kn+135),99999);
+//Get the highest price in the morning
+LLVTEM=LLV(C,135);
+L_Morning=IIf(KN>=136,Ref(LLVTEM,-kn+135),0);
+//Get the lowest price in the morning
+Delta=(1000*(C-H_Morning)/H_Morning>=Delta_R); 
+sig=N;
+B1=0;
+L_Buffer=LLV(C,Buffer);
+for (a=buffer;a<=N;a++)
+{
+if (a==sig AND L_Buffer[a]>=H_Morning[a])
+{B1[a]=1;}
+if(Delta[a]==1 AND Delta[a-1]==0) // Avoid duplicated counting
+{sig=a+Buffer;}
+}
+//Buffer for long
+Delta2=(1000*(L_Morning-C)/L_Morning>=Delta_F); 
+sig=N;
+S1=0;
+H_Buffer=HHV(C,Buffer);
+for (a=buffer;a<=N;a++)
+{
+if (a==sig AND H_Buffer[a]<=L_Morning[a])
+{S1[a]=1;}
+if(Delta2[a]==1 AND Delta2[a-1]==0)
+{sig=a+Buffer;}
+}
+//Buffer for short
+CK_B=(Ref(C,-Buffer)-C)/(Ref(C,-Buffer)-Ref(C,-2*Buffer))>=Filter_Ratio AND Ref(C,-Buffer)>=Ref(C,-2*Buffer);
+for (a=0;a<N;a++)
+{
+if (Ck_B[a]==1)
+{B1[a]=0;}
+}
+//Filter for long
+CK_F=(Ref(C,-Buffer)-C)/(Ref(C,-Buffer)-Ref(C,-2*Buffer))>=Filter_Ratio AND Ref(C,-Buffer)<=Ref(C,-2*Buffer);
+for (a=0;a<N;a++)
+{
+if (Ck_F[a]==1)
+{S1[a]=0;}
+}
+//Filter for short
+//Negative value is reasonable, if the price inverts dramatically in a Short time, do NOT form new positions.
+CK2= KN>=time_start AND KN<=time_end;
+//Set time limit of positions construction
+bsig= B1 AND CK2;
+ssig= S1 AND CK2;
+C1=TimeNum()>=145800;
+//Cover intrady position when it's 15:05 p.m
+C2=0;
+csig=C1 OR C2;
+//Initializing cover signals
+sinps=GetPs(bsig,ssig,Csig);
+Lwtnum=LowestBars(C);
+a_initial=N-LastValue(Lwtnum);
+atemp=a_initial;
+BBot=BBandBot(C,Blin_Range,Blin_Width);
+
+Hstnum=HighestBars(C);
+a_initial2=n-LastValue(Hstnum);
+atemp2=a_initial2;
+BTop=BBandTop(C,Blin_Range,Blin_Width);
+
+for (a=1;a<N;a++)
+{
+if (sinps[a-1]==0 AND bsig[a]==1)
+{atemp=a;
+atemp2=a;}
+if (sinps[a] ==1 AND ( 1000*(C[atemp]-C[a])/C[atemp]>=Loss_lmt OR C[a]<=BBot[a]  OR 1000*(C[a]-C[atemp2])/C[atemp2]>=Pft_lmt))
+{C2[a]=1;
+Csig=C1 OR C2;
+sinps=GetPs(bsig,ssig,Csig);
+atemp=a_initial;
+atemp2=a_initial2;
+}
+}
+//Dynamic cover positions when the loss or the profit reaches the limit,
+//And when the Close price crosses over the inverse BB bands.
+atemp=a_initial;
+atemp2=a_initial2;
+
+for (a=1;a<N;a++)
+{
+if (sinps[a-1]==0 AND ssig[a]==1)
+{atemp2=a;}
+if (sinps[a] == -1 AND (1000*(C[a]-C[atemp2])/C[atemp2]>=Loss_lmt OR C[a]>=BTop[a] OR 1000*(C[atemp]-C[a])/C[atemp]>=Pft_lmt ))
+{C2[a]=1;
+Csig=C1 OR C2;
+sinps=GetPs(bsig,ssig,Csig);
+atemp=a_initial;
+atemp2=a_initial2; 
+}
+}
+C03=Csig;
+ps = GetPs(bsig,ssig,Csig);
+C01 = ps==1 AND  C<HighestSince(bsig,C)-(Loss_lmt*C/1000);
+C02 = ps==-1 AND  C>LowestSince(ssig,C)+(Loss_lmt*C/1000);
+Csig = C03 OR C01 OR C02;
+//--------------------------------Implementation--------------------------------
+Buy=bsig;
+Sell=Csig;
+Short=ssig;
+Cover=Csig;
+
+    Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+_SECTION_END();

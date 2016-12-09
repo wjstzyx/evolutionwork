@@ -1,0 +1,65 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+
+
+tw=Param("timewinodw",300,80,600,20);
+
+stdzhisun=0;
+s1=12;
+s2=26;
+s3=9;
+
+MAperiod=Param("MAperiod",40,1,300,1);
+
+G03=1000*Signal(s1,s2,s3);
+G13=BBandTop(G03,tw,2);
+G23=BBandBot(G03,tw,2);
+G33=10000*(G03-G23)/(G13-G23);
+
+maG03=1000*MA(Signal(s1,s2,s3),MAperiod);
+maG13=BBandTop(maG03,tw,2);
+maG23=BBandBot(maG03,tw,2);
+maG33=10000*(maG03-maG23)/(maG13-maG23);
+
+zhisunup=BBandTop(C,tw,stdzhisun);
+zhisundown=BBandBot(C,tw,stdzhisun);
+
+Bsig1=G33>Ref(G33,-1) AND G33>Ref(G33,-2) ;
+Ssig1=G33<Ref(G33,-1) AND G33<Ref(G33,-2) ;
+Bsig2=maG33>Ref(maG33,-1) AND G03>Ref(G03,-1);
+Ssig2=maG33<Ref(maG33,-1) AND G03<Ref(G03,-1);
+
+
+bsig3 = bsig1 AND bsig2;
+ssig3 = ssig1 AND ssig2;
+bsig=ExRem(bsig3,ssig3);
+ssig=ExRem(ssig3,bsig3);
+
+Num=Param("Num",1,1,20,1);
+bsig = ExRemSpan(bsig,Num);
+ssig = ExRemSpan(ssig,Num);
+
+ps=GetPs(bsig,ssig,0);
+C001=ps==1 AND C<zhisundown;
+C002=ps==-1 AND C>zhisunup;
+
+
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+tp = ParamOptimize("tp",10,5,30,1);
+
+
+C05 = ps==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C06 = ps==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+CSIG = C05 OR C06 OR C001 OR C002;
+
+
+PlotPerformance(BSig,Ssig,Csig);
+
+
+
+
+
+
+StrategyName = "rb-15min-Signal_ma_M ++";StrategyID = "1012100351";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

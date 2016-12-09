@@ -1,0 +1,47 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+
+StrategyName = "HLAvg";
+StrategyID = 1007;
+Plot(0,StrategyName,colorBlack);
+TickerList = ParamStr("Instruments", "AB-SQRUZS");
+
+Period = ParamOptimize("Period", 5, 1, 100, 5);
+Con = ParamOptimize( "K Num", 0, 0, 225, 1);
+HoldK = ParamOptimize( "Hold Nums", 1, 1, 5, 1);
+
+fo = Foreign( TickerList , "O" );
+fh = Foreign( TickerList , "H" );
+fl = Foreign( TickerList , "L" );
+fc = Foreign( TickerList , "C" );
+
+TIME=TimeNum();
+FSTK=TIME==90000;
+UP=Ref(FSTK,-Con) && Close-Ref(Close,-Period)>0;
+DN=Ref(FSTK,-Con) && Close-Ref(Close,-28)<0;
+
+BSIG = UP;
+SSIG = DN;
+CSIG = Ref(BSIG || SSIG,-HoldK);
+
+Buy = BSIG;
+Short = SSIG;
+Sell= Cover = CSIG;
+
+PlotPerformance(BSIG,SSIG,CSIG);
+
+/*
+TFlag=Cum(Buy+Cover-Short-Sell);
+
+ES=StrFormat("%02.0f/%02.0f/%02.0f %02.0f:%02.0f:%02.0f,%.0f,%g",Year(),Month(),Day(),Hour(),Minute(),Second(),tflag,C);
+EH = fopen( "r:current.txt", "w"); 
+
+if( eH ) 
+{ 
+   fputs( eS, eH ); 
+  fclose( eH ); 
+} 
+else 
+{ printf("Error opening file"); }
+
+*/
+//Trading(stid,StrategyName,BSIG,CSIG);

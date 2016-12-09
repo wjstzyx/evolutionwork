@@ -1,0 +1,84 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+
+
+
+Lookback=Param("Lookback",90,10,1000,10);
+
+Limit=Param("Limit",0.1,0,1,0.1);
+
+/////////Engulfing//////////////////
+Engulfingstudy1=Max(O,C)-Ref(Max(O,C),-1);
+Engulfingstudy2=Ref(Min(O,C),-1)-Min(O,C);
+
+stdc1=StDev(Engulfingstudy1,Lookback);
+stdc2=StDev(Engulfingstudy2,Lookback);
+
+xc1=IIf(stdc1==0,0,Engulfingstudy1/stdc1);
+xc2=IIf(stdc2==0,0,Engulfingstudy2/stdc2);
+
+EngulfingPbuy1=NN(xc1);
+EngulfingPbuy2=NN(xc2);
+
+Engulfing=EngulfingPbuy1>Limit AND EngulfingPbuy2>Limit;
+
+
+situation1=Engulfing;
+
+
+MinVC=ValueWhen(situation1==1,C,1);
+
+
+CohC=MinVC;
+
+
+period=Param("period",12,1,40,1);
+
+PlusDM=IIf(Engulfing,CohC-Ref(CohC,-1),0);
+
+
+Vm=1;
+
+Buypower=PlusDM*Vm;
+
+
+
+MinDM = IIf(Engulfing, Ref(CohC,-1)-CohC, 0);
+
+Sellpower=MinDM*Vm;
+
+Wm=Wilders(Wilders(Buypower,period)-Wilders(Sellpower,period),period);
+
+Bsig=Cross(Wm,0);
+Ssig=Cross(0,Wm);
+
+ps = GetPs(bsig,ssig,0);
+
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+HHVbsg=IIf(lstbsg==0,C,HHV(C,lstbsg));
+LLVssg=IIf(lstssg==0,C,LLV(C,lstssg));
+
+HHVbsg=HHV(C,lstbsg);
+LLVssg=LLV(C,lstssg);
+
+
+
+//////////////////////////////////////////////////////////////////
+tp = Param("tp",10,0,100,1);
+
+
+C05 = ps==1 AND  C<HHVbsg-tp*C/1000;
+C06 = ps==-1 AND  C>LLVssg+tp*C/1000;
+
+CSIG =C05 OR C06; 
+
+
+PlotPerformance(BSig,Ssig,Csig);
+
+
+
+
+
+
+StrategyName = "rb-15min-cxvolumeyingbaoyang";StrategyID = "1012100299";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

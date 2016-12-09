@@ -1,0 +1,59 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/BasicV4/PMS.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 800);
+
+StrategyName = "IF01-SXV-LVB-HL-05-1-1-V1";
+StrategyID = 40272;
+ProType = 0;
+
+
+
+
+PMS1=PMS_SXVV2(6,6,22,105,135,"IF");
+PMS2=PMS_SXVV2(6,5,23,105,135,"IF");
+
+
+PMS3=PMS_LVB(0.4,16,18,111,135,"IF");
+PMS4=PMS_LVB(0.5,11,9,112,135,"IF");
+
+PMS5=PMS_HLR(20,14,114,135,"IF");
+PMS6=PMS_HLR(22,11,114,135,"IF");
+
+
+
+
+
+
+cond_SXV=(PMS1+PMS2)/2;
+cond_LVB=(PMS4+PMS3)/3;
+cond_HLR=(PMS5+PMS6)/2;
+
+
+
+
+w_SXV= ParamOptimize("w_SXV",0.5,0,4,0.5);
+w_LVB= ParamOptimize("w_LVB",1,0,4,0.5);
+w_HL= ParamOptimize("w_HL",1,0,4,0.5);
+
+Cond = w_SXV*cond_SXV+ w_LVB*cond_LVB+w_HL*cond_HLR;
+
+
+
+
+
+Vote=ParamOptimize("w_Vote",1,0,4,0.5);
+
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond==0;
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName+"--"+StrategyID);

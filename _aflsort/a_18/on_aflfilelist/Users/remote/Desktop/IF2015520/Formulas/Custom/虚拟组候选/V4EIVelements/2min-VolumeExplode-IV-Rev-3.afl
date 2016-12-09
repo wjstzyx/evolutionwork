@@ -1,0 +1,102 @@
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "IF-2min-VolumeExplode-IV-Rev-3";
+StrategyID = 40985;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine);
+
+
+daystart = BarIndex()==0 OR Day()!=Ref(Day(),-1);
+kn = BarsSince(daystart)+1;
+
+vperiod = Param("vperiod",4,1,100,1);
+
+sv = Sum(V,vperiod)/vperiod;
+mv = MA(sign(C-O)*V,vperiod);
+
+nperiod = Param("nperiod",105,1,1000,1);
+isv = sv - Ref(sv,-vperiod);
+
+nisv = (isv-LLV(isv,nperiod))/(HHV(isv,nperiod)-LLV(isv,nperiod));
+
+nvtresh = Param("nvtresh",0.8,0,1,0.01);
+
+vexplode = nisv<Ref(nisv,-1) AND Ref(nisv,-1)>=nvtresh AND Ref(nisv,-1)>=Ref(nisv,-2);
+
+lstvexplode = BarsSince(vexplode);
+
+waitperiod = Param("waitperiod",3,1,30,1);
+waitperiod2 = Param("waitperiod2",12,1,30,1);
+
+hlperiod = Param("hlperiod",12,1,100,1);
+priceh = C==HHV(C,hlperiod);
+pricel = C==LLV(C,hlperiod);
+
+hturn = Ref(priceh,-1) AND NOT priceh;
+lturn = Ref(pricel,-1) AND NOT pricel;
+
+lsthturn = BarsSince(hturn);
+lstlturn = BarsSince(lturn);
+
+hprice = Ref(C,-lsthturn-1); 
+lprice = Ref(C,-lstlturn-1);
+
+//hprice = Ref(H,-lsthturn-1); 
+//lprice = Ref(L,-lstlturn-1);
+
+//Plot(lprice,"lprice",colorgreen,stylenoline);
+//Plot(hprice,"hprice",colorRed);
+
+//Plot(ATR(14),"std",colorBlue);
+
+r1 = Param("r1",0.5,0,5,0.01);
+r2 = Param("r2",2.9,0,5,0.01);
+
+bsig1 = C>hprice+r1*ATR(14) AND abs(lstvexplode-lsthturn)<=waitperiod AND lstlturn<lsthturn;//lstvexplode>=lsthturn
+ssig1 = C<lprice-r1*ATR(14) AND abs(lstvexplode-lstlturn)<=waitperiod AND lstlturn>lsthturn;//lstvexplode>=lstlturn
+
+bsig2 = C>lprice+r2*ATR(14) AND abs(lstvexplode-lstlturn)<=waitperiod AND lstlturn<=waitperiod2;//AND lstlturn<lsthturn;
+ssig2 = C<hprice-r2*ATR(14) AND abs(lstvexplode-lsthturn)<=waitperiod AND lsthturn<=waitperiod2;//AND lstlturn>lsthturn;
+
+//Plot(bsig2,"bsig2",colorred);
+
+bsig = bsig2;//bsig1 ;//OR 
+ssig = ssig2;//ssig1 ;//OR 
+
+ps = GetPs(bsig,ssig,0);
+Lstbsg = BarsSince(bsig);
+Lstssg = BarsSince(ssig);
+
+NBars = Param("Nbars",21,0,100,1);
+
+C01 = ps==1 AND CPPCount(C<Ref(C,-lstbsg),NBars)==NBars;
+C02 = ps==-1 AND CPPCount(C>Ref(C,-lstssg),NBars)==NBars;
+
+C03 = ps==1 AND C<Ref(C,-lstlturn);
+C04 = ps==-1 AND C>Ref(C,-lsthturn);
+
+
+tp = Param("tp",12,0,500,1);
+C05 = ps==1 AND  C<Highestsince(bsig,C)-tp*C/1000;
+C06 = ps==-1 AND  C>Lowestsince(ssig,C)+tp*C/1000;
+
+//Plot(c03,"bsig",colorRed);
+
+Csig =  C01 OR C02  OR C05 OR C06;// OR TimeNum()==151400;// OR TimeNum()<91800;// OR vexplode;//;//  C03 OR C04 OR
+
+    Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

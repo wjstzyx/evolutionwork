@@ -1,0 +1,55 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "30min-Ç÷ÊÆ¶È-tp-RU";
+StrategyID =10228;
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+SetBarsRequired(-2,-2);
+
+
+
+tperiod = ParamOptimize("tperiod",20,20,10000,20);
+smaperiod = ParamOptimize("smaperiod",40,10,1000,10);
+lmaperiod = ParamOptimize("lmaperiod",40,10,10000,10);
+hlperiod=Param("hlperiod",70,0,3000,10);
+
+trendratio = IIf(abs(C-Ref(C,-tperiod))>10,Sum(abs(C-Ref(C,-1)),tperiod)/abs(C-Ref(C,-tperiod)),100);
+trendratio = Min(trendratio,100);
+
+stratio = EMA(trendratio,smaperiod);
+ltratio = EMA(stratio,lmaperiod);
+
+bsig= stratio<ltratio AND C>=HHV(C,hlperiod);
+ssig= stratio<ltratio AND C<=LLV(C,hlperiod);
+
+ps=GetPs(bsig,ssig,0);
+
+lstbsg = BarsSince(bsig);
+lstssg = BarsSince(ssig);
+
+tp = Param("tp",22,0,100,1);
+C01= ps==1  AND C<HHV(C,lstbsg)-tp*C/1000;
+C02= ps==-1 AND C>LLV(C,lstbsg)+tp*C/1000;
+
+csig = c01 OR c02;
+      
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+//RIPAM 
+//Trading_night_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+//YEPAN

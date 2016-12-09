@@ -1,0 +1,82 @@
+_SECTION_BEGIN("CU_01_V7_HL_DFB_SXV_V0_G1");
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/BasicV3/exiv.afl";
+#include "Formulas/Custom/BasicV3/exv.afl";
+#include "Formulas/Custom/BasicV3/hl.afl";
+#include "Formulas/Custom/BasicV3/V7.afl";
+#include "Formulas/Custom/BasicV3/sxv.afl";
+#include "Formulas/Custom/BasicV3/TM.afl";
+#include "Formulas/Custom/BasicV3/DFB.afl";
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+StrategyName = "CU_01_V7_HL_DFB_SXV_V20_G2.1";
+StrategyID = 50018;
+ProType = 1;
+
+
+V71=V7min(30,99,12,"CU");
+v72=V7min(46,100,0,"CU");
+V73=V7min(32,99,2,"CU");
+v74=V7min(30,100,15,"CU");
+V75=V7min(27,99,8,"CU");
+
+HL1=HLNAVG(132,103,52,"CU");
+HL2=HLNAVG(107,104,0,"CU");
+HL3=HLPAVG(81,100,46,"CU");
+HL4=HLPAVG(78,100,0,"CU");
+HL5=HLPAVG(81,100,11,"CU");
+HL6=HLPAVG(129,106,39,"CU");
+HL7=HLNAVG(134,103,41,"CU");
+HL8=HLNAVG(93,100,0,"CU");
+
+DFB1=DFB(59,86,"CU");
+DFB2=DFB(73,72,"CU");
+DFB3=DFB(76,82,"CU");
+DFB4=DFB(72,56,"CU");
+DFB5=DFB(60,57,"CU");
+
+SXV1=SumXVolume(20,47,32,"CU");
+SXV2=SumXVolume(16,50,32,"CU");
+SXV3=SumXVolume(18,50,32,"CU");
+SXV4=SumXVolAdd(40,38,3,"CU");
+SXV5=SumXVolAdd(40,36,13,"CU");
+
+
+
+
+
+
+cond_V7=(V71+V72+V73+V74+V75)/5;
+cond_HL=(HL1+HL2+HL3+HL4+HL5+HL6+HL7+HL8)/8;
+cond_DFB=(DFB1+DFB2+DFB3+DFB4+DFB5)/5;
+cond_SXV=(SXV1+SXV2+SXV3+SXV4+SXV5)/5;
+
+
+
+w_V7 = ParamOptimize("w_V7",4,0,4,0.5);
+w_HL= ParamOptimize("w_HL",2.5,0,4,0.5);
+w_DFB= ParamOptimize("w_DFB",3,0,4,0.5);
+w_SXV= ParamOptimize("w_SXV",0.5,0,4,0.5);
+
+Cond = w_V7 *cond_V7 + w_HL*cond_HL + w_DFB*cond_DFB + w_SXV*cond_SXV;
+
+
+
+
+Vote=2;
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=GetLastK("CU");
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);
+_SECTION_END();

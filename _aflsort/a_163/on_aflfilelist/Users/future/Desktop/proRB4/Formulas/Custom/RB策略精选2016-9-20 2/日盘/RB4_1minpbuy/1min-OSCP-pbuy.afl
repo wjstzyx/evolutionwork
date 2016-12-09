@@ -1,0 +1,67 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+
+
+FSTK=Day()!=Ref(Day(),-1);
+KN=IIf(FSTK,1,BarsSince(FSTK)+1);	
+
+Lookback1=Param("Lookback1",3,1,200,2);
+Lookback2=Param("Lookback2",450,10,1000,10);
+
+OscPV=EMA(C,Lookback1)-EMA(C,Lookback2);
+
+Cstudy=OscPV;
+
+stdc=StDev(Cstudy,Lookback2);
+
+xc=IIf(stdc==0,0,Cstudy/stdc);
+
+pbuyc=NN(xc);
+
+
+Limit=Param("Limit",0.9,0,1,0.1);
+
+
+bsig1=pbuyc>Limit ;
+ssig1=pbuyc<1-Limit ;
+
+
+bsig=bsig1;
+ssig=ssig1;
+
+ps = GetPs(bsig,ssig,0);
+
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+HHVbsg=IIf(lstbsg==0,C,HHV(C,lstbsg));
+LLVssg=IIf(lstssg==0,C,LLV(C,lstssg));
+
+HHVbsg=HHV(C,lstbsg);
+LLVssg=LLV(C,lstssg);
+
+Holdperiod=Param("Holdperiod",700,1,1000,1);
+
+
+stdzhisun=ParamOptimize("stdzhisun",2.5,0,10,0.1);
+zhisunup=BBandTop(C,Holdperiod,stdzhisun);
+zhisundown=BBandBot(C,Holdperiod,stdzhisun);
+
+C001=ps==1 AND C<zhisundown;
+C002=ps==-1 AND C>zhisunup;
+
+tp = Param("tp",20,0,100,1);
+
+
+C05 = ps==1 AND  C<HHVbsg-tp*C/1000;
+C06 = ps==-1 AND  C>LLVssg+tp*C/1000;
+
+Csig=C001 OR C002 OR C05 OR C06;
+
+
+Plotperformance(bsig,ssig,Csig);
+
+
+
+
+
+StrategyName = "1min-OSCP-pbuy";StrategyID = "1012100193";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

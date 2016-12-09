@@ -1,0 +1,56 @@
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "IF-5MIN-NORANGE-22-20";
+StrategyID = 40718;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+fstk = Day()!=Ref(Day(),-1);
+KN=IIf(FSTK,1,BarsSince(FSTK)+1);
+
+range=abs(C-O);
+//-----------------------------------------------------------------
+
+period=Param("period",22,0,100,1);
+newh=C>=HHV(C,period);
+newl=C<=LLV(C,period);
+
+Lstnewh=IIf(newh,0,Ref(BarsSince(newh),-1)+1);
+Lstnewl=IIf(newl,0,Ref(BarsSince(newl),-1)+1);
+
+bsig=newh   AND kn>period AND MA(C,5)>MA(C,10) AND L>MA(C,5);// AND range<Ref(range,-1)+Ref(range,-2);
+ssig=newl   AND kn>period AND MA(C,5)<MA(C,10)AND H<MA(C,5);// AND range<Ref(range,-1)+Ref(range,-2);
+
+CSIG=0;
+Lstsig = BarsSince(bsig OR ssig);
+sinPs=GetPs(BSIG,SSIG,CSIG);
+
+paraperiod2=Param("paraperiod2",20,0,50,1);
+
+obuy= sinps==1 AND Ref(sinps,-1)!=1;
+osell= sinps==-1 AND Ref(sinps,-1)!=-1;
+
+Lbuy=BarsSince(Obuy);
+Lsell=BarsSince(Osell);
+
+
+C01=sinPs==-1 AND C>O AND Ref(C,-1)<Ref(O,-1)AND Lsell>=paraperiod2 ;//AND Lstsig>=paraperiod2 ;// AND Lsell>=paraperiod2 ;
+C02=sinPs==1 AND C<O  AND Ref(C,-1)>Ref(O,-1)AND Lbuy>=paraperiod2 ;//AND Lstsig>=paraperiod2;// AND Lbuy>=paraperiod2 ;
+
+C03=sinPs==-1 AND C<O AND V>=HHV(V,Lstsig);// AND Lsell>=ppp;
+C04=sinPs==1 AND C>O  AND V>=HHV(V,Lstsig);// AND Lbuy>=ppp;
+
+csig= TimeNum()>=151000 OR (C03 OR C04 OR C01 OR C02 ) ;
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

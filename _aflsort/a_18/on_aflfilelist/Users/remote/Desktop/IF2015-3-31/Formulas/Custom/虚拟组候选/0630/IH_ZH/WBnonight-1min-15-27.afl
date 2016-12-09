@@ -1,0 +1,52 @@
+_SECTION_BEGIN("test");
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "WBnonight-1min-15-27";
+StrategyID = "120018";
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+
+tickername=Name();
+
+N1=Param("N1",15,0,100,1);
+N2=Param("N2",27,0,100,1);
+
+fo = Foreign(TickerName, "O" );
+fh = Foreign(TickerName, "H" );
+fl = Foreign(TickerName, "L" );
+fc = Foreign(TickerName, "C" );
+fv = Foreign(TickerName, "V" );  
+
+FSTK=Day()!=Ref(Day(),-1);
+LSTK=GetlastK(TickerName);
+KN=BarsSince(FSTK)+1;
+
+RecentH=HHV(fh,Min(N1,KN));
+RecentL=LLV(fl,Min(N1,KN));
+RecentWave=Ref(RecentH-RecentL,-1);
+AverageRecentWave=MA(RecentWave,N2);
+
+BG=fc-RecentL>AverageRecentWave;
+SG=RecentH-fc>AverageRecentWave;
+bSIG=BG AND NOT SG;
+sSIG=SG AND NOT BG;
+CSIG=(BG AND SG) OR TimeNum()>=145900;
+
+    Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+_SECTION_END();

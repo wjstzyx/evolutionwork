@@ -1,0 +1,96 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "1min-RB_timeselect-lastwintrade";
+StrategyID ="1012100140";
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+FSTK=Day()!=Ref(Day(),-1);
+KN=IIf(FSTK,1,BarsSince(FSTK)+1);	
+
+KNtotal=ValueWhen(Day()!=Ref(Day(),-1),Ref(KN,-1),1); //
+
+
+///////LAST DAY HIGH LOW///////////////////////////////////////////////////
+LOST=Param("LOST",100000,90000,150000,100);  //Observation Start Time
+LOET=Param("LOET",145000,90000,150000,100);   //Observation End Time
+
+Lob_end = Cross(TimeNum(),LOET);  //detect the observation end time
+Lob_st = Cross(TimeNum(),LOST);   //detect the observation start time 
+ 
+Highest_sinceL = HighestSince(Lob_st,C,1); //capture the 1 hour high
+Lowest_sinceL = LowestSince(Lob_st,C,1);  //capture the 1 hour low
+ 
+LORBH = ValueWhen(Lob_end ,Highest_sinceL,1); //
+LORBL = ValueWhen(Lob_end ,Lowest_sinceL,1);  
+
+LORBHKN =ValueWhen(C==LORBH,KN,1); //
+LORBLKN =ValueWhen(C==LORBL,KN,1); //
+/////////////THIS DAY HIGH LOW//////////////////////////////////////////////
+TOST=Param("TOST",90000,90000,150000,100);  //Observation Start Time
+TOET=Param("TOET",90100,90000,150000,100);   //Observation End Time
+
+Tob_end = Cross(TimeNum(),TOET);  //detect the observation end time
+Tob_st = Cross(TimeNum(),TOST);   //detect the observation start time 
+ 
+Highest_sinceT = HighestSince(Tob_st,C,1); //capture the 1 hour high
+Lowest_sinceT = LowestSince(Tob_st,C,1);  //capture the 1 hour low
+ 
+TORBH = ValueWhen(Tob_end ,Highest_sinceT,1); //
+TORBL = ValueWhen(Tob_end ,Lowest_sinceT,1);  
+
+TORBHKN =ValueWhen(C==TORBH,KN,1); //
+TORBLKN =ValueWhen(C==TORBL,KN,1); //
+
+///////////////////////////////////TRADING TIME///////////////////////////////////////////////////////////////////////////
+
+TST=Param("TST",110000,90000,150000,100);  //Trading Start Time
+TET=Param("TET",150000,90000,150000,100);   //Trading End Time
+
+
+/////
+
+ADXval=Param("ADXval",1,1,100,1);
+
+ssig0=C<Min(LORBL,TORBL) AND TimeNum()>TST AND TimeNum()<TET AND ADX(14)>ADXval;
+bsig0=C>Max(LORBH,TORBH) AND TimeNum()>TST AND TimeNum()<TET AND ADX(14)>ADXval;
+
+
+ps = GetPs(bsig0,ssig0,0);
+
+
+
+SIG=ps;
+
+thisTradeClosetemp=ValueWhen(SIG!=Ref(SIG,-1),C,1);
+thisTradeClose=IIf(SIG!=Ref(SIG,-1),Ref(thisTradeClosetemp,-1),thisTradeClosetemp);
+PSumTradeC=IIf(Ref(SIG,-1)==1,C-thisTradeClose,IIf(Ref(SIG,-1)==-1,thisTradeClose-C,0));
+
+PSumTradeP=IIf(PSumTradeC>0,1,-1);
+
+periorTrade=ValueWhen(ps!=Ref(ps,-1),Ref(ps,-1),1);
+periorTradeP=ValueWhen(ps!=Ref(ps,-1),Ref(PSumTradeP,-1),1);
+
+LastWinTrade=ValueWhen(periorTradeP==1,periorTrade,1);
+
+bsig=ps==1 AND Ref(ps,-1)!=1 AND ps==LastWinTrade;
+ssig=ps==-1 AND Ref(ps,-1)!=-1 AND ps==LastWinTrade;
+
+ps2=GetPs(bsig,ssig,0);
+
+C01=ps2==1 AND ps!=1;
+C02=ps2==-1 AND ps!=-1;
+
+Csig=C01 OR C02;
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

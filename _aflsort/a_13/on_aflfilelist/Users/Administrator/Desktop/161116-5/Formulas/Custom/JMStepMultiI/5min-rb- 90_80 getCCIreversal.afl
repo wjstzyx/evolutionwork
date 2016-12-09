@@ -1,0 +1,242 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+
+
+
+function PIR(p,Length)
+{
+Ll=LLV(p,Length);
+Hh=HHV(p,Length);
+return (100*(p-Ll)/(Hh-Ll));
+}
+
+function TP15(bsig, ssig, ps0)
+{
+tp = 15; //Param("tp",15,0,100,1);
+Lstbsg = BarsSince(ps0==1 AND Ref(ps0,-1)!=1);
+Lstssg = BarsSince(ps0==-1 AND Ref(ps0,-1)!=-1);
+C01 = ps0==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C02 = ps0==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+Csig=C01 OR C02;
+ps = GetPs(bsig, ssig, csig);
+return ps;
+}
+
+
+
+
+
+
+
+
+CCIreversal_N=1; //Paramoptimize("CCIreversal_N",37,1,100,1);
+
+
+
+CCIreversal_smooth=1; //Paramoptimize("CCIreversal_smooth",100,1,1000,1);
+
+
+
+function getCCIreversal(CCIreversal_N,CCIreversal_smooth)
+
+{
+
+typ=C;
+
+
+
+CCI_value=(typ-MA(typ,CCIreversal_N))/(StDev(typ,CCIreversal_N));
+
+
+
+G03=CCI_value;
+
+
+
+////////////////////////////////////////////////
+
+
+
+Value1 = LinearReg(G03,CCIreversal_smooth);
+
+Value2=(4*Value1+3*Ref(Value1,-1)+2*Ref(Value1,-2)+Ref(Value1,-3))/10;
+
+Value3=Value2;
+
+
+
+StoFR1=Value3 ;
+
+
+
+Bsig1=StoFR1>Ref(StoFR1,-1) AND Ref(StoFR1,-1)>Ref(StoFR1,-2);
+
+Ssig1=StoFR1<Ref(StoFR1,-1) AND Ref(StoFR1,-1)<Ref(StoFR1,-2);
+
+
+
+
+
+bsig=ExRem(Bsig1,Ssig1);
+
+ssig=ExRem(Ssig1,Bsig1);
+
+
+
+ps=GetPs(bsig,ssig,0);
+
+
+
+
+//add exrem
+bsig=ExRem(bsig,ssig);
+ssig=ExRem(ssig,bsig);
+ps=GetPs(bsig,ssig,0);
+
+//add_tp15ps_exp
+ps = TP15(bsig, ssig, ps);
+return ps;
+
+
+
+
+
+}
+
+
+
+ps=getCCIreversal(CCIreversal_N,CCIreversal_smooth);
+
+
+ps = 0;
+//30min_MDD
+CCIreversal_N = 97;CCIreversal_smooth = 608;ps1 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps1;
+CCIreversal_N = 75;CCIreversal_smooth = 320;ps2 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps2;
+CCIreversal_N = 94;CCIreversal_smooth = 508;ps3 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps3;
+CCIreversal_N = 77;CCIreversal_smooth = 674;ps4 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps4;
+CCIreversal_N = 77;CCIreversal_smooth = 543;ps5 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps5;
+CCIreversal_N = 100;CCIreversal_smooth = 382;ps6 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps6;
+CCIreversal_N = 83;CCIreversal_smooth = 1000;ps7 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps7;
+CCIreversal_N = 48;CCIreversal_smooth = 499;ps8 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps8;
+CCIreversal_N = 78;CCIreversal_smooth = 507;ps9 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps9;
+CCIreversal_N = 96;CCIreversal_smooth = 104;ps10 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps10;
+CCIreversal_N = 91;CCIreversal_smooth = 619;ps11 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps11;
+CCIreversal_N = 69;CCIreversal_smooth = 498;ps12 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps12;
+CCIreversal_N = 94;CCIreversal_smooth = 156;ps13 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps13;
+CCIreversal_N = 76;CCIreversal_smooth = 735;ps14 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps14;
+CCIreversal_N = 39;CCIreversal_smooth = 629;ps15 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps15;
+CCIreversal_N = 95;CCIreversal_smooth = 366;ps16 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps16;
+CCIreversal_N = 45;CCIreversal_smooth = 825;ps17 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps17;
+CCIreversal_N = 64;CCIreversal_smooth = 187;ps18 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps18;
+CCIreversal_N = 76;CCIreversal_smooth = 803;ps19 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps19;
+CCIreversal_N = 59;CCIreversal_smooth = 413;ps20 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps20;
+CCIreversal_N = 59;CCIreversal_smooth = 188;ps21 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps21;
+CCIreversal_N = 57;CCIreversal_smooth = 429;ps22 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps22;
+CCIreversal_N = 52;CCIreversal_smooth = 832;ps23 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps23;
+CCIreversal_N = 47;CCIreversal_smooth = 422;ps24 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps24;
+CCIreversal_N = 91;CCIreversal_smooth = 859;ps25 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps25;
+CCIreversal_N = 66;CCIreversal_smooth = 741;ps26 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps26;
+CCIreversal_N = 77;CCIreversal_smooth = 540;ps27 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps27;
+CCIreversal_N = 74;CCIreversal_smooth = 188;ps28 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps28;
+CCIreversal_N = 55;CCIreversal_smooth = 643;ps29 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps29;
+CCIreversal_N = 57;CCIreversal_smooth = 768;ps30 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps30;
+//30min_NP
+CCIreversal_N = 83;CCIreversal_smooth = 606;ps1 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps1;
+CCIreversal_N = 86;CCIreversal_smooth = 417;ps2 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps2;
+CCIreversal_N = 97;CCIreversal_smooth = 410;ps3 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps3;
+CCIreversal_N = 97;CCIreversal_smooth = 512;ps4 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps4;
+CCIreversal_N = 100;CCIreversal_smooth = 408;ps5 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps5;
+CCIreversal_N = 95;CCIreversal_smooth = 415;ps6 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps6;
+CCIreversal_N = 100;CCIreversal_smooth = 771;ps7 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps7;
+CCIreversal_N = 62;CCIreversal_smooth = 501;ps8 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps8;
+CCIreversal_N = 100;CCIreversal_smooth = 746;ps9 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps9;
+CCIreversal_N = 85;CCIreversal_smooth = 578;ps10 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps10;
+CCIreversal_N = 83;CCIreversal_smooth = 423;ps11 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps11;
+CCIreversal_N = 100;CCIreversal_smooth = 758;ps12 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps12;
+CCIreversal_N = 84;CCIreversal_smooth = 1000;ps13 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps13;
+CCIreversal_N = 98;CCIreversal_smooth = 302;ps14 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps14;
+CCIreversal_N = 51;CCIreversal_smooth = 578;ps15 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps15;
+CCIreversal_N = 91;CCIreversal_smooth = 331;ps16 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps16;
+CCIreversal_N = 71;CCIreversal_smooth = 386;ps17 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps17;
+CCIreversal_N = 92;CCIreversal_smooth = 399;ps18 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps18;
+CCIreversal_N = 82;CCIreversal_smooth = 1000;ps19 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps19;
+CCIreversal_N = 96;CCIreversal_smooth = 803;ps20 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps20;
+CCIreversal_N = 86;CCIreversal_smooth = 577;ps21 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps21;
+CCIreversal_N = 93;CCIreversal_smooth = 1000;ps22 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps22;
+CCIreversal_N = 94;CCIreversal_smooth = 1000;ps23 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps23;
+CCIreversal_N = 87;CCIreversal_smooth = 401;ps24 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps24;
+CCIreversal_N = 92;CCIreversal_smooth = 324;ps25 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps25;
+CCIreversal_N = 93;CCIreversal_smooth = 563;ps26 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps26;
+CCIreversal_N = 54;CCIreversal_smooth = 672;ps27 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps27;
+CCIreversal_N = 78;CCIreversal_smooth = 689;ps28 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps28;
+CCIreversal_N = 76;CCIreversal_smooth = 803;ps29 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps29;
+CCIreversal_N = 100;CCIreversal_smooth = 708;ps30 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps30;
+//30min_PF
+CCIreversal_N = 100;CCIreversal_smooth = 608;ps1 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps1;
+CCIreversal_N = 100;CCIreversal_smooth = 501;ps2 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps2;
+CCIreversal_N = 84;CCIreversal_smooth = 506;ps3 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps3;
+CCIreversal_N = 90;CCIreversal_smooth = 771;ps4 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps4;
+CCIreversal_N = 81;CCIreversal_smooth = 551;ps5 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps5;
+CCIreversal_N = 86;CCIreversal_smooth = 1000;ps6 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps6;
+CCIreversal_N = 100;CCIreversal_smooth = 498;ps7 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps7;
+CCIreversal_N = 99;CCIreversal_smooth = 774;ps8 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps8;
+CCIreversal_N = 100;CCIreversal_smooth = 885;ps9 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps9;
+CCIreversal_N = 87;CCIreversal_smooth = 592;ps10 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps10;
+CCIreversal_N = 82;CCIreversal_smooth = 825;ps11 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps11;
+CCIreversal_N = 84;CCIreversal_smooth = 500;ps12 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps12;
+CCIreversal_N = 83;CCIreversal_smooth = 1000;ps13 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps13;
+CCIreversal_N = 61;CCIreversal_smooth = 548;ps14 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps14;
+CCIreversal_N = 98;CCIreversal_smooth = 487;ps15 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps15;
+CCIreversal_N = 94;CCIreversal_smooth = 881;ps16 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps16;
+CCIreversal_N = 72;CCIreversal_smooth = 765;ps17 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps17;
+CCIreversal_N = 90;CCIreversal_smooth = 1000;ps18 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps18;
+CCIreversal_N = 100;CCIreversal_smooth = 490;ps19 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps19;
+CCIreversal_N = 100;CCIreversal_smooth = 558;ps20 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps20;
+CCIreversal_N = 79;CCIreversal_smooth = 403;ps21 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps21;
+CCIreversal_N = 100;CCIreversal_smooth = 582;ps22 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps22;
+CCIreversal_N = 94;CCIreversal_smooth = 1000;ps23 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps23;
+CCIreversal_N = 95;CCIreversal_smooth = 695;ps24 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps24;
+CCIreversal_N = 92;CCIreversal_smooth = 1000;ps25 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps25;
+CCIreversal_N = 76;CCIreversal_smooth = 803;ps26 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps26;
+CCIreversal_N = 47;CCIreversal_smooth = 422;ps27 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps27;
+CCIreversal_N = 91;CCIreversal_smooth = 859;ps28 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps28;
+CCIreversal_N = 37;CCIreversal_smooth = 459;ps29 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps29;
+CCIreversal_N = 79;CCIreversal_smooth = 537;ps30 = getCCIreversal(CCIreversal_N,CCIreversal_smooth);ps += ps30;
+
+
+ps_th = Param("ps_th", 80, 0, 100, 1);
+
+bsig=ps >= ps_th;
+ssig=ps <= -ps_th;
+
+bsig=ExRem(bsig,ssig);
+ssig=ExRem(ssig,bsig);
+
+psmerge=GetPs(bsig,ssig,0);
+ps_exit_th = ps_th * 0.66667;
+C01 = psmerge==1 AND ps <= ps_exit_th;
+C02 = psmerge==-1 AND ps >= -ps_exit_th;
+
+tp = 15; //Param("tp",15,0,100,1);
+Lstbsg = BarsSince(psmerge==1 AND Ref(psmerge,-1)!=1);
+Lstssg = BarsSince(psmerge==-1 AND Ref(psmerge,-1)!=-1);
+C03 = psmerge==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C04 = psmerge==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+//Csig=C01 OR C02 OR C03 OR C04;
+csig = C03 OR C04;
+//csig = C01 OR C02;
+
+
+Plotperformance(bsig,ssig,Csig);
+
+ps=GetPs(bsig,ssig,csig);
+
+SIG=ps;
+
+//ProfitDiff = Profit - Ref(Profit, -1);
+//GrossProfit = getGrossProfit(SIG);
+//GrossProfitDiff = GrossProfit - Ref(GrossProfit, -1);
+
+
+
+StrategyName = "5min-rb- 90_80 getCCIreversal";StrategyID = "1012500012";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

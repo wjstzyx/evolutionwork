@@ -1,0 +1,69 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "45min-DMA-TSF-45min-TF";
+StrategyID = 380011;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+tw=Param("timewinodw",100,10,100000,10);
+stdzhisun=Param("stdzhisun",2,0,10,0.1);
+
+s1=Param("s1",7,0,1000,1);
+s2=Param("s2",36,0,1000,1);
+
+TSFtw=Param("TSFtw",120,10,10000,10);
+MAperiodV=Param("MAperiodV",14,1,100,1);
+
+function CalDMA(Value,fast,slow){
+DIFF=MA(Value,fast)-MA(Value,slow);
+return DIFF;
+}
+
+Vm=log(EMA(V,MAperiodV));
+
+G0close = Sum((Vm*Close),MAperiodV)/Sum (Vm,MAperiodV);
+
+G0=1000*CalDMA(G0close,s1,s2);
+
+mid=TSF(G0, TSFtw);
+MAtsfG13= mid+StDev(G0,TSFtw);
+MAtsfG23= mid-StDev(G0,TSFtw);
+MAtsfG33=10000*(G0-matsfG23)/(matsfG13-matsfG23);
+
+Bsig1=matsfG33>Ref(matsfG33,-1) AND matsfG33>Ref(matsfG33,-2);
+Ssig1=matsfG33<Ref(matsfG33,-1) AND matsfG33<Ref(matsfG33,-2);
+
+bsig=ExRem(bsig1,ssig1);
+ssig=ExRem(ssig1,bsig1);
+
+/////zhisun1/////////////
+zhisunup=BBandTop(C,tw,stdzhisun);
+zhisundown=BBandBot(C,tw,stdzhisun);
+
+ps=GetPs(bsig,ssig,0);
+
+C05 = ps==1 AND  MAtsfG33<Ref(MAtsfG33,-1);
+C06 = ps==-1 AND MAtsfG33>Ref(MAtsfG33,-1);
+
+C001=ps==1 AND C<zhisundown;
+C002=ps==-1 AND C>zhisunup;
+//Csig=C001 OR C002 OR TimeNum()>151400;
+Csig=C001 OR C002;
+
+//Csig=C001 OR C002 OR C05 OR C06;
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+
+ps0 = GetPs(bsig,ssig,csig);
+Filter= 1;
+AddColumn(ps0,"ps");

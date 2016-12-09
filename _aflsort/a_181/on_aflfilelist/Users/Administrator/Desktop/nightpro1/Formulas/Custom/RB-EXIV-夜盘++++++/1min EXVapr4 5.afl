@@ -1,0 +1,111 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "1min EXVapr4 5";
+StrategyID ="1022100004";
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+function TimeSelectStartKN(TickerName,StartOP,EndOP,Cond)
+{
+	FSTK=Day()!=Ref(Day(),-1);
+	KNFST=BarsSince(FSTK);
+	TickerNamestr = StrMid(TickerName,0, 2 );
+	End =EndOP;
+	PeriodNum = int(Interval()/60);
+
+	if(TickerNamestr =="IF" AND PeriodNum ==1)
+	  Start =10;
+	else
+	if (TickerNamestr =="RU" AND PeriodNum ==1)
+		Start =2;
+	else
+		Start =StartOP;
+
+		for(i=0;i<BarCount;i++)
+		{
+			if(KNFST[i]<Start || KNFST[i]>End)
+			{
+				Cond[i] = 0;
+			}
+		}
+
+  //Plot(Cond,"Cond",colorRed);
+	return Cond;
+}
+
+function EXVapr4(PTS,HHVPara,TickerName)
+{
+fo = Foreign(TickerName, "O" );
+fh = Foreign(TickerName, "H" );
+fl = Foreign(TickerName, "L" );
+fc = Foreign(TickerName, "C" );
+fv = Foreign(TickerName, "V" );
+TIME=TimeNum();
+FSTK=Day()!=Ref(Day(),-1);
+LSTK=TIME>=151000;
+KN=IIf(FSTK,1,BarsSince(FSTK)+1);
+//Days = 2;
+//MAV=MA(fv,Period);
+//EXVTX=EXVT*10;
+//EXV=(fv/MAV*100>EXVTX OR fv/Ref(fv,-1)*100>2800) AND fv>=HHV(fv,HHVPara) AND fv/Ref(fv,-1)>1.25;
+    EXV = fv>=HHV(fv,HHVPara);
+EXVUP=EXV AND fc>Ref(fo,-1);
+EXVDN=EXV AND fc<Ref(fo,-1);
+LSTEXV=IIf(EXV,0,Ref(BarsSince(EXV),-1)+1);
+PRICE1=IIf(Ref(EXVUP,-LSTEXV),fh,0);
+PRICE2=IIf(Ref(EXVDN,-LSTEXV),fl, 0);
+PRICE=PRICE1+PRICE2;
+LSTEXVP=Ref(PRICE,-LSTEXV);
+BSIG1=0;
+SSIG1=0;
+P=PTS/20000*fc;
+BSIG2=NOT(EXV) AND fc>LSTEXVP+P AND LSTEXV<KN;
+SSIG2=NOT(EXV) AND fc<LSTEXVP-P AND LSTEXV<KN;
+BG=BSIG1 OR BSIG2;
+SG=SSIG1 OR SSIG2;
+BSIG=BG AND NOT(SG);
+SSIG=SG AND NOT(BG);
+	LASTBAR=GetLastK(TickerName);
+	CSIG= 0;
+   Cond = GetPs(BSIG,SSIG,CSIG);
+/*Plot(exv,"exv",colorRed);
+Plot(p,"p",colorRed);
+Plot(fc,"fc",colorRed);
+Plot(LSTEXVP,"LSTEXVP",colorRed);
+Plot(LSTEXV,"LSTEXV",colorRed);*/
+	return TimeSelectStartKN(TickerName,0,270,Cond);
+	//return getCS(BSIG,SSIG,CSIG);
+}
+
+
+
+TickerNAME = Name();
+
+n1= ParamOptimize("n1", 111, 0, 400,1);
+n2= ParamOptimize("n2", 76, 0, 800,1);
+
+Cond=EXVapr4(n1,n2,TickerName);
+
+Vote=0;
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond==0;
+
+bsig=ref(bsig,-1);
+ssig=ref(ssig,-1);
+csig=ref(csig,-1);
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_night_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+_SECTION_END();

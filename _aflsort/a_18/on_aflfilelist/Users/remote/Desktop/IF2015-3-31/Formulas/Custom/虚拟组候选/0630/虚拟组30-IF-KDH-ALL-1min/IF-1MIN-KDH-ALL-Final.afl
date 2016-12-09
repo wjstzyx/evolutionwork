@@ -1,0 +1,199 @@
+_SECTION_BEGIN("test");
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "IF-1MIN-KDH-ALL-Final";
+StrategyID = "40925";
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+fstk[0]=1;
+fstk = Day()!=Ref(Day(),-1);
+KN=IIf(FSTK,1,BarsSince(FSTK)+1);
+
+//-----------------------------------------------------------------
+
+MFI_P=Param("MFI_P",10,1,32,1);
+ADX_P=Param("ADX_P",10,1,32,1);
+MFI_K=Param("MFI_K",5,2,8,1);
+Stc_P=Param("Stc_P",8,1,15);
+MFI_max=Param("MFI_max",43,30,60,0.02);
+MFI_min=Param("MFI_min",57,30,60,0.02);
+Vlt_lmt=Param("Vlt_lmt",25,10,50,0.01);
+Blin_Range=Param("Blin_Range",10,2,30,1);
+Blin_Width=Param("Blin_width",2.60,0,5,0.01);
+SP=Param("SP",10,1,50,1);
+Time_Start=Param("Time_str",45,1,260,1);
+Time_End=Param("Time_end",255,1,260,1);
+Tp=Param("tp",30,0,300,1);
+//-----------------------------------------------------------------
+
+function get_Bosig(STC_P,MFI_P,ADX_P,Vlt_lmt,MFI_MIN,MFI_MAX,MFI_K,Time_Start,Time_End)
+{
+fstk[0]=1;
+fstk = Day()!=Ref(Day(),-1);
+KN=IIf(FSTK,1,BarsSince(FSTK)+1);
+
+K=StochK(stc_p);
+D=StochD(stc_p);
+Range=C-O;
+B11= Ref(K,-1)>Ref(D,-1) AND Ref(K,-2)>Ref(D,-2) AND Ref(K,-3)>Ref(D,-3);
+B12= Ref(Range,-1)>0 AND Ref(Range,-2)>0 AND Ref(Range,-3)>0;
+B13= MFI(MFI_P)>=MFI_min AND LinRegSlope(MFI(MFI_P),MFI_K)>0.00001 AND ADX(ADX_P)>Vlt_lmt;
+B1= b11 AND b12 AND b13;
+Bosig= B1 ;//AND KN>=time_start AND KN<=time_end;
+return Bosig;
+}
+
+function get_Sosig(STC_P,MFI_P,ADX_P,Vlt_lmt,MFI_MIN,MFI_MAX,MFI_K,Time_Start,Time_End)
+{
+
+fstk = Day()!=Ref(Day(),-1);
+KN=IIf(FSTK,1,BarsSince(FSTK)+1);
+
+K=StochK(stc_p);
+D=StochD(stc_p);
+Range=C-O;
+S11= Ref(K,-1)<Ref(D,-1) AND Ref(K,-2)<Ref(D,-2) AND Ref(K,-3)<Ref(D,-3);
+S12= Ref(Range,-1)<0 AND Ref(Range,-2)<0 AND Ref(Range,-3)<0;
+S13= MFI(MFI_P)<=MFI_max AND LinRegSlope(MFI(10),MFI_K)<0.00001 AND ADX(ADX_P)>Vlt_Lmt;
+S1=s11 AND s12 AND S13;
+SoSig=  S1 ;//AND KN>=time_start AND KN<=time_end;;
+return Sosig;
+}
+
+function KD_Buy(STC_P,MFI_P,ADX_P,Vlt_lmt,MFI_MIN,MFI_MAX,MFI_K,Blin_Range,Blin_Width,SP,tp,Time_Start,Time_End)
+{
+Bosig=get_Bosig(STC_P,MFI_P,ADX_P,Vlt_lmt,MFI_MIN,MFI_MAX,MFI_K,time_start,time_end);
+Sosig=get_Sosig(STC_P,MFI_P,ADX_P,Vlt_lmt,MFI_MIN,MFI_MAX,MFI_K,time_Start,Time_End);
+Osig=Bosig OR Sosig;
+
+N=LastValue(BarIndex());
+Osb=BarsSince(osig);
+bsig=IIf(Ref(Osb,-1)>=SP ,bosig,0);
+ssig=0;
+BBot=BBandBot(C,Blin_Range,Blin_Width);
+
+C1=0;
+csig=C1;
+sinps=GetPs(bsig,ssig,Csig);
+ready=0;
+Hstps=0;
+
+for (a=1;a<=N;a++)
+{
+if( ready==0 AND sinps[a-1]!=1 AND bsig[a]==1)
+{
+atemp=a;
+ready=1;
+sinps=GetPs(bsig,ssig,Csig);
+Hstps=C[a];
+}
+if(sinps[a]==1 AND ready==1)
+{
+if(C[a]>Hstps)
+{Hstps=C[a];}
+if( Hstps-C[a]>= tp OR C[a]<=BBot[a])
+{
+C1[a]=1;
+Csig=C1;
+sinps=GetPs(bsig,ssig,Csig);
+atemp=0;
+ready=0;
+Hstps=0;
+}
+}
+}
+sinps=GetPs(bsig,ssig,Csig);
+return sinps;
+}
+
+function KD_Sell(STC_P,MFI_P,ADX_P,Vlt_lmt,MFI_MIN,MFI_MAX,MFI_K,Blin_Range,Blin_Width,SP,tp,Time_Start,Time_End)
+{
+Bosig=get_Bosig(STC_P,MFI_P,ADX_P,Vlt_lmt,MFI_MIN,MFI_MAX,MFI_K,Time_Start,Time_End);
+Sosig=get_Sosig(STC_P,MFI_P,ADX_P,Vlt_lmt,MFI_MIN,MFI_MAX,MFI_K,Time_Start,Time_End);
+Osig=Bosig OR Sosig;
+
+N=LastValue(BarIndex());
+Osb=BarsSince(osig);
+bsig=0;
+ssig=IIf(Ref(Osb,-1)>=SP ,sosig,0);
+BTop=BBandTop(C,Blin_Range,Blin_Width);
+
+C1=0;
+Csig=C1;
+sinps=GetPs(bsig,ssig,Csig);
+ready=0;
+Hstps=0;
+
+
+for (a=1;a<=N;a++)
+{
+if( ready==0 AND sinps[a-1]!=-1 AND ssig[a]==1)
+{
+atemp=a;
+ready=1;
+sinps=GetPs(bsig,ssig,Csig);
+Lstps=C[a];
+}
+
+if(sinps[a]==-1 AND ready==1)
+{
+if(C[a]<Lstps)
+{Lstps=C[a];}
+
+if( C[a]-Lstps>= tp OR C[a]>=BTop[a])
+{
+C1[a]=1;
+Csig=C1;
+sinps=GetPs(bsig,ssig,Csig);
+atemp=0;
+ready=0;
+Lstps=0;
+}
+}
+}
+sinps=GetPs(bsig,ssig,Csig);
+return sinps;
+}
+
+optime = Param("optime",100000,91500,151500,100);
+
+sig1=KD_Buy(STC_P,MFI_P,ADX_P,Vlt_lmt,MFI_MIN,MFI_MAX,MFI_K,Blin_Range,Blin_Width,SP,tp,Time_Start,Time_End);
+sig2=KD_Sell(STC_P,MFI_P,ADX_P,Vlt_lmt,MFI_MIN,MFI_MAX,MFI_K,Blin_Range,Blin_Width,SP,tp,Time_Start,Time_End);
+sig = sig1 + sig2;
+bsig = sig>0.0001 AND TimeNum()>optime AND KN>=time_start AND KN<=time_end;//AND TimeNum()>135500 AND TimeNum()<150000;
+ssig = sig<-0.0001 AND TimeNum()>optime AND KN>=time_start AND KN<=time_end;// AND TimeNum()>135500 AND TimeNum()<150000;
+
+//C1 = abs(sig)<0.0001;
+Csig=TimeNum()>145800 ;
+ps = GetPs(bsig,ssig,Csig);
+C01 = ps==1 AND  C<HighestSince(ps==1 AND Ref(ps,-1)!=1,C)-tp;
+C02 = ps==-1 AND  C>LowestSince(ps==-1 AND Ref(ps,-1)!=-1,C)+tp;
+
+C01 = ps==1 AND  C<HighestSince(bsig,C)-tp;
+C02 = ps==-1 AND  C>LowestSince(ssig,C)+tp;
+//Lstbsg=BarsSince(ps==1 AND Ref(ps,-1)!=1);
+//Lstssg=BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+//C03= ps==1 AND C<Ref(C,-Lstbsg)-tp;
+//C04= ps==1 AND C<Ref(C,-Lstssg)-tp;
+
+Csig= TimeNum()>145800 OR C01 OR C02;
+
+
+    Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+_SECTION_END();

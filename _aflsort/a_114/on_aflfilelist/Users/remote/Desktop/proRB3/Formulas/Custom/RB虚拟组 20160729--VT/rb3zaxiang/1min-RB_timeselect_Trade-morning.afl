@@ -1,0 +1,139 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "1min-RB_timeselect_Trade-morning";
+StrategyID ="1012100045";
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+FSTK=Day()!=Ref(Day(),-1);
+KN=IIf(FSTK,1,BarsSince(FSTK)+1);	
+
+KNtotal=ValueWhen(Day()!=Ref(Day(),-1),Ref(KN,-1),1); //
+
+
+///////LAST DAY HIGH LOW///////////////////////////////////////////////////
+LOST=Param("LOST",100000,90000,150000,100);  //Observation Start Time
+LOET=Param("LOET",145000,90000,150000,100);   //Observation End Time
+
+Lob_end = Cross(TimeNum(),LOET);  //detect the observation end time
+Lob_st = Cross(TimeNum(),LOST);   //detect the observation start time 
+ 
+Highest_sinceL = HighestSince(Lob_st,C,1); //capture the 1 hour high
+Lowest_sinceL = LowestSince(Lob_st,C,1);  //capture the 1 hour low
+ 
+LORBH = ValueWhen(Lob_end ,Highest_sinceL,1); //
+LORBL = ValueWhen(Lob_end ,Lowest_sinceL,1);  
+
+LORBHKN =ValueWhen(C==LORBH,KN,1); //
+LORBLKN =ValueWhen(C==LORBL,KN,1); //
+/////////////THIS DAY HIGH LOW//////////////////////////////////////////////
+TOST=Param("TOST",90000,90000,150000,100);  //Observation Start Time
+TOET=Param("TOET",91800,90000,150000,100);   //Observation End Time
+
+Tob_end = Cross(TimeNum(),TOET);  //detect the observation end time
+Tob_st = Cross(TimeNum(),TOST);   //detect the observation start time 
+ 
+Highest_sinceT = HighestSince(Tob_st,C,1); //capture the 1 hour high
+Lowest_sinceT = LowestSince(Tob_st,C,1);  //capture the 1 hour low
+ 
+TORBH = ValueWhen(Tob_end ,Highest_sinceT,1); //
+TORBL = ValueWhen(Tob_end ,Lowest_sinceT,1);  
+
+TORBHKN =ValueWhen(C==TORBH,KN,1); //
+TORBLKN =ValueWhen(C==TORBL,KN,1); //
+
+///////////////////////////////////TRADING TIME///////////////////////////////////////////////////////////////////////////
+
+TST=Param("TST",92000,90000,150000,100);  //Trading Start Time
+TET=Param("TET",100300,90000,150000,100);   //Trading End Time
+
+
+/////
+
+ADXval=Param("ADXval",20,1,100,1);
+
+ssig0=C<Min(LORBL,TORBL) AND TimeNum()>TST AND TimeNum()<TET AND ADX(14)>ADXval;
+bsig0=C>Max(LORBH,TORBH) AND TimeNum()>TST AND TimeNum()<TET AND ADX(14)>ADXval;
+
+
+ps = GetPs(bsig0,ssig0,0);
+
+
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+HHVbsg=HHV(C,lstbsg);
+LLVssg=LLV(C,lstssg);
+
+HHVbsgPeriod=BarsSince(C>=HHVbsg);
+LLVssgPeriod=BarsSince(C<=LLVssg);
+
+sbuyp=Lstbsg-HHVbsgPeriod;
+ssellp=Lstssg-LLVssgPeriod;
+
+ssbuyp=IIf(sbuyp==Ref(sbuyp,-1),1,0);
+sssellp=IIf(ssellp==Ref(ssellp,-1),1,0);
+
+nobuypeak=BarsSince(Ref(ssbuyp,-1)==0 AND ssbuyp==1);
+nosellpeak=BarsSince(Ref(sssellp,-1)==0 AND sssellp==1);
+
+Holdperiod=Param("Holdperiod",1000,1,2000,1);
+
+C01=ps==1 AND nobuypeak>=Holdperiod;
+C02=ps==-1 AND nosellpeak>=Holdperiod;
+
+
+/////////////////////////////////////////////////////////////////////////
+dangtian=Param("dangtian",18,1,100,1);
+LastDayClose=Ref(C,-KN);
+ThisDayOpen=Ref(O,-KN+1);
+
+C03=ps==1 AND ThisDayOpen-C>C*dangtian/1000;
+C04=ps==-1 AND C-ThisDayOpen>ThisDayOpen*dangtian/1000;
+
+//////////////////////////////////
+
+tp = Param("tp",40,0,100,1);
+
+
+C05 = ps==1 AND  C<HHVbsg-tp*C/1000;
+C06 = ps==-1 AND  C>LLVssg+tp*C/1000;
+
+
+//////////////////////////
+Hsince = HighestSince(TST,H,1); //capture the 1 hour high
+Lsince  = LowestSince(TST,L,1);  //capture the 1 hour low
+
+Ch = ValueWhen(145000,Hsince,1); //
+Cl = ValueWhen(145000,Lsince,1);  
+
+C1450 = ValueWhen(TimeNum()==145000,C,1); 
+
+fanzhuan=Param("fanzhuan",22,1,100,1);
+
+C07=ps==1 AND Ch-C>C*fanzhuan/1000;
+C08=ps==-1 AND C-Cl>Cl*fanzhuan/1000;
+
+
+
+
+
+Csig=C01 OR C02 OR C03 OR C04 OR C05 OR C06 OR C07 OR C08;
+
+
+
+
+
+
+    Buy = bsig0 ;           
+    Sell= CSIG;        
+    Short = ssig0 ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig0,Ssig0,Csig);
+Trading_log(BSIG0,SSIG0,CSIG,StrategyID,StrategyName,ProType);

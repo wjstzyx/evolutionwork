@@ -1,0 +1,59 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/BasicV4/PMS.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 800);
+
+StrategyName = "IF01-LVB-TM-DTA-1-1-1-V05";
+StrategyID = 40269;
+ProType = 0;
+
+
+
+
+PMS1=PMS_LVB(0.4,16,18,111,135,"IF");
+PMS2=PMS_LVB(0.5,11,9,112,135,"IF");
+
+
+
+
+PMS3=PMS_TMHLV3(9,10,17,0.1,116,135,"IF");
+PMS4=PMS_TMHLV3(11,12,15,0.1,116,135,"IF");
+
+PMS6=PMS_DTAV2BC(10,8,0,106,135,"IF");
+PMS7=PMS_DTAV2BC(16,10,0.2,106,135,"IF");
+
+
+
+
+cond_LVB=(PMS1+PMS2)/2;
+cond_TM=(PMS4+PMS3)/2;
+cond_DTA=(PMS7+PMS6)/2;
+
+
+
+
+w_LVB= ParamOptimize("w_LVB",1,0,4,0.5);
+w_TM= ParamOptimize("w_TM",1,0,4,0.5);
+w_DTA= ParamOptimize("w_DTA",1,0,4,0.5);
+
+Cond = w_LVB*cond_LVB+ w_TM*cond_TM+w_DTA*cond_DTA;
+
+
+
+
+
+Vote=ParamOptimize("w_Vote",0.5,0,4,0.5);
+
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond==0;
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName+"--"+StrategyID);

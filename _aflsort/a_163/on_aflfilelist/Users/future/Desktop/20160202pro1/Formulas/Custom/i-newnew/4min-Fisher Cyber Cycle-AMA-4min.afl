@@ -1,0 +1,75 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "4min-Fisher Cyber Cycle-AMA-4min";
+StrategyID =270078;
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+alpha=Param("alpha",0.02,0.01,1,0.01);
+AMAf = Param("AMAf", 0.01, 0, 1.0, 0.001);
+factor = Param("factor", 0.01, 0, 1, 0.001);
+
+function CyberCycle( array, alpha )
+{
+  smooth = ( array + 2 * Ref( array, -1 ) +
+             2 * Ref( array, -2 ) + Ref( array, -3 ) ) / 6;
+  // init value
+  Cycle = ( array[ 2 ] - 2 * array[ 1 ] + array[ 0 ] )/4;
+  for( i = 6; i < BarCount; i++ )
+  {
+     Cycle[ i ] = ( ( 1 - 0.5 * alpha) ^ 2 ) *
+                  ( smooth[ i ] - 2 * smooth[ i - 1 ] + smooth[ i - 2] ) +
+                  2 * ( 1 - alpha ) * Cycle[ i - 1 ] -
+                  ( ( 1 - alpha) ^ 2 ) * Cycle[ i - 2 ];
+  }
+  return Cycle;
+}
+
+med=(H+L)/2;
+
+price=AMA(C,AMAf);
+//price=C;
+Cycle=CyberCycle( price, alpha );
+
+//Plot(Cycle,"Cycle",colorBlue);
+
+
+Value1=Cycle;
+Value1 = AMA(2*(Cycle), factor);
+//Value2=(4*Value1+3*Ref(Value1,-1)+2*Ref(Value1,-2)+Ref(Value1,-3))/10;
+Value3=Value1;
+
+InverseFish=( ( exp( 2 * Value3 ) - 1 ) / ( exp( 2 * Value3 ) + 1 ) + 1 )*50;
+
+
+//Value3=0.5*log((1+1.98*(Value2-0.5))/(1-1.98*(Value2-0.5)));
+
+//Plot(Fish,"Fish ",colorGreen);
+StoFR1=InverseFish ;
+
+Bsig=StoFR1>Ref(StoFR1,-1);
+Ssig=StoFR1<Ref(StoFR1,-1);
+csig=0;
+//Bsig=StoFR1>Ref(StoFR1,-1) AND Ref(StoFR1,-1)>Ref(StoFR1,-2);
+//Ssig=StoFR1<Ref(StoFR1,-1) AND Ref(StoFR1,-1)<Ref(StoFR1,-2);
+
+//Bsig=StoFR1>Ref(StoFR1,-1) AND Ref(StoFR1,-1)>Ref(StoFR1,-2)  AND Ref(StoFR1,-2)>Ref(StoFR1,-3);
+//Ssig=StoFR1<Ref(StoFR1,-1) AND Ref(StoFR1,-1)<Ref(StoFR1,-2)  AND Ref(StoFR1,-2)<Ref(StoFR1,-3);
+
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+
+ps0 = GetPs(bsig,ssig,0);
+Filter= 1;
+AddColumn(ps0,"ps");

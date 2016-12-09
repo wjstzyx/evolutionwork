@@ -1,0 +1,134 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+
+
+function PIR(p,Length)
+{
+Ll=LLV(p,Length);
+Hh=HHV(p,Length);
+return (100*(p-Ll)/(Hh-Ll));
+}
+
+
+CXVOLUME7_periods=Param("CXVOLUME7_periods",3,1,40,1);
+CXVOLUME7_period=Param("CXVOLUME7_period",10,1,40,1);
+
+function getCXVOLUME7(arrH,arrL,CXVOLUME7_periods,CXVOLUME7_period)
+{
+Buypower=HHV( arrH, CXVOLUME7_periods ) - Ref( LLV( arrL, CXVOLUME7_periods ), -CXVOLUME7_periods );
+
+Sellpower=Ref( HHV( arrH, CXVOLUME7_periods ), -CXVOLUME7_periods ) - LLV(arrL, CXVOLUME7_periods );
+
+Wm=Wilders(Wilders(Buypower,CXVOLUME7_period)-Wilders(Sellpower,CXVOLUME7_period),CXVOLUME7_period);
+
+Bsig=Cross(Wm,0);
+Ssig=Cross(0,Wm);
+
+ps = GetPs(bsig,ssig,0);
+
+return ps;
+}
+
+ps=getCXVOLUME7(H,L,CXVOLUME7_periods,CXVOLUME7_period);
+ps1=ps;
+
+
+TimeFrameSet( in15Minute );
+ma15_10 = C;
+tmacd1 = MACD(12, 26);
+tmacd2 = Signal(12,26,9);
+TimeFrameRestore(); 
+t1=TimeFrameExpand(tmacd1,in15Minute);
+t2=TimeFrameExpand(tmacd2,in15Minute);
+macd1=Ref(t1,-1);
+macd2=Ref(t2,-1);
+goldcross= Ref(macd1,-1)<Ref(macd2,-1) AND macd1-macd2>=0 AND macd1-macd2>Ref(MACD1,-1)-Ref(macd2,-1);
+deadcross= Ref(macd1,-1)>Ref(macd2,-1) AND macd1-macd2<=0 AND macd1-macd2<Ref(MACD1,-1)-Ref(macd2,-1);
+
+gd= GetPs(goldcross,deadcross,0);
+
+
+longsample1="c:\\sample\\long_3.csv";
+longsample2="c:\\sample\\long_test_5.csv";
+longsample3="c:\\sample\\long_test_6.csv";
+longsample4="c:\\sample\\long_test_7.csv";
+longsample5="c:\\sample\\long_test_8.csv";
+
+
+
+shortsample1="c:\\sample\\short_3.csv";
+shortsample2="c:\\sample\\short_test_5.csv";
+shortsample3="c:\\sample\\short_test_6.csv";
+shortsample4="c:\\sample\\short_test_7.csv";
+shortsample5="c:\\sample\\short_test_8.csv";
+
+longcof1=Cor(Close,longsample1,30);
+longcof2=Cor(Close,longsample2,30);
+longcof3=Cor(Close,longsample3,30);
+longcof4=Cor(Close,longsample4,30);
+longcof5=Cor(Close,longsample5,30);
+
+
+shortcof1=Cor(Close,shortsample1,30);
+shortcof2=Cor(Close,shortsample2,30);
+shortcof3=Cor(Close,shortsample3,30);
+shortcof4=Cor(Close,shortsample4,30);
+shortcof5=Cor(Close,shortsample5,30);
+
+cor2macd2_cof_long=Param("cor2macd2_cof_long",0.85, 0.5, 1, 0.01);
+cor2macd2_cof_short=Param("cor2macd2_cof_short",0.85, 0.5, 1, 0.01);
+
+cor2macd2_cof_close1=Param("cor2macd2_cof_close1",0.5,0.5, 1, 0.01);
+cor2macd2_cof_close2=Param("cor2macd2_cof_close2",0.5, 0.5, 1, 0.01);
+
+cor2macd2_lengthlong = Param("cor2macd2_lengthlong", 25, 1, 100, 1);
+cor2macd2_lengthshort = Param("cor2macd2_lengthshort", 25, 1, 100, 1);
+
+
+
+bsig= longcof1>1 OR longcof2>1 OR longcof3>cor2macd2_cof_long OR longcof4>cor2macd2_cof_long OR longcof5>1;
+bsig= bsig AND TimeNum()>=103000 AND TimeNum()<=145000 AND C>=Ref(C,-1) AND gd==1;
+
+
+ssig= shortcof1>1 OR shortcof2>1 OR shortcof3>cor2macd2_cof_short OR shortcof4>cor2macd2_cof_short OR shortcof5>1;
+ssig= ssig AND TimeNum()>=103000 AND TimeNum()<=145000 AND C<=Ref(C,-1) AND gd==-1;
+
+Lstbsg = BarsSince(bsig);
+Lstssg = BarsSince(ssig);
+co= (BarsSince(bsig)==cor2macd2_lengthlong AND C<Ref(C,-lstbsg)) OR (BarsSince(ssig)==cor2macd2_lengthshort AND C>Ref(C,-lstssg));
+
+ps=GetPs(bsig,ssig,0);
+
+ps2=ps;
+
+
+ps=ps1+ps2;
+
+bsig1=ps>=2;
+ssig1=ps<=-2;
+
+bsig=ExRem(bsig1,ssig1);
+ssig=ExRem(ssig1,bsig1);
+
+psmerge=GetPs(bsig,ssig,0);
+
+tp = Param("tp",15,0,100,1);
+
+Lstbsg = BarsSince(psmerge==1 AND Ref(psmerge,-1)!=1);
+Lstssg = BarsSince(psmerge==-1 AND Ref(psmerge,-1)!=-1);
+
+C01 = psmerge==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C02 = psmerge==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+Csig=C01 OR C02;
+
+
+Plotperformance(bsig,ssig,Csig);
+
+
+
+
+
+
+
+
+StrategyName = "rb-10min-CXVOLUME7ps_cor2macd2";StrategyID = "1012100341";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

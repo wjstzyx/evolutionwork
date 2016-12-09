@@ -1,0 +1,50 @@
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "IF-1MIN-YBSVC01-25-8-28-7";
+StrategyID = 40722;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+ppp = Param("ppp",25,1,27000,1);
+period = Param("period",8,1,27000,1);
+x = Param("x",28,1,27000,1);
+y = Param("y",7,1,27000,1);
+daystart = BarIndex() == 0 OR DateNum() != Ref(DateNum(), -1);
+kn = BarsSince(daystart);
+
+fc = Foreign(Name(),"C");
+fv = Foreign(Name(),"V");
+fo = Foreign(Name(),"O");
+fh = Foreign(Name(),"H");
+fl = Foreign(Name(),"L");
+
+xx = Sum(fv * fc,kn)/Sum(fv,kn);
+
+up=C>O;
+dn=C<O;
+sc = Cross(fc,xx);
+xc = Cross(xx,fc);
+
+ps = GetPs(sc,xc,0);
+
+bsig = ps == 1 AND fc == LLV(fc,period) AND kn >= ppp;
+ssig = ps == -1 AND fc == HHV(fc,period)  AND kn >= ppp;
+
+
+Csig = TimeNum() > 151300;
+Lstsig = BarsSince(bsig OR ssig);
+sinPs=GetPs(BSIG,SSIG,CSIG);
+
+
+C01=sinPs==1 AND Lstsig>=x AND C==LLV(C,period) ;//AND C<Lstdc;
+C02=sinPs==-1 AND Lstsig>=x AND C==HHV(C,period) ;//AND C>Lstdc;
+c05=sinPs==1 AND CPPCount(dn,y)==y ;//AND C<Lstdc;
+C06=sinPs==-1 AND CPPCount(up,y)==y;//AND C>Lstdc;
+Csig= C01 OR C02 OR C05 OR C06 OR Csig;
+Plotperformance(bsig,ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

@@ -1,0 +1,40 @@
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Basic/HL.afl";
+#include "Formulas/Custom/Basic/EXV.afl";
+
+StrategyName = "SuperBac_HLEXV_V1";
+StrategyID = 5032;
+ProType = 1;
+
+Vote= ParamOptimize("Vote", 0, 0, 50, 1);
+
+Cond1 = 0;//EXVORIV3CU3(35,33,80,28,"CU");  //1
+Cond2 = EXVORI(31,8,"RU");                //2
+Cond3 = EXVORIV3CU3(37,72,500,25,"RU"); //3
+Cond4 = EXVORIV2CU3(31,9,65,4,"RU");    //4
+Cond5 = HLAVG(16,0,"CU");                 //5
+Cond6 = HLAVG(13,3,"CU");                 //6
+Cond7 = HLAVG(12,4,"CU");                 //7
+Cond8 = 0;//HLAVG(16,0,"RU");                   //8
+Cond9 = HLNAVG(15,2,"CU");                //9
+Cond10 = HLNAVG(13,3,"CU");                //10
+Cond11 = HLNAVG(13,4,"CU");                //11
+
+	for(i=0;i<BarCount;i++)
+	{
+		Cond[i] = Cond1[i]+Cond2[i]+Cond3[i]+Cond4[i]+Cond5[i]+Cond6[i]+Cond7[i]+Cond8[i]+Cond9[i]+Cond10[i]+Cond11[i];
+	}
+
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+//CSIG=Cond<=Vote && Cond>=-Vote;
+CSIG=(TimeNum()+Interval()*100/60)>=146000;
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

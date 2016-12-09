@@ -1,0 +1,36 @@
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/BasicIF/HLIF.afl";
+#include "Formulas/Custom/BasicIF/EXVif.afl";
+
+StrategyName = "IF03_CandiIFHLEXV_G12_C_4019";
+StrategyID = 4019;
+ProType = 0;
+
+Cond1=EXVORIif(10,10,"IF");
+Cond2=EXVORIV3CU3if(12,12,215, 27, "if");
+Cond3=HLAVGIF(9,2,21, "if"); 
+Cond4=HLAVGIF(5,8,25, "if"); 
+G1Cond=Cond1+Cond2+Cond3+Cond4;
+
+Cond5=EXVORICU3if(12,8,150,4,"IF");
+Cond6=EXVORIV2CU3if(12,20,125,8,"IF");
+Cond7=HLAVGaIF(3,9,15, "if"); 
+Cond8=HLnAVG2IF(16,2,27, "if");
+G2Cond=Cond5+Cond6+Cond7+Cond8;
+
+Cond=GetSig123(G1Cond)+GetSig123(G2Cond);
+
+VoteEnter = ParamOptimize("VoteEnter ", 1, 0, 10, 1);
+VoteCover =  ParamOptimize("VoteCover ", 0, 0, 10, 1);
+BSIG=Cond>VoteEnter ;
+SSIG=Cond<-VoteEnter ;
+CSIG=(TimeNum()+Interval()*100/60)>=151500;
+
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+PlotPerformance(sinPs,sinBS,StrategyName);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,0);

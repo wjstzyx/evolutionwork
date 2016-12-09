@@ -1,0 +1,29 @@
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Basic2012/UDVOL.afl";
+
+StrategyName = "UDVOLCU01";
+StrategyID = 5040;
+
+Cond= UDVOLORI(27,3,1,135,244,"CU");  		
+Cond = TimeSelect(51,255,Cond);		
+
+
+BSIG=Cond>0;
+SSIG=Cond<0;
+CSIG=Cond==0;
+
+
+Vote=0;
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond<=Vote && Cond>=-Vote;
+
+
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName);
+PlotPerformance(sinPs,sinBS,StrategyName);

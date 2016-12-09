@@ -1,0 +1,75 @@
+//#include "Formulas/Custom/201502/15s/volatility.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+TickerNAME = Name(); 
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+
+StrategyName = "	IF-2min-FQS-41-3-4-5";
+StrategyID = 40816;
+ProType = 0;
+TickerName=Name();
+
+    
+//period= ParamOptimize("period", 10, 0, 200,1); 
+period2= ParamOptimize("period2", 41, 0, 200,1); 
+x= ParamOptimize("x", 3, 0, 200,1);
+y= ParamOptimize("y", 4, 0, 200,1);
+paraperiod2= ParamOptimize("paraperiod2", 5, 0, 200,1); 
+
+//===============================================
+FSTK=Day()!=Ref(Day(),-1);				
+KN=BarsSince(FSTK)+1;
+upline=H-Max(C,O);
+
+dnline=Min(C,O)-L;
+
+uprange=C-O;
+range=abs(C-O);
+newk=-upline+uprange*2+dnline;
+
+newkup=IIf(newk>0,1,0);
+newkdn=IIf(newk<0,1,0);
+
+up=C>O;
+dn=C<O;
+
+cond1=V==HHV(V,kn) ;
+up1=CPPCount(dn,x)>=x-2;
+dn1=CPPCount(up,x)>=x-2;
+
+bsig=Cond1 AND dn AND Sum(up1,y)==y AND newkdn;
+ssig=Cond1 AND up AND Sum(dn1,y)==y AND newkup;
+
+
+bsig=Ref(bsig,-1) AND up AND kn>2 AND kn<period2;
+ssig=Ref(ssig,-1) AND dn AND kn>2 AND kn<period2;
+Lstsig = BarsSince(bsig OR ssig);   
+CSIG =Lstsig==paraperiod2;
+
+BPeriod= BarsSince(BSIG)<BarsSince(SSIG) AND BarsSince(BSIG)>0;            
+SPeriod= BarsSince(SSIG)<BarsSince(BSIG) AND BarsSince(SSIG)>0;  
+ 
+//C01=bperiod AND V==HHV(V,period2) AND up;
+//C02=speriod AND V==HHV(V,period2) AND dn;
+
+
+
+
+Csig=Csig  OR TimeNum()>=151200;
+
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+
+/*
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);
+*/
+PlotPerformance(bsig,ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

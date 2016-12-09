@@ -1,0 +1,87 @@
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "CU-5MIN-QIANGP-100-32-3";
+StrategyID = 50066;
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine);
+//------------------------para----------------------------------------
+//time=ParamOptimize("time",1, 0, 100,1);
+Y=ParamOptimize("Y",100, 1, 100,1);
+x=ParamOptimize("x",32, 0, 225,1);
+period=ParamOptimize("period",3, 0, 225,1);
+//yy=ParamOptimize("yy",28, 0, 225,1);
+//----------------------------------------------------------------------
+
+FSTK=Day()!=Ref(Day(),-1);
+KN=BarsSince(FSTK)+1;
+RANGE=abs(C-O);
+//sigb01=C>Ref(C,-1);
+//sigb02=H>Ref(H,-1);
+//sigb03=L>Ref(L,-1);
+//sigs01=C<Ref(C,-1);
+//sigs02=H<Ref(H,-1);
+//sigs03=L<Ref(L,-1);
+//up=C>O OR (H>Ref(H,-1)AND L>Ref(L,-1));
+//dn=C<O OR (H<Ref(H,-1)AND L<Ref(L,-1));
+up=C>O;// OR (H>Ref(H,-1)AND L>Ref(L,-1));
+dn=C<O ;//OR (H<Ref(H,-1)AND L<Ref(L,-1));
+sigb01=C>Ref(C,-1)+5*X;
+sigb02=H>Ref(H,-1)+5*X;
+sigb03=L>Ref(L,-1)+5*X;
+sigs01=C<Ref(C,-1)-5*X;
+sigs02=H<Ref(H,-1)-5*X;
+sigs03=L<Ref(L,-1)-5*X;
+
+YEH=TimeFrameGetPrice("H",inDaily,-1);
+YEL=TimeFrameGetPrice("L",inDaily,-1);
+YEc=TimeFrameGetPrice("c",inDaily,-1);
+YEo=TimeFrameGetPrice("o",inDaily,-1);
+
+yeavg=TimeFrameGetPrice("avg",inDaily,-1);
+
+//aa=Plot(yeavg,"aa",colorRed);
+//b01=(sigb01 AND  sigb02) OR (sigb02 AND sigb03) OR (sigb01 AND sigb03);
+//s01=(sigs01 AND  sigs02) OR (sigs02 AND sigs03) OR (sigs01 AND sigs03);
+
+b01=O>yeh;
+s01=O<yel;
+
+
+
+bsig=  C>yeavg AND C==HHV(C,kn+45*period) AND kn>x;// AND NOT CPPCount(up,period)==period;// AND V<HHV(V,kn);// AND up;//AND C>O;
+ssig= C<yeavg AND C==LLV(C,kn+45*period)AND kn>x;// AND NOT CPPCount(dn,period)==period;//AND V<HHV(V,kn);// AND dn;// AND C<O;
+
+//bsig=Ref(bsig,-1) AND dn AND V<HHV(V,kn);
+//ssig=Ref(ssig,-1) AND up AND V<HHV(V,kn);
+Csig= TimeNum()>=145600;//-time*100;
+
+Lstsig = BarsSince(bsig OR ssig);
+BPeriod= BarsSince(BSIG)<BarsSince(SSIG) AND BarsSince(BSIG)>0;
+SPeriod= BarsSince(SSIG)<BarsSince(BSIG) AND BarsSince(SSIG)>0;
+//C01=bperiod AND C<O AND RANGE>Sum(Ref(RANGE,-1),3);//AND C<Lstdc;
+//C02=speriod AND  C>O AND RANGE>Sum(Ref(RANGE,-1),3) ;//AND C>Lstdc;
+
+C03=bperiod AND CPPCount(dn,y)==y ;//AND C<Lstdc;
+C04=speriod AND CPPCount(up,y)==y ;//AND C>Lstdc;
+
+//C05=bperiod AND C-Ref(C,-Lstsig)>0 AND Lstsig>=period;
+//C06=speriod AND  Ref(C,-Lstsig)-C>0 AND Lstsig>=period;
+
+//C01=bperiod AND  V==HHV(V,kn) AND up ;
+//C02=speriod AND  V==HHV(V,kn) ;
+
+
+Csig=C03 OR C04 OR  Csig ;//OR V==HHV(V,kn);//OR C01 OR C02;//OR C05 OR C06 ;//OR V==HHV(V,period);
+//-----------------------------------------------------------------------------------------------------------------------
+	Buy = bsig ;
+	Sell= CSIG;
+	Short = ssig ;
+	Cover = CSIG;
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

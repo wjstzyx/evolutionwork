@@ -1,0 +1,66 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "1min-DPO-pbuy-lastwintrade";
+StrategyID ="1012100136";
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+Lookback=Param("Lookback",210,10,1000,10);
+
+DPO=C - Ref( MA( C, Lookback ), -( 1 + Lookback/2 ) );
+
+Cstudy=DPO;
+
+stdc=StDev(Cstudy,Lookback);
+
+xc=IIf(stdc==0,0,Cstudy/stdc);
+
+pbuyc=NN(xc);
+
+
+Limit=Param("Limit",0.9,0,1,0.1);
+
+tst=Param("tst",111000,90000,150000,100);
+ted=Param("ted",150000,90000,150000,100);
+
+bsig1=pbuyc>Limit AND TimeNum()>tst AND TimeNum()<ted;
+ssig1=pbuyc<1-Limit AND TimeNum()>tst AND TimeNum()<ted;
+
+ps = GetPs(bsig1,ssig1,0);
+
+
+SIG=ps;
+
+thisTradeClosetemp=ValueWhen(SIG!=Ref(SIG,-1),C,1);
+thisTradeClose=IIf(SIG!=Ref(SIG,-1),Ref(thisTradeClosetemp,-1),thisTradeClosetemp);
+PSumTradeC=IIf(Ref(SIG,-1)==1,C-thisTradeClose,IIf(Ref(SIG,-1)==-1,thisTradeClose-C,0));
+
+PSumTradeP=IIf(PSumTradeC>0,1,-1);
+
+periorTrade=ValueWhen(ps!=Ref(ps,-1),Ref(ps,-1),1);
+periorTradeP=ValueWhen(ps!=Ref(ps,-1),Ref(PSumTradeP,-1),1);
+
+LastWinTrade=ValueWhen(periorTradeP==1,periorTrade,1);
+
+bsig=ps==1 AND Ref(ps,-1)!=1 AND ps==LastWinTrade;
+ssig=ps==-1 AND Ref(ps,-1)!=-1 AND ps==LastWinTrade;
+
+ps2=GetPs(bsig,ssig,0);
+
+C01=ps2==1 AND ps!=1;
+C02=ps2==-1 AND ps!=-1;
+
+Csig=C01 OR C02;
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

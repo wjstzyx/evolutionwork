@@ -1,0 +1,66 @@
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "G3-1min";
+StrategyID = 210082;
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+tw=ParamOptimize("timewindow",800,10,1000,20);
+MAperiod=ParamOptimize("MAperiod",1750,10,2000,20);
+
+bollingstd=2;
+
+G0=(H+L+C+O)/Sum(C,tw); 
+G1=BBandTop(G0,tw,bollingstd);
+G2=BBandBot(G0,tw,bollingstd);
+
+G3=(G0-G2)/(G1-G2);
+
+//Plot(G3,"G3",colorGreen);
+
+DynamicAverage = MA(G3,MAperiod);
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs",1);
+OptimizerSetOption("MaxEval",5000);
+
+
+OneStDev = 0.05;
+
+howManyStDev = ParamOptimize("howManyStDev", 9, 1, 20, 1); // <=== 3.1
+down = DynamicAverage - howManyStDev * OneStDev; 
+up = DynamicAverage + howManyStDev * OneStDev;
+
+// BSIG, SSIG, CSIG
+SSIG = Cross(down, G3); // Important: do not use Cross(X4, a)
+BSIG = Cross(G3, up); // Important: do not use Cross(b, X4)
+ps = GetPs(BSIG, SSIG, 0);
+
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+
+tp = Param("tp",19,0,100,1);
+
+C05 = ps==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C06 = ps==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+CSIG =  C05 OR C06;
+
+
+    Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

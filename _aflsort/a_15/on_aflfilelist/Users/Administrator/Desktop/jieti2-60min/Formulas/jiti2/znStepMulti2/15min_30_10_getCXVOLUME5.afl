@@ -1,0 +1,137 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+function PIR(p,Length)
+{
+Ll=LLV(p,Length);
+Hh=HHV(p,Length);
+return (100*(p-Ll)/(Hh-Ll));
+}
+
+function TP15(bsig, ssig, ps0)
+{
+tp = 15; //Param("tp",15,0,100,1);
+Lstbsg = BarsSince(ps0==1 AND Ref(ps0,-1)!=1);
+Lstssg = BarsSince(ps0==-1 AND Ref(ps0,-1)!=-1);
+C01 = ps0==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C02 = ps0==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+Csig=C01 OR C02;
+ps = GetPs(bsig, ssig, csig);
+return ps;
+}
+
+
+
+CXVOLUME5_period=1; //paramoptimize("CXVOLUME5_period",11,1,40,1);
+
+function getCXVOLUME5(CXVOLUME5_period)
+
+{
+
+PlusDM=IIf(H-Ref(H,-1)>Ref(L,-1)-L,C-Ref(C,-1),0);
+
+
+
+Buypower=PlusDM;
+
+
+
+MinDM = IIf(H-Ref(H,-1)<Ref(L,-1)-L, Ref(C,-1)-C, 0);
+
+
+
+Sellpower=MinDM;
+
+
+
+Wm=Wilders(Wilders(Buypower,CXVOLUME5_period)-Wilders(Sellpower,CXVOLUME5_period),CXVOLUME5_period);
+
+
+
+Bsig=Cross(Wm,0);
+
+Ssig=Cross(0,Wm);
+
+
+
+bsig=ExRem(Bsig,Ssig);
+ssig=ExRem(Ssig,Bsig);
+
+ps=GetPs(bsig,ssig,0);
+
+
+
+
+//add exrem
+bsig=exrem(bsig,ssig);
+ssig=exrem(ssig,bsig);
+ps=getps(bsig,ssig,0);
+
+//add_tp15ps_exp
+ps = TP15(bsig, ssig, ps);
+return ps;
+
+
+}
+
+ps = 0;
+//15_MD
+CXVOLUME5_period = 23;ps1 = getCXVOLUME5(CXVOLUME5_period);ps += ps1;
+CXVOLUME5_period = 12;ps2 = getCXVOLUME5(CXVOLUME5_period);ps += ps2;
+CXVOLUME5_period = 6;ps3 = getCXVOLUME5(CXVOLUME5_period);ps += ps3;
+CXVOLUME5_period = 20;ps4 = getCXVOLUME5(CXVOLUME5_period);ps += ps4;
+CXVOLUME5_period = 22;ps5 = getCXVOLUME5(CXVOLUME5_period);ps += ps5;
+CXVOLUME5_period = 24;ps6 = getCXVOLUME5(CXVOLUME5_period);ps += ps6;
+CXVOLUME5_period = 7;ps7 = getCXVOLUME5(CXVOLUME5_period);ps += ps7;
+CXVOLUME5_period = 14;ps8 = getCXVOLUME5(CXVOLUME5_period);ps += ps8;
+CXVOLUME5_period = 8;ps9 = getCXVOLUME5(CXVOLUME5_period);ps += ps9;
+CXVOLUME5_period = 21;ps10 = getCXVOLUME5(CXVOLUME5_period);ps += ps10;
+//15_NP
+CXVOLUME5_period = 23;ps1 = getCXVOLUME5(CXVOLUME5_period);ps += ps1;
+CXVOLUME5_period = 12;ps2 = getCXVOLUME5(CXVOLUME5_period);ps += ps2;
+CXVOLUME5_period = 6;ps3 = getCXVOLUME5(CXVOLUME5_period);ps += ps3;
+CXVOLUME5_period = 20;ps4 = getCXVOLUME5(CXVOLUME5_period);ps += ps4;
+CXVOLUME5_period = 22;ps5 = getCXVOLUME5(CXVOLUME5_period);ps += ps5;
+CXVOLUME5_period = 24;ps6 = getCXVOLUME5(CXVOLUME5_period);ps += ps6;
+CXVOLUME5_period = 7;ps7 = getCXVOLUME5(CXVOLUME5_period);ps += ps7;
+CXVOLUME5_period = 14;ps8 = getCXVOLUME5(CXVOLUME5_period);ps += ps8;
+CXVOLUME5_period = 18;ps9 = getCXVOLUME5(CXVOLUME5_period);ps += ps9;
+CXVOLUME5_period = 8;ps10 = getCXVOLUME5(CXVOLUME5_period);ps += ps10;
+//15_PF
+CXVOLUME5_period = 23;ps1 = getCXVOLUME5(CXVOLUME5_period);ps += ps1;
+CXVOLUME5_period = 12;ps2 = getCXVOLUME5(CXVOLUME5_period);ps += ps2;
+CXVOLUME5_period = 6;ps3 = getCXVOLUME5(CXVOLUME5_period);ps += ps3;
+CXVOLUME5_period = 20;ps4 = getCXVOLUME5(CXVOLUME5_period);ps += ps4;
+CXVOLUME5_period = 22;ps5 = getCXVOLUME5(CXVOLUME5_period);ps += ps5;
+CXVOLUME5_period = 24;ps6 = getCXVOLUME5(CXVOLUME5_period);ps += ps6;
+CXVOLUME5_period = 7;ps7 = getCXVOLUME5(CXVOLUME5_period);ps += ps7;
+CXVOLUME5_period = 14;ps8 = getCXVOLUME5(CXVOLUME5_period);ps += ps8;
+CXVOLUME5_period = 8;ps9 = getCXVOLUME5(CXVOLUME5_period);ps += ps9;
+CXVOLUME5_period = 21;ps10 = getCXVOLUME5(CXVOLUME5_period);ps += ps10;
+
+
+ps_th = Param("ps_th", 10, 0, 100, 1);
+
+bsig=ps >= ps_th;
+ssig=ps <= -ps_th;
+
+bsig=ExRem(bsig,ssig);
+ssig=ExRem(ssig,bsig);
+
+psmerge=GetPs(bsig,ssig,0);
+ps_exit_th = ps_th * 0.66667;
+C01 = psmerge==1 AND ps <= ps_exit_th;
+C02 = psmerge==-1 AND ps >= -ps_exit_th;
+
+tp = 15; //Param("tp",15,0,100,1);
+Lstbsg = BarsSince(psmerge==1 AND Ref(psmerge,-1)!=1);
+Lstssg = BarsSince(psmerge==-1 AND Ref(psmerge,-1)!=-1);
+C03 = psmerge==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C04 = psmerge==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+//Csig=C01 OR C02 OR C03 OR C04;
+csig = C03 OR C04;
+//csig = C01 OR C02;
+
+
+Plotperformance(bsig,ssig,Csig);
+
+StrategyName = "15min_30_10_getCXVOLUME5";StrategyID = "1010800015";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

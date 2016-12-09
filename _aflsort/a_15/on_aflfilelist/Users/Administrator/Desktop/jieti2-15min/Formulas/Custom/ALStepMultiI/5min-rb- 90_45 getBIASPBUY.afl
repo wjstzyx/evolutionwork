@@ -1,0 +1,220 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+
+
+
+function PIR(p,Length)
+{
+Ll=LLV(p,Length);
+Hh=HHV(p,Length);
+return (100*(p-Ll)/(Hh-Ll));
+}
+
+function TP15(bsig, ssig, ps0)
+{
+tp = 15; //Param("tp",15,0,100,1);
+Lstbsg = BarsSince(ps0==1 AND Ref(ps0,-1)!=1);
+Lstssg = BarsSince(ps0==-1 AND Ref(ps0,-1)!=-1);
+C01 = ps0==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C02 = ps0==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+Csig=C01 OR C02;
+ps = GetPs(bsig, ssig, csig);
+return ps;
+}
+
+
+
+
+
+
+
+
+BIASPBUY_Lookback=1; //Paramoptimize("BIASPBUY_Lookback",450,10,1000,10);
+
+BIASPBUY_Limit=1; //Paramoptimize("BIASPBUY_Limit",0.8,0.1,1,0.1);
+
+
+
+function getBIASPBUY(Lookback,Limit)
+
+{
+
+Cstudy=C-MA(C,Lookback);
+
+
+
+stdc=StDev(Cstudy,Lookback);
+
+
+
+xc=IIf(stdc==0,0,Cstudy/stdc);
+
+
+
+pbuyc=NN(xc);
+
+
+
+bsig=pbuyc>Limit;
+
+ssig=pbuyc<1-Limit;
+
+
+
+ps = GetPs(bsig,ssig,0);
+
+
+
+
+//add exrem
+bsig=ExRem(bsig,ssig);
+ssig=ExRem(ssig,bsig);
+ps=GetPs(bsig,ssig,0);
+
+//add_tp15ps_exp
+ps = TP15(bsig, ssig, ps);
+return ps;
+
+
+
+
+
+}
+
+
+
+ps=getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);
+
+
+ps = 0;
+//30min_MDD
+BIASPBUY_Lookback = 170;BIASPBUY_Limit = 0.7;ps1 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps1;
+BIASPBUY_Lookback = 260;BIASPBUY_Limit = 0.6;ps2 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps2;
+BIASPBUY_Lookback = 160;BIASPBUY_Limit = 0.9;ps3 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps3;
+BIASPBUY_Lookback = 50;BIASPBUY_Limit = 0.7;ps4 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps4;
+BIASPBUY_Lookback = 150;BIASPBUY_Limit = 0.7;ps5 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps5;
+BIASPBUY_Lookback = 250;BIASPBUY_Limit = 0.8;ps6 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps6;
+BIASPBUY_Lookback = 180;BIASPBUY_Limit = 0.8;ps7 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps7;
+BIASPBUY_Lookback = 460;BIASPBUY_Limit = 0.6;ps8 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps8;
+BIASPBUY_Lookback = 50;BIASPBUY_Limit = 0.8;ps9 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps9;
+BIASPBUY_Lookback = 230;BIASPBUY_Limit = 0.5;ps10 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps10;
+BIASPBUY_Lookback = 470;BIASPBUY_Limit = 0.6;ps11 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps11;
+BIASPBUY_Lookback = 230;BIASPBUY_Limit = 0.7;ps12 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps12;
+BIASPBUY_Lookback = 390;BIASPBUY_Limit = 0.7;ps13 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps13;
+BIASPBUY_Lookback = 210;BIASPBUY_Limit = 0.8;ps14 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps14;
+BIASPBUY_Lookback = 270;BIASPBUY_Limit = 0.7;ps15 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps15;
+BIASPBUY_Lookback = 320;BIASPBUY_Limit = 0.6;ps16 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps16;
+BIASPBUY_Lookback = 280;BIASPBUY_Limit = 0.8;ps17 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps17;
+BIASPBUY_Lookback = 480;BIASPBUY_Limit = 0.6;ps18 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps18;
+BIASPBUY_Lookback = 320;BIASPBUY_Limit = 0.3;ps19 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps19;
+BIASPBUY_Lookback = 560;BIASPBUY_Limit = 0.5;ps20 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps20;
+BIASPBUY_Lookback = 830;BIASPBUY_Limit = 0.5;ps21 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps21;
+BIASPBUY_Lookback = 200;BIASPBUY_Limit = 0.9;ps22 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps22;
+BIASPBUY_Lookback = 310;BIASPBUY_Limit = 0.8;ps23 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps23;
+BIASPBUY_Lookback = 640;BIASPBUY_Limit = 0.2;ps24 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps24;
+BIASPBUY_Lookback = 460;BIASPBUY_Limit = 0.2;ps25 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps25;
+BIASPBUY_Lookback = 250;BIASPBUY_Limit = 0.9;ps26 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps26;
+BIASPBUY_Lookback = 270;BIASPBUY_Limit = 0.9;ps27 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps27;
+BIASPBUY_Lookback = 970;BIASPBUY_Limit = 0.5;ps28 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps28;
+BIASPBUY_Lookback = 400;BIASPBUY_Limit = 0.1;ps29 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps29;
+BIASPBUY_Lookback = 790;BIASPBUY_Limit = 0.6;ps30 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps30;
+//30min_NP
+BIASPBUY_Lookback = 220;BIASPBUY_Limit = 0.6;ps1 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps1;
+BIASPBUY_Lookback = 140;BIASPBUY_Limit = 0.6;ps2 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps2;
+BIASPBUY_Lookback = 210;BIASPBUY_Limit = 0.6;ps3 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps3;
+BIASPBUY_Lookback = 180;BIASPBUY_Limit = 0.6;ps4 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps4;
+BIASPBUY_Lookback = 110;BIASPBUY_Limit = 0.6;ps5 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps5;
+BIASPBUY_Lookback = 160;BIASPBUY_Limit = 0.6;ps6 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps6;
+BIASPBUY_Lookback = 190;BIASPBUY_Limit = 0.6;ps7 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps7;
+BIASPBUY_Lookback = 280;BIASPBUY_Limit = 0.6;ps8 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps8;
+BIASPBUY_Lookback = 260;BIASPBUY_Limit = 0.6;ps9 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps9;
+BIASPBUY_Lookback = 310;BIASPBUY_Limit = 0.6;ps10 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps10;
+BIASPBUY_Lookback = 300;BIASPBUY_Limit = 0.7;ps11 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps11;
+BIASPBUY_Lookback = 280;BIASPBUY_Limit = 0.7;ps12 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps12;
+BIASPBUY_Lookback = 120;BIASPBUY_Limit = 0.9;ps13 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps13;
+BIASPBUY_Lookback = 170;BIASPBUY_Limit = 0.6;ps14 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps14;
+BIASPBUY_Lookback = 150;BIASPBUY_Limit = 0.7;ps15 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps15;
+BIASPBUY_Lookback = 290;BIASPBUY_Limit = 0.6;ps16 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps16;
+BIASPBUY_Lookback = 110;BIASPBUY_Limit = 0.7;ps17 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps17;
+BIASPBUY_Lookback = 260;BIASPBUY_Limit = 0.8;ps18 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps18;
+BIASPBUY_Lookback = 180;BIASPBUY_Limit = 0.8;ps19 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps19;
+BIASPBUY_Lookback = 210;BIASPBUY_Limit = 0.7;ps20 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps20;
+BIASPBUY_Lookback = 170;BIASPBUY_Limit = 0.5;ps21 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps21;
+BIASPBUY_Lookback = 140;BIASPBUY_Limit = 0.8;ps22 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps22;
+BIASPBUY_Lookback = 230;BIASPBUY_Limit = 0.8;ps23 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps23;
+BIASPBUY_Lookback = 210;BIASPBUY_Limit = 0.5;ps24 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps24;
+BIASPBUY_Lookback = 430;BIASPBUY_Limit = 0.3;ps25 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps25;
+BIASPBUY_Lookback = 230;BIASPBUY_Limit = 0.7;ps26 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps26;
+BIASPBUY_Lookback = 370;BIASPBUY_Limit = 0.6;ps27 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps27;
+BIASPBUY_Lookback = 220;BIASPBUY_Limit = 0.5;ps28 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps28;
+BIASPBUY_Lookback = 260;BIASPBUY_Limit = 0.7;ps29 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps29;
+BIASPBUY_Lookback = 350;BIASPBUY_Limit = 0.6;ps30 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps30;
+//30min_PF
+BIASPBUY_Lookback = 410;BIASPBUY_Limit = 0.7;ps1 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps1;
+BIASPBUY_Lookback = 470;BIASPBUY_Limit = 0.7;ps2 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps2;
+BIASPBUY_Lookback = 270;BIASPBUY_Limit = 0.5;ps3 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps3;
+BIASPBUY_Lookback = 320;BIASPBUY_Limit = 0.3;ps4 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps4;
+BIASPBUY_Lookback = 560;BIASPBUY_Limit = 0.5;ps5 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps5;
+BIASPBUY_Lookback = 920;BIASPBUY_Limit = 0.5;ps6 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps6;
+BIASPBUY_Lookback = 550;BIASPBUY_Limit = 0.5;ps7 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps7;
+BIASPBUY_Lookback = 840;BIASPBUY_Limit = 0.6;ps8 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps8;
+BIASPBUY_Lookback = 870;BIASPBUY_Limit = 0.6;ps9 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps9;
+BIASPBUY_Lookback = 280;BIASPBUY_Limit = 0.9;ps10 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps10;
+BIASPBUY_Lookback = 970;BIASPBUY_Limit = 0.5;ps11 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps11;
+BIASPBUY_Lookback = 790;BIASPBUY_Limit = 0.6;ps12 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps12;
+BIASPBUY_Lookback = 370;BIASPBUY_Limit = 0.8;ps13 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps13;
+BIASPBUY_Lookback = 660;BIASPBUY_Limit = 0.6;ps14 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps14;
+BIASPBUY_Lookback = 300;BIASPBUY_Limit = 0.9;ps15 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps15;
+BIASPBUY_Lookback = 670;BIASPBUY_Limit = 0.6;ps16 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps16;
+BIASPBUY_Lookback = 450;BIASPBUY_Limit = 0.5;ps17 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps17;
+BIASPBUY_Lookback = 670;BIASPBUY_Limit = 0.1;ps18 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps18;
+BIASPBUY_Lookback = 940;BIASPBUY_Limit = 0.6;ps19 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps19;
+BIASPBUY_Lookback = 870;BIASPBUY_Limit = 0.7;ps20 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps20;
+BIASPBUY_Lookback = 420;BIASPBUY_Limit = 0.8;ps21 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps21;
+BIASPBUY_Lookback = 820;BIASPBUY_Limit = 0.7;ps22 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps22;
+BIASPBUY_Lookback = 690;BIASPBUY_Limit = 0.6;ps23 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps23;
+BIASPBUY_Lookback = 830;BIASPBUY_Limit = 0.8;ps24 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps24;
+BIASPBUY_Lookback = 780;BIASPBUY_Limit = 0.6;ps25 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps25;
+BIASPBUY_Lookback = 550;BIASPBUY_Limit = 0.7;ps26 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps26;
+BIASPBUY_Lookback = 470;BIASPBUY_Limit = 0.5;ps27 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps27;
+BIASPBUY_Lookback = 570;BIASPBUY_Limit = 0.7;ps28 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps28;
+BIASPBUY_Lookback = 430;BIASPBUY_Limit = 0.8;ps29 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps29;
+BIASPBUY_Lookback = 440;BIASPBUY_Limit = 0.8;ps30 = getBIASPBUY(BIASPBUY_Lookback,BIASPBUY_Limit);ps += ps30;
+
+
+ps_th = Param("ps_th", 45, 0, 100, 1);
+
+bsig=ps >= ps_th;
+ssig=ps <= -ps_th;
+
+bsig=ExRem(bsig,ssig);
+ssig=ExRem(ssig,bsig);
+
+psmerge=GetPs(bsig,ssig,0);
+ps_exit_th = ps_th * 0.66667;
+C01 = psmerge==1 AND ps <= ps_exit_th;
+C02 = psmerge==-1 AND ps >= -ps_exit_th;
+
+tp = 15; //Param("tp",15,0,100,1);
+Lstbsg = BarsSince(psmerge==1 AND Ref(psmerge,-1)!=1);
+Lstssg = BarsSince(psmerge==-1 AND Ref(psmerge,-1)!=-1);
+C03 = psmerge==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C04 = psmerge==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+//Csig=C01 OR C02 OR C03 OR C04;
+csig = C03 OR C04;
+//csig = C01 OR C02;
+
+
+Plotperformance(bsig,ssig,Csig);
+
+ps=GetPs(bsig,ssig,csig);
+
+SIG=ps;
+
+//ProfitDiff = Profit - Ref(Profit, -1);
+//GrossProfit = getGrossProfit(SIG);
+//GrossProfitDiff = GrossProfit - Ref(GrossProfit, -1);
+
+
+
+StrategyName = "5min-rb- 90_45 getBIASPBUY";StrategyID = "1013900009";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

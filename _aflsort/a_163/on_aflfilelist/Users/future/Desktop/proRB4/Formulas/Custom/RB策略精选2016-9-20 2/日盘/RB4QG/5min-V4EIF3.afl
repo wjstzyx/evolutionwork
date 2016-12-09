@@ -1,0 +1,54 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+
+
+
+function V4EIF3(T1,N1,StartPeriod,EndPeriod,tw,tp,TickerName)
+{
+fo = Foreign(TickerName, "O" );
+fh = Foreign(TickerName, "H" );
+fl = Foreign(TickerName, "L" );
+fc = Foreign(TickerName, "C" );
+fv = Foreign(TickerName, "V" );
+ 
+FSTK=Day()!=Ref(Day(),-1);
+KN=BarsSince(FSTK)+1;
+ 
+TradingPeriod=KN>=StartPeriod AND KN<EndPeriod;
+ 
+BSIGX1=(fH+fl)/2>EMA(Ref(FH,-1),T1) AND TradingPeriod;
+SSIGX1=(fH+fl)/2<EMA(Ref(FL,-1),T1) AND TradingPeriod;
+LSTBSIGX1=Ref(BarsSince(BSIGX1),-1)+1;
+LSTSSIGX1=Ref(BarsSince(SSIGX1),-1)+1;
+ 
+BSIG=Ref(BSIGX1,-N1) AND LSTSSIGX1>N1 AND (fH+fl)/2>Ref((fH+fl)/2,-N1) AND TradingPeriod AND NOT(SSIGX1);
+SSIG=Ref(SSIGX1,-N1) AND LSTBSIGX1>N1 AND (fH+fl)/2<Ref((fH+fl)/2,-N1) AND TradingPeriod AND NOT(BSIGX1);
+
+csig = 0;
+ 
+return GetPs(BSIG,SSIG,CSIG);
+}
+
+
+n1= ParamOptimize("n1", 274, 1, 500,1);
+n2= ParamOptimize("n2", 24, 1, 200,1);
+n3= ParamOptimize("n3", 5, 0, 450,1);
+n4= ParamOptimize("n4", 39, 0, 2250,1);
+tw=ParamOptimize("timewinodw",100,0,7000,20);
+tp = ParamOptimize("tp",17.1,0,5000,0.1);
+
+Cond=V4EIF3(n1,n2,N3,N4,tw,tp,TickerName);
+
+Vote=0;
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond==0;// OR getlastk(Name());
+
+
+PlotPerformance(bsig,ssig,csig);
+
+
+
+
+
+StrategyName = "5min-V4EIF3";StrategyID = "1012100216";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

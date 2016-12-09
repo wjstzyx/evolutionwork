@@ -1,0 +1,121 @@
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "IF-1min-V4EIV-1";
+StrategyID = 40957;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+function EXIVASum(PTS,SumPeriod,HHVPeriod,NBars,StartPeriod,EndPeriod,TickerName)
+{
+	fo= Foreign(TickerName, "O" );
+	fh= Foreign(TickerName, "H" );
+	fl= Foreign(TickerName, "L" );
+	fc= Foreign(TickerName, "C" );
+	fv= Foreign(TickerName, "V" );
+	FSTK= Day()!=Ref(Day(),-1);
+	LSTK= GetLastK(TickerName);
+	KN= BarsSince(FSTK)+1;
+	TradingPeriod= KN>StartPeriod AND KN<EndPeriod;
+
+	SumV= Sum(fv,SumPeriod);
+	IV= SumV-Ref(SumV,-SumPeriod);
+	EXV= IV>=HHV(IV,HHVPeriod);
+	EXVUP= EXV AND fc>Ref(fc,-SumPeriod);
+	EXVDN= EXV AND fc<Ref(fc,-SumPeriod);
+
+	LSTEXV= BarsSince(EXV);
+	LSTEXVUP= Ref(EXVUP,-LSTEXV);
+	LSTEXVDN= Ref(EXVDN,-LSTEXV);
+	PRICE1= IIf(LSTEXVUP,fh,0);
+	PRICE2= IIf(LSTEXVDN,fl,0);
+	PRICE= PRICE1+PRICE2;
+	LSTEXVP= Ref(PRICE,-LSTEXV);
+
+	P= PTS/10000*fc;
+
+	BG= NOT(EXV) AND LSTEXVDN AND fc>LSTEXVP+P AND LSTEXV<KN;
+	SG= NOT(EXV) AND LSTEXVUP AND fc<LSTEXVP-P AND LSTEXV<KN;
+	BSIG= BG AND NOT(SG);
+	SSIG= SG AND NOT(BG);
+	CSIG= LSTK OR NOT TradingPeriod;
+	return getCSSLEveryNBars(BSIG,SSIG,CSIG,NBars);
+}
+
+
+function V4EORI(HHVPeriod,WaitPeriod,StartPeriod,EndPeriod,TickerName)
+{
+fo= Foreign(TickerName, "O" );
+fh= Foreign(TickerName, "H" );
+fl= Foreign(TickerName, "L" );
+fc= Foreign(TickerName, "C" );
+fv= Foreign(TickerName, "V" );
+FSTK= Day()!=Ref(Day(),-1);
+LSTK= GetLastK(TickerName);
+KN= BarsSince(FSTK)+1;
+TradingPeriod= KN>StartPeriod AND KN<EndPeriod;
+
+BG= fc>HHV(Ref(fc,-1),Min(KN-1,HHVPeriod)) AND TradingPeriod;
+SG= fc<LLV(Ref(fc,-1),Min(KN-1,HHVPeriod)) AND TradingPeriod;
+
+BSIG1= Ref(BG,-WaitPeriod) AND BarsSince(sg)>WaitPeriod AND fc>Ref(fc,-WaitPeriod) AND TradingPeriod;
+SSIG1= Ref(SG,-WaitPeriod) AND BarsSince(bg)>WaitPeriod AND fc<Ref(fc,-WaitPeriod) AND TradingPeriod;
+
+BSIG= BSIG1 AND NOT SSIG1;
+SSIG= SSIG1 AND NOT BSIG1;
+CSIG= LSTK OR NOT TradingPeriod;
+
+return getCS(BSIG,SSIG,CSIG);
+}
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+
+Cond1=V4EORI(33,21,0,10000,"IF");
+Cond2=EXIVASum(18,3,48,15,0,10000,"IF");
+
+sCond1=Cond1+Cond2;
+
+Vote=0;
+BSIG1=sCond1>Vote;
+SSIG1=sCond1<-Vote;
+CSIG1=GetLastK("IF") OR sCond1==0;
+
+ps1 = GetPs(bsig1,ssig1,csig1);
+
+Cond3=V4EORI(7,10,27,10000,"IF");
+
+sCond2=Cond3+Cond2;
+
+BSIG2=sCond2>Vote;
+SSIG2=sCond2<-Vote;
+CSIG2=GetLastK("IF") OR sCond2==0;
+
+ps2 = GetPs(bsig2,ssig2,csig2);
+
+Cond5=V4EORI(12,28,0,10000,"IF");
+
+sCond3=Cond5+Cond2;
+
+BSIG3=sCond3>Vote;
+SSIG3=sCond3<-Vote;
+CSIG3=GetLastK("IF") OR sCond3==0;
+
+ps3 = GetPs(bsig3,ssig3,csig3);
+
+    Buy = bsig1 ;           
+
+    Sell= CSIG1;        
+
+    Short = ssig1 ;         
+
+    Cover = CSIG1;  
+
+Plotperformance(bsig1,ssig1,csig1);
+Trading_log(BSIG1,SSIG1,CSIG1,StrategyID,StrategyName,ProType);

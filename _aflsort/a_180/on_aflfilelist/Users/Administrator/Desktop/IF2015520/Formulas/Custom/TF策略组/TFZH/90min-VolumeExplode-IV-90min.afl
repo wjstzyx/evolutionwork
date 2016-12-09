@@ -1,0 +1,98 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "90min-VolumeExplode-IV-90min";
+StrategyID = 380042;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+//(49,38,0.06,3,25,33,40,0,12)
+vperiod = Param("vperiod",49,1,100,1);
+nperiod = Param("nperiod",38,1,1000,1);
+nvtresh = Param("nvtresh",0.06,0,1,0.01);
+waitperiod = Param("waitperiod",3,1,30,1);
+hlperiod = Param("hlperiod",25,1,100,1);
+pt = Param("pt",33,0,100,1);
+tw=Param("timewinodw",360,40,1000,10);
+stdzhisun=Param("stdzhisun",0,0,10,0.1);
+NBars = Param("Nbars",12,0,100,1);
+
+
+
+daystart = BarIndex()==0 OR Day()!=Ref(Day(),-1);
+kn = BarsSince(daystart)+1;
+
+
+sv = Sum(V,vperiod)/vperiod;
+mv = MA(sign(C-O)*V,vperiod);
+
+
+isv = sv - Ref(sv,-vperiod);
+
+nisv = (isv-LLV(isv,nperiod))/(HHV(isv,nperiod)-LLV(isv,nperiod));
+
+
+
+vexplode = nisv<Ref(nisv,-1) AND Ref(nisv,-1)>=nvtresh AND Ref(nisv,-1)>=Ref(nisv,-2);
+
+lstvexplode = BarsSince(vexplode);
+
+
+priceh = C==HHV(C,hlperiod);
+pricel = C==LLV(C,hlperiod);
+
+hturn = Ref(priceh,-1) AND NOT priceh;
+lturn = Ref(pricel,-1) AND NOT pricel;
+
+lsthturn = BarsSince(hturn);
+lstlturn = BarsSince(lturn);
+
+hprice = Ref(C,-lsthturn-1); 
+lprice = Ref(C,-lstlturn-1);
+
+//Plot(lprice,"hprice",colorRed);
+
+
+bsig = C-lprice>pt*(hprice-lprice)/100 AND lstvexplode<=waitperiod AND lstlturn<lsthturn;
+ssig = C-hprice<-pt*(hprice-lprice)/100 AND lstvexplode<=waitperiod AND lstlturn>lsthturn;
+
+ps = GetPs(bsig,ssig,0);
+
+
+zhisunup=BBandTop(C,tw,stdzhisun);
+zhisundown=BBandBot(C,tw,stdzhisun);
+
+ps=GetPs(bsig,ssig,0);
+Lstbsg = BarsSince(bsig);
+Lstssg = BarsSince(ssig);
+
+C01=ps==1 AND C<zhisundown;
+C02=ps==-1 AND C>zhisunup;
+
+csig =TimeNum()==151400;
+
+
+Cond = getCSSLEveryNBars(BSIG,SSIG,csig,NBars);
+
+C01 = ps==1 AND CPPCount(C<Ref(C,-lstbsg),NBars)==NBars;
+C02 = ps==-1 AND CPPCount(C>Ref(C,-lstssg),NBars)==NBars;
+
+
+bsig = Cond>0;
+ssig = Cond<0;
+csig = Cond==0;// ORC01 OR C02;//
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+ps0 = GetPs(bsig,ssig,csig);
+Filter= 1;
+AddColumn(ps0,"ps");

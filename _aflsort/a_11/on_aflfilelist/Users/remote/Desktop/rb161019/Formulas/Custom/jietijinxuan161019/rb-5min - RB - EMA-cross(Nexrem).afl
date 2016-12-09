@@ -1,0 +1,52 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+
+
+fo = Foreign(TickerName, "O" ); 
+fh = Foreign(TickerName, "H" );	
+fl = Foreign(TickerName, "L" );	
+fc = Foreign(TickerName, "C" );	
+fv = Foreign(TickerName, "v" );	
+N1 = Param("N1",10,1,1000,1);
+N2 = Param("N2",27,1,1000,1);
+	TIME = TimeNum();		
+	TIME = Hour()*10000 + Minute()*100;		
+	FSTK = Day() != Ref(Day(),-1);		
+	LSTK = getLastK(TickerName);		
+	KN = IIf(FSTK,1,BarsSince(FSTK)+1);		
+	fcM = fc - Ref(fc,-N1);		
+	MI = EMA(fcM,N1);		
+			
+	B01 = Cross(fcM,MI);		
+	S01 = Cross(MI,fcM);		
+			
+	fcma = MA(fc,N2);		
+	HV = HHV(fh,N2);		
+	LV = LLV(fl,N2);		
+			
+	B02 = fcma>Ref(fcma,-N2) AND fcma>Ref(Hv,-kN+1);		
+	s02 = fcma<Ref(fcma,-N2) AND fcma<Ref(Lv,-kN+1);		
+
+
+	bsig1= b01 AND b02;		
+	ssig1= s01 AND s02;
+
+bsig = bsig1;
+ssig = ssig1;		
+			
+ps=GetPs(bsig,ssig,0);
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+tp = ParamOptimize("tp",16,5,30,1);
+C01= ps==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C02= ps==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+CSIG = C01 OR C02;	
+
+  Cond = getCS(BSIG,SSIG,CSIG);			
+PlotPerformance(BSig,Ssig,Csig);
+
+
+
+
+
+
+StrategyName = "rb-5min - RB - EMA-cross(Nexrem)";StrategyID = "1012100361";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

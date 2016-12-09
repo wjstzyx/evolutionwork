@@ -1,0 +1,25 @@
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+
+StrategyName = "V4ERU";
+StrategyID = 10120;//Param("StrategyID",10120,1,100000,1);
+Plot(0,StrategyName,colorBlack,styleNoLine);
+
+
+#include "FORMULAS\CUSTOM\RU_DAY\RUDAY_001.afl";
+TickerNAME = Name();
+
+	COND=V7dyv4ERU(91600,0,64,1,55,7,100,145700);
+
+
+buopenp= (COND==1) AND NOT (getlastk(tickername));
+	seopenp= COND==-1 AND NOT (getlastk(tickername));
+	Closep=COND==2 OR(TimeNum()+Interval()*100/60)>=146000;
+
+
+	Buy = buopenp;
+	Sell= Closep;
+	Short = seopenp;
+	Cover = Closep;
+//Plot(StrategyID,"StID",colorBrown,16|2048);
+PlotPerformance(buopenp,seopenp,Closep);
+Trading_log(buopenp,seopenp,Closep,StrategyID,StrategyName,1);

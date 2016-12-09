@@ -1,0 +1,71 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/BasicV3/dfb.afl";
+#include "Formulas/Custom/BasicV3/exiv.afl";
+#include "Formulas/Custom/BasicV3/exv.afl";
+#include "Formulas/Custom/BasicV3/hl.afl";
+#include "Formulas/Custom/BasicV3/maa.afl";
+#include "Formulas/Custom/BasicV3/sxv.afl";
+#include "Formulas/Custom/BasicV3/tb.afl";
+#include "Formulas/Custom/BasicV3/tm.afl";
+#include "Formulas/Custom/BasicV3/v7.afl";
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval",600);
+
+StrategyName = "IF_01_EXIV-MAA-V7_NP_V20_3.2";
+StrategyID = 40038;
+ProType = 0;
+
+EXIV0=EXIV(29,31,0,"IF");
+EXIV1=EXIVMA(6,23,37,0,"IF");
+EXIV2=EXIVMA(10,17,38,0,"IF");
+EXIV3=EXIVMA(16,20,3,0,"IF");
+EXIV4=EXIV(13,35,0,"IF");
+EXIV5=EXIVMA(8,25,18,0,"IF");
+EXIV6=EXIV(39,28,1,"IF");
+EXIV7=EXIV(10,55,0,"IF");
+
+cond_exiv=(EXIV0+EXIV1+EXIV2+EXIV3+EXIV4+EXIV5+EXIV6+EXIV7)/8;
+
+
+MAA0=MAArrangeRoll(21,9,0,1000,1000,"IF");
+MAA1=MAArrangeRoll(21,9,1,1000,1000,"IF");
+MAA2=MAArrangeRoll(12,5,4,1000,1000,"IF");
+MAA3=MAArrangeRoll(15,8,1,1000,1000,"IF");
+MAA4=MAArrangeRoll(23,11,0,1000,1000,"IF");
+MAA5=MAArrangeRoll(36,11,1,1000,1000,"IF");
+MAA6=MAArrangeRoll(24,11,0,1000,1000,"IF");
+MAA7=MAArrangeRoll(22,10,1,1000,1000,"IF");
+
+cond_maa=(MAA0 +MAA1 +MAA2 +MAA3+MAA4+MAA5+MAA6+MAA7 )/8;
+
+
+V70=v7min(14,114,2,"IF");
+V71=V7DYStartVer(82,38,"IF");
+V72=v7min(15,110,2,"IF");
+V73=v7min(14,110,2,"IF");
+
+cond_v7=(V70+V71+V72+V73)/4;
+
+w_exiv = ParamOptimize("w_exiv",3,0,3,0.5);
+w_maa = ParamOptimize("w_maa",3,0,3,0.5);
+w_v7 = ParamOptimize("w_v7",1.5,0,3,0.5);
+
+
+
+Cond = w_exiv*cond_exiv + w_maa*cond_maa + w_v7*cond_v7;
+
+Vote=2;
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=GetLastK("IF");
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

@@ -1,0 +1,60 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/BasicV4/PMS.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 800);
+
+StrategyName = "IF01-TM-DTA-DFB-1-1-0.5-V0";
+StrategyID = 40244;
+ProType = 0;
+
+
+PMS1=PMS_TMHLV3(8,10,4,0,135,166,"IF");
+PMS2=PMS_TMHLV3(10,9,6,0,135,165,"IF");
+PMS3=PMS_TMHLV3(8,13,6,0.3,135,165,"IF");
+
+
+
+
+PMS4=PMS_DTAV2BC(7,5,0.3,136,165,"IF");
+PMS5=PMS_DTAV2BC(13,8,0.1,133,165,"IF");
+PMS6=PMS_DTAV2BC(10,6,0.2,128,165,"IF");
+
+
+PMS7=PMS_DFB(6,103,133,165,"IF");
+PMS8=PMS_DFB(5,102,133,165,"IF");
+PMS9=PMS_DFB(9,97,133,165,"IF");
+PMS10=PMS_DFB(12,90,133,165,"IF");
+PMS11=PMS_DFB(15,79,133,165,"IF");
+
+
+
+
+
+cond_TM=(PMS1+PMS2+PMS3)/3;
+cond_DTA=(PMS4+PMS5+PMS6)/3;
+cond_DFB=(PMS7+PMS8+PMS9+PMS10+PMS11)/5;
+
+
+
+
+w_TM= ParamOptimize("w_TM",1,0,4,0.5);
+w_DTA= ParamOptimize("w_DTA",1,0,4,0.5);
+w_DFB= ParamOptimize("w_DFB",0.5,0,4,0.5);
+
+Cond = w_TM*cond_TM+ w_DTA*cond_DTA+w_DFB*cond_DFB;
+
+Vote=ParamOptimize("w_Vote",0,0,4,0.5);
+
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond==0;
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

@@ -1,0 +1,71 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/BasicV4/EXV.afl";
+#include "Formulas/Custom/BasicV4/SXV.afl";
+#include "Formulas/Custom/BasicV4/HL.afl";  ////
+#include "Formulas/Custom/BasicV4/EXR.afl";
+#include "Formulas/Custom/BasicV4/Dfb.afl";
+#include "Formulas/Custom/BasicV4/BOMB.afl";
+#include "Formulas/Custom/BasicV4/DTA.afl";
+#include "Formulas/Custom/BasicV4/EXIV.afl";
+#include "Formulas/Custom/BasicV4/MAA.afl";
+#include "Formulas/Custom/BasicV4/TB.afl";
+#include "Formulas/Custom/BasicV4/TM.afl";
+#include "Formulas/Custom/BasicV4/V7.afl";
+#include "Formulas/Custom/BasicV4/VB.afl";
+#include "Formulas/Custom/BasicV4/EXVC.afl";
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+StrategyName = "IF02-V4E-V4E23-EXVHH-1-1-2-V1";
+StrategyID = 40280;
+ProType = 0;
+
+
+C1 = V4eif(4,3,16,900,"if");
+C2 = V4eif(1,5,16,900,"if");
+Cond1x = (C1+C2)/2; 
+
+
+
+
+
+
+C1 = exvhh(20,8,5,14,"IF");
+C2 = exvhh(18,11,7,27,"if");
+C3 = exvhh(17,9,11,29,"if");
+C4 = exvhh(16,6,6,22,"if");
+
+Cond4 = (C1+C2+C3+C4)/4;
+
+
+
+
+C1 = V4eif2(5,5,16,900,"if");
+C2 = V4eif2(1,6,16,900,"if"); 
+C3 = V4eif3(3,3,16,900,"if");
+
+Cond6 = (C1+C2+C3)/3;
+
+
+wv4e = Paramoptimize("wv4e",1,0,5,0.5);
+
+wv4e23 = Paramoptimize("wv4e23",1,0,5,0.5);
+wexvhh = Paramoptimize("wexvhh",2,0,5,0.5);
+Cond = Cond1x*wv4e+Cond6*wv4e23+Cond4*wexvhh;
+
+
+Vote=ParamOptimize("w_Vote",1,0,4,0.5);
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=GetLastK("IF");
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName+"--"+StrategyID);

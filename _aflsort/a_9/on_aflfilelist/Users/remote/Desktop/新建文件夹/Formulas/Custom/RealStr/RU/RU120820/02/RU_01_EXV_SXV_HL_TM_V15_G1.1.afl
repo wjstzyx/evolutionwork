@@ -1,0 +1,76 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/BasicV3/exiv.afl";
+#include "Formulas/Custom/BasicV3/exv.afl";
+#include "Formulas/Custom/BasicV3/hl.afl";
+#include "Formulas/Custom/BasicV3/maa.afl";
+#include "Formulas/Custom/BasicV3/sxv.afl";
+#include "Formulas/Custom/BasicV3/TM.afl";
+#include "Formulas/Custom/BasicV3/v7.afl";
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+StrategyName = "RU_01_EXV_SXV_HL_TM_V15_G1.1";
+StrategyID = 10063;
+ProType = 1;
+/*
+CondHL1=HLCAVG(55,35,49,"RU");
+CondHL2=HLCAVG(71,35,48,"RU");
+CondHL3=HLCAVG(70,35,53,"RU");
+CondHL4=HLAVGA(50,35,60,"RU");
+CondHL5=HLCAVG(70,35,37,"RU");
+*/
+CondEXV1=EXVHH(20,11,88,80,"RU");
+CondEXV2=EXVAStat(74,91,1,"RU");
+CondEXV3=EXVapr4(82,42,"RU");
+CondEXV4=EXVAStat(83,86,1,"RU");
+CondEXV5=EXVHH(21,12,88,84,"RU");
+CondEXV6=EXVapr4(83,91,"RU");
+CondEXV7=EXVHH(26,22,88,82,"RU");
+CondEXV8=EXVapr4(82,42,"RU");
+CondSXV1=SumXVolAdd(57,36,4,"RU");
+CondSXV2=SumXVolume(23,34,17,"RU");
+CondSXV3=SumXVolAdd(57,35,19,"RU");
+CondSXV4=SumXVolAdd(57,35,0,"RU");
+CondSXV5=SumXVolume(17,32,29,"RU");
+CondSXV6=SumXVolAdd(58,35,14,"RU");
+CondSXV7=SumXVolAdd(55,35,19,"RU");
+CondSXV8=SumXVolume(17,33,58,"RU");
+CondTM1=TimeShareFHLLess(10,26,12,1000,330,"RU");
+CondTM2=TimeShareFHLLess(15,30,18,1000,330,"RU");
+CondTM3=TimeShareFHLLess(10,25,36,1000,330,"RU");
+CondTM4=TimeShareFHLLess(9,23,16,1000,330,"RU");
+CondTM5=TimeShareFHLLess(8,26,26,1000,330,"RU");
+
+
+
+
+
+
+cond_EXV = (CondEXV1+CondEXV2+CondEXV3+CondEXV4+CondEXV5+CondEXV6+CondEXV7+CondEXV8)/8;
+cond_SXV= (CondSXV1+CondSXV2+CondSXV3+CondSXV4+CondSXV5+CondSXV6+CondSXV7+CondSXV8)/8;
+cond_HL =0;//(CondHL1+CondHL2+CondHL3+CondHL4+CondHL5)/5;
+cond_TM =(CondTM1+CondTM2+CondTM3+CondTM4+CondTM5)/5;
+
+w_EXV = ParamOptimize("w_EXV",3,0,4,0.5);
+w_SXV= ParamOptimize("w_SXV",1.5,0,4,0.5);
+w_HL=0;//ParamOptimize("w_HL",0,0,4,0.5);
+w_TM = ParamOptimize("w_TM ",2,0,4,0.5);
+
+
+Cond =w_EXV*cond_EXV+ w_SXV*cond_SXV+ w_HL*cond_HL+ w_TM *cond_TM ;
+
+Vote=1.5;
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=GetLastK("RU");
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

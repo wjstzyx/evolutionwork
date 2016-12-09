@@ -1,0 +1,150 @@
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "IF-1min-VolumeExplode-IV-KD3";
+StrategyID = 40981;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine);
+
+function Supersmoother(array) 
+{ 
+	PI = 3.1415926 ; 
+	SQ2 = sqrt( 2 ); 
+    a1 = exp( -SQ2 * PI /10); 
+    b1 = 2 * a1 * cos( SQ2 * PI / 10); 
+    c2 = b1; 
+    c3 = -a1 * a1; 
+    c1 = 1 - c2 - c3; 
+
+    Filt = Nz( array ); 
+
+    for ( i = 2; i < BarCount; i++ ) 
+    { 
+         Filt[ i ] = c1 * ( array[ i ] + array[ i - 1 ] ) / 2 + 
+                     c2 * Filt[ i - 1 ] + 
+                     c3 * Filt[ i - 2]; 
+    } 
+
+    return Filt; 
+} 
+
+function Rooffilter( array ) 
+{
+	sq05=sqrt(0.5);
+	pi=3.1415926;
+	alpha1=(cos(sq05*pi/48)+sin(sq05*pi/48)-1)/cos(sq05*pi/48);
+	Hp=array;
+ 	for ( i =2 ; i < BarCount; i++ ) 
+    { 
+	HP[ i ] = ( ( 1 - alpha1 / 2 ) ^ 2 ) * 
+	( Close[ i ] - 2 * Close[ i -1 ] + Close[ i - 2 ] ) + 
+	  2 * ( 1 - alpha1 ) * HP[ i - 1 ] - 
+	HP[ i -2 ] * ( 1 - alpha1 ) ^ 2; 
+ } 
+	return Hp;
+}
+
+Hpfilt=rooffilter(C);
+smfilt=supersmoother(HPfilt);
+Highestc=HHV(smfilt,10);
+Lowestc=LLV(smfilt,10);
+
+function getstoc(){
+for (i=2; i<BarCount;i++)
+{
+	PI = 3.1415926 ; 
+	SQ2 = sqrt( 2 ); 
+    a1 = exp( -SQ2 * PI /10); 
+    b1 = 2 * a1 * cos( SQ2 * PI / 10); 
+    c2 = b1; 
+    c3 = -a1 * a1; 
+    c1 = 1 - c2 - c3; 
+
+stoc[i]=(smfilt[i]-Lowestc[i])/(Highestc[i]-Lowestc[i]);
+}
+return stoc;
+}
+
+Ostoc=getstoc();
+newstoc=Supersmoother(Ostoc);
+realostoc=100*Ostoc;
+realnewstoc=100*newstoc;
+
+
+vperiod = Param("vperiod",3,1,100,1);
+
+sv = Sum(V,vperiod)/vperiod;
+
+nperiod = Param("nperiod",720,1,1000,1);
+isv = sv - Ref(sv,-vperiod);
+
+nisv = (isv-LLV(isv,nperiod))/(HHV(isv,nperiod)-LLV(isv,nperiod));
+
+nvtresh = Param("nvtresh",0.8,0,1,0.01);
+
+vexplode = nisv<Ref(nisv,-1) AND Ref(nisv,-1)>=nvtresh AND Ref(nisv,-1)>=Ref(nisv,-2);
+
+lstvexplode = BarsSince(vexplode);
+
+waitperiod = Param("waitperiod",7,1,30,1);
+
+hlperiod = Param("hlperiod",10,1,100,1);
+priceh = C==HHV(C,hlperiod);
+pricel = C==LLV(C,hlperiod);
+
+hturn = Ref(priceh,-1) AND NOT priceh;
+lturn = Ref(pricel,-1) AND NOT pricel;
+
+lsthturn = BarsSince(hturn);
+lstlturn = BarsSince(lturn);
+
+hprice = Ref(C,-lsthturn-1); 
+lprice = Ref(C,-lstlturn-1);
+
+//Plot(lprice,"hprice",colorRed);
+
+
+buylev = Param("buylev",6,0,100,1);
+
+overbuy = realnewstoc<Ref(realnewstoc,-1) AND Ref(realnewstoc,-2)<Ref(realnewstoc,-1) AND Ref(realnewstoc,-1)>100-buylev;
+oversel = realnewstoc>Ref(realnewstoc,-1) AND Ref(realnewstoc,-2)>Ref(realnewstoc,-1) AND Ref(realnewstoc,-1)<buylev;
+
+bsig = BarsSince(Cross(realnewstoc,buylev))<=waitperiod  AND lstvexplode<=waitperiod AND lstlturn<lsthturn;//
+ssig = BarsSince(Cross(100-buylev,realnewstoc))<=waitperiod  AND lstvexplode<=waitperiod AND lstlturn>lsthturn;//
+
+csig =TimeNum()==151400;
+
+NBars = Param("Nbars",18,0,100,1);
+Cond = getCSSLEveryNBars(BSIG,SSIG,0,NBars);
+
+ps = GetPs(bsig,ssig,0);
+Lstbsg = BarsSince(bsig);
+Lstssg = BarsSince(ssig);
+
+C01 = ps==1 AND CPPCount(C<Ref(C,-lstbsg),NBars)==NBars;
+C02 = ps==-1 AND CPPCount(C>Ref(C,-lstssg),NBars)==NBars;
+
+
+tp = Param("tp",30,0,500,0.1);
+C05 = ps==1 AND  C<Highestsince(bsig,C)-tp*C/1000;
+C06 = ps==-1 AND  C>Lowestsince(ssig,C)+tp*C/1000;
+
+//Plot(csig,"bsig",colorRed);
+
+Csig = C01 OR C02  OR C05 OR C06;//;//  OR C03 OR C04
+
+    Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

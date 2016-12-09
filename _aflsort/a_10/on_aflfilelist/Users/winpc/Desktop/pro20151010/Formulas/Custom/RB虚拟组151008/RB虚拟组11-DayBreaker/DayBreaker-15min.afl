@@ -1,0 +1,57 @@
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "DayBreaker-15min";
+StrategyID = 210072;
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+
+// Yesterday's high, low, close
+yh = TimeFrameGetPrice("H", inDaily, -1);
+yl = TimeFrameGetPrice("L", inDaily, -1);
+yc = TimeFrameGetPrice("C", inDaily, -1);
+yo = TimeFrameGetPrice("O", inDaily, -1);
+
+otime = Param("otime",93000,90000,150000,1000);
+bsig1 = C>yh AND TimeNum()>=otime;
+ssig1 = C<yl AND TimeNum()>=otime;
+
+Lstbsig = BarsSince(bsig1 );
+Lstssig = BarsSince(bsig1);  
+
+firstbar = Day()!=Ref(Day(),-1);
+kn = BarsSince(firstbar);
+
+bsig=bsig1 AND CPPCount(bsig1 OR ssig1 ,kn)==1;//AND  kn<2;// ;// AND Lstbsig<Lstssig;
+ssig=ssig1 AND CPPCount(ssig1 OR bsig1 ,kn)==1 ;//AND  kn<2;//;//AND Lstbsig>Lstssig;
+Lstsig = BarsSince(bsig OR ssig);   
+
+BPeriod= BarsSince(BSIG)<BarsSince(SSIG) AND BarsSince(BSIG)>0;            
+SPeriod= BarsSince(SSIG)<BarsSince(BSIG) AND BarsSince(SSIG)>0;  
+
+pts= ParamOptimize("pts", 11, 0, 200,1); 
+period= ParamOptimize("period", 6, 0, 200,1); 
+
+C01=bperiod AND (C<Max(yo,yc) OR Ref(C,-period)-C>pts*C/3000);
+C02=speriod AND (C>Min(yo,yc) OR C-Ref(C,-period)>pts*C/3000);
+
+
+CSIG = 0;//C01 OR C02;//TimeNum()>=145900;// OR  ;
+
+
+    Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

@@ -1,0 +1,34 @@
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/BasicIF/All01MIF.afl";
+#include "Formulas/Custom/BasicIF/TMIF.afl";
+StrategyName = "IF01_TM_EXV_DTA_Combin_G2_4027";
+StrategyID = 4027;
+ProType = 0;
+
+//Group 2
+CondTM = TimeShareFHLLessIF(7,15,21,1000,1000,"IF");
+CondTM = TimeSelect(32,275,CondTM);
+CondEXVCon=EXVCon(1.5,18,210,"IF");
+CondDTA=DTAV2IF(39,17,2.7,87,"IF");
+CondEXV=EXVHH(1.4,300,3,24,"IF");
+WEXVHH = ParamOptimize("WEXVHH", 1, 0, 3, 0.5);
+WCondTM = ParamOptimize("WCondTM", 2, 0, 3, 0.5);
+WEXVCon = ParamOptimize("WEXVCon", 1.5, 0, 3, 0.5);
+WDTA = ParamOptimize("WDTA", 1.5, 0, 3, 0.5);
+CondG2 = WCondTM*CondTM +WEXVCon*CondEXVCon+WDTA*CondDTA+WEXVHH*CondEXV;
+
+Cond = CondG2;
+
+Vote= ParamOptimize( "Vote", 1, 0, 5, 1);
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG = (TimeNum()+Interval()*100/60)>=151500;
+
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

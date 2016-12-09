@@ -1,0 +1,64 @@
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "MAAV2-1min-3-6-9-simplema";
+StrategyID = 110020;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+tickername=Name();
+
+N3=Param("N3",3,0,100,1);
+N2=Param("N2",6,0,100,1);
+N1=Param("N1",9,0,100,1);
+
+fo = Foreign(TickerName, "O" );
+	fh = Foreign(TickerName, "H" );
+	fl = Foreign(TickerName, "L" );
+	fc = Foreign(TickerName, "C" );
+	fv = Foreign(TickerName, "V" );
+	fopi = Foreign(TickerName, "OpenInt" );
+
+	TIME=TimeNum();
+
+	FSTK=Day()!=Ref(Day(),-1);
+	KN=IIf(FSTK,1,BarsSince(FSTK)+1);
+
+
+//--------------------------------
+
+	Btop = BBandTop( fc, N1, 0 );
+	Bbot = BBandBot( fc, N1, 0 );
+
+  fcMA = MA(fc,N1) ;
+  
+  //Plot(fcma,"fcma",colorBlue);
+  //Plot(MA(MA(fc,N1),N2),"ma",colorRed);
+
+  B01 = CPPCount(fl>fcMA,N2)>N3;
+  S01 = CPPCount(fh<fcMA,N2)>N3;//=N3;
+//--------------------------------
+
+	BSIG=B01 AND NOT(S01) ;
+	SSIG=S01 AND NOT(B01) ;
+
+
+	BSIG=B01 AND KN >N1;
+	SSIG=S01 AND KN >N1;
+
+   CSIG = GetLastK(TickerName);  
+
+    Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

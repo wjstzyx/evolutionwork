@@ -1,0 +1,83 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "1min-zyz1-lastwintrade";
+StrategyID ="1012100142";
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+ 
+
+FSTK=Day()!=Ref(Day(),-1);
+KN=IIf(FSTK,1,BarsSince(FSTK)+1);	
+
+///////////////////////////////////////////////
+TOST=Param("TOST",91500,90000,150000,100);  //Observation Start Time
+TOET=Param("TOET",93000,90000,150000,100);   //Observation End Time
+
+
+Tob_end = Cross(TimeNum(),TOET);  //detect the observation end time
+Tob_st = Cross(TimeNum(),TOST);   //detect the observation start time 
+ 
+Highest_sinceT = HighestSince(Tob_st,C,1); //capture the 1 hour high
+Lowest_sinceT = LowestSince(Tob_st,C,1);  //capture the 1 hour low
+
+Highest_sinceBAR = HighestSinceBars(Tob_st,C,1);
+Lowest_sinceBAR = LowestSinceBars(Tob_st,C,1); 
+ 
+TORBH = ValueWhen(Tob_end ,Highest_sinceT,1); //
+TORBL = ValueWhen(Tob_end ,Lowest_sinceT,1);  
+
+////////////////////////////////////////////////
+
+C90000=ValueWhen(TimeNum()==90000 ,C,1); //
+C93000=ValueWhen(TimeNum()==93000 ,C,1);
+
+X1=(C-TORBH)+(C-TORBL);
+X2=(C-TORBH)-(C-TORBL);
+
+
+tradingtime=Param("tradingtime",95100,90000,150000,100);
+
+
+Bsig=2*C>(TORBH+TORBL) AND TimeNum()==tradingtime;
+Ssig=2*C<(TORBH+TORBL) AND TimeNum()==tradingtime;
+
+
+ps = GetPs(bsig,ssig,0);
+
+
+
+SIG=ps;
+
+thisTradeClosetemp=ValueWhen(SIG!=Ref(SIG,-1),C,1);
+thisTradeClose=IIf(SIG!=Ref(SIG,-1),Ref(thisTradeClosetemp,-1),thisTradeClosetemp);
+PSumTradeC=IIf(Ref(SIG,-1)==1,C-thisTradeClose,IIf(Ref(SIG,-1)==-1,thisTradeClose-C,0));
+
+PSumTradeP=IIf(PSumTradeC>0,1,-1);
+
+periorTrade=ValueWhen(ps!=Ref(ps,-1),Ref(ps,-1),1);
+periorTradeP=ValueWhen(ps!=Ref(ps,-1),Ref(PSumTradeP,-1),1);
+
+LastWinTrade=ValueWhen(periorTradeP==1,periorTrade,1);
+
+bsig=ps==1 AND Ref(ps,-1)!=1 AND ps==LastWinTrade;
+ssig=ps==-1 AND Ref(ps,-1)!=-1 AND ps==LastWinTrade;
+
+ps2=GetPs(bsig,ssig,0);
+
+C01=ps2==1 AND ps!=1;
+C02=ps2==-1 AND ps!=-1;
+
+Csig=C01 OR C02;
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

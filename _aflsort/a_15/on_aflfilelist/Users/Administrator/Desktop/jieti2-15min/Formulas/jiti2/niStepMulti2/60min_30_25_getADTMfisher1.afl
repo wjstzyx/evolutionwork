@@ -1,0 +1,177 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+function PIR(p,Length)
+{
+Ll=LLV(p,Length);
+Hh=HHV(p,Length);
+return (100*(p-Ll)/(Hh-Ll));
+}
+
+function TP15(bsig, ssig, ps0)
+{
+tp = 15; //Param("tp",15,0,100,1);
+Lstbsg = BarsSince(ps0==1 AND Ref(ps0,-1)!=1);
+Lstssg = BarsSince(ps0==-1 AND Ref(ps0,-1)!=-1);
+C01 = ps0==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C02 = ps0==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+Csig=C01 OR C02;
+ps = GetPs(bsig, ssig, csig);
+return ps;
+}
+
+
+
+
+
+
+ADTMfisher1_N1=1; //Paramoptimize("ADTMfisher1_N1",38,1.0,100,1);
+
+ADTMfisher1_AMAf = 1; //Paramoptimize("ADTMfisher1_AMAf", 0.015,0.001, 1.0, 0.001);
+
+ADTMfisher1_factor = 1; //Paramoptimize("ADTMfisher1_factor", 0.01,0.001, 1, 0.001);
+
+
+
+function getADTMfisher1(ADTMfisher1_N1,ADTMfisher1_AMAf,ADTMfisher1_factor)
+
+{
+
+input=O;
+
+price=AMA(input,ADTMfisher1_AMAf);
+
+
+
+DMZ=IIf(price<=Ref(price,-1),0,Max(abs(H-O),abs(O-Ref(O,-1))));
+
+
+
+DMF=IIf(price>=Ref(price,-1),0,Max(abs(H-O),abs(O-Ref(O,-1))));
+
+
+
+ADMZ=EMA(DMZ,ADTMfisher1_N1);
+
+ADMF=EMA(DMF,ADTMfisher1_N1);
+
+
+
+SRDM=IIf(ADMZ>ADMF,(ADMZ-ADMF)/ADMZ,IIf(ADMZ==ADMF,0,(ADMZ-ADMF)/ADMF));
+
+
+
+Value1 = AMA(2*(SRDM), ADTMfisher1_factor);
+
+Value2=(4*Value1+3*Ref(Value1,-1)+2*Ref(Value1,-2)+Ref(Value1,-3))/10;
+
+Value3=Value1;
+
+
+
+InverseFish=( ( exp( 2 * Value3 ) - 1 ) / ( exp( 2 * Value3 ) + 1 ) + 1 )*50;
+
+
+
+StoFR1=InverseFish ;
+
+
+
+Bsig1=StoFR1>Ref(StoFR1,-1);
+
+Ssig1=StoFR1<Ref(StoFR1,-1);
+
+
+
+bsig=ExRem(Bsig1,Ssig1);
+
+ssig=ExRem(Ssig1,Bsig1);
+
+
+
+ps=GetPs(bsig,ssig,0);
+
+
+
+
+//add exrem
+bsig=exrem(bsig,ssig);
+ssig=exrem(ssig,bsig);
+ps=getps(bsig,ssig,0);
+
+//add_tp15ps_exp
+ps = TP15(bsig, ssig, ps);
+return ps;
+
+
+
+
+
+}
+
+
+
+ps=getADTMfisher1(ADTMfisher1_N1,ADTMfisher1_AMAf,ADTMfisher1_factor);
+
+
+ps = 0;
+//60_MD
+ADTMfisher1_N1 = 100;ADTMfisher1_AMAf = 0.129;ADTMfisher1_factor = 0.061;ps1 = getADTMfisher1(ADTMfisher1_N1,ADTMfisher1_AMAf,ADTMfisher1_factor);ps += ps1;
+ADTMfisher1_N1 = 100;ADTMfisher1_AMAf = 0.19;ADTMfisher1_factor = 0.071;ps2 = getADTMfisher1(ADTMfisher1_N1,ADTMfisher1_AMAf,ADTMfisher1_factor);ps += ps2;
+ADTMfisher1_N1 = 60;ADTMfisher1_AMAf = 0.094;ADTMfisher1_factor = 0.685;ps3 = getADTMfisher1(ADTMfisher1_N1,ADTMfisher1_AMAf,ADTMfisher1_factor);ps += ps3;
+ADTMfisher1_N1 = 100;ADTMfisher1_AMAf = 0.177;ADTMfisher1_factor = 0.048;ps4 = getADTMfisher1(ADTMfisher1_N1,ADTMfisher1_AMAf,ADTMfisher1_factor);ps += ps4;
+ADTMfisher1_N1 = 76;ADTMfisher1_AMAf = 0.214;ADTMfisher1_factor = 0.59;ps5 = getADTMfisher1(ADTMfisher1_N1,ADTMfisher1_AMAf,ADTMfisher1_factor);ps += ps5;
+ADTMfisher1_N1 = 100;ADTMfisher1_AMAf = 0.1;ADTMfisher1_factor = 0.39;ps6 = getADTMfisher1(ADTMfisher1_N1,ADTMfisher1_AMAf,ADTMfisher1_factor);ps += ps6;
+ADTMfisher1_N1 = 89;ADTMfisher1_AMAf = 0.084;ADTMfisher1_factor = 0.16;ps7 = getADTMfisher1(ADTMfisher1_N1,ADTMfisher1_AMAf,ADTMfisher1_factor);ps += ps7;
+ADTMfisher1_N1 = 100;ADTMfisher1_AMAf = 0.111;ADTMfisher1_factor = 0.492;ps8 = getADTMfisher1(ADTMfisher1_N1,ADTMfisher1_AMAf,ADTMfisher1_factor);ps += ps8;
+ADTMfisher1_N1 = 60;ADTMfisher1_AMAf = 0.182;ADTMfisher1_factor = 0.664;ps9 = getADTMfisher1(ADTMfisher1_N1,ADTMfisher1_AMAf,ADTMfisher1_factor);ps += ps9;
+ADTMfisher1_N1 = 57;ADTMfisher1_AMAf = 0.518;ADTMfisher1_factor = 0.078;ps10 = getADTMfisher1(ADTMfisher1_N1,ADTMfisher1_AMAf,ADTMfisher1_factor);ps += ps10;
+//60_NP
+ADTMfisher1_N1 = 40;ADTMfisher1_AMAf = 0.089;ADTMfisher1_factor = 0.601;ps1 = getADTMfisher1(ADTMfisher1_N1,ADTMfisher1_AMAf,ADTMfisher1_factor);ps += ps1;
+ADTMfisher1_N1 = 62;ADTMfisher1_AMAf = 0.207;ADTMfisher1_factor = 0.35;ps2 = getADTMfisher1(ADTMfisher1_N1,ADTMfisher1_AMAf,ADTMfisher1_factor);ps += ps2;
+ADTMfisher1_N1 = 67;ADTMfisher1_AMAf = 0.205;ADTMfisher1_factor = 0.577;ps3 = getADTMfisher1(ADTMfisher1_N1,ADTMfisher1_AMAf,ADTMfisher1_factor);ps += ps3;
+ADTMfisher1_N1 = 35;ADTMfisher1_AMAf = 0.093;ADTMfisher1_factor = 0.364;ps4 = getADTMfisher1(ADTMfisher1_N1,ADTMfisher1_AMAf,ADTMfisher1_factor);ps += ps4;
+ADTMfisher1_N1 = 63;ADTMfisher1_AMAf = 0.232;ADTMfisher1_factor = 0.59;ps5 = getADTMfisher1(ADTMfisher1_N1,ADTMfisher1_AMAf,ADTMfisher1_factor);ps += ps5;
+ADTMfisher1_N1 = 48;ADTMfisher1_AMAf = 0.172;ADTMfisher1_factor = 0.356;ps6 = getADTMfisher1(ADTMfisher1_N1,ADTMfisher1_AMAf,ADTMfisher1_factor);ps += ps6;
+ADTMfisher1_N1 = 61;ADTMfisher1_AMAf = 0.179;ADTMfisher1_factor = 0.537;ps7 = getADTMfisher1(ADTMfisher1_N1,ADTMfisher1_AMAf,ADTMfisher1_factor);ps += ps7;
+ADTMfisher1_N1 = 65;ADTMfisher1_AMAf = 0.165;ADTMfisher1_factor = 0.582;ps8 = getADTMfisher1(ADTMfisher1_N1,ADTMfisher1_AMAf,ADTMfisher1_factor);ps += ps8;
+ADTMfisher1_N1 = 48;ADTMfisher1_AMAf = 0.091;ADTMfisher1_factor = 0.638;ps9 = getADTMfisher1(ADTMfisher1_N1,ADTMfisher1_AMAf,ADTMfisher1_factor);ps += ps9;
+ADTMfisher1_N1 = 86;ADTMfisher1_AMAf = 0.23;ADTMfisher1_factor = 0.576;ps10 = getADTMfisher1(ADTMfisher1_N1,ADTMfisher1_AMAf,ADTMfisher1_factor);ps += ps10;
+//60_PF
+ADTMfisher1_N1 = 94;ADTMfisher1_AMAf = 0.301;ADTMfisher1_factor = 0.105;ps1 = getADTMfisher1(ADTMfisher1_N1,ADTMfisher1_AMAf,ADTMfisher1_factor);ps += ps1;
+ADTMfisher1_N1 = 90;ADTMfisher1_AMAf = 0.327;ADTMfisher1_factor = 0.065;ps2 = getADTMfisher1(ADTMfisher1_N1,ADTMfisher1_AMAf,ADTMfisher1_factor);ps += ps2;
+ADTMfisher1_N1 = 74;ADTMfisher1_AMAf = 0.192;ADTMfisher1_factor = 0.444;ps3 = getADTMfisher1(ADTMfisher1_N1,ADTMfisher1_AMAf,ADTMfisher1_factor);ps += ps3;
+ADTMfisher1_N1 = 74;ADTMfisher1_AMAf = 0.371;ADTMfisher1_factor = 0.107;ps4 = getADTMfisher1(ADTMfisher1_N1,ADTMfisher1_AMAf,ADTMfisher1_factor);ps += ps4;
+ADTMfisher1_N1 = 61;ADTMfisher1_AMAf = 0.236;ADTMfisher1_factor = 0.316;ps5 = getADTMfisher1(ADTMfisher1_N1,ADTMfisher1_AMAf,ADTMfisher1_factor);ps += ps5;
+ADTMfisher1_N1 = 83;ADTMfisher1_AMAf = 0.331;ADTMfisher1_factor = 0.051;ps6 = getADTMfisher1(ADTMfisher1_N1,ADTMfisher1_AMAf,ADTMfisher1_factor);ps += ps6;
+ADTMfisher1_N1 = 90;ADTMfisher1_AMAf = 0.193;ADTMfisher1_factor = 0.085;ps7 = getADTMfisher1(ADTMfisher1_N1,ADTMfisher1_AMAf,ADTMfisher1_factor);ps += ps7;
+ADTMfisher1_N1 = 57;ADTMfisher1_AMAf = 0.518;ADTMfisher1_factor = 0.078;ps8 = getADTMfisher1(ADTMfisher1_N1,ADTMfisher1_AMAf,ADTMfisher1_factor);ps += ps8;
+ADTMfisher1_N1 = 31;ADTMfisher1_AMAf = 0.143;ADTMfisher1_factor = 0.42;ps9 = getADTMfisher1(ADTMfisher1_N1,ADTMfisher1_AMAf,ADTMfisher1_factor);ps += ps9;
+ADTMfisher1_N1 = 23;ADTMfisher1_AMAf = 0.221;ADTMfisher1_factor = 0.3;ps10 = getADTMfisher1(ADTMfisher1_N1,ADTMfisher1_AMAf,ADTMfisher1_factor);ps += ps10;
+
+
+ps_th = Param("ps_th",25, 0, 100, 1);
+
+bsig=ps >= ps_th;
+ssig=ps <= -ps_th;
+
+bsig=ExRem(bsig,ssig);
+ssig=ExRem(ssig,bsig);
+
+psmerge=GetPs(bsig,ssig,0);
+ps_exit_th = ps_th * 0.66667;
+C01 = psmerge==1 AND ps <= ps_exit_th;
+C02 = psmerge==-1 AND ps >= -ps_exit_th;
+
+tp = 15; //Param("tp",15,0,100,1);
+Lstbsg = BarsSince(psmerge==1 AND Ref(psmerge,-1)!=1);
+Lstssg = BarsSince(psmerge==-1 AND Ref(psmerge,-1)!=-1);
+C03 = psmerge==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C04 = psmerge==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+//Csig=C01 OR C02 OR C03 OR C04;
+csig = C03 OR C04;
+//csig = C01 OR C02;
+
+
+Plotperformance(bsig,ssig,Csig);
+
+StrategyName = "60min_30_25_getADTMfisher1";StrategyID = "1015500019";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

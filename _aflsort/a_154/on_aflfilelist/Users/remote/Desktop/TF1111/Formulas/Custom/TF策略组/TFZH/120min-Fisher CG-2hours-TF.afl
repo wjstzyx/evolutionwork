@@ -1,0 +1,113 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "120min-Fisher CG-2hours-TF";
+StrategyID = 380004;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine);       
+
+Period = Param("Period", 3, 1, 250, 1);
+
+Len=Param("Len",3,1,100,1);
+stdzhisun=ParamOptimize("stdzhisun",0.7,0,10,0.1);
+
+p = Param("p",257,0,1000,1);
+
+function CGOscillator(array, length)
+{
+  CGOValue = array;
+
+  for(i = length; i < BarCount; i++)
+  {
+    num = 0;
+    denom = 0;
+    for(j = 0; j < length; j++)
+    {
+      num = num + (1 + j) * array[i - j];
+      denom = denom + array[i - j];
+    }
+    if (denom != 0) CGOValue[i] = -num / denom + (length +1)/2;
+  }
+  return CGOValue;
+}
+
+med = (H + L) / 2;
+
+
+CG=CGOscillator(med, Period);
+
+
+MaxCG=HHV(CG,Len);
+
+MinCG=LLV(CG,Len);
+
+Value1=IIf(MaxCG>MinCG,(CG-MinCG)/(MaxCG-MinCG),0);
+
+Value2=(4*Value1+3*Ref(Value1,-1)+2*Ref(Value1,-2)+Ref(Value1,-3))/10;
+
+Value3=0.5*log((1+1.98*(Value2-0.5))/(1-1.98*(Value2-0.5)));
+
+FisherCG=Value3;
+
+Plot(FisherCG,"FisherCG",colorRed);
+
+Buy=(FisherCG>Ref(FisherCG,-1)) AND (Ref(FisherCG,-1)>Ref(FisherCG,-2))  AND (Ref(FisherCG,-2)>Ref(FisherCG,-3)) ;
+Sell=(FisherCG<(Ref(FisherCG,-1))) AND (Ref(FisherCG,-1)<Ref(FisherCG,-2))  AND (Ref(FisherCG,-2)<Ref(FisherCG,-3)) ;
+
+//Buy=(FisherCG>Ref(FisherCG,-1)) AND (Ref(FisherCG,-1)>Ref(FisherCG,-2))  AND (Ref(FisherCG,-2)>Ref(FisherCG,-3));
+//Sell=(FisherCG<(Ref(FisherCG,-1))) AND (Ref(FisherCG,-1)<Ref(FisherCG,-2))  AND (Ref(FisherCG,-2)<Ref(FisherCG,-3));
+
+//Buy=(FisherCG>Ref(FisherCG,-1));
+//Sell=(FisherCG<(Ref(FisherCG,-1)));
+
+bsig=ExRem(Buy,Sell);
+ssig=ExRem(Sell,Buy);
+
+
+//////////////////////////zhisun/////////////////////////////////////////////////
+
+
+
+//stdzhiyin=ParamOptimize("stdzhiyin",2.7,0,10,0.1);
+
+zhisunup=BBandTop(C,100,stdzhisun);
+zhisundown=BBandBot(C,100,stdzhisun);
+
+//zhiyinup=BBandTop(C,100,stdzhiyin);
+//zhiyindown=BBandBot(C,100,stdzhiyin);
+
+ps=GetPs(bsig,ssig,0);
+
+C001=ps==1 AND C<zhisundown;
+C002=ps==-1 AND C>zhisunup;
+
+//C01=ps==1 AND C>zhiyinup;
+//C02=ps==-1 AND C<zhiyindown;
+
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+C03 = ps==1 AND  C>Ref(C,-Lstbsg)+p;
+C04 = ps==-1 AND  C<Ref(C,-lstssg)-p;
+
+
+//Csig=C001 OR C002 OR C03 OR C04 OR C01 OR C02;
+
+Csig=C001 OR C002 OR C03 OR C04;
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+//Plotperformance(bsig,ssig,0);
+
+ps0 = GetPs(bsig,ssig,csig);
+Filter= 1;
+AddColumn(ps0,"ps");

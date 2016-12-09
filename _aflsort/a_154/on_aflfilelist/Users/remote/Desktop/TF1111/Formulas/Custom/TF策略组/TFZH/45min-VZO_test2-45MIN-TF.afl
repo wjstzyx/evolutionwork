@@ -1,0 +1,171 @@
+_SECTION_BEGIN("VZO SS");
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "45min-VZO_test2-45MIN-TF";
+StrategyID = 380023;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+/*
+// Tested on version 5.9 //
+The VZO discerns bullish volume from bearish volume and is useful for 
+identifying at which zone (bullish or bearish) volume is positioned. 
+
+The oscillator is plotted on a vertical scale of -100 to +100. Movements above 
++49 are considered overbought, while an oversold condition would be a move 
+under -49. 
+
+Movements above +69 mark extreme overbought levels, while an extreme oversold 
+condition is a move under -69. 
+
+The Zero line demonstrates equilibrium between Buyers and Sellers.
+
+Components of VZO are...
+-- Your favorite Moving Average (try FRAMA)
+-- ADX
+-- Seven oscillator zones: +69, +49, +24, Zero, -14, -49 and -69.
+
+I've tried to compensate the zones to adapt to the SuperSmoother.
+
+Action is trending when ADX is >18 while <18 is sideways action.
+*/
+
+GraphXSpace = 5;
+
+PI = 3.1415926 ; 
+SQ2 = sqrt( 2 ); 
+
+function SuperSmoother( array, period ) 
+{ 
+    a1 = exp( -SQ2 * PI / period ); 
+    b1 = 2 * a1 * cos( SQ2 * PI / period ); 
+    c2 = b1; 
+    c3 = -a1 * a1; 
+    c1 = 1 - c2 - c3; 
+
+    Filt = Nz( array ); 
+
+    for ( i = 2; i < BarCount; i++ ) 
+    { 
+         Filt[ i ] = c1 * ( array[ i ] + array[ i - 1 ] ) / 2 + 
+                     c2 * Filt[ i - 1 ] + 
+                     c3 * Filt[ i - 2]; 
+    } 
+
+    return Filt; 
+} 
+
+function VZO( Period ) 
+{ 
+ R = sign( Close - Ref( Close, -1 ) ) * V; 
+ VP = SuperSmoother( R, Period ); 
+ TV = SuperSmoother( V, Period ); 
+ 
+ //Plot(V,"V",colorBlue);
+ //Plot(TV,"TV",colorRed);
+ //Plot(VP,"Vp",colorwhite);
+ 
+ SV = supersmoother(100*R/TV,period);
+ //Plot(SV,"SV",colorYellow);
+ 
+ return Nz( 100 * VP / TV ); 
+} 
+
+Period = Param("Period", 13, 1, 100 ); 
+ADX_Level = Param("ADX Level", 29, 1, 100 );
+ExRemoveP=Param("ExRemP",0,0,1000);
+thres = Param("thres",44,0,100,1);
+t1 = Param("t1",91600,91500,151500,100);
+t2 = Param("t2",95600,91500,151500,100);
+t3 = Param("t3",91500,91500,151500,100);
+t4 = Param("t4",151500,91500,151500,100);
+vz = VZO(Period);
+
+//Plot(vz,"vz",colorBlue);
+
+bsig0 = Cross(vz,thres);
+ssig0 = Cross(-thres,vz);
+//ssig0 = Cross(vz,-thres);
+
+//Plot(bsig0,"bsig0",colorRed);
+//Plot(ssig0,"ssig0",colorGreen);
+
+
+BCK2= PDI(14)>Ref(PDI(14),-1);
+BCK4= ADX(14)>=ADX_Level;
+
+
+SCK2= MDI(14)>Ref(MDI(14),-1);
+SCK4= ADX(14)>=ADX_Level; 
+
+
+
+timefilter = (TimeNum()>=t1 AND TimeNum()<=t2) OR (TimeNum()>=t3 AND TimeNum()<=t4);
+
+bsig0 = bsig0  AND timefilter AND bck4 ;//AND bck2;;//bck3 //
+ssig0 = ssig0  AND timefilter AND sck4;//;//sck3 AND sck2
+
+bsig=ExRem(bsig0,ssig0); 
+ssig=ExRem(ssig0,bsig0);
+
+//bsig=ExRem(bsig0,BarsSince(bsig0==1)>=ExRemoveP);
+//ssig=ExRem(ssig0,BarsSince(ssig0==1)>=ExRemoveP);
+
+ps=GetPs(bsig,ssig,0);
+
+covthres=Param("covthres",98,0,100,1);
+
+//Plot(vz,"vz",colorBlue);
+
+C03 = ps==1 AND vz<-covthres;
+C04 = ps==-1 AND vz>covthres;
+
+Lstbsg = BarsSince(bsig);
+Lstssg = BarsSince(ssig);
+
+Holdperiod=Param("Holdperiod",500,0,500,1);
+C01 = ps==1 AND Lstbsg>=Holdperiod AND C<Ref(C,-Lstbsg);
+C02 = ps==-1 AND lstssg>=holdperiod AND C>Ref(C,-lstssg);
+
+tp = Param("tp",85,0,500,0.1);
+
+RecentH=HHV(H,10);
+RecentL=LLV(L,10);
+RecentWave=Ref(RecentH-RecentL,-1);
+AverageRecentWave=MA(RecentWave,2);
+
+//tp = 1.3*AverageRecentWave;
+//tp = Max(1.3*AverageRecentWave,85);
+//tp = 85;
+
+C05 = ps==1 AND  C<Highestsince(bsig,C)-tp;
+C06 = ps==-1 AND  C>Lowestsince(ssig,C)+tp;
+
+sp = Param("sp",50,0,500,1);
+//C05 = ps==1 AND  C<Highestsince(bsig,C)-sp*C/1000;
+//C06 = ps==-1 AND  C>Lowestsince(ssig,C)+sp*C/1000;
+
+//C05 = ps==1 AND  C<Highestsince(ps==1 AND Ref(ps,-1)!=1,C)-tp;
+//C06 = ps==-1 AND  C>Lowestsince(ps==-1 AND Ref(ps,-1)!=-1,C)+tp;
+
+Csig =  C05 OR C06;// OR C03 OR C04;//OR TimeNum()>=151400;C01 OR C02 OR
+//csig=0;
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+
+_SECTION_END();
+
+ps0 = GetPs(bsig,ssig,csig);
+Filter= 1;
+AddColumn(ps0,"ps");

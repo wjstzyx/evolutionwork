@@ -1,0 +1,86 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "HC-40min-rev-QHLSR-AMA";
+StrategyID = 560015;
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+
+N=Param("N",3,0,100,1);
+AMAf = Param("AMAf", 0.01, 0, 1.0, 0.001);
+factor = Param("factor", 0.05, 0, 1, 0.001);
+
+input=(C+H+L)/3;
+input=C;
+
+typ=input;
+typ=AMA(input,AMAf);
+typv=AMA(V,AMAf);
+typh=AMA(H,AMAf);
+typl=AMA(L,AMAf);
+typC=AMA(C,AMAf);
+
+QHL=(C-Ref(C,-1))-(V-Ref(V,-1))*(Ref(H,-1)-Ref(L,-1))/Ref(V,-1);
+QHL=(typC-Ref(typC,-1))-(typv-Ref(typv,-1))*(Ref(typh,-1)-Ref(typl,-1))/Ref(typv,-1);
+//QHL=(typ-Ref(typ,-1));
+
+A=Sum(IIf(QHL>0,QHL,0),5);
+
+E=Sum(IIf(QHL>0,QHL,0),10);
+
+B=abs(Sum(IIf(QHL<0,QHL,0),5));
+
+F=abs(Sum(IIf(QHL<0,QHL,0),10));
+
+D=A/(A+B);
+
+G=E/(E+F);
+
+QHL5=IIf(Sum(IIf(QHL>0,1,0),N)==N,1,IIf(Sum(IIf(QHL<0,1,0),N)==N,0,D));
+
+QHL10=G;
+
+////////////////////////////////////////////////
+
+Value1 = AMA(2*(QHL5), factor);
+Value2=(4*Value1+3*Ref(Value1,-1)+2*Ref(Value1,-2)+Ref(Value1,-3))/10;
+Value3=Value1;
+
+InverseFish=( ( exp( 2 * Value3 ) - 1 ) / ( exp( 2 * Value3 ) + 1 ) + 1 )*50;
+
+
+//Value3=0.5*log((1+1.98*(Value2-0.5))/(1-1.98*(Value2-0.5)));
+
+//Plot(Fish,"Fish ",colorGreen);
+StoFR1=InverseFish ;
+
+Bsig=StoFR1>Ref(StoFR1,-1);
+Ssig=StoFR1<Ref(StoFR1,-1);
+
+Bsig=StoFR1>Ref(StoFR1,-1) AND Ref(StoFR1,-1)>Ref(StoFR1,-2);
+Ssig=StoFR1<Ref(StoFR1,-1) AND Ref(StoFR1,-1)<Ref(StoFR1,-2);
+
+Bsig=StoFR1>Ref(StoFR1,-1) AND Ref(StoFR1,-1)>Ref(StoFR1,-2)  AND Ref(StoFR1,-2)>Ref(StoFR1,-3);
+Ssig=StoFR1<Ref(StoFR1,-1) AND Ref(StoFR1,-1)<Ref(StoFR1,-2)  AND Ref(StoFR1,-2)<Ref(StoFR1,-3);
+
+
+
+    
+    csig=0;
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+
+
+ps0 = GetPs(bsig,ssig,0);
+Filter= 1;
+AddColumn(ps0,"ps");

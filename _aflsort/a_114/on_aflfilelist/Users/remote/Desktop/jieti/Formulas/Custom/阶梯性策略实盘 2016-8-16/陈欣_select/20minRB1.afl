@@ -1,0 +1,72 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "20minRB1";
+StrategyID ="1012100150";
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+
+
+Osc_Issue  = MACD();
+Middle  = 0;
+
+FirstBar_CG   = BarsSince(Cross(Osc_Issue,Middle))+1;
+CurrPeak             = HHV(C,FirstBar_CG);
+
+FirstBar_CG   = BarsSince(Cross(Middle,Osc_Issue))+1;
+CurrTrough             = LLV(C,FirstBar_CG);
+
+Sel_BarIndex        = BarIndex();
+
+
+i=1;
+LastBar_PG       = Sel_BarIndex-ValueWhen(Cross(Middle,Osc_Issue),BarIndex(),i);
+FirstBar_PG      = Sel_BarIndex-ValueWhen(Cross(Osc_Issue,Middle),BarIndex(),i+1);
+
+HHVval=HHV(C,FirstBar_PG - LastBar_PG+1);
+PriorPeak          = Ref(HHVval,-LastBar_PG);
+
+LastBar_PG       = Sel_BarIndex-ValueWhen(Cross(Osc_Issue,Middle),BarIndex(),i);
+FirstBar_PG      = Sel_BarIndex-ValueWhen(Cross(Middle,Osc_Issue),BarIndex(),i+1);
+
+LLVval=LLV(C,FirstBar_PG - LastBar_PG+1);
+PriorTrough         = Ref(LLVval,-LastBar_PG);
+
+
+BuyPower = CurrPeak  - PriorTrough;
+SellPower = PriorPeak - CurrTrough;
+ttfperiod = IIf(BuyPower+SellPower==0,0,100*(BuyPower - SellPower) /(BuyPower + SellPower));
+
+
+Buy=ttfperiod>Ref(ttfperiod,-1);
+Sell=ttfperiod<Ref(ttfperiod,-1);
+
+bsig=ExRem(Buy,Sell);
+ssig=ExRem(Sell,Buy);
+
+
+ps=GetPs(bsig,ssig,0);
+
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+
+tp = Param("tp",14,0,100,1);
+
+C05 = ps==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C06 = ps==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+CSIG =  C05 OR C06;   
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

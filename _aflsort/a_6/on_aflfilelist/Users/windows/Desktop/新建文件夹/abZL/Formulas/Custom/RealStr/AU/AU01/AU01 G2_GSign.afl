@@ -1,0 +1,64 @@
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/BasicV2/TM.afl";
+#include "Formulas/Custom/BasicV2/V7DY.afl";
+#include "Formulas/Custom/BasicV2/DFB.afl";
+#include "Formulas/Custom/BasicV2/MAA.afl";
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 800);
+
+StrategyName = "AU01 G2_GSign";
+StrategyID = 6002;
+ProType = 1;
+
+//V7
+CondV1 =  V7DYHLV2(15,25,"AU");		
+CondV2 =  V7DYHL(10,7,"AU");		
+CondV3 =  V7DYHL(9,6,"AU");		
+CondV4 =  V7DYMA(27,42,0,"AU");		
+CondV = CondV1+ CondV2+ CondV3+ CondV4;
+CondG1= GetSig123(CondV);
+//Maa
+CondM1 =  MAArrangeCount(93,91,15,1000,1000,"AU");
+CondM2 =  MAArrangeCount(99,88,12,1000,1000,"AU");
+CondM = CondM1 +CondM2;
+CondG2= GetSig123(CondM);
+
+//DFB
+CondD =  DFB(11,3,"AU");
+CondG3= CondD ;
+//TM
+CondT1 =  TimeShareHLHalfLess(81,159,144,1000,1000,"AU");
+CondT2 =  TimeShareFHLLess(71,178,119,1000,1000,"AU");
+CondT3 =  TimeShareFHLLess(71,162,119,1000,1000,"AU");
+CondT4 =  TimeShareFHLLess(79,169,116,1000,1000,"AU");
+CondT5 =  TimeShareFHLLess(71,163,119,1000,1000,"AU");
+CondT6 =  TimeShareHLLess(79,95,95,1000,1000,"AU");
+CondT7 =  TimeShareHLLess(80,94,94,1000,1000,"AU");
+CondT = CondT1 +CondT2 +CondT3 +CondT4 +CondT5 +CondT6 +CondT7 ;
+
+CondG4=GetSig123(CondT);
+
+
+V7= ParamOptimize("V7",2, 0.5, 2.5, 0.5);
+Maa= ParamOptimize("Maa", 1, 0.5, 2.5, 0.5);
+DF= ParamOptimize("DFB", 1.5, 0.5, 2.5, 0.5);
+TM= ParamOptimize("TM", 2, 0.5, 2.5, 0.5);
+
+Cond = V7*CondG1 +Maa*CondG2+DF*CondG3+TM*CondG4;
+
+Vote=ParamOptimize("Vote", 1, 0, 2, 0.5);
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG1=Cond<=Vote && Cond>=-Vote;
+CSIG=(TimeNum()+Interval()*100/60)>=145800;
+
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

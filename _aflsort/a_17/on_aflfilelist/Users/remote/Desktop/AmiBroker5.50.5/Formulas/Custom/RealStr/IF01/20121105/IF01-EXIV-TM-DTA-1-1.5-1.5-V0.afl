@@ -1,0 +1,67 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/BasicV3/dfb.afl";
+#include "Formulas/Custom/BasicV3/exiv.afl";
+#include "Formulas/Custom/BasicV3/exv.afl";
+#include "Formulas/Custom/BasicV3/hl.afl";
+#include "Formulas/Custom/BasicV3/maa.afl";
+#include "Formulas/Custom/BasicV3/sxv.afl";
+#include "Formulas/Custom/BasicV3/tb.afl";
+#include "Formulas/Custom/BasicV3/tm.afl";
+#include "Formulas/Custom/BasicV3/v7.afl";
+#include "Formulas/Custom/BasicV4/bomb.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 800);
+
+StrategyName = "IF01-EXIV-TM-DTA-1-1.5-1.5-V0";
+StrategyID = 40237;
+ProType = 0;
+
+
+BOMB1=Bomb_EXIV(13,10,25,48,127,"IF");
+BOMB2=Bomb_EXIV(13,10,28,47,127,"IF");
+
+
+
+BOMB3=Bomb_TMHLV3(19,18,7,0.7,0,129,"IF");
+BOMB4=Bomb_TMHLV3(23,18,13,0.7,0,129,"IF");
+
+
+
+BOMB5=DTAV2BC(4,4,0.1,87,134,"IF");
+BOMB6=DTAV2BC(6,5,0.2,95,135,"IF");
+BOMB7=DTAV2BC(8,6,0.2,95,135,"IF");
+
+
+
+
+cond_EXIV=(Bomb1+Bomb2)/2;
+cond_TM=(Bomb3+Bomb4)/2;
+cond_DTA=(Bomb5+Bomb6+Bomb7)/3;
+
+
+
+
+w_EXIV= ParamOptimize("w_EXIV",1,0,4,0.5);
+w_TM= ParamOptimize("w_TM",1.5,0,4,0.5);
+w_DTA= ParamOptimize("w_DTA",1.5,0,4,0.5);
+
+
+
+
+Cond = w_EXIV*cond_EXIV+ w_TM*cond_TM+w_DTA*cond_DTA;
+
+Vote=ParamOptimize("w_Vote",0,0,4,0.5);
+
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond==0;
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

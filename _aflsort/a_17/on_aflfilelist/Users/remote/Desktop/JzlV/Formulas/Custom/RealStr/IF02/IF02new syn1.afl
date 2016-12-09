@@ -1,0 +1,55 @@
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/BasicIF/All01MIF.afl";
+
+StrategyName = "IF02_EXV_HL_DTA_TM_new syn1_4029";
+StrategyID = 4029;
+ProType = 0;
+
+
+Cond1=EXVHH3(1.2,150,2,4,8,22,"IF"); //486/366
+Cond2=EXVhh3(1.5,150,2,6,9,25,"if"); //440/359; insensitive to para Period3
+
+Cond3=HLPAVG(9,12,42,"IF"); //431/366
+Cond4=HLCAVG(5,10,38,"IF"); //429/364
+Cond5=HLNAVG(3,14,40,"IF"); //416/344
+
+Cond6=DTAV2IF(33,14,4,35,"IF");  //435/369
+Cond7=DTAV2IF(21,10,3,36,"IF");  //522/441
+Cond8=DTAV2IF(11,7,2,40,"IF"); //415/369
+Cond9=DTAV2IF(19,10,2,40,"IF"); //527/464
+Cond10=DTAV2IF(15,9,1.2,39,"IF"); //519/470
+Cond11=DTAV2IF(7,6,0,35,"IF"); // 449/415
+
+CondTM12=TimeShareHLLess(6,40,12,1000,1000,"IF");
+Cond12 = TimeSelect(38,275,CondTM12); //426/364
+CondTM13=TimeShareHLLess(3,21,14,1000,1000,"IF");
+Cond13 = TimeSelect(39,275,CondTM13); //473/405
+CondTM14=TimeShareHLLess(2,16,14,1000,1000,"IF");
+Cond14 = TimeSelect(39,275,CondTM14); //465/390
+
+Cond15=EXLV(1,180,2,5,14,70,"IF"); //290/260
+
+Cond16 =MAC(11,11,39,"IF"); //446/382
+Cond17 =MAC2(18,4,38,"IF"); //454/380
+
+Cond=Cond1+Cond2+Cond15+Cond3+Cond4+Cond5+Cond16+Cond17+Cond7+Cond8+Cond9+Cond10;
+
+
+
+
+
+Vote=ParamOptimize("Vote",0,0,10,0.5);
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond==0;
+
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);
+//Trading(stid,StrategyName,BSIG,CSIG);
+_SECTION_END();

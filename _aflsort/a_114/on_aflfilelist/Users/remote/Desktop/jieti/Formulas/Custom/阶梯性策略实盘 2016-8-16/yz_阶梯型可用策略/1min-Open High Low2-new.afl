@@ -1,0 +1,69 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "1min-Open High Low2-new";
+StrategyID ="1012100126";
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+
+ 
+NewDay = (Day()!= Ref(Day(), -1)) OR BarIndex() == 0;  
+
+ 
+FirstTradeTime=Param("FirstTradeTime",94500,90000,150000,500);
+bias=Param("bias",0.22,0.01,2,0.01);
+Interv=Param("Interv",18,1,100,1);
+ 
+DayOpen=TimeFrameGetPrice("O",inDaily);
+DayHigh = HighestSince(NewDay,H,1);  
+DayLow = LowestSince(NewDay,L,1);  
+
+Bsig = (round(DayOpen/Interv)<=round(DayLow/Interv)) AND High>=(sqrt(DayOpen)+bias)^2 AND TimeNum()>FirstTradeTime;  
+Ssig = (round(DayOpen/Interv)>=round(DayHigh/Interv)) AND Low<=(sqrt(DayOpen)-bias)^2 AND TimeNum()>FirstTradeTime; 
+
+ 
+ps=GetPs(Bsig,Ssig,0);
+
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+HHVbsg=IIf(lstbsg==0,C,HHV(C,lstbsg));
+LLVssg=IIf(lstssg==0,C,LLV(C,lstssg));
+
+HHVbsg=HHV(C,lstbsg);
+LLVssg=LLV(C,lstssg);
+
+//Holdperiod=Param("Holdperiod",600,1,1000,1);
+
+
+//stdzhisun=ParamOptimize("stdzhisun",1,0,10,0.1);
+//zhisunup=BBandTop(C,Holdperiod,stdzhisun);
+//zhisundown=BBandBot(C,Holdperiod,stdzhisun);
+
+//C001=ps==1 AND C<zhisundown;
+//C002=ps==-1 AND C>zhisunup;
+
+tp = Param("tp",100,0,100,1);
+
+
+C05 = ps==1 AND  C<HHVbsg-tp*C/1000;
+C06 = ps==-1 AND  C>LLVssg+tp*C/1000;
+
+Csig= C05 OR C06;//C001 OR C002 OR
+
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+
+
+ 

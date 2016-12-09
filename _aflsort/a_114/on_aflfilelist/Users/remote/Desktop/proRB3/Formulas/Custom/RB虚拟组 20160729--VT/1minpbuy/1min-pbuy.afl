@@ -1,0 +1,93 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "1min-成交量权重价格-pbuy";
+StrategyID ="1012100012";
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+
+
+
+
+
+FSTK=Day()!=Ref(Day(),-1);
+KN=IIf(FSTK,1,BarsSince(FSTK)+1);	
+LastDayClose=Ref(C,-KN);
+ThisDayOpen=Ref(O,-KN+1);
+
+period=Param("period",340,100,600,10);
+Vc=V*C;
+VweightC=IIf(Sum(V,period)==0,C,Sum(Vc,period)/Sum(V,period));
+
+Lookback=Param("Lookback",470,10,1000,10);
+
+
+Cstudy=C-VweightC;
+
+stdc=StDev(Cstudy,Lookback);
+
+xc=IIf(stdc==0,0,Cstudy/stdc);
+
+pbuyc=NN(xc);
+
+
+Limit=Param("Limit",0.9,0,1,0.1);
+
+
+bsig1=pbuyc>Limit ;
+ssig1=pbuyc<1-Limit ;
+
+//bsig1=pbuyc>Limit AND ADX()>20;
+//ssig1=pbuyc<1-Limit AND ADX()>20;
+
+//bsig=bsig1 AND CPPCount(bsig1 OR ssig1,kn)==1;
+//ssig=ssig1 AND CPPCount(bsig1 OR ssig1,kn)==1;
+
+bsig=bsig1;
+ssig=ssig1;
+
+ps = GetPs(bsig,ssig,0);
+
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+HHVbsg=IIf(lstbsg==0,C,HHV(C,lstbsg));
+LLVssg=IIf(lstssg==0,C,LLV(C,lstssg));
+
+HHVbsg=HHV(C,lstbsg);
+LLVssg=LLV(C,lstssg);
+
+Holdperiod=Param("Holdperiod",350,1,1000,1);
+
+
+stdzhisun=ParamOptimize("stdzhisun",2.5,0,10,0.1);
+zhisunup=BBandTop(C,Holdperiod,stdzhisun);
+zhisundown=BBandBot(C,Holdperiod,stdzhisun);
+
+C001=ps==1 AND C<zhisundown;
+C002=ps==-1 AND C>zhisunup;
+
+tp = Param("tp",20,0,100,1);
+
+
+C05 = ps==1 AND  C<HHVbsg-tp*C/1000;
+C06 = ps==-1 AND  C>LLVssg+tp*C/1000;
+
+Csig=C001 OR C002 OR C05 OR C06;
+
+
+
+
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

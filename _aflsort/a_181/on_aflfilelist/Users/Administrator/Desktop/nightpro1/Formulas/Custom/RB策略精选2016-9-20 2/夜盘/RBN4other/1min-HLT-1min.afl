@@ -1,0 +1,61 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+
+
+
+
+function HLT( periods )
+{
+	BuyPower = HHV( High, periods ) - Ref( LLV( Low, periods ), -periods );
+	SellPower = Ref( HHV( High, periods ), -periods ) - LLV( Low, periods );
+    Hltdata=IIf((BuyPower + SellPower)==0,0,(BuyPower - SellPower) / ( (BuyPower + SellPower)));
+    
+	return 100 *  Hltdata;
+}
+
+
+
+periodttf=ParamOptimize("periodttf",110,0,300,10);
+
+ttfperiod = HLT( periodttf );
+
+
+bt = ParamOptimize( "Buy Trigger",199, -200, 200, 10 );
+
+
+Buy = Cross( ttfperiod, bt );
+Sell = Cross( -bt, ttfperiod );
+Short = Sell;
+Cover = Buy;
+
+
+
+bsig=Buy;
+ssig=Sell;
+ps=GetPs(bsig,ssig,0);
+
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+
+tp = Param("tp",38,0,100,1);
+
+C05 = ps==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C06 = ps==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+CSIG =  C05 OR C06;
+
+
+
+
+
+
+
+
+
+PlotPerformance(BSig,Ssig,Csig);
+
+
+
+
+
+StrategyName = "1min-HLT-1min";StrategyID = "1022100024";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_night_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

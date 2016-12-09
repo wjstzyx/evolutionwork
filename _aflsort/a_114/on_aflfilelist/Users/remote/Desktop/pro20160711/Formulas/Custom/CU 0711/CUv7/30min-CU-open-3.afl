@@ -1,0 +1,66 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "30min-CU-open-3";
+StrategyID ="1010500042";
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+yclose = TimeFrameGetPrice( "C", indaily, -1 );
+
+dayopen = Day()!=Ref(Day(),-1);
+kn = BarsSince(dayopen);
+
+openprice = ValueWhen(dayopen,O,1);
+
+//Plot(openprice,"openprice",colorBlue);
+
+bs = Param("bs",3,0,100,1);
+
+tk = Param("tk",4,0,100,1);
+
+otime = Param("otime",100000,94500,150000,100);
+
+bsig0 = C>openprice*(1+bs/1000) AND TimeNum()<=otime AND abs(yclose-openprice)/yclose>=tk/1000;
+ssig0 = C<openprice*(1-bs/1000) AND TimeNum()<=otime AND abs(yclose-openprice)/yclose>=tk/1000;
+
+//Plot(ssig0,"ssig0",colorBlue);
+
+bsig = bsig0 ;//AND cppcount2(bsig0 OR ssig0,kn)<2;
+ssig = ssig0 ;//AND cppcount2(bsig0 OR ssig0,kn)<2;
+
+
+ps = GetPs(bsig,ssig,0);
+
+Lstbsg = BarsSince(Cross(bsig,0));
+Lstssg = BarsSince(Cross(ssig,0));
+
+//Lstbsg = BarsSince(bsig);
+//Lstssg = BarsSince(ssig);
+
+
+tp = Paramoptimize("tp",15,0,50,1);
+
+C01 = ps==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C02 = ps==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+//Plot(C02,"C02",colorgreen);
+
+ctime = Param("ctime",150000,90000,150000,100);
+
+CSIG = C01 OR C02 OR TimeNum()>=ctime;
+       
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+
+

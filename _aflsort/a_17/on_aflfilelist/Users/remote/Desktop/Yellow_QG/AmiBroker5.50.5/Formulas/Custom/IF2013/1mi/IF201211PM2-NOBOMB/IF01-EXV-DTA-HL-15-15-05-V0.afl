@@ -1,0 +1,58 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/BasicV4/PMM.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 800);
+
+StrategyName = "IF01-EXV-DTA-HL-15-15-05-V0";
+StrategyID = 40266;
+ProType = 0;
+
+
+PMM1=PMM_EXV1(33,15,4,195,235,"IF");
+PMM2=PMM_EXV1(33,15,9,195,235,"IF");
+
+
+PMM3=PMM_DTAV2BC(4,4,0.2,193,236,"IF");
+
+
+PMM5=PMM_HLR(27,25,195,235,"IF");
+PMM6=PMM_HLR(75,38,195,235,"IF");
+
+
+
+
+
+
+cond_EXV=(PMM1+PMM2)/2;
+cond_DTA=(PMM3)/1;
+cond_HL=(PMM5+PMM6)/2;
+
+
+
+
+w_EXV= ParamOptimize("w_EXV",1.5,0,4,0.5);
+w_DTA= ParamOptimize("w_DTA",1.5,0,4,0.5);
+w_HL= ParamOptimize("w_HL",0.5,0,4,0.5);
+
+Cond = w_EXV*cond_EXV+ w_DTA*cond_DTA+w_HL*cond_HL;
+
+
+
+
+
+
+Vote=ParamOptimize("w_Vote",0,0,4,0.5);
+
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond==0;
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName+"--"+StrategyID);

@@ -1,0 +1,73 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "CS-15min_tupo_yz_1sym";
+StrategyID ="1055400000";
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+
+eps = 0.001;
+FSTK= BarIndex()==0 OR Day()!=Ref(Day(),-1);
+KN=BarsSince(FSTK)+1;
+
+function _tupo_ ( pz,kn,updn)
+{
+	fc = Foreign(pz, "C" );
+	fv = Foreign(pz, "v" );
+
+	fpc = Sum(fc*fv,kn)/Sum(fv,kn);
+
+	fup =IIf(TimeNum()>93000,CPPCount2(fc>fpc,kn-3),100) ;
+
+	uptodown = (HHV(fc,kn)-fC)/HHV(fc,kn)*100;
+	downtoup = (fC-LLV(fc,kn))/LLV(fc,kn)*100;
+
+	fc_day  = Ref(fc,-kn);
+
+	MA2_day = (Ref(fc,-kn)+Ref(fc,-kn-15))/2;
+	tupoup = fup==kn-3   AND  fc>MA2_day  AND uptodown<updn;
+	tupodn = fup== 0    AND fc<MA2_day  AND downtoup<updn;
+
+	tupo = IIf(tupoup,1,IIf(tupodn,-1,0) );
+
+	return tupo;
+}
+
+updn=Param("updn", 1, 0, 5, 0.2);
+num=Paramoptimize("num", 1, 0, 30, 1);
+
+tupo1 =_tupo_ (Name(),kn,updn) ;
+
+tupo =tupo1;  
+
+//TN=(TimeNum()>=140000 AND TimeNum()<150000);
+TN=(TimeNum()>=100000 AND TimeNum()<120000);
+
+bsig = tupo>=num AND tn;
+ssig =  tupo<=-num AND tn; 
+   
+ps = GetPs(BSIG,SSIG,0);
+
+
+Lstbsg = BarsSince(Cross(bsig,0));
+Lstssg = BarsSince(Cross(ssig,0));
+
+    
+nc = Paramoptimize("nc", 25, 0,50, 5);
+C01= ps==1 AND HighestSince(bsig,C,1)-C>=nc*C/1000;
+C02= ps==-1 AND LowestSince(ssig,C,1)-C<=-nc*C/1000;
+
+CSIG = C01 OR C02; 
+    
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+//PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

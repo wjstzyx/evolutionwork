@@ -1,0 +1,259 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+
+
+
+function PIR(p,Length)
+{
+Ll=LLV(p,Length);
+Hh=HHV(p,Length);
+return (100*(p-Ll)/(Hh-Ll));
+}
+
+function TP15(bsig, ssig, ps0)
+{
+tp = 15; //Param("tp",15,0,100,1);
+Lstbsg = BarsSince(ps0==1 AND Ref(ps0,-1)!=1);
+Lstssg = BarsSince(ps0==-1 AND Ref(ps0,-1)!=-1);
+C01 = ps0==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C02 = ps0==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+Csig=C01 OR C02;
+ps = GetPs(bsig, ssig, csig);
+return ps;
+}
+
+
+
+
+
+
+ADTMfisher2_N1=1; //Paramoptimize("ADTMfisher2_N1",25,1.0,100,1);
+
+ADTMfisher2_AMAf = 1; //Paramoptimize("ADTMfisher2_AMAf", 0.015,0.001, 1.0, 0.001);
+
+ADTMfisher2_factor = 1; //Paramoptimize("ADTMfisher2_factor", 0.01,0.001, 1, 0.001);
+
+
+
+function getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor)
+
+{
+
+input=O;
+
+
+
+price=AMA(input,ADTMfisher2_AMAf);
+
+
+
+DMZ=IIf(price<=Ref(price,-1),0,Max(abs(H-O),abs(O-Ref(O,-1))));
+
+
+
+DMF=IIf(price>=Ref(price,-1),0,Max(abs(H-O),abs(O-Ref(O,-1))));
+
+
+
+ADMZ=EMA(DMZ,ADTMfisher2_N1);
+
+
+
+ADMF=EMA(DMF,ADTMfisher2_N1);
+
+
+
+SRDM=IIf(ADMZ>ADMF,(ADMZ-ADMF)/ADMZ,IIf(ADMZ==ADMF,0,(ADMZ-ADMF)/ADMF));
+
+
+
+Value1 = AMA(2*(SRDM), ADTMfisher2_factor);
+
+
+
+Value1 = IIf(Value1 > 0.999, 0.999, IIf(Value1 < -0.999, -0.999, Value1));
+
+Value2=(4*Value1+3*Ref(Value1,-1)+2*Ref(Value1,-2)+Ref(Value1,-3))/10;
+
+Value3=Value1;
+
+
+
+Fish = log((1 + Value3)/(1 - Value3));
+
+
+
+StoFR1=Fish ;
+
+
+
+Bsig1=StoFR1>Ref(StoFR1,-1);
+
+Ssig1=StoFR1<Ref(StoFR1,-1);
+
+
+
+bsig=ExRem(Bsig1,Ssig1);
+
+ssig=ExRem(Ssig1,Bsig1);
+
+
+
+ps=GetPs(bsig,ssig,0);
+
+
+
+
+//add exrem
+bsig=ExRem(bsig,ssig);
+ssig=ExRem(ssig,bsig);
+ps=GetPs(bsig,ssig,0);
+
+//add_tp15ps_exp
+ps = TP15(bsig, ssig, ps);
+return ps;
+
+
+
+
+
+}
+
+
+
+ps=getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);
+
+
+
+ps = 0;
+//30min_MDD
+ADTMfisher2_N1 = 86;ADTMfisher2_AMAf = 0.063;ADTMfisher2_factor = 0.001;ps1 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps1;
+ADTMfisher2_N1 = 92;ADTMfisher2_AMAf = 0.304;ADTMfisher2_factor = 0.001;ps2 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps2;
+ADTMfisher2_N1 = 88;ADTMfisher2_AMAf = 0.301;ADTMfisher2_factor = 0.001;ps3 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps3;
+ADTMfisher2_N1 = 86;ADTMfisher2_AMAf = 0.215;ADTMfisher2_factor = 0.001;ps4 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps4;
+ADTMfisher2_N1 = 100;ADTMfisher2_AMAf = 0.189;ADTMfisher2_factor = 0.001;ps5 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps5;
+ADTMfisher2_N1 = 100;ADTMfisher2_AMAf = 0.423;ADTMfisher2_factor = 0.001;ps6 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps6;
+ADTMfisher2_N1 = 78;ADTMfisher2_AMAf = 0.264;ADTMfisher2_factor = 0.001;ps7 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps7;
+ADTMfisher2_N1 = 76;ADTMfisher2_AMAf = 0.005;ADTMfisher2_factor = 0.328;ps8 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps8;
+ADTMfisher2_N1 = 95;ADTMfisher2_AMAf = 0.226;ADTMfisher2_factor = 0.001;ps9 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps9;
+ADTMfisher2_N1 = 100;ADTMfisher2_AMAf = 0.457;ADTMfisher2_factor = 0.001;ps10 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps10;
+ADTMfisher2_N1 = 84;ADTMfisher2_AMAf = 0.065;ADTMfisher2_factor = 0.152;ps11 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps11;
+ADTMfisher2_N1 = 35;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.819;ps12 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps12;
+ADTMfisher2_N1 = 28;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.68;ps13 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps13;
+ADTMfisher2_N1 = 46;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 1.0;ps14 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps14;
+ADTMfisher2_N1 = 27;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.592;ps15 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps15;
+ADTMfisher2_N1 = 29;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.982;ps16 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps16;
+ADTMfisher2_N1 = 76;ADTMfisher2_AMAf = 0.072;ADTMfisher2_factor = 0.151;ps17 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps17;
+ADTMfisher2_N1 = 63;ADTMfisher2_AMAf = 0.075;ADTMfisher2_factor = 0.098;ps18 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps18;
+ADTMfisher2_N1 = 21;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.699;ps19 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps19;
+ADTMfisher2_N1 = 21;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.861;ps20 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps20;
+ADTMfisher2_N1 = 20;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.707;ps21 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps21;
+ADTMfisher2_N1 = 87;ADTMfisher2_AMAf = 0.339;ADTMfisher2_factor = 0.001;ps22 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps22;
+ADTMfisher2_N1 = 75;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.048;ps23 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps23;
+ADTMfisher2_N1 = 84;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.051;ps24 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps24;
+ADTMfisher2_N1 = 100;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.127;ps25 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps25;
+ADTMfisher2_N1 = 93;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.153;ps26 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps26;
+ADTMfisher2_N1 = 85;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.172;ps27 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps27;
+ADTMfisher2_N1 = 64;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.618;ps28 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps28;
+ADTMfisher2_N1 = 90;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.209;ps29 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps29;
+ADTMfisher2_N1 = 61;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.032;ps30 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps30;
+//30min_NP
+ADTMfisher2_N1 = 100;ADTMfisher2_AMAf = 0.018;ADTMfisher2_factor = 0.077;ps1 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps1;
+ADTMfisher2_N1 = 94;ADTMfisher2_AMAf = 0.038;ADTMfisher2_factor = 0.026;ps2 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps2;
+ADTMfisher2_N1 = 100;ADTMfisher2_AMAf = 0.022;ADTMfisher2_factor = 0.165;ps3 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps3;
+ADTMfisher2_N1 = 100;ADTMfisher2_AMAf = 0.038;ADTMfisher2_factor = 0.25;ps4 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps4;
+ADTMfisher2_N1 = 100;ADTMfisher2_AMAf = 0.009;ADTMfisher2_factor = 0.309;ps5 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps5;
+ADTMfisher2_N1 = 84;ADTMfisher2_AMAf = 0.044;ADTMfisher2_factor = 0.248;ps6 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps6;
+ADTMfisher2_N1 = 100;ADTMfisher2_AMAf = 0.04;ADTMfisher2_factor = 0.185;ps7 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps7;
+ADTMfisher2_N1 = 97;ADTMfisher2_AMAf = 0.017;ADTMfisher2_factor = 0.001;ps8 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps8;
+ADTMfisher2_N1 = 89;ADTMfisher2_AMAf = 0.083;ADTMfisher2_factor = 0.001;ps9 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps9;
+ADTMfisher2_N1 = 100;ADTMfisher2_AMAf = 0.015;ADTMfisher2_factor = 0.443;ps10 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps10;
+ADTMfisher2_N1 = 92;ADTMfisher2_AMAf = 0.304;ADTMfisher2_factor = 0.001;ps11 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps11;
+ADTMfisher2_N1 = 80;ADTMfisher2_AMAf = 0.03;ADTMfisher2_factor = 0.115;ps12 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps12;
+ADTMfisher2_N1 = 100;ADTMfisher2_AMAf = 0.013;ADTMfisher2_factor = 0.016;ps13 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps13;
+ADTMfisher2_N1 = 91;ADTMfisher2_AMAf = 0.278;ADTMfisher2_factor = 0.002;ps14 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps14;
+ADTMfisher2_N1 = 81;ADTMfisher2_AMAf = 0.069;ADTMfisher2_factor = 0.08;ps15 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps15;
+ADTMfisher2_N1 = 100;ADTMfisher2_AMAf = 0.056;ADTMfisher2_factor = 0.166;ps16 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps16;
+ADTMfisher2_N1 = 85;ADTMfisher2_AMAf = 0.042;ADTMfisher2_factor = 0.548;ps17 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps17;
+ADTMfisher2_N1 = 88;ADTMfisher2_AMAf = 0.091;ADTMfisher2_factor = 0.001;ps18 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps18;
+ADTMfisher2_N1 = 90;ADTMfisher2_AMAf = 0.382;ADTMfisher2_factor = 0.001;ps19 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps19;
+ADTMfisher2_N1 = 80;ADTMfisher2_AMAf = 0.245;ADTMfisher2_factor = 0.001;ps20 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps20;
+ADTMfisher2_N1 = 93;ADTMfisher2_AMAf = 0.312;ADTMfisher2_factor = 0.001;ps21 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps21;
+ADTMfisher2_N1 = 90;ADTMfisher2_AMAf = 0.377;ADTMfisher2_factor = 0.001;ps22 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps22;
+ADTMfisher2_N1 = 87;ADTMfisher2_AMAf = 0.212;ADTMfisher2_factor = 0.001;ps23 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps23;
+ADTMfisher2_N1 = 86;ADTMfisher2_AMAf = 0.215;ADTMfisher2_factor = 0.001;ps24 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps24;
+ADTMfisher2_N1 = 88;ADTMfisher2_AMAf = 0.134;ADTMfisher2_factor = 0.001;ps25 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps25;
+ADTMfisher2_N1 = 100;ADTMfisher2_AMAf = 0.189;ADTMfisher2_factor = 0.001;ps26 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps26;
+ADTMfisher2_N1 = 100;ADTMfisher2_AMAf = 0.405;ADTMfisher2_factor = 0.001;ps27 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps27;
+ADTMfisher2_N1 = 100;ADTMfisher2_AMAf = 0.403;ADTMfisher2_factor = 0.001;ps28 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps28;
+ADTMfisher2_N1 = 88;ADTMfisher2_AMAf = 0.197;ADTMfisher2_factor = 0.001;ps29 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps29;
+ADTMfisher2_N1 = 87;ADTMfisher2_AMAf = 0.005;ADTMfisher2_factor = 0.488;ps30 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps30;
+//30min_PF
+ADTMfisher2_N1 = 100;ADTMfisher2_AMAf = 0.068;ADTMfisher2_factor = 0.001;ps1 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps1;
+ADTMfisher2_N1 = 77;ADTMfisher2_AMAf = 0.029;ADTMfisher2_factor = 0.153;ps2 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps2;
+ADTMfisher2_N1 = 92;ADTMfisher2_AMAf = 0.304;ADTMfisher2_factor = 0.001;ps3 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps3;
+ADTMfisher2_N1 = 67;ADTMfisher2_AMAf = 0.009;ADTMfisher2_factor = 0.024;ps4 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps4;
+ADTMfisher2_N1 = 97;ADTMfisher2_AMAf = 0.012;ADTMfisher2_factor = 0.001;ps5 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps5;
+ADTMfisher2_N1 = 78;ADTMfisher2_AMAf = 0.125;ADTMfisher2_factor = 0.02;ps6 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps6;
+ADTMfisher2_N1 = 64;ADTMfisher2_AMAf = 0.011;ADTMfisher2_factor = 0.001;ps7 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps7;
+ADTMfisher2_N1 = 51;ADTMfisher2_AMAf = 0.037;ADTMfisher2_factor = 0.001;ps8 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps8;
+ADTMfisher2_N1 = 84;ADTMfisher2_AMAf = 0.065;ADTMfisher2_factor = 0.152;ps9 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps9;
+ADTMfisher2_N1 = 70;ADTMfisher2_AMAf = 0.096;ADTMfisher2_factor = 0.121;ps10 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps10;
+ADTMfisher2_N1 = 9;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.157;ps11 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps11;
+ADTMfisher2_N1 = 16;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.158;ps12 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps12;
+ADTMfisher2_N1 = 100;ADTMfisher2_AMAf = 0.55;ADTMfisher2_factor = 0.001;ps13 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps13;
+ADTMfisher2_N1 = 4;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.077;ps14 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps14;
+ADTMfisher2_N1 = 15;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.271;ps15 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps15;
+ADTMfisher2_N1 = 7;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.121;ps16 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps16;
+ADTMfisher2_N1 = 16;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.368;ps17 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps17;
+ADTMfisher2_N1 = 6;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.001;ps18 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps18;
+ADTMfisher2_N1 = 13;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.001;ps19 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps19;
+ADTMfisher2_N1 = 100;ADTMfisher2_AMAf = 0.642;ADTMfisher2_factor = 0.001;ps20 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps20;
+ADTMfisher2_N1 = 10;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.2;ps21 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps21;
+ADTMfisher2_N1 = 98;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.119;ps22 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps22;
+ADTMfisher2_N1 = 99;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.089;ps23 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps23;
+ADTMfisher2_N1 = 100;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.148;ps24 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps24;
+ADTMfisher2_N1 = 97;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.107;ps25 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps25;
+ADTMfisher2_N1 = 88;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.18;ps26 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps26;
+ADTMfisher2_N1 = 57;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.381;ps27 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps27;
+ADTMfisher2_N1 = 23;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.285;ps28 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps28;
+ADTMfisher2_N1 = 78;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.181;ps29 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps29;
+ADTMfisher2_N1 = 100;ADTMfisher2_AMAf = 0.001;ADTMfisher2_factor = 0.075;ps30 = getADTMfisher2(ADTMfisher2_N1,ADTMfisher2_AMAf,ADTMfisher2_factor);ps += ps30;
+
+
+ps_th = Param("ps_th", 45, 0, 100, 1);
+
+bsig=ps >= ps_th;
+ssig=ps <= -ps_th;
+
+bsig=ExRem(bsig,ssig);
+ssig=ExRem(ssig,bsig);
+
+psmerge=GetPs(bsig,ssig,0);
+ps_exit_th = ps_th * 0.66667;
+C01 = psmerge==1 AND ps <= ps_exit_th;
+C02 = psmerge==-1 AND ps >= -ps_exit_th;
+
+tp = 15; //Param("tp",15,0,100,1);
+Lstbsg = BarsSince(psmerge==1 AND Ref(psmerge,-1)!=1);
+Lstssg = BarsSince(psmerge==-1 AND Ref(psmerge,-1)!=-1);
+C03 = psmerge==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C04 = psmerge==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+//Csig=C01 OR C02 OR C03 OR C04;
+csig = C03 OR C04;
+//csig = C01 OR C02;
+
+
+Plotperformance(bsig,ssig,Csig);
+
+ps=GetPs(bsig,ssig,csig);
+
+SIG=ps;
+
+//ProfitDiff = Profit - Ref(Profit, -1);
+//GrossProfit = getGrossProfit(SIG);
+//GrossProfitDiff = GrossProfit - Ref(GrossProfit, -1);
+
+
+
+StrategyName = "5min-rb- 90_45 getADTMfisher2";StrategyID = "1010100009";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

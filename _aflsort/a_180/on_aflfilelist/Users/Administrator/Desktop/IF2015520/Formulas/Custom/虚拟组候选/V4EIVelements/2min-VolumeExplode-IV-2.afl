@@ -1,0 +1,77 @@
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "IF-2min-VolumeExplode-IV-2";
+StrategyID = 40982;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine);
+
+
+
+daystart = BarIndex()==0 OR Day()!=Ref(Day(),-1);
+kn = BarsSince(daystart)+1;
+
+vperiod = Param("vperiod",1,1,100,1);
+
+sv = Sum(V,vperiod)/vperiod;
+mv = MA(sign(C-O)*V,vperiod);
+
+nperiod = Param("nperiod",108,1,1000,1);
+isv = sv - Ref(sv,-vperiod);
+
+nisv = (isv-LLV(isv,nperiod))/(HHV(isv,nperiod)-LLV(isv,nperiod));
+
+nvtresh = Param("nvtresh",0.97,0,1,0.01);
+
+vexplode = nisv<Ref(nisv,-1) AND Ref(nisv,-1)>=nvtresh AND Ref(nisv,-1)>=Ref(nisv,-2);
+
+lstvexplode = BarsSince(vexplode);
+
+waitperiod = Param("waitperiod",5,1,30,1);
+
+hlperiod = Param("hlperiod",5,1,100,1);
+priceh = C==HHV(C,hlperiod);
+pricel = C==LLV(C,hlperiod);
+
+hturn = Ref(priceh,-1) AND NOT priceh;
+lturn = Ref(pricel,-1) AND NOT pricel;
+
+lsthturn = BarsSince(hturn);
+lstlturn = BarsSince(lturn);
+
+hprice = Ref(C,-lsthturn-1); 
+lprice = Ref(C,-lstlturn-1);
+
+//Plot(lprice,"hprice",colorRed);
+
+rank = Param("pt",60,0,100,1);
+
+range = abs(C-O);
+
+bsig = C>O AND range>Percentile(range,30,rank) AND lstvexplode<=waitperiod AND lstlturn<lsthturn;//C-lprice
+ssig = C<O AND range>Percentile(range,30,rank) AND lstvexplode<=waitperiod AND lstlturn>lsthturn;//hprice-C
+
+csig =  0;//TimeNum()==145800;
+
+NBars = Param("Nbars",10,0,100,1);
+Cond = getCSSLEveryNBars(BSIG,SSIG,csig,NBars);
+
+bsig = Cond>0;
+ssig = Cond<0;
+csig = Cond==0;
+
+    Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

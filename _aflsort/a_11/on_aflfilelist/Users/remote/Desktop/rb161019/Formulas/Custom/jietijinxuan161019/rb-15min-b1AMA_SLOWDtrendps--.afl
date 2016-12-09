@@ -1,0 +1,110 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+
+
+function PIR(p,Length)
+{
+Ll=LLV(p,Length);
+Hh=HHV(p,Length);
+return (100*(p-Ll)/(Hh-Ll));
+}
+
+
+
+b1AMA_tw=Param("b1AMA_timewinodw",55,1,1000,1);
+b1AMA_AMAf = Param("b1AMA_AMAf", 0.018, 0, 1.0, 0.001);
+b1AMA_factor = Param("b1AMA_factor", 0.018, 0, 1, 0.001);
+
+
+input=O;
+
+typ=AMA(input,b1AMA_AMAf);
+
+b1=( ( typ+2 * StDev( typ,b1AMA_tw ) - MA( typ,b1AMA_tw) ) / ( 4 * StDev( typ,b1AMA_tw ) ) ) ;
+
+
+Value1 = AMA(2*(b1), b1AMA_factor);
+Value2=(4*Value1+3*Ref(Value1,-1)+2*Ref(Value1,-2)+Ref(Value1,-3))/10;
+Value3=Value1;
+
+InverseFish=( ( exp( 2 * Value3 ) - 1 ) / ( exp( 2 * Value3 ) + 1 ) + 1 )*50;
+
+
+StoFR1=InverseFish ;
+
+Bsig=StoFR1>Ref(StoFR1,-1) AND Ref(StoFR1,-1)>Ref(StoFR1,-2);
+Ssig=StoFR1<Ref(StoFR1,-1) AND Ref(StoFR1,-1)<Ref(StoFR1,-2);
+
+
+ps = GetPs(bsig,ssig,0);
+
+ps1=ps;
+
+
+SLOWDtrend_N=Param("SLOWDtrend_N",6,1,100,1);
+SLOWDtrend_M1=Param("SLOWDtrend_M1",1,1,100,1);
+SLOWDtrend_M2=Param("SLOWDtrend_M2",1,1,100,1);
+SLOWDtrend_M3=Param("SLOWDtrend_M3",6,1,100,1);
+SLOWDtrend_Length=Param("SLOWDtrend_Length",80,10,1000,10);
+SLOWDtrend_Selltrigger=Param("SLOWDtrend_Selltrigger",5,1,100,1);
+
+
+
+function getSLOWDtrend(arrH,arrL,arrC,SLOWDtrend_N,SLOWDtrend_M1,SLOWDtrend_M2,SLOWDtrend_M3,SLOWDtrend_Length,SLOWDtrend_Selltrigger)
+{
+RSV=IIf((HHV(arrH,SLOWDtrend_N)-LLV(arrL,SLOWDtrend_N))==0,0,(arrC-LLV(arrL,SLOWDtrend_N))/(HHV(arrH,SLOWDtrend_N)-LLV(arrL,SLOWDtrend_N))*100);
+
+FASTK=EMA(RSV,SLOWDtrend_M1);
+
+K=EMA(FASTK,SLOWDtrend_M2);
+
+D=EMA(K,SLOWDtrend_M3);
+
+G3=D;
+
+PIRG3=PIR(G3,SLOWDtrend_Length);
+
+
+ssig=PIRG3<SLOWDtrend_Selltrigger;
+
+bsig=PIRG3>100-SLOWDtrend_Selltrigger;
+
+ps=GetPs(bsig,ssig,0);
+
+return ps;
+}
+
+ps=getSLOWDtrend(H,L,C,SLOWDtrend_N,SLOWDtrend_M1,SLOWDtrend_M2,SLOWDtrend_M3,SLOWDtrend_Length,SLOWDtrend_Selltrigger);
+
+ps2=ps;
+
+
+ps=ps1+ps2;
+
+bsig1=ps>=2;
+ssig1=ps<=-2;
+
+bsig=ExRem(bsig1,ssig1);
+ssig=ExRem(ssig1,bsig1);
+
+psmerge=GetPs(bsig,ssig,0);
+
+tp = Param("tp",15,0,100,1);
+
+Lstbsg = BarsSince(psmerge==1 AND Ref(psmerge,-1)!=1);
+Lstssg = BarsSince(psmerge==-1 AND Ref(psmerge,-1)!=-1);
+
+C01 = psmerge==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C02 = psmerge==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+Csig=C01 OR C02;
+
+Plotperformance(bsig,ssig,Csig);
+
+
+
+
+
+
+
+
+StrategyName = "rb-15min-b1AMA_SLOWDtrendps--";StrategyID = "1012100346";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

@@ -1,0 +1,84 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "45min-LUD4-45min-TF";
+StrategyID = 380013;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+function LUDFBreakNight(period,period2,TickerName)
+{//17mi 3,14 
+//14mi 4,17
+//15mi 3,15
+//13mi 3,19
+//12mi 4,20
+//10mi 5,24  good
+//11mi 4,22
+
+//rb 10mi 8,17
+	fo = O;	fh = H;	fl = L;	fc = C;	fv = V;	fopi = OpenInt;
+	TimeN =(TimeNum()+Interval()*100/60);
+	TIME=TimeNum();
+	FSTK=Day()!=Ref(Day(),-1);
+	KN=IIf(FSTK,1,BarsSince(FSTK)+1);
+ //------------------------------
+    up = fc>fo;
+    dn = fc<fo;
+//==============================================
+    RL = LLV(fl,period-1);
+    RH = HHV(fh,period-1);
+    FFH = Ref(fh,-KN+1); 
+    FFL = Ref(fl,-KN+1); 
+
+    b01 =   (fc+fo)/2>FFH ;//(FFH +FFL )/2;
+    S01 =  (fc+fo)/2<FFL ;//(FFH +FFL )/2;
+//=============================================
+  
+	bsig = (b01  AND KN==period) AND NOT S01 AND KN>1 ;
+	ssig = (S01  AND KN==period) AND NOT B01 AND KN>1 ;
+
+ //--------------------------   
+	CSIG = GetLastK(TickerName);
+	sinPs=getPS(BSIG,SSIG,CSIG);
+	Lstfc = BarsSince(bsig OR ssig );
+	Csig = Lstfc >period2;
+
+
+    Cond = getCSL(BSIG,SSIG,CSIG);
+
+	return Cond ;
+}
+
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 3 );
+OptimizerSetOption("MaxEval", 1000);
+
+TickerNAME = Name();
+
+n1= 16;
+
+//Cond=PLUDHNight(n1,TickerName);
+Cond = LUDFBreakNight(3,61,Name());
+
+Vote=0;
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond==0;
+
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+ps0 = GetPs(bsig,ssig,csig);
+Filter= 1;
+AddColumn(ps0,"ps");

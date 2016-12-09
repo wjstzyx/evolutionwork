@@ -1,0 +1,94 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "90min-LUD6-90min-TF";
+StrategyID = 380034;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+//#include "Formulas/IC_minute_shipan/LudChen.afl;
+
+function LUDWBNight(N1,N2,period,period2,Value,Value2,TickerName)
+{//15mi  3,1,3,15,24,50==
+//10mi 4,2,4,25,25,35  not better
+//12mi 4,3,4,20,30,30  
+//13mi 3,2,3,19,25,1000
+//14mi 3,2,3,17,33,15
+//21mi 2,1,2,13,1000,53
+	fo = O;	fh = H;	fl = L;	fc = C;	fv = V;	fopi = OpenInt;
+
+	FSTK=Day()!=Ref(Day(),-1);
+	LSTK=GetlastK(TickerName);
+	KN=BarsSince(FSTK)+1;
+
+	RecentH=HHV(fh,Min(N1,KN));
+	RecentL=LLV(fl,Min(N1,KN));
+	RecentWave=Ref(RecentH-RecentL,-1);
+	AverageRecentWave=MA(RecentWave,N2);
+
+	BG=fc-RecentL>AverageRecentWave AND KN==period;
+	SG=RecentH-fc>AverageRecentWave AND KN==period;
+
+	BSIG=BG AND NOT SG;
+	SSIG=SG AND NOT BG;
+
+    up = fc>fo;
+    dn = fc<fo;
+	Lstfc = BarsSince(bsig OR ssig );
+	Csig = Lstfc >period2;
+	//CSIG = GetLastK(TickerName);
+	sinPs=GetPs(BSIG,SSIG,CSIG);
+   Cup = CPPCount(up,KN );
+   Cdn = CPPCount(dn,KN );
+	Vv=Value ;
+   C01 = Cup/Cdn >Vv/10 AND Lstfc   >0  AND sinPs==-1;
+   C02 = Cdn/Cup >Vv/10 AND Lstfc   >0  AND sinPs==1;
+ //===============================
+     Openfc = Ref(fc,-Kn+1);
+     Closefc = Ref(fc,-Kn);
+     upR = abs( Openfc -Closefc )/Closefc >Value2/10000;
+ 
+     jumpup = Ref(fo,-KN+1)>Ref(fc,-KN) AND upR;
+     jumpdn = Ref(fo,-KN+1)<Ref(fc,-KN) AND upR ;
+
+     C03 =sinps==1 AND Ref(fo,-KN+1)<Ref(fc,-KN) AND upR ;
+     C04 =sinps==-1 AND Ref(fo,-KN+1)>Ref(fc,-KN) AND upR ;
+  //--------------------------  
+
+	CSIG=(Csig OR C01 OR C02)   AND NOT(C03) AND NOT(C04);
+
+
+return getCSL(BSIG,SSIG,CSIG);
+}
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 3 );
+OptimizerSetOption("MaxEval", 1000);
+
+TickerNAME = Name();
+
+n1= 16;
+
+//Cond=PLUDHNight(n1,TickerName);
+Cond = LUDWBNight(4,5,3,26,35,51,Name());
+
+Vote=0;
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond==0;
+
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+ps0 = GetPs(bsig,ssig,csig);
+Filter= 1;
+AddColumn(ps0,"ps");

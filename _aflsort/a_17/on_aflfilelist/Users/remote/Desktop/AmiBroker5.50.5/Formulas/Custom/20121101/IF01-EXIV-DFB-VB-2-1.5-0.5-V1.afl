@@ -1,0 +1,70 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/BasicV4/exiv.afl";
+#include "Formulas/Custom/BasicV4/DFB.afl";
+#include "Formulas/Custom/BasicV4/VB.afl";
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+StrategyName = "IF01-EXIV-DFB-VB-2-1.5-0.5-V1";
+StrategyID = 40218;
+ProType = 0;
+
+
+
+EXIV1=EXIVMA(50,69,11,0,"IF");
+EXIV2=EXIV(45,23,0,"IF");
+EXIV3=EXIVMA(22,93,1,0,"IF");
+EXIV4=EXIV(19,55,0,"IF");
+EXIV5=EXIVMA(17,48,4,0,"IF");
+EXIV6=EXIV(47,55,0,"IF");
+EXIV7=EXIV(24,52,0,"IF");
+EXIV8=EXIVMA(21,50,4,0,"IF");
+
+
+DFB1=DFBV2(64,115,88,"IF");
+DFB2=DFBV2(17,112,89,"IF");
+DFB3=DFBV2(15,112,90,"IF");
+DFB4=DFBV2(56,109,89,"IF");
+DFB5=DFBV2(64,100,88,"IF");
+DFB6=DFBV2(80,114,75,"IF");
+
+
+
+
+VB1=VolumeBreakV1(20,4,7,"IF");
+VB2=VolumeBreakV1(26,4,7,"IF");
+VB3=VolumeBreakV1(29,4,7,"IF");
+VB4=VolumeBreakV1(34,4,7,"IF");
+
+
+
+
+
+Cond_EXIV= (EXIV1+EXIV2+EXIV3+EXIV4+EXIV5+EXIV6+EXIV7+EXIV8)/8;
+Cond_DFB= (DFB1+DFB2+DFB3+DFB4+DFB5+DFB6)/6;
+cond_VB=(VB1+VB2+VB3+VB4)/4;
+
+w_EXIV= ParamOptimize("w_EXIV",2,0,4,0.5);
+w_DFB= ParamOptimize("w_DFB",1.5,0,4,0.5);
+w_VB= ParamOptimize("w_VB",0.5,0,4,0.5);
+
+
+Cond =  w_EXIV*cond_EXIV+w_DFB*cond_DFB+ w_VB*cond_VB;
+
+
+
+Vote=ParamOptimize("w_Vote",1,0,4,0.5);
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=GetLastK("IF");
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

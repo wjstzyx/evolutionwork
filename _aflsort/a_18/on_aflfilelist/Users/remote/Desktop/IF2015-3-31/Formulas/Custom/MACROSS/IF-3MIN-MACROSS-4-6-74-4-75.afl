@@ -1,0 +1,78 @@
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();
+StrategyName = "IF-3MIN-MACROSS-4-6-74-4-75-40693";
+StrategyID = 40693;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine);
+//------------------------para----------------------------------------
+num = ParamOptimize("num ",  4, 4,4,1);
+pts= ParamOptimize("pts", 6, 1, 20,1);
+period= ParamOptimize("period",74, 40, 200,1);
+x=ParamOptimize("x",4, 3, 6,1);
+pts2=ParamOptimize("pts2",75, 3, 100,1);
+//----------------------------------------------------------------------
+
+FSTK=Day()!=Ref(Day(),-1);
+KN=BarsSince(FSTK)+1;
+upline=H-Max(C,O);
+dnline=Min(C,O)-L;
+real=abs(C-O);
+up=C>O;
+dn=C<O;
+upv=IIf(C>O,V,0);
+dnv=IIf(C<O,V,0);
+MA5=MA(C,5);
+MA10=MA(C,10);
+MA20=MA(C,20);
+MA60=MA(C,60);
+RH=Max(C,O);
+RL=Min(C,O);
+
+Cond1=RH>MA5 AND RL<MA5;
+Cond2=RH>MA10 AND RL<MA10;
+Cond3=RH>MA20 AND RL<MA20;
+Cond4=RH>MA60 AND RL<MA60;
+
+Lstcond1=BarsSince(Cond1);
+Lstcond2=BarsSince(Cond2);
+Lstcond3=BarsSince(Cond3);
+Lstcond4=BarsSince(Cond4);
+
+
+sig1=Ref(Lstcond1>=1 AND Lstcond1<=num,-1) AND Cond1 AND Ref(Cond1,-num-1);
+sig2=Ref(Lstcond2>=1 AND Lstcond2<=num,-1) AND Cond2  AND Ref(Cond2,-num-1);
+sig3=Ref(Lstcond3>=1 AND Lstcond3<=num,-1) AND Cond3   AND Ref(Cond3,-num-1);
+sig4=Ref(Lstcond4>=1 AND Lstcond4<=num,-1) AND Cond4   AND Ref(Cond4,-num-1);
+
+sig=sig1 OR sig2 OR sig4 OR sig3;// OR sig2 ;//OR sig3;// OR sig4;
+
+sigtwo=abs(C-Ref(C,-num))<pts*C/20000;
+
+bsig =Ref((sig AND sigtwo),-1) AND up  AND L>Ref(L,-1) AND V>Ref(V,-1) AND C>MA20;
+ssig =Ref((sig AND sigtwo),-1) AND dn AND H<Ref(H,-1) AND V>Ref(V,-1) AND C<MA20;
+
+
+CSIG=0;
+Lstsig = BarsSince(bsig OR ssig);
+BPeriod= BarsSince(BSIG)<BarsSince(SSIG) AND BarsSince(BSIG)>0;
+SPeriod= BarsSince(SSIG)<BarsSince(BSIG) AND BarsSince(SSIG)>0;
+C01=bperiod AND up AND V==HHV(V,period);//Ref(V,-1)==HHV(V,period)
+C02=speriod AND  dn  AND V==HHV(V,period);//Ref(V,-1)==HHV(V,period)
+C03=speriod AND CPPCount(up,x)==x;
+C04=bperiod AND CPPCount(dn,x)==x;
+C05=speriod AND C-Ref(C,-10)>pts2*C/20000;
+C06=bperiod AND Ref(C,-10)-C>pts2*C/20000;
+
+Csig= c01 OR c02  OR C03 OR C04 OR C05 OR C06;//C01 OR C02 OR
+//-----------------------------------------------------------------------------------------------------------------------
+	Buy = bsig ;
+	Sell= CSIG;
+	Short = ssig ;
+	Cover = CSIG;
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

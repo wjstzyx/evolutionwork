@@ -1,0 +1,83 @@
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Basic2012/HL.afl";
+#include "Formulas/Custom/Basic2012/EXV.afl";
+#include "Formulas/Custom/Basic2012/TopBot.afl";
+#include "Formulas/Custom/Basic2012/VolumeBreak.afl";
+#include "Formulas/Custom/Basic2012/V7DY.afl";
+#include "Formulas/Custom/Basic2012/Cross.afl";
+
+StrategyName = "BalanceCrossRU02";
+StrategyID = 1061;
+ProType = 1;
+//EXV
+CondE1=EXVORI(28,41,"RU");
+CondE2=EXVORICU3(30,94,205,19,"RU");
+CondE3=EXVORIV2CU3(20,50,125,20,"RU");
+CondE4=EXVORIV3CU3(31,77,205,44,"RU");
+CondE5=EXVHH(20,145,18,54,"RU");
+CondE= CondE1 + CondE2 + CondE3 + CondE4 + CondE5;
+CondG1=GetSig123(CondE);
+//HL
+CondH1=HLAVG(13,3,27,"RU");
+CondH2=HLAVG(29,0,45,"RU");
+CondH3=HLCAVG(21,0,58,"RU");
+CondH4=HLCAVG(31,4,71,"RU");
+CondH5=HLNAVG(46,3,71,"RU");
+CondH6=HLNAVG(31,2,53,"RU");
+CondH7=HLAVGA(19,2,77,"RU");
+CondH8=HLNAVG2(35,5,42,"RU");
+CondH= CondH1 + CondH2 + CondH3 + CondH4 + CondH5 + CondH6 + CondH7 + CondH8;
+CondG2=GetSig123(CondH);
+//V7
+CondV1=V7DYMA(29,27,59,"RU");//G1
+CondV2=V7DYMAHLV(67,27,49,"RU");//G1
+CondG3=GetSig123(CondV1+CondV2);
+//CondV3=V7DYHL(141,59,"RU");
+CondG4=V7DYHLV2(137,57,"RU");//G3
+CondG5=V7DYLONGK(87,155,2,24,"RU");//G4
+
+CondG = CondG1 + CondG2 + CondG3 + CondG4 + CondG5;
+
+//Cross
+CondC1= KNCLROSSORIPro(16,13,0,1,1000,1000,"RU");
+CondC2= KNCLROSSORIPro_2(16,13,0,1,1000,1000,"RU");
+CondC3= KNCLROSSAVGHLTWOBETPro(15,20,0,2,1000,1000,1000,"RU");//92
+CondC3 = TimeSelect(2,270,CondC3);	
+CondC4= KNCLROSSAVGHLTWOBETPro(16,18,0,2,1000,1000,1000,"RU");//88
+CondC4 = TimeSelect(2,270,CondC4);	
+CondC5= KNCLROSSAVGHLTWOBETPro(18,15,1,2,1000,1000,1000,"RU");//88
+CondC5 = TimeSelect(4,270,CondC5);	
+CondCross= CondC1 + CondC2 + CondC3 + CondC4 + CondC5;
+
+
+Start = ParamOptimize("Start", 10, 0, 200, 1);
+CondCross= TimeSelect(Start,270,CondCross);	
+
+WCross = ParamOptimize("WCross", 1, 0, 3, 0.5);
+Cond = WCross*CondCross+CondG;
+
+/*
+WCStart = ParamOptimize("WCStart", 30, 0, 200, 1);
+CondC = TimeSelect(WCStart ,270,CondC);	
+
+WE = ParamOptimize("WE", 0.5, 0, 3, 0.5);
+WH = ParamOptimize("WH", 0.5, 0, 3, 0.5);
+WV = ParamOptimize("WV", 0.5, 0, 3, 0.5);
+
+Cond = WE*GetSig123(CondE) + WH*GetSig123(CondH) + WV*GetSig123(CondV) + WC*GetSig123(CondC);
+*/
+
+Vote= ParamOptimize("Vote", 0, 0, 10, 0.5);
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG1=Cond<=Vote && Cond>=-Vote;
+CSIG2=(TimeNum()+Interval()*100/60)>=146000;
+CSIG =CSIG2;
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

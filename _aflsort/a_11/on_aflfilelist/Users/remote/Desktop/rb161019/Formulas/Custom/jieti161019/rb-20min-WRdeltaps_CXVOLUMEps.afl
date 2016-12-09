@@ -1,0 +1,98 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+
+function PIR(p,Length)
+{
+Ll=LLV(p,Length);
+Hh=HHV(p,Length);
+return (100*(p-Ll)/(Hh-Ll));
+}
+
+
+
+WR_tw=Param("WR_tw",7,1,1000,1);
+
+WR_Length=Param("WR_Length",40,10,1000,10);
+WR_Selltrigger=Param("WR_Selltrigger",1,1,100,1);
+
+
+function getWR(arrH,arrC,arrL,WR_tw,WR_Length,WR_Selltrigger)
+{
+G31=-( HHV( arrH, WR_tw ) - arrC )/( HHV( arrH,WR_tw ) - LLV( arrL, WR_tw ) );
+G3=G31-Ref(G31,-1);
+
+PIRG3=PIR(G3,WR_Length);
+
+ssig=PIRG3<WR_Selltrigger;
+bsig=PIRG3>100-WR_Selltrigger;
+
+
+ps=GetPs(bsig,ssig,0);
+
+return ps;
+}
+
+ps=getWR(H,C,L,WR_tw,WR_Length,WR_Selltrigger);
+ps1=ps;
+
+
+CXVOLUME_period=Param("CXVOLUME_period",16,6,40,1);
+
+function getCXVOLUME(arrHigh,arrLow,arrV,CXVOLUME_period)
+{
+PlusDM= IIf(arrHigh>Ref(arrHigh,-1) AND arrLow>=Ref(arrLow,-1), arrHigh-Ref(arrHigh,-1),
+                 IIf(arrHigh>Ref(arrHigh,-1) AND arrLow<Ref(arrLow,-1)
+                 AND arrHigh-Ref(arrHigh,-1)>Ref(arrLow,-1)-arrLow,
+                arrHigh-Ref(arrHigh,-1),0));
+
+Vm=log(EMA(arrV,CXVOLUME_period));
+
+Buypower=PlusDM*Vm;
+
+MinDM = IIf(arrLow<Ref(arrLow,-1)   AND  arrHigh<=Ref(arrHigh,-1), Ref(arrLow,-1)-arrLow,
+               IIf(arrHigh>Ref(arrHigh,-1) AND arrLow<Ref(arrLow,-1)
+               AND arrHigh-Ref(arrHigh,-1)<Ref(arrLow,-1)-arrLow, Ref(arrLow,-1)-arrLow, 0));
+
+Sellpower=MinDM*Vm;
+
+Wm=Wilders(Wilders(Buypower,CXVOLUME_period)-Wilders(Sellpower,CXVOLUME_period),CXVOLUME_period);
+
+Bsig=Cross(Wm,0);
+Ssig=Cross(0,Wm);
+
+ps = GetPs(bsig,ssig,0);
+
+return ps;
+}
+
+ps=getCXVOLUME(High,Low,V,CXVOLUME_period);
+ps2=ps;
+
+
+ps=ps1+ps2;
+
+bsig1=ps>=2;
+ssig1=ps<=-2;
+
+bsig=ExRem(bsig1,ssig1);
+ssig=ExRem(ssig1,bsig1);
+
+psmerge=GetPs(bsig,ssig,0);
+
+tp = Param("tp",15,0,100,1);
+
+Lstbsg = BarsSince(psmerge==1 AND Ref(psmerge,-1)!=1);
+Lstssg = BarsSince(psmerge==-1 AND Ref(psmerge,-1)!=-1);
+
+C01 = psmerge==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C02 = psmerge==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+Csig=C01 OR C02;
+
+
+Plotperformance(bsig,ssig,Csig);
+
+
+
+
+
+StrategyName = "rb-20min-WRdeltaps_CXVOLUMEps";StrategyID = "1012100314";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

@@ -1,0 +1,61 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "30min-LRC-trend-PP";
+StrategyID =310164;
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+
+
+SetBarsRequired(-2,-2);
+
+period = paramoptimize("period",72,1,100,1);
+period2 = paramoptimize("period2",5,1,100,1);
+r = paramoptimize("r",1.0,0,5,0.1);
+
+LRC0 = LinearReg(C,period);
+
+up = LRC0 + r*ATR(period2);
+dn = LRC0 - r*ATR(period2);
+
+bsig = Cross(C,up);
+ssig = Cross(dn,C);
+
+Holdperiod=Paramoptimize("Holdperiod",35,1,100,1);
+
+ps = GetPs(bsig,ssig,0);
+
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+C01 = ps==1 AND Lstbsg>=Holdperiod AND C<Ref(C,-Lstbsg);//AND C<Ref(C,-Holdperiod);//
+C02 = ps==-1 AND lstssg>=holdperiod AND C>Ref(C,-lstssg);//AND C>Ref(C,-Holdperiod);//
+
+p = Paramoptimize("p",35,0,100,2);
+C03 = ps==1 AND  C<Ref(C,-Lstbsg)-p;
+C04 = ps==-1 AND  C>Ref(C,-lstssg)+p;
+
+tp = Paramoptimize("tp",12,0,50,1);
+
+C05 = ps==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C06 = ps==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+CSIG = C01 OR C02 OR C03 OR C04 OR C05 OR C06;
+
+
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+//RIPAM 
+//Trading_night_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+//YEPAN

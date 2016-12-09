@@ -1,0 +1,162 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "45min-VZ+KD-45MIN-TF";
+StrategyID = 380022;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+k=Param("WaitK",7,1,10,1);
+thres = Param("thres",37,0,100,1);
+Vr=Param("Vr",1.15,0,2,0.01);
+lowlev = Param("lowlev",32,0,100,1);
+uplev = Param("uplev",3,0,100,1);
+
+t1 = Param("t1",93000,91500,151500,100);
+t2 = Param("t2",103000,91500,151500,100);
+t3 = Param("t3",133000,91500,151500,100);
+t4 = Param("t4",144500,91500,151500,100);
+function Supersmoother(array) 
+{ 
+	PI = 3.1415926 ; 
+	SQ2 = sqrt( 2 ); 
+    a1 = exp( -SQ2 * PI /10); 
+    b1 = 2 * a1 * cos( SQ2 * PI / 10); 
+    c2 = b1; 
+    c3 = -a1 * a1; 
+    c1 = 1 - c2 - c3; 
+
+    Filt = Nz( array ); 
+
+    for ( i = 2; i < BarCount; i++ ) 
+    { 
+         Filt[ i ] = c1 * ( array[ i ] + array[ i - 1 ] ) / 2 + 
+                     c2 * Filt[ i - 1 ] + 
+                     c3 * Filt[ i - 2]; 
+    } 
+
+    return Filt; 
+} 
+
+function Rooffilter( array ) 
+{
+	sq05=sqrt(0.5);
+	pi=3.1415926;
+	alpha1=(cos(sq05*pi/48)+sin(sq05*pi/48)-1)/cos(sq05*pi/48);
+	Hp=array;
+ 	for ( i =2 ; i < BarCount; i++ ) 
+    { 
+	HP[ i ] = ( ( 1 - alpha1 / 2 ) ^ 2 ) * 
+	( Close[ i ] - 2 * Close[ i -1 ] + Close[ i - 2 ] ) + 
+	  2 * ( 1 - alpha1 ) * HP[ i - 1 ] - 
+	HP[ i -2 ] * ( 1 - alpha1 ) ^ 2; 
+ } 
+	return Hp;
+}
+
+Hpfilt=rooffilter(C);
+smfilt=supersmoother(HPfilt);
+Highestc=HHV(smfilt,10);
+Lowestc=LLV(smfilt,10);
+
+function getstoc(){
+for (i=2; i<BarCount;i++)
+{
+	PI = 3.1415926 ; 
+	SQ2 = sqrt( 2 ); 
+    a1 = exp( -SQ2 * PI /10); 
+    b1 = 2 * a1 * cos( SQ2 * PI / 10); 
+    c2 = b1; 
+    c3 = -a1 * a1; 
+    c1 = 1 - c2 - c3; 
+
+stoc[i]=(smfilt[i]-Lowestc[i])/(Highestc[i]-Lowestc[i]);
+}
+return stoc;
+}
+
+Ostoc=getstoc();
+newstoc=Supersmoother(Ostoc);
+realostoc=100*Ostoc;
+realnewstoc=100*newstoc;
+
+
+
+
+function VZO( ) 
+{ 
+ R = sign( Close - Ref( Close, -1 ) ) * V; 
+ VP = SuperSmoother( R); 
+ TV = SuperSmoother( V); 
+ return Nz( 100 * VP / TV ); 
+} 
+
+
+vz = VZO();
+
+bsig1 = Cross(vz,thres);
+ssig1 = Cross(-thres,vz);
+
+bsig2= BarsSince(Cross(lowlev,realnewstoc))<=k AND  bsig1 ;
+ssig2= BarsSince(Cross(realnewstoc,uplev))<=k AND  ssig1 ;
+
+
+
+Time = (TimeNum()>=t1 AND TimeNum()<=t2) OR (TimeNum()>=t3 AND TimeNum()<=t4);
+
+bsig3=bsig2 AND time ;// 
+ssig3=ssig2 AND time ;// 
+
+bsig= bsig3 ;
+ssig= ssig3;
+
+Csig=TimeNum()>151300;
+ps=GetPs(bsig3,ssig3,Csig);
+tp= (HHV(C,60)-LLV(C,60))*Vr;
+
+C1=0;
+csig=C1;
+sinps=GetPs(bsig,ssig,Csig);
+ready=0;
+Hstps=0;
+
+for (a=1;a<BarCount;a++)
+{
+if( ready==0 AND sinps[a-1]!=1 AND bsig[a]==1)
+{
+atemp=a;
+ready=1;
+sinps=GetPs(bsig,ssig,Csig);
+Hstps=C[a];
+}
+if(sinps[a]==1 AND ready==1)
+{
+if(C[a]>Hstps)
+{Hstps=C[a];}
+if( Hstps-C[a]>= tp[a])
+{
+C1[a]=1;
+Csig=C1 OR TimeNum()>151300;
+sinps=GetPs(bsig,ssig,Csig);
+atemp=0;
+ready=0;
+Hstps=0;
+}
+}
+}
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+
+ps0 = GetPs(bsig,ssig,csig);
+Filter= 1;
+AddColumn(ps0,"ps");

@@ -1,0 +1,84 @@
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+
+StrategyName = "Volume EXV";
+StrategyID = 100400;
+
+TIME=Hour()*10000+Minute()*100;
+FSTK=Day()!=Ref(Day(),-1);
+LSTK=TIME>=145500;
+
+KN=IIf(FSTK,1,BarsSince(FSTK)+1);
+PTS2=0;
+MA1=MA(Close,5);
+MA2=MA(Close,10);
+MA3=MA(Close,20);
+UPMA=MA1>MA2 && MA2>MA3;
+DNMA=MA1<MA2 && MA2<MA3;
+MAV=MA(Volume,90);
+EXVTX=110*2;
+PTS2X=PTS2;
+EXV=(Volume/MAV*100>EXVTX) && Volume>=HHV(Volume,5) && Volume/Ref(Volume,-1)>150/100;
+EXVUP=EXV && Close>Ref(Open,-1);
+EXVDN=EXV && Close<Ref(Open,-1);
+
+LSTEXV=IIf(EXV,0,BarsSince(EXV));
+PRICE1=IIf(Ref(EXVUP,-LSTEXV),High,0);
+PRICE2=IIf(Ref(EXVDN,-LSTEXV),Low, 0);
+PRICE=PRICE1+PRICE2;
+LSTEXVP=Ref(PRICE,-LSTEXV);
+BSIG1=EXV && Close<Ref(Open,-1);
+SSIG1=EXV && Close>Ref(Open,-1);
+P=40*0.2/20000*Close;
+BSIG2=NOT(EXV) && Close>LSTEXVP+P && LSTEXV<KN;
+SSIG2=NOT(EXV) && Close<LSTEXVP-P && LSTEXV<KN;
+BG=BSIG1 || BSIG2;
+SG=SSIG1 || SSIG2;
+BGX=(BSIG1 || BSIG2) && (FSTK || NOT(DNMA));
+SGX=(SSIG1 || SSIG2) && (FSTK || NOT(UPMA));
+//HLAVG
+TIMEN=7;
+THR=9;
+CSIGAA=LSTK;
+LSTCSIGAA=BarsSince(CSIGAA);
+VMA=MA(Volume,135);
+VSIG=Ref(Volume,-1)<Volume&& Ref(Volume,-1)<Ref(Volume,-2)&& Ref(Volume,-1)<THR/10*VMA;
+BSIG4=Ref(VSIG,-TIMEN) && Close>Ref(Close,-TIMEN+1) && Day()==Ref(Day(),-6);
+SSIG4=Ref(VSIG,-TIMEN) && Close<Ref(Close,-TIMEN+1) && Day()==Ref(Day(),-6);
+LSTBSIG4=BarsSince(BSIG4);
+LSTSSIG4=BarsSince(SSIG4);
+CONDBB=(BSIG4 || (LSTBSIG4<LSTSSIG4 && LSTBSIG4<LSTCSIGAA)) && NOT(SSIG4) && NOT(CSIGAA);
+CONDSB=(SSIG4 || (LSTSSIG4<LSTBSIG4 && LSTSSIG4<LSTCSIGAA)) && NOT(BSIG4) && NOT(CSIGAA);
+CONDCB=NOT(CONDBB) && NOT(CONDSB);
+BSIGA=BG && NOT(SG);
+SSIGA=SG && NOT(BG);
+//Volumeume
+LSTBSIGA=BarsSince(BSIGA);
+LSTSSIGA=BarsSince(SSIGA);
+CONDBA=(BSIGA || (LSTBSIGA<LSTSSIGA && LSTBSIGA<LSTCSIGAA)) && NOT(SSIGA) && NOT(CSIGAA);
+CONDSA=(SSIGA || (LSTSSIGA<LSTBSIGA && LSTSSIGA<LSTCSIGAA)) && NOT(BSIGA) && NOT(CSIGAA);
+CONDCA=NOT(CONDBA) && NOT(CONDSA);
+CONDBC=(CONDBA && CONDBB) || (CONDBA && CONDCB) || (CONDBB && CONDCA);
+CONDSC=(CONDSA && CONDSB) || (CONDSA && CONDCB) || (CONDSB && CONDCA);
+CONDCC=NOT(CONDBC) && NOT(CONDSC);
+BSIG=CONDBC;
+SSIG=CONDSC;
+CSIG=CSIGAA;
+LSTBSIG=BarsSince(BSIG);
+LSTSSIG=BarsSince(SSIG);
+LSTCSIG=BarsSince(CSIG);
+CONDB=(BSIG || (LSTBSIG<LSTSSIG && LSTBSIG<LSTCSIG)) && NOT (SSIG) && NOT(CSIG);
+CONDS=(SSIG || (LSTSSIG<LSTBSIG && LSTSSIG<LSTCSIG)) && NOT (BSIG) && NOT(CSIG);
+CONDC=NOT(CONDB) && NOT(CONDS);
+
+BSIG=CONDB;
+SSIG=CONDS;
+CSIG=CONDC;
+
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+PlotPerformance(sinPs,sinBS,StrategyName);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName);

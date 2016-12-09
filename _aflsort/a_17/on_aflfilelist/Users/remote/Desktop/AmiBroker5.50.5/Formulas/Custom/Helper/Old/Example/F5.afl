@@ -1,0 +1,21 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+
+StrategyName = "F5";
+StrategyID = 1007;
+Plot(0,StrategyName,colorBlack);
+
+TIMEX=ParamOptimize("TIMEX",20,1,200,1);//24--26
+EXIT=ParamOptimize("EXIT",1,1,6,1);//24--26
+
+TIME=TimeNum();
+LSTBAR=TIME>=145500;
+BSIG=LSTBAR && Close<Ref(Close,-TIMEX);
+SSIG=LSTBAR && Close>Ref(Close,-TIMEX);
+CSIG=BarsSince(BSIG)==EXIT OR BarsSince(SSIG)==EXIT;
+
+Buy = BSIG;
+Short = SSIG;
+Sell= Cover = CSIG;
+
+PlotPerformance(BSIG,SSIG,CSIG);
+//Trading(stid,StrategyName,BSIG,CSIG);

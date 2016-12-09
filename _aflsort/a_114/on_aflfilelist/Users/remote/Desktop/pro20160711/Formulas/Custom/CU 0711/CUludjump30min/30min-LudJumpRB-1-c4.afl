@@ -1,0 +1,31 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+ #include "Formulas/Custom/BasicV4/pud.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "30min-LudJumpRB-1-c4";
+StrategyID ="1010500029";
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+ 
+para1 = Paramoptimize("para1",4,1,50,1);
+para2 = Paramoptimize("para2",8,1,50,1);
+
+ Cond= LudJumpRB(para1,para2,TickerName);
+ 
+ Vote=0;
+ BSIG=Cond>Vote;
+ SSIG=Cond<-Vote;
+ CSIG=Cond==0 ;
+ 
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+

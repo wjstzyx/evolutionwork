@@ -1,0 +1,38 @@
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "IF-1MIN-YBSVCORI-25-8";
+StrategyID = 40723;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+ppp = Param("ppp",25,1,27000,1);
+period = Param("period",8,1,27000,1);
+
+daystart = BarIndex() == 0 OR DateNum() != Ref(DateNum(), -1);
+kn = BarsSince(daystart);
+
+fc = Foreign(Name(),"C");
+fv = Foreign(Name(),"V");
+fo = Foreign(Name(),"O");
+fh = Foreign(Name(),"H");
+fl = Foreign(Name(),"L");
+
+xx = Sum(fv * fc,kn)/Sum(fv,kn);
+
+sc = Cross(fc,xx);
+xc = Cross(xx,fc);
+
+ps = GetPs(sc,xc,0);
+
+bsig = ps == 1 AND fc == LLV(fc,period) AND kn >= ppp;
+ssig = ps == -1 AND fc == HHV(fc,period)  AND kn >= ppp;
+
+
+Csig = TimeNum() > 151300;
+
+Plotperformance(bsig,ssig,Csig);

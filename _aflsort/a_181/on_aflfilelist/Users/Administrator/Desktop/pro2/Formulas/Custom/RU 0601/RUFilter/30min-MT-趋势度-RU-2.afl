@@ -1,0 +1,68 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "30min-MT-?¡Â¨º??¨¨-RU-2";
+StrategyID =10227;
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+function VolSlice(value, window_size, window_number) {
+	winvol = HHV(value, window_size) - LLV(value, window_size);
+	res = EMA(winvol, window_size * window_number);
+	return res;
+}
+
+
+
+SetBarsRequired(-2,-2);
+
+
+//Parameters Setting
+P1=Param("P1",44,1,100,1);
+P2=Param("P2",37,1,100,1);
+P3=Param("P3",1,1,100,1);
+ADXth=Param("ADXth",14,1,40,1);
+Tth=Param("TTh",0.8,0,5,0.1);
+TCover=Param("Tcover",1.8,-3,3,0.1);
+
+
+
+//Main
+RP1=ROC(C,P1);
+RP2=ROC(C,P2);
+RP3=ROC(C,P3);
+RSUM=RP1+RP2+RP3;
+
+tperiod = ParamOptimize("tperiod",20,20,10000,20);
+smaperiod = ParamOptimize("smaperiod",10,10,1000,10);
+lmaperiod = ParamOptimize("lmaperiod",10,10,10000,10);
+hlperiod=Param("hlperiod",70,0,3000,10);
+
+trendratio = IIf(abs(C-Ref(C,-tperiod))>10,Sum(abs(C-Ref(C,-1)),tperiod)/abs(C-Ref(C,-tperiod)),100);
+trendratio = Min(trendratio,100);
+
+stratio = EMA(trendratio,smaperiod);
+ltratio = EMA(stratio,lmaperiod);
+
+bsig= Rsum>Tth AND ADX(14)>=ADXth AND stratio<ltratio AND C>=HHV(C,hlperiod);//
+ssig= Rsum<-Tth AND ADX(14)>=ADXth AND stratio<ltratio AND C<=LLV(C,hlperiod);// 
+
+ps=GetPs(bsig,ssig,0);
+C01= ps==1  AND Rsum<-TCover;
+C02= ps==-1 AND Rsum>Tcover;
+
+csig = c01 OR c02;
+      
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+//RIPAM 
+//Trading_night_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

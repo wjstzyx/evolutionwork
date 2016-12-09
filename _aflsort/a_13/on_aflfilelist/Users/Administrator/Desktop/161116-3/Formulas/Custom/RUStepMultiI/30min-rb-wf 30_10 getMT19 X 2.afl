@@ -1,0 +1,162 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+
+
+
+function PIR(p,Length)
+{
+Ll=LLV(p,Length);
+Hh=HHV(p,Length);
+return (100*(p-Ll)/(Hh-Ll));
+}
+
+function TP15(bsig, ssig, ps0)
+{
+tp = 15; //Param("tp",15,0,100,1);
+Lstbsg = BarsSince(ps0==1 AND Ref(ps0,-1)!=1);
+Lstssg = BarsSince(ps0==-1 AND Ref(ps0,-1)!=-1);
+C01 = ps0==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C02 = ps0==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+Csig=C01 OR C02;
+ps = GetPs(bsig, ssig, csig);
+return ps;
+}
+
+
+
+
+
+
+
+
+MT_P1=1; //Paramoptimize("MT_P1",16,1,100,1);
+
+MT_P2=1; //Paramoptimize("MT_P2",38,1,100,1);
+
+MT_P3=1; //Paramoptimize("MT_P3",63,1,100,1);
+
+MT_ADXth=1; //Paramoptimize("MT_ADXth",14,1,40,1);
+
+MT_Tth=1; //Paramoptimize("MT_TTh",0.8,0.1,5,0.1);
+
+
+
+function getMT(P1,P2,P3,ADXth,Tth)
+
+{
+
+RP1=ROC(C,P1);
+
+RP2=ROC(C,P2);
+
+RP3=ROC(C,P3);
+
+RSUM=RP1+RP2+RP3;
+
+
+
+bsig=Cross(Rsum,Tth) AND ADX(14)>=ADXth;
+
+ssig=Cross(-Tth,Rsum) AND ADX(14)>=ADXth;
+
+
+
+ps=GetPs(bsig,ssig,0);
+
+
+
+
+//add exrem
+bsig=ExRem(bsig,ssig);
+ssig=ExRem(ssig,bsig);
+ps=GetPs(bsig,ssig,0);
+
+//add_tp15ps_exp
+ps = TP15(bsig, ssig, ps);
+return ps;
+
+
+
+
+
+}
+
+
+
+ps=getMT(MT_P1,MT_P2,MT_P3,MT_ADXth,MT_Tth);
+
+
+//In-Sample Date Range:2013/10/01 to 2016/09/30
+//Out-Sample Date Range:2016/10/01 to 2016/12/30
+ps = 0;
+//30min_MDD
+MT_P1 = 32;MT_P2 = 70;MT_P3 = 47;MT_ADXth = 10;MT_TTh = 1.6;ps1 = getMT(MT_P1,MT_P2,MT_P3,MT_ADXth,MT_TTh);ps += ps1;
+MT_P1 = 19;MT_P2 = 47;MT_P3 = 28;MT_ADXth = 10;MT_TTh = 0.4;ps2 = getMT(MT_P1,MT_P2,MT_P3,MT_ADXth,MT_TTh);ps += ps2;
+MT_P1 = 39;MT_P2 = 99;MT_P3 = 68;MT_ADXth = 11;MT_TTh = 1.4;ps3 = getMT(MT_P1,MT_P2,MT_P3,MT_ADXth,MT_TTh);ps += ps3;
+MT_P1 = 7;MT_P2 = 59;MT_P3 = 35;MT_ADXth = 20;MT_TTh = 3.3;ps4 = getMT(MT_P1,MT_P2,MT_P3,MT_ADXth,MT_TTh);ps += ps4;
+MT_P1 = 1;MT_P2 = 51;MT_P3 = 76;MT_ADXth = 1;MT_TTh = 1.9;ps5 = getMT(MT_P1,MT_P2,MT_P3,MT_ADXth,MT_TTh);ps += ps5;
+MT_P1 = 80;MT_P2 = 83;MT_P3 = 59;MT_ADXth = 11;MT_TTh = 1.9;ps6 = getMT(MT_P1,MT_P2,MT_P3,MT_ADXth,MT_TTh);ps += ps6;
+MT_P1 = 80;MT_P2 = 82;MT_P3 = 59;MT_ADXth = 11;MT_TTh = 1.8;ps7 = getMT(MT_P1,MT_P2,MT_P3,MT_ADXth,MT_TTh);ps += ps7;
+MT_P1 = 1;MT_P2 = 100;MT_P3 = 100;MT_ADXth = 1;MT_TTh = 0.1;ps8 = getMT(MT_P1,MT_P2,MT_P3,MT_ADXth,MT_TTh);ps += ps8;
+MT_P1 = 62;MT_P2 = 79;MT_P3 = 56;MT_ADXth = 11;MT_TTh = 1.8;ps9 = getMT(MT_P1,MT_P2,MT_P3,MT_ADXth,MT_TTh);ps += ps9;
+MT_P1 = 57;MT_P2 = 91;MT_P3 = 33;MT_ADXth = 12;MT_TTh = 2.5;ps10 = getMT(MT_P1,MT_P2,MT_P3,MT_ADXth,MT_TTh);ps += ps10;
+//30min_NP
+MT_P1 = 38;MT_P2 = 27;MT_P3 = 22;MT_ADXth = 1;MT_TTh = 0.4;ps1 = getMT(MT_P1,MT_P2,MT_P3,MT_ADXth,MT_TTh);ps += ps1;
+MT_P1 = 38;MT_P2 = 27;MT_P3 = 19;MT_ADXth = 1;MT_TTh = 0.4;ps2 = getMT(MT_P1,MT_P2,MT_P3,MT_ADXth,MT_TTh);ps += ps2;
+MT_P1 = 34;MT_P2 = 28;MT_P3 = 2;MT_ADXth = 1;MT_TTh = 0.4;ps3 = getMT(MT_P1,MT_P2,MT_P3,MT_ADXth,MT_TTh);ps += ps3;
+MT_P1 = 14;MT_P2 = 52;MT_P3 = 39;MT_ADXth = 5;MT_TTh = 0.7;ps4 = getMT(MT_P1,MT_P2,MT_P3,MT_ADXth,MT_TTh);ps += ps4;
+MT_P1 = 34;MT_P2 = 27;MT_P3 = 76;MT_ADXth = 5;MT_TTh = 0.5;ps5 = getMT(MT_P1,MT_P2,MT_P3,MT_ADXth,MT_TTh);ps += ps5;
+MT_P1 = 32;MT_P2 = 57;MT_P3 = 8;MT_ADXth = 3;MT_TTh = 0.2;ps6 = getMT(MT_P1,MT_P2,MT_P3,MT_ADXth,MT_TTh);ps += ps6;
+MT_P1 = 32;MT_P2 = 53;MT_P3 = 8;MT_ADXth = 3;MT_TTh = 0.1;ps7 = getMT(MT_P1,MT_P2,MT_P3,MT_ADXth,MT_TTh);ps += ps7;
+MT_P1 = 21;MT_P2 = 58;MT_P3 = 14;MT_ADXth = 14;MT_TTh = 2.1;ps8 = getMT(MT_P1,MT_P2,MT_P3,MT_ADXth,MT_TTh);ps += ps8;
+MT_P1 = 20;MT_P2 = 79;MT_P3 = 14;MT_ADXth = 5;MT_TTh = 0.1;ps9 = getMT(MT_P1,MT_P2,MT_P3,MT_ADXth,MT_TTh);ps += ps9;
+MT_P1 = 32;MT_P2 = 30;MT_P3 = 1;MT_ADXth = 1;MT_TTh = 0.4;ps10 = getMT(MT_P1,MT_P2,MT_P3,MT_ADXth,MT_TTh);ps += ps10;
+//30min_PF
+MT_P1 = 25;MT_P2 = 13;MT_P3 = 37;MT_ADXth = 27;MT_TTh = 3.0;ps1 = getMT(MT_P1,MT_P2,MT_P3,MT_ADXth,MT_TTh);ps += ps1;
+MT_P1 = 27;MT_P2 = 1;MT_P3 = 11;MT_ADXth = 17;MT_TTh = 0.1;ps2 = getMT(MT_P1,MT_P2,MT_P3,MT_ADXth,MT_TTh);ps += ps2;
+MT_P1 = 24;MT_P2 = 23;MT_P3 = 38;MT_ADXth = 19;MT_TTh = 3.0;ps3 = getMT(MT_P1,MT_P2,MT_P3,MT_ADXth,MT_TTh);ps += ps3;
+MT_P1 = 29;MT_P2 = 19;MT_P3 = 1;MT_ADXth = 15;MT_TTh = 2.6;ps4 = getMT(MT_P1,MT_P2,MT_P3,MT_ADXth,MT_TTh);ps += ps4;
+MT_P1 = 22;MT_P2 = 15;MT_P3 = 29;MT_ADXth = 27;MT_TTh = 3.4;ps5 = getMT(MT_P1,MT_P2,MT_P3,MT_ADXth,MT_TTh);ps += ps5;
+MT_P1 = 23;MT_P2 = 46;MT_P3 = 30;MT_ADXth = 15;MT_TTh = 2.5;ps6 = getMT(MT_P1,MT_P2,MT_P3,MT_ADXth,MT_TTh);ps += ps6;
+MT_P1 = 74;MT_P2 = 63;MT_P3 = 73;MT_ADXth = 7;MT_TTh = 2.3;ps7 = getMT(MT_P1,MT_P2,MT_P3,MT_ADXth,MT_TTh);ps += ps7;
+MT_P1 = 26;MT_P2 = 37;MT_P3 = 10;MT_ADXth = 27;MT_TTh = 2.6;ps8 = getMT(MT_P1,MT_P2,MT_P3,MT_ADXth,MT_TTh);ps += ps8;
+MT_P1 = 26;MT_P2 = 13;MT_P3 = 38;MT_ADXth = 27;MT_TTh = 2.1;ps9 = getMT(MT_P1,MT_P2,MT_P3,MT_ADXth,MT_TTh);ps += ps9;
+MT_P1 = 24;MT_P2 = 34;MT_P3 = 40;MT_ADXth = 18;MT_TTh = 2.7;ps10 = getMT(MT_P1,MT_P2,MT_P3,MT_ADXth,MT_TTh);ps += ps10;
+
+
+ps_th = Param("ps_th", 10, 0, 100, 1);
+
+bsig=ps >= ps_th;
+ssig=ps <= -ps_th;
+
+bsig=ExRem(bsig,ssig);
+ssig=ExRem(ssig,bsig);
+
+psmerge=GetPs(bsig,ssig,0);
+ps_exit_th = ps_th * 0.66667;
+C01 = psmerge==1 AND ps <= ps_exit_th;
+C02 = psmerge==-1 AND ps >= -ps_exit_th;
+
+tp = 15; //Param("tp",15,0,100,1);
+Lstbsg = BarsSince(psmerge==1 AND Ref(psmerge,-1)!=1);
+Lstssg = BarsSince(psmerge==-1 AND Ref(psmerge,-1)!=-1);
+C03 = psmerge==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C04 = psmerge==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+//Csig=C01 OR C02 OR C03 OR C04;
+csig = C03 OR C04;
+//csig = C01 OR C02;
+
+
+Plotperformance(bsig,ssig,Csig);
+
+ps=GetPs(bsig,ssig,csig);
+
+SIG=ps;
+
+//ProfitDiff = Profit - Ref(Profit, -1);
+//GrossProfit = getGrossProfit(SIG);
+//GrossProfitDiff = GrossProfit - Ref(GrossProfit, -1);
+
+
+
+StrategyName = "30min-rb-wf 30_10 getMT19 X 2";StrategyID = "1010100008";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

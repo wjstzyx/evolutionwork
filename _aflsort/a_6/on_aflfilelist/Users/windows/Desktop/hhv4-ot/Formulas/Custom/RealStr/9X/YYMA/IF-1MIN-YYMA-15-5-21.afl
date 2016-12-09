@@ -1,0 +1,90 @@
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "IF-1MIN-YYMA-15-5-21";
+StrategyID = 40759;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+//------------------------para----------------------------------------             
+
+//time = ParamOptimize("time ",  6, 1,100,1);            
+period= ParamOptimize("period", 15, 0, 200,1);            
+num=ParamOptimize("num",5, 1, 200,1); //81
+//pts=ParamOptimize("pts",2, 1, 200,1); //81
+period2= ParamOptimize("period2", 21, 0, 200,1);               
+          
+
+//----------------------------------------------------------------------               
+
+fask = Foreign(Name(), "H" );
+fbid = Foreign(Name(), "L" );
+faskv = Foreign(Name(), "2" );
+fbidv = Foreign(Name(), "1" );
+fc = Foreign(Name(), "C" );
+fv = Foreign(Name(), "V" );
+foi = Foreign(Name(), "I" );
+
+//===============================================
+up=C>O;
+dn=C<O;
+
+b01=CPPCount(C>MA(C,10),period)==period;
+s01=CPPCount(C<MA(C,10),period)==period;
+
+Lstb01=BarsSince(b01);
+Lsts01=BarsSince(s01);
+
+b02=Lstb01>=1 AND Lstb01<=num AND C>MA(C,5) AND up;
+s02=Lsts01>=1 AND Lsts01<=num AND C<MA(C,5) AND dn;
+
+bsig=b02;
+ssig=s02;
+
+         
+
+CSIG=0;            
+
+Lstsig = BarsSince(bsig OR ssig);              
+
+BPeriod= BarsSince(BSIG)<BarsSince(SSIG) AND BarsSince(BSIG)>0;            
+SPeriod= BarsSince(SSIG)<BarsSince(BSIG) AND BarsSince(SSIG)>0;            
+
+
+
+//CSIG= csig1;//tupo 15,5
+//Csig=C01 OR C02;//14,5 maxdrawdown bigger      
+CSIG=V==HHV(V, period2);//15,5,21  more paras      
+//CSIG=C03 OR C04;//16,3,7                
+
+//------------------------------------------------------------------------------------------------------------               
+
+    Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+               
+
+PlotPerformance(BSig,Ssig,Csig);   
+	/*bis = IIf(p==1,1,0);
+	sis = IIf(p==2,1,0);
+	cis = IIf(p==3,1,0);
+	ps = GetPs(bis,sis,Cis);
+	Plot(ps,"sig",colorRed,styleLine);
+	PlotPerformances(ps); */ 
+
+          
+	res = IIf(bsig, 1, IIf(ssig, 2, 3));
+	Filter = bsig OR ssig OR csig;
+	SetOption("NoDefaultColumns", True );
+	AddColumn( DateTime(), "Date", formatDateTime );
+	AddColumn(MilliSec(), "ms");
+	AddColumn(res, "signal");
+ 

@@ -1,0 +1,25 @@
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Basicv4/rv.afl";
+
+StrategyName = "RVV1_5R";
+StrategyID = 24102;
+ProType = 1;
+//EXV
+Cond=rvv1(54,130,Name());
+
+
+Vote= 0;
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+
+CSIG1=Cond<=Vote && Cond>=-Vote;
+CSIG =CSIG1;
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

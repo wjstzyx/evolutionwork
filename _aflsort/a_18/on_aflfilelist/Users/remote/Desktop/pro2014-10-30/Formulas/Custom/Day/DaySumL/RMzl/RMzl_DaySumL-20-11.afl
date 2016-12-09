@@ -1,0 +1,27 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/BasicV4/DaySumL.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+StrategyName = "Rmzl_DaySumL-20-11";
+StrategyID = 370006;
+ProType = 1;
+TickerName=Name();
+
+Plot(0,StrategyName,colorBlack,styleNoLine);
+
+Cond= DaySumL(20,11,0,3,TickerName);
+
+
+Vote=ParamOptimize("w_Vote",0,0,4,0.5);
+Vote=0;
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=Cond==0 ;//OR filttimeRmzl();
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+//PlotPerformance(bsig,ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

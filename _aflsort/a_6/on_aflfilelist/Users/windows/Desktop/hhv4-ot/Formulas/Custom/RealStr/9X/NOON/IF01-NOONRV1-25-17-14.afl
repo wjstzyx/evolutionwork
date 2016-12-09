@@ -1,0 +1,33 @@
+_SECTION_BEGIN("TEST1");
+#pragma nocache;
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TRADEHelper.afl";
+#include "Formulas/Custom/BasicV4/noontrading.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 500);
+TickerNAME = Name();
+
+StrategyName = "IF01-NOONRV1-25-17-14";
+StrategyID = 40653;
+ProType =0;
+
+N1=paramoptimize("paraperiod2",25,0,50,1);
+N2 =paramoptimize("period ",17,1,30,1);
+N3 =paramoptimize("periodV ",14,1,30,1);
+cond=NOONRV1(N1,N2,N3,"IF" );
+
+Vote=0;
+
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=GetLastK("IF") OR Cond==0;
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+//PlotPerformance(sinPs,sinBS,StrategyName+"--"+StrategyID);
+_SECTION_END();

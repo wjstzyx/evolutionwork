@@ -1,0 +1,37 @@
+#pragma nocache;
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TRADEHelper.afl";
+#include "Formulas/Custom/BasicV4/bomb.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+StrategyName = "IF01-BOMBRV2-BOMBTR";
+StrategyID =40435;
+ProType = 0;
+
+
+cond1=Bombrv2(4,2,14,"IF");//stay
+Cond2=Bombrv2(7,2,15,"IF");//stay
+cond3=Bombrv2(5,2,15,"IF");//stay
+
+cond4=Bombtr(8,9,5,37,3,"IF");
+cond5=Bombtr(7,12,4,38,3,"IF");//very good
+cond6=Bombtr(7,15,3,41,2,"IF");
+Cond7=bombtr(7,17,3,38,2,"IF");
+
+
+Cond=((cond1+Cond2+Cond3)/3+(Cond4+Cond5+Cond6+Cond7)/4)/2;
+
+Vote=0;
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=GetLastK("IF") OR Cond==0;
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName+"--"+StrategyID);

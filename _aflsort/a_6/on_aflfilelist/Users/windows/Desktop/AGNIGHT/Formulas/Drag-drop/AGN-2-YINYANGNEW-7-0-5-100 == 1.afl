@@ -1,0 +1,36 @@
+_SECTION_BEGIN("AGN-2-YINYANGNEW-7-0-5");
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/BasicV4/AGNIGHT.afl";
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 800);
+
+StrategyName = "AGN-2-YINYANGNEW-7-0-5-100";
+StrategyID = 91001;
+ProType = 3;
+
+Cond=YINYANGNEW(7,0,5,100,"AGN");
+
+
+Vote=0;//ParamOptimize("Vote", 0.5, 0, 1, 0.5);
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+//=========================================
+TIME=Hour()*10000+Minute()*100;
+FSTK=TIME==210000;	
+KN=IIf(FSTK,1,BarsSince(FSTK)+1);
+knum =ceil((60*5+30)/(Interval()/60));	
+LSTK=KN==164;
+CSIG=LSTK OR(time>=22800 AND time<23000);
+//========================================
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_night_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName+"--"+StrategyID);
+_SECTION_END();

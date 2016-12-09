@@ -1,0 +1,88 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "15min-VPIN-pp";
+StrategyID =310191;
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+SetBarsRequired(-2,-2);
+
+//rb,30min,9:15 10,7,60,20,8
+//rb,30min,9:00 10,6,25,20,16
+
+
+function GetVbuy(odata,cdata,vol,size)
+{
+	dp = cdata-odata;
+	x = IIf(StDev(dp,size)==0,0,dp/StDev(dp,size));
+	cdf = NN(x);
+	return cdf*vol;
+}
+
+
+samplesize = ParamOptimize("samplesize",20,10,1000,10);
+volb = GetVbuy(O,C,V,samplesize);
+pbuy=volb/V;
+
+vols = V-volb;
+
+N = BarsSince(Day()!=Ref(Day(),-1));
+
+sumbv=Sum(volb,N);
+sumsv=Sum(vols,N);
+
+bsig0 = TimeNum()==90000 AND sumbv>sumsv;
+ssig0 = TimeNum()==90000 AND sumbv<sumsv;
+
+//d=7,8
+d = Paramoptimize("d",1,1,60,1);  
+bsig1 = Sum(sumbv>sumsv,d)==d;
+ssig1 = Sum(sumbv<sumsv,d)==d;
+
+//Plot(sumvb,"sumvb",colorRed);
+//Plot(sumvs,"sumbs",colorGreen);
+
+bsig = bsig0 OR bsig1;
+ssig = ssig0 OR ssig1;
+
+Holdperiod=Paramoptimize("Holdperiod",32,1,100,1);
+
+ps = GetPs(bsig,ssig,0);
+
+//Lstbsg = BarsSince(bsig);
+//Lstssg = BarsSince(ssig);
+
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+C01 = ps==1 AND Lstbsg>=Holdperiod AND C<Ref(C,-Lstbsg);//AND C<Ref(C,-Holdperiod);//
+C02 = ps==-1 AND lstssg>=holdperiod AND C>Ref(C,-lstssg);//AND C>Ref(C,-Holdperiod);//
+
+p = Paramoptimize("p",64,0,100,2);
+C03 = ps==1 AND  C<Ref(C,-Lstbsg)-p;
+C04 = ps==-1 AND  C>Ref(C,-lstssg)+p;
+
+tp = Paramoptimize("tp",20,0,50,1);
+
+
+C05 = ps==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C06 = ps==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+CSIG = C01 OR C02 OR C03 OR C04 OR C05 OR C06;
+
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+//RIPAM 
+//Trading_night_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+//YEPAN

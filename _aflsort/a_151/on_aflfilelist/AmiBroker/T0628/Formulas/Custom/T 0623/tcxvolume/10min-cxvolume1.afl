@@ -1,0 +1,94 @@
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "10min-cxvolume1";
+StrategyID = 130041;
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+
+period=Param("period",12,6,40,1);
+
+PlusDM= IIf(High>Ref(High,-1) AND Low>=Ref(Low,-1), High-Ref(High,-1),
+                 IIf(High>Ref(High,-1) AND Low<Ref(Low,-1)
+                 AND High-Ref(High,-1)>Ref(Low,-1)-Low,
+                High-Ref(High,-1),0));
+
+Vm=log(EMA(V,period));
+//Vm=EMA(V,period);
+//Vm=V;
+//Vm=1;
+
+ 
+//Buypower= (C-L)*Vm+ (H-O)*Vm + IIf(C>O,(C-O)*Vm,0) + PlusDM*Vm + IIf(Ref(C,-1)<O,(O-Ref(C,-1))*Vm,0);
+//Buypower= (C-L)*Vm+ (H-O)*Vm + IIf(C>O,(C-O)*Vm,0) + PlusDM*Vm ;
+
+//Buypower= Sum((C-L)*Vm+ (H-O)*Vm + IIf(C>O,(C-O)*Vm,0) + PlusDM*Vm + IIf(Ref(C,-1)<O,(O-Ref(C,-1))*Vm,0),period)/Sum(Vm,period);
+
+//Buypower=(C-L)*Vm;
+//Buypower=(H-O)*V;
+Buypower=PlusDM*Vm;
+//Buypower=IIf(C>O,(C-O)*Vm,0);
+//Buypower=C-L;
+
+
+MinDM = IIf(Low<Ref(Low,-1)   AND  High<=Ref(High,-1), Ref(Low,-1)-Low,
+               IIf(High>Ref(High,-1) AND Low<Ref(Low,-1)
+               AND High-Ref(High,-1)<Ref(Low,-1)-Low, Ref(Low,-1)-Low, 0));
+
+//Sellpower= (H-C)*Vm + (O-L)*Vm + IIf(C<O,(O-C)*Vm,0) + MinDM*Vm + IIf(Ref(C,-1)>O,(Ref(C,-1)-O)*Vm,0);
+//Sellpower= (H-C)*Vm + (O-L)*Vm + IIf(C<O,(O-C)*Vm,0) + MinDM*Vm ;
+
+//Sellpower=Sum((H-C)*Vm + (O-L)*Vm + IIf(C<O,(O-C)*Vm,0) + MinDM*Vm + IIf(Ref(C,-1)>O,(Ref(C,-1)-O)*Vm,0),period)/Sum(Vm,period);
+
+
+//Sellpower=(H-C)*Vm;
+//Sellpower=(O-L)*V;
+Sellpower=MinDM*Vm;
+//Sellpower=IIf(C<O,(O-C)*Vm,0);
+//Sellpower=H-C;
+
+
+
+Wm=Wilders(Wilders(Buypower,period)-Wilders(Sellpower,period),period);
+//Wm=Wilders(Buypower,period)-Wilders(Sellpower,period);
+//Wm=MA(Buypower,period)-MA(Sellpower,period);
+//Wm=MA(MA(Buypower,period)-MA(Sellpower,period),period);
+//Wm=EMA(Buypower,period)-EMA(Sellpower,period);
+//Wm=EMA(EMA(Buypower,period)-EMA(Sellpower,period),period);
+//Wm=WMA(Buypower,period)-WMA(Sellpower,period);
+//Wm=WMA(WMA(Buypower,period)-WMA(Sellpower,period),period);
+//Wm=TSF(Buypower,period)-TSF(Sellpower,period);
+//Wm=TSF(TSF(Buypower,period)-TSF(Sellpower,period),period);
+//Wm=Buypower-Sellpower;
+Bsig=Cross(Wm,0);
+Ssig=Cross(0,Wm);
+
+ps = GetPs(bsig,ssig,0);
+
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+tp = Param("tp",2,0,100,1);
+
+
+C05 = ps==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C06 = ps==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+CSIG = C05 OR C06;// TimeNum() < 91830 OR TimeNum() > 151430 OROR  OR C03 OR C04;
+
+    Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

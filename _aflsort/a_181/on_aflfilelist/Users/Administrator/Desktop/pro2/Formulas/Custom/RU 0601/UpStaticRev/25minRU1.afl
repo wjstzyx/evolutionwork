@@ -1,0 +1,118 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "25minRU1";
+StrategyID =10258;
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+//rb 15min 14
+//m 30min 14
+//p 20min 23
+//pp 10min 6
+//ru 25min 12
+
+
+Osc_Issue  = MACD();
+//Osc_Issue  = CCI(14);
+//Osc_Issue  = Wilders(C,12)-Wilders(C,26);
+//Osc_Issue1  = TSF(C,t1)-TSF(C,t2);
+//Osc_Issue  = TSF(Osc_Issue1,t3);
+//Osc_Issue  = LinearReg(C,t1)- LinearReg(C,t2);
+//Osc_Issue  = WMA(C,12)-WMA(C,26);
+//Middle  = Signal();
+Middle  = 0;
+
+FirstBar_CG   = BarsSince(Cross(Osc_Issue,Middle))+1;
+CurrPeak             = HHV(C,FirstBar_CG);
+
+FirstBar_CG   = BarsSince(Cross(Middle,Osc_Issue))+1;
+CurrTrough             = LLV(C,FirstBar_CG);
+
+Sel_BarIndex        = BarIndex();
+
+
+i=1;
+LastBar_PG       = Sel_BarIndex-ValueWhen(Cross(Middle,Osc_Issue),BarIndex(),i);
+FirstBar_PG      = Sel_BarIndex-ValueWhen(Cross(Osc_Issue,Middle),BarIndex(),i+1);
+
+HHVval=HHV(C,FirstBar_PG - LastBar_PG+1);
+PriorPeak          = Ref(HHVval,-LastBar_PG);
+
+LastBar_PG       = Sel_BarIndex-ValueWhen(Cross(Osc_Issue,Middle),BarIndex(),i);
+FirstBar_PG      = Sel_BarIndex-ValueWhen(Cross(Middle,Osc_Issue),BarIndex(),i+1);
+
+LLVval=LLV(C,FirstBar_PG - LastBar_PG+1);
+PriorTrough         = Ref(LLVval,-LastBar_PG);
+
+
+//PlusDM= IIf(CurrPeak>PriorPeak AND CurrTrough>=PriorTrough, CurrPeak-PriorPeak,
+//                 IIf(CurrPeak>PriorPeak AND CurrTrough<PriorTrough
+//                 AND CurrPeak-PriorPeak>PriorTrough-CurrTrough,
+//                CurrPeak-PriorPeak,0));
+
+//PlusDM= IIf(CurrPeak>PriorPeak , CurrPeak-PriorPeak,0);
+
+PlusDM= IIf(CurrPeak-PriorPeak>PriorTrough-CurrTrough , CurrPeak-PriorPeak,0);
+
+//Vm=IIf(EMA(V,period1)<=0,0,log(EMA(V,period1)));
+
+//Buypower=PlusDM*Vm;
+Buypower=PlusDM;
+
+//MinDM = IIf(CurrTrough<PriorTrough   AND  CurrPeak<=PriorPeak, PriorTrough-CurrTrough,
+//               IIf(CurrPeak>PriorPeak AND CurrTrough<PriorTrough
+//               AND CurrPeak-PriorPeak<PriorTrough-CurrTrough, PriorTrough-CurrTrough, 0));
+
+//MinDM = IIf(CurrTrough<PriorTrough,PriorTrough-CurrTrough, 0);
+
+MinDM = IIf(CurrPeak-PriorPeak<PriorTrough-CurrTrough,PriorTrough-CurrTrough, 0);
+
+//Sellpower=MinDM*Vm;
+Sellpower=MinDM;
+
+ttfperiod=Buypower-Sellpower;
+
+//Buy=ttfperiod>Ref(ttfperiod,-1);
+//Sell=ttfperiod<Ref(ttfperiod,-1);
+
+Buy=ttfperiod>0;
+Sell=ttfperiod<0;
+
+Short = Sell;
+Cover = Buy;
+
+
+bsig=Buy;
+ssig=Sell;
+
+bsig=ExRem(Buy,Sell);
+ssig=ExRem(Sell,Buy);
+
+
+ps=GetPs(bsig,ssig,0);
+
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+
+tp = Param("tp",10,0,100,1);
+
+C05 = ps==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C06 = ps==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+CSIG =  C05 OR C06;   
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+//RIPAM 
+//Trading_night_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+//YEPAN

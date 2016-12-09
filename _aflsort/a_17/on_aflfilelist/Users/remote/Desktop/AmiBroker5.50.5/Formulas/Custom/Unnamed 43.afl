@@ -1,0 +1,43 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/BasicV4/EXV.afl";
+#include "Formulas/Custom/BasicV4/SXV.afl";
+#include "Formulas/Custom/BasicV4/HL.afl";  ////
+#include "Formulas/Custom/BasicV4/EXR.afl";
+#include "Formulas/Custom/BasicV4/Dfb.afl";
+#include "Formulas/Custom/BasicV4/BOMB.afl";
+#include "Formulas/Custom/BasicV4/DTA.afl";
+#include "Formulas/Custom/BasicV4/EXIV.afl";
+#include "Formulas/Custom/BasicV4/MAA.afl";
+#include "Formulas/Custom/BasicV4/TB.afl";
+#include "Formulas/Custom/BasicV4/TM.afl";
+#include "Formulas/Custom/BasicV4/V7.afl";
+#include "Formulas/Custom/BasicV4/VB.afl";
+#include "Formulas/Custom/BasicV4/EXVC.afl";
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+StrategyName = "IF02-9953-All-1-V1";
+StrategyID = 40279;
+ProType = 0;
+LASTBAR=GetLastK("YE"); 
+
+//Cond = DFBFunc1("Ye",41,91,74);
+Cond = dtav2(10,1,0.3,18,"Ye");
+
+
+Vote=0;
+
+BSIG=Cond>Vote AND NOT(LASTBAR);
+SSIG=Cond<-Vote AND NOT(LASTBAR);
+
+CSIG=GetLastK("YE");
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName+"--"+StrategyID);

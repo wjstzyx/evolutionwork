@@ -1,0 +1,66 @@
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Basic2012/Rev.afl";
+#include "Formulas/Custom/Basic2012/TM.afl";
+#include "Formulas/Custom/Basic2012/YCHL.afl";
+#include "Formulas/Custom/Basic2012/UDVOL.afl";
+#include "Formulas/Custom/Basic2012/HL.afl";
+
+StrategyName = "Candi TM Cu 1";
+StrategyID = 5042;
+ProType = 1;
+//Rev
+CondR= MAVOLREVPro(7,95,0,85,1000,1000,"CU");
+CondG1 = CondR;
+//TM
+CondT1= TimeShareHLLess(5,26,38,1000,1000,"CU");
+CondT1= TimeSelect(48,275,CondT1);
+
+CondT2= TimeShareHLLess(4,27,40,1000,213,"CU");
+CondT2= TimeSelect(48,275,CondT2);
+
+CondT3= TimeShareHLLess(5,25,49,1000,1000,"CU");
+CondT3= TimeSelect(56,275,CondT3);
+CondT= CondT1+ CondT2+ CondT3;
+CondG2=CondT/3;//GetSig123(CondT);
+//YCHL
+CondF1= FCCHLORI(0,51,0,1000,1000,"CU");
+CondF2= FCCHLORI(0,51,0,1000,1000,"CU");
+CondF2= TimeSelect(84,1000,CondF2);
+CondF= CondF1+ CondF2;
+CondG3=CondF/2;//GetSig123(CondF);
+//UDVol 
+CondUD= UDVOLORI(27,3,1,135,244,"CU");  		
+CondUD= TimeSelect(51,255,CondUD);	
+CondG4 = CondUD;
+//HL
+CondH1= 0;//HLNAVG2(34,10,50,"CU");
+CondH2= HLAVGA(50,1,69,"CU");
+CondH3= HLAVGA(65,0,69,"CU");
+CondH4= HLAVG(53,0,50,"CU");
+CondH5= HLAVG(63,0,50,"CU");
+CondH6= HLCAVG(50,0,50,"CU");
+CondH7= HLNAVG(56,10,55,"CU");
+CondGHL= (CondH1+CondH2+CondH3+CondH4+CondH5+CondH6+CondH7);
+CondG5=CondGHL/6;//GetSig123(CondGHL);
+
+Rev= ParamOptimize("Rev", 0.5, 0, 10, 0.5);
+TM = ParamOptimize("TM", 1.5, 0, 10, 0.5);
+YCHL= ParamOptimize("YCHL", 1, 0, 10, 0.5);
+UD= ParamOptimize("UD", 1, 0, 10, 0.5);
+HL= ParamOptimize("HL", 1, 0, 10, 0.5);
+
+Cond = Rev*CondG1 +TM*CondG2+YCHL*CondG3+UD*CondG4+HL*CondG5;
+
+Vote= ParamOptimize("Vote", 0.5, 0, 10, 0.5);
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG1=Cond<=Vote && Cond>=-Vote;
+CSIG=(TimeNum()+Interval()*100/60)>=146000;
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

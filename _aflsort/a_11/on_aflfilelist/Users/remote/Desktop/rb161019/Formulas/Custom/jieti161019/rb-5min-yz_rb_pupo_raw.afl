@@ -1,0 +1,71 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+
+
+
+
+
+
+fc = Foreign(Name(), "C" );
+fv = Foreign(Name(), "V" );
+foi = Foreign(Name(), "I" );
+
+
+eps = 0.001;
+
+	FSTK= BarIndex()==0 OR Day()!=Ref(Day(),-1);
+	KN=BarsSince(FSTK)+1;
+
+
+
+m=Paramoptimize("m", 70, 0, 200, 1);
+ss=Paramoptimize("ss", 13, 0, 200, 1);//60
+Reff=Paramoptimize("reff",3, 1, 100, 1);//  4   5 
+p=Paramoptimize("p",3, 1, 30, 0.1);
+
+zf1 = C-Ref(C,-m)>ss*C/1000 ;
+zdf = (HHV(C,Reff)-LLV(C,Reff))< abs(C-Ref(C,-m))/p;
+
+
+dq = Ref(C,-1)<=LLV(C,Reff) AND C>Ref(C,-1) ;
+
+
+zf0 = C-Ref(C,-m)<-ss*C/1000 ;
+zdf0 = (HHV(C,Reff)-LLV(C,Reff))> abs(C-Ref(C,-m))/p;
+dq0 = Ref(C,-1)>=HHV(C,Reff) AND C<Ref(C,-1) ;
+
+
+zd = Sum(abs(C-O),m)/m;
+
+
+bsig=zf1 AND zdf AND dq ;// AND zd<C/1000 ;// AND  zd<15*C/10000;// AND Ref(O,-kn+1)>Ref(C,-kn);// AND TN;
+
+
+
+SSIG=zf0 AND zdf AND dq0 ;//AND zd<C/1000 ;//AND  zd<15*C/10000;// AND  Ref(O,-kn+1)<Ref(C,-kn) ;//AND TN;
+
+
+
+ PS=GetPs(BSIG,SSIG,0);
+
+	Lstbsg = BarsSince(bsig);
+	Lstssg = BarsSince(ssig);
+    
+
+Nc = Paramoptimize("nc", 20, 1,300, 1);
+ C03= ps==1 AND HighestSince(bsig,fc,1)-fc>=nc*C/1000;
+ C04= ps== -1 AND LowestSince(ssig,fc,1)-fc<=-nc*C/1000;
+
+	C05 = ps==1 AND C-Ref(C,-Lstbsg)<-nc*C/1000;
+
+	C06 = ps==-1 AND C-Ref(C,-Lstbsg)>nc*C/1000;
+
+ CSIG =  C03 OR C04 ;//   OR C05 OR C06  ;//C01 OR C02  OR
+
+
+PlotPerformance(BSIG,SSIG,CSIG);
+
+
+
+
+
+StrategyName = "rb-5min-yz_rb_pupo_raw";StrategyID = "1012100327";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

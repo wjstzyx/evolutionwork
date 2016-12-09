@@ -1,0 +1,59 @@
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Basic2012/V7DY.afl";
+#include "Formulas/Custom/Basic2012/DTA.afl";
+#include "Formulas/Custom/Basic2012/EXV.afl";
+#include "Formulas/Custom/Basic2012/REV.afl";
+#include "Formulas/Custom/BasicV2/MMT.afl";
+
+StrategyName = "V7ThreeSegment_V2.1_RU05";
+StrategyID = 1066;
+ProType = 1;
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+
+//V7DY Series:V7DYORIALL,V7DYORI
+CondV731=V7DYThreeSegment(1,21,"RU");
+CondV732=V7DYThreeSegment(2,20,"RU");
+CondV73=(CondV731+CondV732)/2;
+
+CondEXV1=EXVHH(5,37,8,85,"RU");
+CondEXV2=EXVHH(1,72,10,44,"RU");
+CondEXV=(CondEXV1+CondEXV2)/2;
+
+CondDTA=DTAV2(8,3,20,19,"RU");
+
+/*
+CondREV = MAVOLREVPro(13,6,0,1000,1000,1000,"RU");
+CondREV = TimeSelect(20,1000,CondREV);
+CondV7MA1=V7DYMA(4,122,1,"RU");
+CondV7MA2=V7DYMAHLV(119,110,1,"RU");
+CondV7MA=(CondV7MA1+CondV7MA2)/2;
+*/
+
+
+WV73 = ParamOptimize("WV73 ", 2.5, 0, 3, 0.5);
+WEXV = ParamOptimize("WEXV ", 2, 0, 3, 0.5);
+WDTA = ParamOptimize("WDTA", 2, 0, 3, 0.5);
+
+//Cond = WV73*CondV73+WV7MA*CondV7MA+WEXV*CondEXV+WDTA*CondDTA+WREV*CondREV;
+Cond = WV73*CondV73+WEXV*CondEXV+WDTA*CondDTA;
+
+Vote= ParamOptimize("Vote", 0, 0, 3, 0.5);
+
+
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG = (TimeNum()+Interval()*100/60)>=146000;
+
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

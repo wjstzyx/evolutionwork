@@ -1,0 +1,153 @@
+
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "6min-tupo-KD-13";
+StrategyID =270261;
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+
+m = Param("m",6,1,30,1);
+n = Param("n",2,1,30,1);
+
+Maxminm=Param("Maxminm",5,1,100,1); 
+nvtresh = Param("nvtresh",1.7,0,3,0.01);
+buylev = Param("buylev",6,0,100,1);
+
+EMAperiod1=Param("EMAperiod1",80,1,1000,1);
+EMAperiod2=Param("EMAperiod2",80,1,1000,1);
+
+
+	mMinute=m*in15Minute;
+
+	TimeFrameSet(mMinute);
+
+	Ostoc=StochD();
+
+	TimeFrameRestore();
+
+	newstoc=TimeFrameExpand(Ostoc, mMinute);
+   realnewstoc=newstoc;
+
+	nMinute=n*in15Minute;
+
+	TimeFrameSet(nMinute);
+
+    EMAperiod=Param("EMAperiod",3,1,100,1);
+   AMAf3=Param("AMAf3",0.5,0,1,0.01);
+    Prd=Param("Res_Period",2,0,200,1);
+
+   HaClose =EMA((O+H+L+C)/4,EMAperiod);
+   HaOpen = AMA( Ref( HaClose, -1 ), AMAf3 ); 
+   HaHigh = Max( H, Max( HaClose, HaOpen ) ); 
+   HaLow = Min( L, Min( HaClose, HaOpen ) ); 
+   
+    HaH=TEMA(H,Prd);
+    HaL=TEMA(L,Prd);
+
+
+    hturn = Ref(HaH,-1) > Ref(HaH,-2) AND Ref(HaH,-1)>HaH;
+    lturn = HaL > Ref(HaL,-1) AND Ref(HaL,-1) < Ref(HaL,-2);
+
+	hpk1 = ValueWhen(hturn,Ref(HaHigh,-1),1);
+	lpk1 = ValueWhen(lturn,Ref(HaLow,-1),1);
+
+	hpkmax = hpk1>Ref(hpk1,-1);
+	hpkmin = hpk1<Ref(hpk1,-1);
+
+	hpkturn = ExRem(hpkmin,hpkmax);
+
+    hpk2 = ValueWhen(hpkturn,hpk1,1);
+
+	lpkmax = lpk1>Ref(lpk1,-1);
+	lpkmin = lpk1<Ref(lpk1,-1);
+
+	lpkturn = ExRem(lpkmax,lpkmin);
+
+    lpk2 = ValueWhen(lpkturn,lpk1,1);    
+
+	MaxHpk=hpk2;
+	MinHpk=hpk2;
+	MaxLpk=lpk2;
+	MinLpk=lpk2;
+	for (i=2;i<=Maxminm;i++)
+	{
+	hpkv = ValueWhen(hpkturn,hpk1,i);
+	MinHpk=Min(MinHpk,hpkv);
+	MaxHpk=Max(MaxHpk,hpkv);
+
+	lpkv = ValueWhen(lpkturn,lpk1,i);
+
+	MinLpk=Min(MinLpk,lpkv);
+	MaxLpk=Max(MaxLpk,lpkv);
+	}
+
+	TimeFrameRestore();
+
+	mPeakmax=TimeFrameExpand(hpk2, nMinute);
+	mPeakmin=TimeFrameExpand(lpk2, nMinute);
+
+   mPeakmax1=WMA(mPeakmax,EMAperiod1);
+   mPeakmin1=WMA(mPeakmin,EMAperiod1);
+
+	maxHPeak=TimeFrameExpand(MaxHpk, nMinute);
+	minLPeak=TimeFrameExpand(MinLpk, nMinute);
+
+    maxHPeak1=WMA(maxHPeak,EMAperiod2);
+    minLPeak1=WMA(minLPeak,EMAperiod2);
+
+	daystart = Day()!=Ref(Day(),-1) OR BarIndex()==0;
+	kn = BarsSince(daystart);
+	mav = Sum(V,kn)/kn;
+	zv = V/mav;
+
+	bsigA = realnewstoc<100+buylev AND C<mPeakmin1 AND zv>nvtresh;//nisv>=nvtresh;//lstvexplode<=waitperiod AND V>Ref(V,-1);//
+	ssigA = realnewstoc>100-buylev AND C>mPeakmax1 AND zv>nvtresh;//nisv>=nvtresh;//lstvexplode<=waitperiod AND V>Ref(V,-1);//AND 
+
+
+	psAA = GetPs(bsigA,ssigA,0);
+
+	C01A = psAA==1 AND C<minLPeak1;
+	C02A = psAA==-1 AND C>maxHPeak1;
+
+    CsigA=C01A OR C02A;
+
+	cond1=GetPs(bsigA,ssigA,csigA);
+
+
+	bsigB = realnewstoc<buylev AND C<mPeakmin1 AND zv>nvtresh;//nisv>=nvtresh;//lstvexplode<=waitperiod AND V>Ref(V,-1);//
+	ssigB = realnewstoc>1-buylev AND C>mPeakmax1 AND zv>nvtresh;//nisv>=nvtresh;//lstvexplode<=waitperiod AND V>Ref(V,-1);//AND 
+
+	psBB = GetPs(bsigB,ssigB,0);
+
+	C01B = psBB==1 AND C<minLPeak1;
+	C02B = psBB==-1 AND C>maxHPeak1;
+
+   
+    CsigB = C01B OR C02B;
+	
+	cond2=GetPs(bsigB,ssigB,csigB);
+
+
+cond = cond1+cond2;
+
+bsig = cond>0;
+ssig = cond<0;
+csig = cond==0;
+
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+ps0 = GetPs(bsig,ssig,csig);
+Filter= 1;
+AddColumn(ps0,"ps");

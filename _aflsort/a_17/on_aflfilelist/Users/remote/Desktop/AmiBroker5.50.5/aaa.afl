@@ -1,0 +1,69 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/BasicV4/DFB.afl";
+#include "Formulas/Custom/BasicV4/SXV.afl";
+#include "Formulas/Custom/BasicV4/EXR.afl";
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+StrategyName = "IF01-DFB-SXV-EXR-1-1.5-0.5-V0";
+StrategyID = 40228;
+ProType = 0;
+
+
+
+DFB1=DFBV2(64,115,88,"IF");
+DFB2=DFBV2(17,112,89,"IF");
+DFB3=DFBV2(15,112,90,"IF");
+DFB4=DFBV2(56,109,89,"IF");
+DFB5=DFBV2(64,100,88,"IF");
+DFB6=DFBV2(80,114,75,"IF");
+
+
+
+SXV1=SXVV1(16,33,8,5,"IF");
+SXV2=SXVV2(92,2,95,6,"IF");
+SXV3=SXVV1(16,32,12,10,"IF");
+SXV4=SXVV2(90,48,95,5,"IF");
+SXV5=SXVV1(16,38,12,11,"IF");
+
+
+EXR1=EXRRR(28,53,"IF");
+EXR2=EXRRRM(37,68,4,"IF");
+EXR3=EXRRRM(39,64,4,"IF");
+EXR4=EXRRR(30,68,"IF");
+EXR5=EXRRRMKNC(27,102,18,"IF");
+EXR6=EXRRRM(51,68,5,"IF");
+
+
+
+
+
+
+
+Cond_DFB= (DFB1+DFB2+DFB3+DFB4+DFB5+DFB6)/6;
+Cond_SXV= (SXV1+SXV2+SXV3+SXV4+SXV5)/5;
+cond_EXR=(EXR1+EXR2+EXR3+EXR4+EXR5+EXR6)/6;
+
+w_DFB= ParamOptimize("w_DFB",1,0,4,0.5);
+w_SXV= ParamOptimize("w_SXV",1.5,0,4,0.5);
+w_EXR= ParamOptimize("w_EXR",0.5,0,4,0.5);
+
+Cond =  w_DFB*cond_DFB+w_SXV*cond_SXV+ w_EXR*cond_EXR;
+
+Cond=Cond_DFB;
+
+Vote=ParamOptimize("w_Vote",0,0,4,0.5);
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=GetLastK("IF");
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

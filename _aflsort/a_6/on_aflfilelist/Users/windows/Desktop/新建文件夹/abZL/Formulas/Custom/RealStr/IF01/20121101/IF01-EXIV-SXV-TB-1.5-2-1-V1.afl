@@ -1,0 +1,71 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/BasicV4/exiv.afl";
+#include "Formulas/Custom/BasicV4/Sxv.afl";
+#include "Formulas/Custom/BasicV4/TB.afl";
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+StrategyName = "IF01-EXIV-SXV-TB-1.5-2-1-V1";
+StrategyID = 40222;
+ProType = 0;
+
+
+
+EXIV1=EXIV(45,44,0,"IF");
+EXIV2=EXIV(47,55,0,"IF");
+EXIV3=EXIV(21,55,0,"IF");
+EXIV4=EXIV(16,66,0,"IF");
+EXIV5=EXIV(50,44,0,"IF");
+EXIV6=EXIVMA(41,43,20,0,"IF");
+EXIV7=EXIVMA(50,69,11,0,"IF");
+EXIV8=EXIVMA(50,72,29,0,"IF");
+
+
+
+SXV1=SXVV2(90,48,95,5,"IF");
+SXV2=SXVV2(90,81,100,10,"IF");
+SXV3=SXVV1(17,31,7,6,"IF");
+SXV4=SXVV2(92,2,95,6,"IF");
+SXV5=SXVV2(109,20,94,4,"IF");
+
+
+
+
+TB1=TopBotV1(40,31,7,"IF");
+TB2=TopBotV1(34,13,6,"IF");
+TB3=TopBotV2(40,16,7,"IF");
+TB4=TopBotV2(34,7,6,"IF");
+TB5=TopBotV2(40,25,7,"IF");
+TB6=TopBotV2(25,2,5,"IF");
+
+
+
+
+Cond_EXIV= (EXIV1+EXIV2+EXIV3+EXIV4+EXIV5+EXIV6+EXIV7+EXIV8)/8;
+Cond_SXV= (SXV1+SXV2+SXV3+SXV4+SXV5)/5;
+cond_TB=(TB1+TB2+TB3+TB4+TB5+TB6)/6;
+
+w_EXIV= ParamOptimize("w_EXIV",1.5,0,4,0.5);
+w_SXV= ParamOptimize("w_SXV",2,0,4,0.5);
+w_TB= ParamOptimize("w_TB",1,0,4,0.5);
+
+
+Cond =  w_EXIV*cond_EXIV+w_SXV*cond_SXV+ w_TB*cond_TB;
+
+
+
+Vote=ParamOptimize("w_Vote",1,0,4,0.5);
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=GetLastK("IF");
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);

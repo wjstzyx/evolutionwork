@@ -1,0 +1,48 @@
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#pragma nocache;
+
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+StrategyName = "IF01-TMV1-8-21-25-HHV4-28-20-2-0-18-3-YY-V05";
+StrategyID = 40446;
+ProType = 0;
+
+#include"Formulas/Custom/BasicV4/hv4.afl";
+#include"Formulas/Custom/BasicV4/TM.afl";
+#include"Formulas/Custom/BasicV4/YINYANG.afl";
+
+
+COND1=TMHLV1(8,21,25,"IF");
+c1= EXVHHV4(28,20,2,0,18,3,"IF");
+c2=EXVHHV4Cover(28,20,2,6.2,19,5,"IF");
+c3=HV4Exvc(25,21,0.6,5.4,18,0,"IF");
+c4=HV4ExvcMAV(34,25,0.6,1.4,18,5,"IF");
+Cond2 = (C1+C2+c3+c4)/4;
+c1=YYV2(6,1,7,70,1000,"IF");
+c2=yyv3(6,2,8,10,80,1000,"IF");
+c3=yyv4(6,2,7.8,160,1000,"IF");
+Cond3 = (C1+C2+c3)/3;
+
+w_tr= 1;
+w_hl= 1;
+w_yy= 1;
+
+
+Cond =  w_tr*Cond1+w_hl*Cond2+ w_yy*Cond3 ;
+
+Vote=ParamOptimize("w_Vote",0.5,0,4,0.5);
+
+BSIG=Cond>Vote;
+SSIG=Cond<-Vote;
+CSIG=GetLastK("IF") OR Cond==0;
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName+"--"+StrategyID);

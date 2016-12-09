@@ -1,0 +1,48 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+
+
+fo = Foreign(TickerName, "O" );		
+fh = Foreign(TickerName, "H" );		
+fl = Foreign(TickerName, "L" );		
+fc = Foreign(TickerName, "C" );		
+fv = Foreign(TickerName, "v" );		
+FSTK = Day() != Ref(Day(),-1);		
+LSTK = getLastK(TickerName);		
+KN = IIf(FSTK,1,BarsSince(FSTK)+1);	
+StartPeriod = Param("StartPeriod",17,1,300,1);
+N1 = Param("N1",41,1,1000,1);
+TradString = KN>StartPeriod ;		
+		
+YFC = TimeFrameGetPrice("C",-inDaily,-1);		
+YFO = TimeFrameGetPrice("O",-inDaily,-1);		
+up = fc > fo;		
+dn = fc < fo;		
+		
+B01 = fc>Ref(HHV(fh,N1),-1);		
+		
+S01 = fc<Ref(LLV(fl,N1),-1);		
+		
+b02 = fc > (YFC+YFO)/2 AND fc > Ref(fo,-KN+1)  AND TradString;		
+S02 = fc < (YFC+YFO)/2 AND fc < Ref(fo,-KN+1) AND TradString;		
+		
+		
+		
+bsig = b01 AND b02 AND TradString;		
+SSIG = s01 AND s02 AND TradString;		
+		
+CSIG = 0;		
+	Cond = getCS(BSIG,SSIG,CSIG);				
+		
+
+
+
+
+
+PlotPerformance(BSig,Ssig,Csig);
+
+
+
+
+
+
+StrategyName = "rb-3min - RB - HGJY(Nexrem)";StrategyID = "1012100359";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

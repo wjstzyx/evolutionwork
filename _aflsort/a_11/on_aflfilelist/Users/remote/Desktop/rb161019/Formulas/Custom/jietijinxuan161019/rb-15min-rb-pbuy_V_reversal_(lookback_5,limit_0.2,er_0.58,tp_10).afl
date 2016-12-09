@@ -1,0 +1,122 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+
+function CND(d)
+{
+	A1 = 0.31938153;
+	
+	A2 = -0.356563782;
+	A3 = 1.781477937;
+	A4 = -1.821255978;
+	A5 = 1.330274429;
+	RSQRT2PI = 0.39894228040143267793994605993438;
+
+	K = 1.0 / (1.0 + 0.2316419 * abs(d));
+
+	_cnd = RSQRT2PI * exp(-0.5 * d * d) * (K * (A1 + K * (A2 + K * (A3 + K * (A4 + K * A5)))));
+	
+	__cnd = IIf( d>0,1.0-_cnd,_cnd);
+	/*
+	if (d > 0){
+		_cnd = 1.0 - _cnd;
+	}
+	*/
+	
+	return __cnd;
+}
+
+
+
+
+Lookback=Param("Lookback",5,1,500,10);
+
+
+indicator = ROC(V,Lookback);
+
+
+
+Cstudy= indicator;
+
+
+stdc=StDev(Cstudy,Lookback);
+
+
+
+xc=IIf(stdc==0,0,Cstudy/stdc);
+
+
+
+pbuyc=CND(xc);
+
+
+
+
+Limit=Param("Limit",0.2,0,1,0.1);
+
+tst=Param("tst",90000,90000,150000,100);
+ted=Param("ted",150000,90000,150000,100);
+
+///////////////////////////////////reversal
+
+
+vfilter=pbuyc<Limit ;
+
+timefilter = TimeNum()>tst AND TimeNum()<ted;
+
+
+//bFilter1 =  MACD() > Signal();
+bFilter1 = C>MA(C,Lookback);
+
+
+
+SumUP = Sum(IIf( C>MA(C,Lookback),C-MA(C,Lookback),0),Lookback);
+SumDN = Sum(IIf( C<MA(C,Lookback) ,MA(C,Lookback)-C,0),Lookback);
+
+bsig2 = SumUP > SumDN;
+ssig2 = SumUP < SumDN;
+
+
+//original ER
+dir=abs(Close-Ref(Close,-10));
+vola=Sum(abs(Close-Ref(Close,-1)),10) + 0.0001;
+ER=dir/vola;
+
+er_th = paramoptimize("ER_th",0.58,0,1,0.02);
+
+
+erfilter = er>er_th;
+
+bsig=Vfilter AND bfilter1 AND timefilter AND erfilter AND bsig2;
+ssig=Vfilter AND NOT bfilter1 AND timefilter AND erfilter AND ssig2;
+
+
+ps = GetPs(bsig,ssig,0);
+
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+HHVbsg=IIf(lstbsg==0,C,HHV(C,lstbsg));
+LLVssg=IIf(lstssg==0,C,LLV(C,lstssg));
+
+HHVbsg=HHV(C,lstbsg);
+LLVssg=LLV(C,lstssg);
+
+
+
+tp = Param("tp",10,0,100,1);
+
+
+C05 = ps==1 AND  C<HHVbsg-tp*C/1000;
+C06 = ps==-1 AND  C>LLVssg+tp*C/1000;
+
+Csig=C05 OR C06;
+
+
+
+Plotperformance(bsig,ssig,Csig);
+
+
+
+
+
+
+StrategyName = "rb-15min-rb-pbuy_V_reversal_(lookback_5,limit_0";StrategyID = "1012100349";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

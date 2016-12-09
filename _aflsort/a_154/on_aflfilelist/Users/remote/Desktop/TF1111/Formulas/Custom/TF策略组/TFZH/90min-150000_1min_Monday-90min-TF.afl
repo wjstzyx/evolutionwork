@@ -1,0 +1,78 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "90min-150000_1min_Monday-90min-TF";
+StrategyID = 380030;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+bidp = Foreign(Name(), "L");
+askp = Foreign(Name(), "H");
+bidv = Foreign(Name(), "1");
+askv = Foreign(Name(), "2");
+
+function VolSlice(value, window_size, window_number) {
+	winvol = HHV(value, window_size) - LLV(value, window_size);
+	res = EMA(winvol, window_size * window_number);
+	return res;
+}
+
+function VolSliceOC(window_size) {
+	OC=abs(Ref(C,-1)-C);
+	res = MA(OC, window_size);
+	return res;
+}
+eps=0.001;
+
+
+
+
+
+param1 = Param("param1",-0.0200002,-10,100,0.01);
+param2 = Param("param2",0.1,-10,100,0.1);
+dofw = Param("dofw",1,1,5,1);
+length=Param("length",12,1,1000,1);
+
+
+
+/*
+bsig= DayOfWeek()==dofw && TimeNum()==91500;
+bsig= bsig && (o-Ref(C,-1))/Ref(C,-1)*100>param1;
+csig= BarsSince(bsig)==length;
+
+ssig=0;
+*/
+
+bsig= DayOfWeek()==dofw && TimeNum()==91500;
+bsig= bsig && (O-Ref(C,-1))/Ref(C,-1)*100>param1;// && C>o;
+highestc= HighestSince(bsig,c);
+
+
+ssig= DayOfWeek()==dofw && TimeNum()==91500;
+ssig= ssig && (Ref(C,-1)-o)/Ref(C,-1)*100>param1;// && C<o;
+lowestc= lowestSince(ssig,c);
+
+csig=0;
+
+ps=GetPs(bsig,ssig,csig);
+
+
+c1 = ps==1 && ( BarsSince(bsig)==length OR (highestc-C)/highestc*100>param2);
+c2 = ps==-1 && ( BarsSince(ssig)==length OR (C-lowestc)/lowestc*100>param2);
+
+csig= c1 OR c2 OR TimeNum()==151400;
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+
+ps0 = GetPs(bsig,ssig,csig);
+Filter= 1;
+AddColumn(ps0,"ps");

@@ -1,0 +1,81 @@
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "IF-1MIN-YYMA-11-4";
+StrategyID = 40767;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+//------------------------para----------------------------------------             
+
+//time = ParamOptimize("time ",  6, 1,100,1);            
+period= ParamOptimize("period", 11, 0, 200,1);            
+num=ParamOptimize("num",4, 1, 200,1); //81
+           
+
+//----------------------------------------------------------------------               
+
+//===============================================
+up=C>O;
+dn=C<O;
+
+b01=CPPCount(C>MA(C,5),period)==period;
+s01=CPPCount(C<MA(C,5),period)==period;
+
+Lstb01=BarsSince(b01);
+Lsts01=BarsSince(s01);
+
+b02=Lstb01>=1 AND Lstb01<=num AND Ref(C,-1)<Ref(MA(C,5),-1) AND C>MA(C,5) AND up;
+s02=Lsts01>=1 AND Lsts01<=num AND  Ref(C,-1)>Ref(MA(C,5),-1) AND C<MA(C,5) AND dn;
+
+bsig=b02;
+ssig=s02;
+
+         
+
+CSIG=0;            
+
+Lstsig = BarsSince(bsig OR ssig);              
+
+BPeriod= BarsSince(BSIG)<BarsSince(SSIG) AND BarsSince(BSIG)>0;            
+SPeriod= BarsSince(SSIG)<BarsSince(BSIG) AND BarsSince(SSIG)>0;            
+
+Csig1=V==HHV(V,period);
+
+      
+
+CSIG= csig1;//
+
+               
+
+//------------------------------------------------------------------------------------------------------------               
+
+    Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+               
+
+PlotPerformance(BSig,Ssig,Csig);   
+	/*bis = IIf(p==1,1,0);
+	sis = IIf(p==2,1,0);
+	cis = IIf(p==3,1,0);
+	ps = GetPs(bis,sis,Cis);
+	Plot(ps,"sig",colorRed,styleLine);
+	PlotPerformances(ps); */ 
+
+          
+	res = IIf(bsig, 1, IIf(ssig, 2, 3));
+	Filter = bsig OR ssig OR csig;
+	SetOption("NoDefaultColumns", True );
+	AddColumn( DateTime(), "Date", formatDateTime );
+	AddColumn(MilliSec(), "ms");
+	AddColumn(res, "signal");
+ 

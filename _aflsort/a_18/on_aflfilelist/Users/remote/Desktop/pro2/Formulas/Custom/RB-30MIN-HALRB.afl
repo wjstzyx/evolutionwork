@@ -1,0 +1,69 @@
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "RB-30MIN-HALRB";
+StrategyID = 210061;
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+//------------------------para----------------------------------------             
+         
+period= ParamOptimize("period", 15, 0, 200,1);            
+num=ParamOptimize("num",5, 1, 200,1); //81
+pts=ParamOptimize("pts",5, 1, 200,1); //81
+period2= ParamOptimize("period2", 12, 0, 200,1);                            
+
+//===============================================
+up=C>O;
+dn=C<O;
+
+b01=C==HHV(C,PERIOD);
+s01=C==LLV(C,PERIOD);
+
+Lstb01=BarsSince(b01);
+Lsts01=BarsSince(s01);
+
+b02=Lstb01>=1 AND Lstb01<=num AND C>Ref(H,-1) AND UP;
+s02=Lsts01>=1 AND Lsts01<=num AND C<Ref(L,-1) AND DN;
+
+B03=CPPCount(C==LLV(C,PERIOD*2),NUM)==0;
+S03=CPPCount(C==HHV(C,PERIOD*2),NUM)==0;
+
+b04=C>MA(C,60);
+s04=C<MA(C,60);
+
+bsig=b02 AND B03;// AND b04;
+ssig=s02 AND S03;// AND s04;
+
+CSIG=0;            
+
+Lstsig = BarsSince(bsig OR ssig);              
+
+BPeriod= BarsSince(BSIG)<BarsSince(SSIG) AND BarsSince(BSIG)>0;            
+SPeriod= BarsSince(SSIG)<BarsSince(BSIG) AND BarsSince(SSIG)>0;            
+
+C01=BPERIOD AND CPPCount(DN,pts)==pts;
+C02=SPERIOD AND CPPCount(UP,pts)==pts;
+    
+CSIG=C01 OR C02  ;// 10,2,12  
+//CSIG=C03 OR C04;//11,4,9
+               
+
+//------------------------------------------------------------------------------------------------------------               
+
+    Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+               
+
+//PlotPerformance(BSig,Ssig,Csig);   
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+ 

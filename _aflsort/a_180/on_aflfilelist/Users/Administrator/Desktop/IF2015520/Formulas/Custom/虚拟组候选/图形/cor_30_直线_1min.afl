@@ -1,0 +1,66 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "cor_30_line_1min";
+StrategyID = 40953;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+
+
+longsample="D:\\sample\\long_3.csv";
+shortsample="D:\\sample\\short_3.csv";
+
+
+//Plot(s,"s",colorRed,16);
+
+longcof=Cor(Close,longsample,30);
+shortcof=Cor(Close,shortsample,30);
+
+cof=Param("cof",0.94, 0.5, 1, 0.01);
+lengthlong = Param("lengthlong", 20, 1, 100, 1);
+lengthshort = Param("lengthshort", 20, 1, 100, 1);
+
+
+opentime=Param("opentime",145800,91500,151500,100);
+closetime=Param("closetime",151300,91500,151500,100);
+
+
+
+bsig= longcof>=cof  AND TimeNum()>=103000 AND TimeNum()<=145000 ;
+ssig= shortcof>=cof AND TimeNum()>=103000 AND TimeNum()<=145000 ;
+
+
+Lstbsg = BarsSince(bsig);
+Lstssg = BarsSince(ssig);
+
+co= (BarsSince(bsig)==lengthlong AND C<Ref(C,-lstbsg)) or (BarsSince(ssig)==lengthshort AND C>Ref(C,-lstssg)) OR TimeNum()>=151500 ;
+
+ps=GetPs(bsig,ssig,co);
+
+
+zs= Param("zs",0.5,0.1,100,0.1);
+hp=HighestSince(ps==1 AND Ref(ps,-1)!=1,C);
+co1= ps==1 AND (hp-C)/hp*100>=zs;
+
+lp=LowestSince(ps==-1 AND Ref(ps,-1)!=-1,C);
+co2= ps==-1 AND (C-lp)/lp*100>=zs;
+
+csig= co OR co1 OR co2;
+
+Buy = bsig ;           
+
+    Sell= CSIG;        
+
+    Short = ssig ;         
+
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+
+

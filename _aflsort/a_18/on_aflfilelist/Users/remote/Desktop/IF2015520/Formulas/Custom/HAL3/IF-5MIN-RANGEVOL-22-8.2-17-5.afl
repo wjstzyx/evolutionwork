@@ -1,0 +1,74 @@
+#include "Formulas/Custom/Helper/Backtesthelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "IF-5MIN-RANGEVOL-22-8.2-17-5";
+StrategyID = 40719;
+ProType = 0;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+function VolSlice(value, window_size, window_number) {
+	winvol = HHV(value, window_size) - LLV(value, window_size);
+	res = EMA(winvol, window_size * window_number);
+	return res;
+}
+
+TickerName=Name();
+fo = Foreign(TickerName, "O" );
+fh = Foreign(TickerName, "H" );
+fl = Foreign(TickerName, "L" );
+fc = Foreign(TickerName, "C" );
+fv = Foreign(TickerName, "v" );
+fstk = Day()!=Ref(Day(),-1);
+KN=IIf(FSTK,1,BarsSince(FSTK)+1);
+
+range=abs(fc-fo);
+//-----------------------------------------------------------------
+
+period=Param("period",22,0,100,1);//20
+newh=fc>=HHV(fc,period);
+newl=fc<=LLV(fc,period);
+
+Lstnewh=IIf(newh,0,Ref(BarsSince(newh),-1)+1);
+Lstnewl=IIf(newl,0,Ref(BarsSince(newl),-1)+1);
+
+
+Vol=Volslice(fc,10,2);
+
+s=Param("s",8.2,0,20,0.1);//6
+Volfilter=Vol>s;
+
+
+bsig=newh AND C>O AND kn>period AND range<Ref(range,-1)+Ref(range,-2) AND Volfilter; // AND fc>fo 
+ssig=newl AND  C<O AND kn>period AND range<Ref(range,-1)+Ref(range,-2) AND Volfilter;//AND fc<fo
+
+CSIG=0;
+Lstsig = BarsSince(bsig OR ssig);
+sinPs=GetPs(BSIG,SSIG,CSIG);
+
+paraperiod2=Param("paraperiod2",17,0,50,1);//5
+ppp=Param("ppp",5,0,50,1);
+
+obuy= sinps==1 AND Ref(sinps,-1)!=1;
+osell= sinps==-1 AND Ref(sinps,-1)!=-1;
+
+Lbuy=BarsSince(Obuy);
+Lsell=BarsSince(Osell);
+
+
+C01=sinPs==-1 AND FC>FO AND Ref(FC,-1)<Ref(FO,-1) AND Lsell>=paraperiod2 ;
+C02=sinPs==1 AND FC<FO  AND Ref(FC,-1)>Ref(FO,-1) AND Lbuy>=paraperiod2 ;
+
+C03=sinPs==-1 AND FC<FO AND fv>=HHV(fv,Lstsig) ;//AND Lsell>=ppp;
+C04=sinPs==1 AND FC>FO  AND fv>=HHV(fv,Lstsig) ;//AND Lbuy>=ppp;
+
+csig= TimeNum()>=151000 OR (C03 OR C04 OR C01 OR C02 ) ;
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

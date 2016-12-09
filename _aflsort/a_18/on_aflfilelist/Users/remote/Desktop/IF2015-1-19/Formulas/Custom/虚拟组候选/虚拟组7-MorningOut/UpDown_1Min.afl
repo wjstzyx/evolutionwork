@@ -1,0 +1,68 @@
+//#include "Formulas/Custom/201502/15s/volatility.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+#include "Formulas/Custom/Helper/BacktestHelper.afl";
+TickerNAME = Name(); 
+
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+
+
+StrategyName = "	IF-UpDown_1Min";
+StrategyID = 40872;
+ProType = 0;
+TickerName=Name();
+
+point3 = Param("point3", 11, 0, 10000, 0.05);
+stopwin = Param("stopwin",20,1,10000,0.2);
+stoploss = Param("stoploss",10,0,10000,0.2);
+
+fc = Foreign(Name(),"C");
+fv = Foreign(Name(),"V");
+fo = Foreign(Name(),"O");
+fh = Foreign(Name(),"H");
+fl = Foreign(Name(),"L");
+
+daystart = BarIndex() == 0 OR DateNum() != Ref(DateNum(), -1);
+kn = BarsSince(daystart);
+
+ds = kn == 0 AND Ref(kn,-1) != 0;
+
+pc = iif(ds, Ref(fc,-1),0);
+nc = IIf(ds, fo,0);
+ncc = IIf(ds, fc, 0);
+
+bsig = (ncc - nc > point3 * ncc/10000);
+ssig = (nc - ncc > point3 * ncc/10000);
+
+xx = BarsSince(bsig OR ssig);
+
+pps = GetPs(bsig,ssig,0);
+C01 = pps == 1 AND fc - Ref(fc,-xx) > stopwin AND DateNum() == Ref(DateNum(),-xx);
+C02 = pps == -1 AND Ref(fc,-xx) - fc > stopwin AND DateNum() == Ref(DateNum(),-xx);
+
+C03 = pps == 1 AND highestsince(bsig,fc,1) - fc > stoploss * fc/10000 AND DateNum() == Ref(DateNum(),-xx);
+C04 = pps == -1 AND fc - lowestsince(ssig,fc,1) > stoploss * fc/10000 AND DateNum() == Ref(DateNum(),-xx);
+
+zhiying = IIf(C01==1 OR C02==1,1,0);
+zhiying1 = DateNum()==ValueWhen(zhiying,DateNum(),1);
+zhiying1 =Nz(zhiying1);
+
+zhisun = IIf(C03==1 OR C04==1,1,0);
+zhisun1 = DateNum()==ValueWhen(zhisun,DateNum(),1);
+zhisun1 =Nz(zhisun1);
+
+csig = TimeNum() > 151200 OR zhiying1 OR zhisun1;
+
+Buy=BSIG;
+Short=SSIG;
+Sell=Cover=CSIG;
+
+/*
+sinPs=getPS(BSIG,SSIG,CSIG);
+sinBS=getSIG(BSIG,SSIG,CSIG,sinPs);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
+PlotPerformance(sinPs,sinBS,StrategyName);
+*/
+PlotPerformance(bsig,ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

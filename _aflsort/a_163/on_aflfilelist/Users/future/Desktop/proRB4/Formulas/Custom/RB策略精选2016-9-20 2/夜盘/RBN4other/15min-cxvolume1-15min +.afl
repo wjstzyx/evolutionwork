@@ -1,0 +1,54 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+
+
+
+
+period=Param("period",16,6,40,1);
+
+PlusDM= IIf(High>Ref(High,-1) AND Low>=Ref(Low,-1), High-Ref(High,-1),
+                 IIf(High>Ref(High,-1) AND Low<Ref(Low,-1)
+                 AND High-Ref(High,-1)>Ref(Low,-1)-Low,
+                High-Ref(High,-1),0));
+
+Vm=log(EMA(V,period));
+
+Buypower=PlusDM*Vm;
+
+
+
+MinDM = IIf(Low<Ref(Low,-1)   AND  High<=Ref(High,-1), Ref(Low,-1)-Low,
+               IIf(High>Ref(High,-1) AND Low<Ref(Low,-1)
+               AND High-Ref(High,-1)<Ref(Low,-1)-Low, Ref(Low,-1)-Low, 0));
+
+Sellpower=MinDM*Vm;
+
+
+
+
+Wm=Wilders(Wilders(Buypower,period)-Wilders(Sellpower,period),period);
+
+Bsig=Cross(Wm,0);
+Ssig=Cross(0,Wm);
+
+ps = GetPs(bsig,ssig,0);
+
+Lstbsg = BarsSince(ps==1 AND Ref(ps,-1)!=1);
+Lstssg = BarsSince(ps==-1 AND Ref(ps,-1)!=-1);
+
+tp = Param("tp",33,0,100,1);
+
+
+C05 = ps==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C06 = ps==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+CSIG = C05 OR C06;// TimeNum() < 91830 OR TimeNum() > 151430 OROR  OR C03 OR C04;
+       
+
+
+PlotPerformance(BSig,Ssig,Csig);
+
+
+
+
+
+StrategyName = "15min-cxvolume1-15min +";StrategyID = "1022100021";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_night_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

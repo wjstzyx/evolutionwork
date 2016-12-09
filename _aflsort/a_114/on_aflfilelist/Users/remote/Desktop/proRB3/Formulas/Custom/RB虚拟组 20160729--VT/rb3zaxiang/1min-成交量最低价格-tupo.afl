@@ -1,0 +1,45 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";
+#include "Formulas/Custom/Helper/TradeHelper.afl";
+OptimizerSetEngine("spso");
+OptimizerSetOption("Runs", 1 );
+OptimizerSetOption("MaxEval", 1000);
+TickerNAME = Name();             
+
+StrategyName = "1min-成交量最低价格-tupo";
+StrategyID ="1012100047";
+ProType = 1;
+Plot(0,StrategyName,colorBlack,styleNoLine); 
+
+FSTK=Day()!=Ref(Day(),-1);
+KN=IIf(FSTK,1,BarsSince(FSTK)+1);	
+LastDayClose=Ref(C,-KN);
+ThisDayOpen=Ref(O,-KN+1);
+
+StDevVal=Param("StDevVal",1.5,0,10,0.1);
+
+Lookback=Param("Lookback",470,10,1000,10);
+
+stdc=StDev(C,Lookback);
+
+Vc=ValueWhen(Ref(V,-1)==LLV(V,Lookback),Ref(C,-1),1);
+
+upband=Vc+stdc*StDevVal;
+dnband=Vc-stdc*StDevVal;
+
+bsig1=C>upband;
+ssig1=C<dnband;
+
+bsig=bsig1;
+ssig=ssig1;
+
+Csig=0;
+
+
+
+    Buy = bsig ;           
+    Sell= CSIG;        
+    Short = ssig ;         
+    Cover = CSIG;          
+
+PlotPerformance(BSig,Ssig,Csig);
+Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);

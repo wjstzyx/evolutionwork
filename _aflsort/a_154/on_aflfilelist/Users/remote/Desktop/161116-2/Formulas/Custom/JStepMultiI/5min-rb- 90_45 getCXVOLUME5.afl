@@ -1,0 +1,218 @@
+#include "Formulas/Custom/helper/BacktestHelper.afl";#include "Formulas/Custom/helper/TradeHelper.afl";OptimizerSetEngine("spso");OptimizerSetOption("Runs", 1 );OptimizerSetOption("MaxEval", 1000);TickerNAME = Name();
+
+
+
+function PIR(p,Length)
+{
+Ll=LLV(p,Length);
+Hh=HHV(p,Length);
+return (100*(p-Ll)/(Hh-Ll));
+}
+
+function TP15(bsig, ssig, ps0)
+{
+tp = 15; //Param("tp",15,0,100,1);
+Lstbsg = BarsSince(ps0==1 AND Ref(ps0,-1)!=1);
+Lstssg = BarsSince(ps0==-1 AND Ref(ps0,-1)!=-1);
+C01 = ps0==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C02 = ps0==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+Csig=C01 OR C02;
+ps = GetPs(bsig, ssig, csig);
+return ps;
+}
+
+
+
+
+
+
+CXVOLUME5_period=1; //Paramoptimize("CXVOLUME5_period",11,1,40,1);
+
+
+
+function getCXVOLUME5(CXVOLUME5_period)
+
+{
+
+PlusDM=IIf(H-Ref(H,-1)>Ref(L,-1)-L,C-Ref(C,-1),0);
+
+
+
+Buypower=PlusDM;
+
+
+
+MinDM = IIf(H-Ref(H,-1)<Ref(L,-1)-L, Ref(C,-1)-C, 0);
+
+
+
+Sellpower=MinDM;
+
+
+
+Wm=Wilders(Wilders(Buypower,CXVOLUME5_period)-Wilders(Sellpower,CXVOLUME5_period),CXVOLUME5_period);
+
+
+
+Bsig=Cross(Wm,0);
+
+Ssig=Cross(0,Wm);
+
+
+
+ps = GetPs(bsig,ssig,0);
+
+
+
+
+//add exrem
+bsig=ExRem(bsig,ssig);
+ssig=ExRem(ssig,bsig);
+ps=GetPs(bsig,ssig,0);
+
+//add_tp15ps_exp
+ps = TP15(bsig, ssig, ps);
+return ps;
+
+
+
+
+
+}
+
+
+
+ps=getCXVOLUME5(CXVOLUME5_period);
+
+
+ps = 0;
+//30min_MDD
+CXVOLUME5_period = 19;ps1 = getCXVOLUME5(CXVOLUME5_period);ps += ps1;
+CXVOLUME5_period = 27;ps2 = getCXVOLUME5(CXVOLUME5_period);ps += ps2;
+CXVOLUME5_period = 29;ps3 = getCXVOLUME5(CXVOLUME5_period);ps += ps3;
+CXVOLUME5_period = 28;ps4 = getCXVOLUME5(CXVOLUME5_period);ps += ps4;
+CXVOLUME5_period = 18;ps5 = getCXVOLUME5(CXVOLUME5_period);ps += ps5;
+CXVOLUME5_period = 20;ps6 = getCXVOLUME5(CXVOLUME5_period);ps += ps6;
+CXVOLUME5_period = 22;ps7 = getCXVOLUME5(CXVOLUME5_period);ps += ps7;
+CXVOLUME5_period = 17;ps8 = getCXVOLUME5(CXVOLUME5_period);ps += ps8;
+CXVOLUME5_period = 12;ps9 = getCXVOLUME5(CXVOLUME5_period);ps += ps9;
+CXVOLUME5_period = 26;ps10 = getCXVOLUME5(CXVOLUME5_period);ps += ps10;
+CXVOLUME5_period = 33;ps11 = getCXVOLUME5(CXVOLUME5_period);ps += ps11;
+CXVOLUME5_period = 21;ps12 = getCXVOLUME5(CXVOLUME5_period);ps += ps12;
+CXVOLUME5_period = 30;ps13 = getCXVOLUME5(CXVOLUME5_period);ps += ps13;
+CXVOLUME5_period = 25;ps14 = getCXVOLUME5(CXVOLUME5_period);ps += ps14;
+CXVOLUME5_period = 31;ps15 = getCXVOLUME5(CXVOLUME5_period);ps += ps15;
+CXVOLUME5_period = 35;ps16 = getCXVOLUME5(CXVOLUME5_period);ps += ps16;
+CXVOLUME5_period = 23;ps17 = getCXVOLUME5(CXVOLUME5_period);ps += ps17;
+CXVOLUME5_period = 24;ps18 = getCXVOLUME5(CXVOLUME5_period);ps += ps18;
+CXVOLUME5_period = 32;ps19 = getCXVOLUME5(CXVOLUME5_period);ps += ps19;
+CXVOLUME5_period = 36;ps20 = getCXVOLUME5(CXVOLUME5_period);ps += ps20;
+CXVOLUME5_period = 15;ps21 = getCXVOLUME5(CXVOLUME5_period);ps += ps21;
+CXVOLUME5_period = 40;ps22 = getCXVOLUME5(CXVOLUME5_period);ps += ps22;
+CXVOLUME5_period = 38;ps23 = getCXVOLUME5(CXVOLUME5_period);ps += ps23;
+CXVOLUME5_period = 16;ps24 = getCXVOLUME5(CXVOLUME5_period);ps += ps24;
+CXVOLUME5_period = 10;ps25 = getCXVOLUME5(CXVOLUME5_period);ps += ps25;
+CXVOLUME5_period = 14;ps26 = getCXVOLUME5(CXVOLUME5_period);ps += ps26;
+CXVOLUME5_period = 11;ps27 = getCXVOLUME5(CXVOLUME5_period);ps += ps27;
+CXVOLUME5_period = 9;ps28 = getCXVOLUME5(CXVOLUME5_period);ps += ps28;
+CXVOLUME5_period = 8;ps29 = getCXVOLUME5(CXVOLUME5_period);ps += ps29;
+CXVOLUME5_period = 7;ps30 = getCXVOLUME5(CXVOLUME5_period);ps += ps30;
+//30min_NP
+CXVOLUME5_period = 19;ps1 = getCXVOLUME5(CXVOLUME5_period);ps += ps1;
+CXVOLUME5_period = 27;ps2 = getCXVOLUME5(CXVOLUME5_period);ps += ps2;
+CXVOLUME5_period = 29;ps3 = getCXVOLUME5(CXVOLUME5_period);ps += ps3;
+CXVOLUME5_period = 28;ps4 = getCXVOLUME5(CXVOLUME5_period);ps += ps4;
+CXVOLUME5_period = 18;ps5 = getCXVOLUME5(CXVOLUME5_period);ps += ps5;
+CXVOLUME5_period = 20;ps6 = getCXVOLUME5(CXVOLUME5_period);ps += ps6;
+CXVOLUME5_period = 22;ps7 = getCXVOLUME5(CXVOLUME5_period);ps += ps7;
+CXVOLUME5_period = 17;ps8 = getCXVOLUME5(CXVOLUME5_period);ps += ps8;
+CXVOLUME5_period = 12;ps9 = getCXVOLUME5(CXVOLUME5_period);ps += ps9;
+CXVOLUME5_period = 26;ps10 = getCXVOLUME5(CXVOLUME5_period);ps += ps10;
+CXVOLUME5_period = 33;ps11 = getCXVOLUME5(CXVOLUME5_period);ps += ps11;
+CXVOLUME5_period = 21;ps12 = getCXVOLUME5(CXVOLUME5_period);ps += ps12;
+CXVOLUME5_period = 30;ps13 = getCXVOLUME5(CXVOLUME5_period);ps += ps13;
+CXVOLUME5_period = 25;ps14 = getCXVOLUME5(CXVOLUME5_period);ps += ps14;
+CXVOLUME5_period = 31;ps15 = getCXVOLUME5(CXVOLUME5_period);ps += ps15;
+CXVOLUME5_period = 23;ps16 = getCXVOLUME5(CXVOLUME5_period);ps += ps16;
+CXVOLUME5_period = 24;ps17 = getCXVOLUME5(CXVOLUME5_period);ps += ps17;
+CXVOLUME5_period = 32;ps18 = getCXVOLUME5(CXVOLUME5_period);ps += ps18;
+CXVOLUME5_period = 36;ps19 = getCXVOLUME5(CXVOLUME5_period);ps += ps19;
+CXVOLUME5_period = 34;ps20 = getCXVOLUME5(CXVOLUME5_period);ps += ps20;
+CXVOLUME5_period = 40;ps21 = getCXVOLUME5(CXVOLUME5_period);ps += ps21;
+CXVOLUME5_period = 38;ps22 = getCXVOLUME5(CXVOLUME5_period);ps += ps22;
+CXVOLUME5_period = 13;ps23 = getCXVOLUME5(CXVOLUME5_period);ps += ps23;
+CXVOLUME5_period = 16;ps24 = getCXVOLUME5(CXVOLUME5_period);ps += ps24;
+CXVOLUME5_period = 10;ps25 = getCXVOLUME5(CXVOLUME5_period);ps += ps25;
+CXVOLUME5_period = 14;ps26 = getCXVOLUME5(CXVOLUME5_period);ps += ps26;
+CXVOLUME5_period = 11;ps27 = getCXVOLUME5(CXVOLUME5_period);ps += ps27;
+CXVOLUME5_period = 9;ps28 = getCXVOLUME5(CXVOLUME5_period);ps += ps28;
+CXVOLUME5_period = 8;ps29 = getCXVOLUME5(CXVOLUME5_period);ps += ps29;
+CXVOLUME5_period = 7;ps30 = getCXVOLUME5(CXVOLUME5_period);ps += ps30;
+//30min_PF
+CXVOLUME5_period = 19;ps1 = getCXVOLUME5(CXVOLUME5_period);ps += ps1;
+CXVOLUME5_period = 29;ps2 = getCXVOLUME5(CXVOLUME5_period);ps += ps2;
+CXVOLUME5_period = 28;ps3 = getCXVOLUME5(CXVOLUME5_period);ps += ps3;
+CXVOLUME5_period = 20;ps4 = getCXVOLUME5(CXVOLUME5_period);ps += ps4;
+CXVOLUME5_period = 22;ps5 = getCXVOLUME5(CXVOLUME5_period);ps += ps5;
+CXVOLUME5_period = 17;ps6 = getCXVOLUME5(CXVOLUME5_period);ps += ps6;
+CXVOLUME5_period = 12;ps7 = getCXVOLUME5(CXVOLUME5_period);ps += ps7;
+CXVOLUME5_period = 26;ps8 = getCXVOLUME5(CXVOLUME5_period);ps += ps8;
+CXVOLUME5_period = 33;ps9 = getCXVOLUME5(CXVOLUME5_period);ps += ps9;
+CXVOLUME5_period = 21;ps10 = getCXVOLUME5(CXVOLUME5_period);ps += ps10;
+CXVOLUME5_period = 30;ps11 = getCXVOLUME5(CXVOLUME5_period);ps += ps11;
+CXVOLUME5_period = 35;ps12 = getCXVOLUME5(CXVOLUME5_period);ps += ps12;
+CXVOLUME5_period = 23;ps13 = getCXVOLUME5(CXVOLUME5_period);ps += ps13;
+CXVOLUME5_period = 24;ps14 = getCXVOLUME5(CXVOLUME5_period);ps += ps14;
+CXVOLUME5_period = 39;ps15 = getCXVOLUME5(CXVOLUME5_period);ps += ps15;
+CXVOLUME5_period = 32;ps16 = getCXVOLUME5(CXVOLUME5_period);ps += ps16;
+CXVOLUME5_period = 36;ps17 = getCXVOLUME5(CXVOLUME5_period);ps += ps17;
+CXVOLUME5_period = 34;ps18 = getCXVOLUME5(CXVOLUME5_period);ps += ps18;
+CXVOLUME5_period = 37;ps19 = getCXVOLUME5(CXVOLUME5_period);ps += ps19;
+CXVOLUME5_period = 40;ps20 = getCXVOLUME5(CXVOLUME5_period);ps += ps20;
+CXVOLUME5_period = 38;ps21 = getCXVOLUME5(CXVOLUME5_period);ps += ps21;
+CXVOLUME5_period = 10;ps22 = getCXVOLUME5(CXVOLUME5_period);ps += ps22;
+CXVOLUME5_period = 14;ps23 = getCXVOLUME5(CXVOLUME5_period);ps += ps23;
+CXVOLUME5_period = 9;ps24 = getCXVOLUME5(CXVOLUME5_period);ps += ps24;
+CXVOLUME5_period = 8;ps25 = getCXVOLUME5(CXVOLUME5_period);ps += ps25;
+CXVOLUME5_period = 7;ps26 = getCXVOLUME5(CXVOLUME5_period);ps += ps26;
+CXVOLUME5_period = 6;ps27 = getCXVOLUME5(CXVOLUME5_period);ps += ps27;
+CXVOLUME5_period = 1;ps28 = getCXVOLUME5(CXVOLUME5_period);ps += ps28;
+
+
+ps_th = Param("ps_th", 45, 0, 100, 1);
+
+bsig=ps >= ps_th;
+ssig=ps <= -ps_th;
+
+bsig=ExRem(bsig,ssig);
+ssig=ExRem(ssig,bsig);
+
+psmerge=GetPs(bsig,ssig,0);
+ps_exit_th = ps_th * 0.66667;
+C01 = psmerge==1 AND ps <= ps_exit_th;
+C02 = psmerge==-1 AND ps >= -ps_exit_th;
+
+tp = 15; //Param("tp",15,0,100,1);
+Lstbsg = BarsSince(psmerge==1 AND Ref(psmerge,-1)!=1);
+Lstssg = BarsSince(psmerge==-1 AND Ref(psmerge,-1)!=-1);
+C03 = psmerge==1 AND  C<HHV(C,lstbsg)-tp*C/1000;
+C04 = psmerge==-1 AND  C>LLV(C,lstssg)+tp*C/1000;
+
+//Csig=C01 OR C02 OR C03 OR C04;
+csig = C03 OR C04;
+//csig = C01 OR C02;
+
+
+Plotperformance(bsig,ssig,Csig);
+
+ps=GetPs(bsig,ssig,csig);
+
+SIG=ps;
+
+//ProfitDiff = Profit - Ref(Profit, -1);
+//GrossProfit = getGrossProfit(SIG);
+//GrossProfitDiff = GrossProfit - Ref(GrossProfit, -1);
+
+
+
+StrategyName = "5min-rb- 90_45 getCXVOLUME5";StrategyID = "1012400010";ProType = 1;Buy = BSIG;Short = SSIG;Sell = Cover = CSIG;Trading_log(BSIG,SSIG,CSIG,StrategyID,StrategyName,ProType);
