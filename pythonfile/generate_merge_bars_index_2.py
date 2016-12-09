@@ -161,7 +161,7 @@ def main_fun(ms,starttime,period,type='history'):
 
     #产生目标K线时间list
 
-
+#usage xxxx.py ms05 15
 
 if len(sys.argv)==3:
     database=sys.argv[1]
