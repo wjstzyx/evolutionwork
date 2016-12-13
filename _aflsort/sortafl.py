@@ -1,4 +1,7 @@
 #coding=utf-8 
+#####################
+#此功能进行统计的Afl去重，过滤作用
+#####################
 import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
