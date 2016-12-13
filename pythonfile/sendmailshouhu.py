@@ -93,11 +93,10 @@ try:
 	res=output.read()
 	res=res.replace('\n',' ')
 	print res,type(res)
-	if res and (nowtimehour=='11:46' or nowtimehour=='19:46') or 1==1:
+	if res and (nowtimehour=='11:46' or nowtimehour=='19:46'):
 		processid=res
 		print processid
 		cmd="kill %s" % (processid)
-		print cmd ,1
 		os.system(cmd)
 		cmd='python /home/yuyang/myfile/evolutionwork/website1/elmanager/manage.py runserver 0.0.0.0:9001 &'
 		print 1,cmd
