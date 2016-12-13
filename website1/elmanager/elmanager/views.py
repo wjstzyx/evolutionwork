@@ -16,6 +16,38 @@ from dbconn import MSSQL
 # ms1 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="future")
 
 
+def st_heart_analysis(request):
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	if request.GET:
+		sttype=request.GET.get("st","")
+		print sttype
+		sql="SELECT TOP 100    [st]     ,[computername]    ,convert(nvarchar,[stockdate],120) as stockdate  ,[p]    ,[signCON]   ,[Period]     ,[Timenum]    ,[baropen]    ,[barhigh]    ,[barlow]     ,[barclose]    ,[barvolume]     ,[symbol]   FROM [LogRecord].[dbo].[cache_st_heart] where st='%s' order by stockdate desc" % (sttype)
+		realres=ms.dict_sql(sql)
+		sql="SELECT TOP 100    [st]     ,[computername]    ,convert(nvarchar,[stockdate],120) as stockdate    ,[p]    ,[signCON]   ,[Period]     ,[Timenum]    ,[baropen]    ,[barhigh]    ,[barlow]     ,[barclose]    ,[barvolume]     ,[symbol]   FROM [LogRecord].[dbo].[backtest_cache_st_heart] where st='%s' order by stockdate desc" % (sttype)
+		lilunres=ms.dict_sql(sql)
+
+
+
+
+
+
+
+
+
+
+
+
+
+	return render_to_response('st_heart_analysis.html',{
+		'data':'',
+		'lilunres':lilunres,
+		'realres':realres,
+
+
+	})	
+
+
+
 
 def jieti_st_position(request):
 	data=""
