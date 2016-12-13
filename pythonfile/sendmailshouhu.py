@@ -84,3 +84,25 @@ try:
 		os.system(cmd)
 except:
 	pass
+
+# nohup python /home/yuyang/myfile/evolutionwork/website1/elmanager/manage.py runserver 0.0.0.0:9001 &
+
+try:
+	cmd="ps -ef|grep 'manage.py runserver 0.0.0.0:9001' |grep -v 'grep' |awk '{print $2}'"
+	output=os.popen(cmd)
+	res=output.read()
+	print res,type(res)
+	if res and (nowtimehour=='11:46' or nowtimehour=='19:46'):
+		processid=res
+		print processid
+		cmd="kill %s" % (processid)
+		os.system(cmd)
+		cmd='nohup python /home/yuyang/myfile/evolutionwork/website1/elmanager/manage.py runserver 0.0.0.0:9001 &'
+		print 1,cmd
+		os.system(cmd)
+	if res=='':
+		cmd='nohup python /home/yuyang/myfile/evolutionwork/website1/elmanager/manage.py runserver 0.0.0.0:9001 &'
+		print 2.cmd
+		os.system(cmd)
+except:
+	pass
