@@ -38,6 +38,7 @@ def changeTimetype(tablename):
 			if len(item['D'])!=10 or len(item['T'])!=5 or newD!=item['D'] or newT!=item['T']:
 				print item['symbol'] 
 				sql="update Tsymbol set D='%s',T='%s' where id=%s" % (newD,newT,item['id'])
+				print sql 
 				ms.insert_sql(sql)
 				scroptsql="update Tsymbol set D='%s',T='%s' where id=%s and symbol='%s' ;" % (item['D'],item['T'],item['id'],item['symbol'])
 				# print scroptsql
@@ -48,5 +49,5 @@ def changeTimetype(tablename):
 
 # changeTimetype()
 # ('Tsymbol','TSymbol_alltime','TSymbol_quotes_backup')
-changeTimetype("Tsymbol")
+changeTimetype("TSymbol_quotes_backup")
 # changeTimetype("TSymbol_alltime")
