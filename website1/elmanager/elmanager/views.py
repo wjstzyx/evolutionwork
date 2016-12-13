@@ -16,6 +16,53 @@ from dbconn import MSSQL
 # ms1 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="future")
 
 
+
+def jieti_st_position(request):
+	data=""
+	whichtype=0
+	res1=""
+	res2=""
+	res3=""
+	res11=""
+	res21=""
+	res31=""
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	if request.POST:
+		sttype=request.POST.get("sttype","")
+		print sttype
+		if sttype=="jieti1":
+			#阶梯1--理论VS实际策略差异
+			sql="select a.*,b.P as lilunP, b.tradetime as liluntime,c.P,c.tradetime,d.Symbol,b.TradName from (select st from P_BASIC where ac in (select f_ac from p_follow  where ac='StepMultiI300w' ))a left join [Future].[dbo].[for_backtest_Trading_logSymbol] b on a.ST=b.ST left join Future.dbo.Trading_logSymbol c on a.ST=c.ST left join Future.dbo.Symbol_ID d on cast(left(RIGHT(a.st,7),2) as int)=d.S_ID where d.Symbol not in ('AGN','AUN','CUN','Inight','Rbnight','MEZL','Pnight','LZL') and b.P<>c.P "
+			res1=ms.dict_sql(sql)
+			whichtype=1
+
+		if sttype=="jieti2":
+			#阶梯2--理论VS实际策略差异
+			sql="select a.*,b.P as lilunP, b.tradetime as liluntime,c.P,c.tradetime,d.Symbol,b.TradName from (select st from P_BASIC where ac in (select f_ac from p_follow  where ac='StepMulti2' ))a left join [Future].[dbo].[for_backtest_Trading_logSymbol] b on a.ST=b.ST left join Future.dbo.Trading_logSymbol c on a.ST=c.ST left join Future.dbo.Symbol_ID d on cast(left(RIGHT(a.st,7),2) as int)=d.S_ID where d.Symbol not in ('AGN','AUN','CUN','Inight','Rbnight','MEZL','Pnight','LZL') and b.P<>c.P "
+			res1=ms.dict_sql(sql)
+			whichtype=1
+
+
+
+
+
+
+
+
+
+
+
+	return render_to_response('jieti_st_position.html',{
+		'data':data,
+		'whichtype':whichtype,
+		'res1':res1,
+
+	})	
+
+
+
+
+
 def total_monitor(request):
 	data=""
 	whichtype=0

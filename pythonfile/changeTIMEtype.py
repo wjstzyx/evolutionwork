@@ -49,5 +49,5 @@ def changeTimetype(tablename):
 
 # changeTimetype()
 # ('Tsymbol','TSymbol_alltime','TSymbol_quotes_backup')
-changeTimetype("TSymbol_quotes_backup")
+changeTimetype("Tsymbol")
 # changeTimetype("TSymbol_alltime")
