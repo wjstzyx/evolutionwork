@@ -29,7 +29,7 @@ def monitor():
 			print 'have send 1'
 			# print smsresult
 
-
+#暂时废除
 def monitor_future_account():
 	nowtime=datetime.datetime.now().strftime("%H%M")
 	nowtime=int(nowtime)
@@ -60,10 +60,27 @@ def monitor_daily_equity():
 			print 'have send 2'
 		# print smsresult
 
+def monitor_03_database_15minKbar():
+	print 'monitor_03_database_15minKbar'
+	nowtime=datetime.datetime.now().strftime("%H%M")
+	nowtime=int(nowtime)
+	dayOfWeek = datetime.datetime.now().weekday()
+	if dayOfWeek in (0,1,2,3,4) and nowtime>=720 and nowtime<2330:
+		sql="select DATEDIFF(day, updatetime, getdate()) as aaa from [LogRecord].[dbo].[quotes_python_heart]where type='Kbars'  and name='15'   and isactive=1"
+		res=ms.dict_sql(sql)
+		if res[0]['aaa']>=1:
+			sendmessage='13764504303'
+			totalsubject="03数据库15Min Kbar没有更新"
+			smsresult=sendsms(sendmessage,totalsubject)
+			print 'have send 3'
+		# print smsresult
+
+
+
 
 monitor()
 # monitor_future_account()
 monitor_daily_equity()
-
+monitor_03_database_15minKbar()
 
 
