@@ -458,6 +458,56 @@ def account_database_isdistinct():
 						ms.insert_sql(sql)
 						break
 
+#阶梯1,2 AB仓位对比报警
+def jieti_AB_isdistinct():
+	#查询发件人
+	print '###jieti_AB_isdistinct'
+	(mailtolist,sendmessage)=get_messagelist()
+	# print mailtolist
+	#待检测的ABmachine列表
+	sql="select item,starttime,endtime from [LogRecord].[dbo].[monitorconfig] where type='jieti_ab_position' and ismonitor=1"
+	res=ms.dict_sql(sql)
+	for item in res:
+		symbol=item['item']
+		starttime=item['starttime']
+		endtime=item['endtime']
+		sql="select getdate()"
+		getnow=ms.find_sql(sql)[0][0]
+		nowtime=getnow.strftime('%H:%M:%S')
+		nowtime=datetime.datetime.strptime(nowtime,'%H:%M:%S')
+		starttime=datetime.datetime.strptime(starttime,'%H:%M:%S')
+		endtime=datetime.datetime.strptime(endtime,'%H:%M:%S')
+		if nowtime>starttime and nowtime<=endtime:
+			#delete 
+			nowday=datetime.datetime.now().strftime('%Y%m%d')
+			sql="select 'jieti1'as type,a.*,b.P as lilunP, b.tradetime as liluntime,c.P,c.tradetime,d.Symbol,b.TradName from (select st from P_BASIC where ac in (select f_ac from p_follow  where ac='StepMultiI300w' ))a left join [Future].[dbo].[for_backtest_Trading_logSymbol] b on a.ST=b.ST left join Future.dbo.Trading_logSymbol c on a.ST=c.ST left join Future.dbo.Symbol_ID d on cast(left(RIGHT(a.st,7),2) as int)=d.S_ID where d.Symbol not in ('AGN','AUN','CUN','Inight','Rbnight','MEZL','Pnight','LZL') and b.P<>c.P  union all 				select 'jieti2' as type, a.*,b.P as lilunP, b.tradetime as liluntime,c.P,c.tradetime,d.Symbol,b.TradName from (select st from P_BASIC where ac in (select f_ac from p_follow  where ac='StepMulti2' ))a left join [Future].[dbo].[for_backtest_Trading_logSymbol] b on a.ST=b.ST left join Future.dbo.Trading_logSymbol c on a.ST=c.ST left join Future.dbo.Symbol_ID d on cast(left(RIGHT(a.st,7),2) as int)=d.S_ID where d.Symbol not in ('AGN','AUN','CUN','Inight','Rbnight','MEZL','Pnight','LZL') and b.P<>c.P "
+			res11=ms.dict_sql(sql)
+			sql="select st,DATEDIFF(Minute,[inserttime],getdate()) as timediff from [LogRecord].[dbo].[jieti_AB_temp_compare]"
+			tempstlist=ms.dict_sql(sql)
+			stlist=[item1['st'] for item1 in tempstlist]
+			newstlist=[item1['st'] for item1 in res11]
+			for item in stlist:
+				st=item
+				if st not in newstlist:
+					sql="delete from [LogRecord].[dbo].[jieti_AB_temp_compare] where st=%s" % (st)
+					ms.insert_sql(sql)
+
+			for item in res11:
+				type=item['type']
+				st=item['st']
+				if st not in stlist:
+					sql="insert into [LogRecord].[dbo].[jieti_AB_temp_compare](st,type,[realposition],[lilunposition],[inserttime]) values('%s','%s',%s,%s,getdate())" % (st,type,item['P'],item['lilunP'])
+					ms.insert_sql(sql)
+			for item1 in tempstlist:
+				if item['st'] in newstlist and item1['timediff']>3:
+						# print '报警'
+						# print "@@@@@@@@@@@@@ERROE@@@@@@@@@@@@@@"
+						subject='阶梯型策略AB信号出现差异'
+						msg='阶梯型策略AB信号出现差异'
+						sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,msg,0,sendmessage)
+						ms.insert_sql(sql)
+						break
+
 
 
 
@@ -489,6 +539,10 @@ while(1):
 		pass
 	try:
 		account_database_isdistinct()
+	except:
+		pass 
+	try:
+		jieti_AB_isdistinct()
 	except:
 		pass 
 	break
