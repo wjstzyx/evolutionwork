@@ -438,7 +438,7 @@ def multiple_ratio(myquotes,ratio):
 
 
 
-sql="SELECT distinct  a.acname,c.symbol  FROM [LogRecord].[dbo].[temp_ac] a inner join Future.dbo.AC_RATIO b on a.acname=b.AC inner join Symbol_ID c on b.Stock=c.S_ID order by a.acname"
+sql="SELECT distinct  a.acname,c.symbol  FROM [LogRecord].[dbo].[temp_ac] a inner join Future.dbo.AC_RATIO b on a.acname=b.AC inner join Symbol_ID c on b.Stock=c.S_ID where a.acname>='PPtrend' order by a.acname"
 res=ms.dict_sql(sql)
 for item in res:
 	ac=item['acname']

@@ -107,6 +107,16 @@ function add_new_monitor(){
              </tr> 
 
             {% endfor %}
+            {% for item in resstock %}
+             <tr> 
+              <td align=center >{{item.AC}}</td>
+              <td align=center ><a href='/index/quanyi/accountdetail_ac/?userid={{item.F_ac}}' target="_blank">{{item.F_ac}}</a></td>
+              <td align=center >{{item.Symbol}}</td> 
+              <td align=center >{{item.ratio}}</td> 
+              <td align=center >{{item.isac}}</td> 
+             </tr> 
+
+            {% endfor %}
             </tbody> 
          </table> 
         </div> 

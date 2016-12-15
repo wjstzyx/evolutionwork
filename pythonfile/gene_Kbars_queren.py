@@ -60,7 +60,7 @@ def get_Kbarinfo(ms,period,stockdate):
     for item in res:
         symbol=item['Symbol']
         sql="Insert_Kbars '%s','%s',%s,%s,%s,%s,%s,%s,%s" % (symbol,stockdate,item['O'],item['C'],item['H'],item['L'],item['V'],item['OPI'],period)
-        # print sql
+        #print sql
         ms.insert_sql(sql)
 
 
@@ -92,7 +92,7 @@ def get_Kbarinfo_history(ms,period,stockdate):
 
 
 
-# get_Kbarinfo(15,'2016-12-05 11:0:00')
+
 
 
 
@@ -112,8 +112,8 @@ def main_fun():
     # get_Kbarinfo(ms03,15,'2016-12-13 10:00:00')
 
     resultlist=[]
-    total_day_generate(fromdate='2016-09-01',interval=15,resultlist=resultlist)
-    sql="  select distinct  top(60)   stockdate from [Future].[dbo].[TSymbol_%smin] order by stockdate desc" % (15)
+    total_day_generate(fromdate='2016-10-01',interval=15,resultlist=resultlist)
+    sql="  select distinct  top(100)   stockdate from [Future].[dbo].[TSymbol_%smin] order by stockdate desc" % (15)
     res=ms.dict_sql(sql)
     firsttime=res[-1]['stockdate']
     lasttime=res[0]['stockdate']
@@ -126,6 +126,5 @@ def main_fun():
     write_heart('Kbars','queren')
 
 main_fun()
-
 
 

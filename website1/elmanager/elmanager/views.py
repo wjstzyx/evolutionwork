@@ -107,7 +107,6 @@ def total_monitor(request):
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 	if request.POST:
 		sttype=request.POST.get("sttype","")
-		print sttype
 		if sttype=="day_quotes_lack":
 			#日盘行情数据缺失报警
 			sql=" select top(200) a.*,t.TradName from (select st,stockdate,timenum,period, [address] ,DATEDIFF(MINUTE, CONVERT(datetime,case when LEN(CAST(timenum as nvarchar))=6 then left(CAST(timenum as nvarchar),2)+':'+SUBSTRING(CAST(timenum as nvarchar),3,2)+':'+RIGHT(CAST(timenum as nvarchar),2) when LEN(CAST(timenum as nvarchar))=5 then left('0'+CAST(timenum as nvarchar),2)+':'+SUBSTRING('0'+CAST(timenum as nvarchar),3,2)+':'+RIGHT('0'+CAST(timenum as nvarchar),2) end,114),convert(datetime,CONVERT(nvarchar,stockdate,114),114)) as mydatediff  from [LogRecord].[dbo].[ST_heart] where type in (1,12) )a  left join Trading_logSymbol t on  a.st=t.ST  where ABS(mydatediff)>a.period+17  order by ABS(mydatediff) desc"
@@ -271,6 +270,14 @@ def accountdetail_ac(request):
 	if not  res111:
 		sql="SELECT [AC]  ,[F_ac]+'__'+CAST(stock as nvarchar) as F_ac  ,stock,bb.Symbol,[ratio],1 as isac  FROM [Future].[dbo].[p_follow] p left join (SELECT *  FROM [Future].[dbo].[Symbol_ID] where (Symbol not like '%%night%%'  and (Symbol not like '%%N' ) and Symbol not like '%%ZL') OR  Symbol='ZN' or Symbol='RMZL') bB  on p.stock=bb.S_ID where ac='%s ' and ratio<>0" % (userid)
 		res=ms.dict_sql(sql)
+		print 'res',res
+		#res是商品的配置信息
+		#增加 resstock 映射股指的配置信息
+		ms105 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="future")
+		sql="SELECT account as AC ,REVERSE('0'+SUBSTRING(REVERSE([acanme]),2,100)) as F_ac,Symbol,SUM(ratio)*100 as ratio,'股指映射' as isac   FROM [future].[dbo].[account_position_stock_yingshe]   where account='%s'   group by account,REVERSE('0'+SUBSTRING(REVERSE([acanme]),2,100)),symbol" % (userid)
+		resstock=ms105.dict_sql(sql)
+
+
 		for item in res:
 			sql="SELECT 1 isac  FROM [Future].[dbo].[p_follow] where ac='%s' " % (item['F_ac'])
 			res1=ms.dict_sql(sql)
@@ -315,8 +322,17 @@ def accountdetail_ac(request):
 		if res==[]:
 			res=[{'AC':'此账号没有相关配置','F_ac':'请联系小仇','ratio':'账号：'+userid,'isac':''}]
 			resultlist=[('没有配置虚拟组','或虚拟组配置手数为0')]
+		print 'resultlist',resultlist
+		#添加股指映射后的结果
+		sql="SELECT account as AC ,Symbol,SUM(ratio) as ratio FROM [future].[dbo].[account_position_stock_yingshe]   where account='%s'  group by account,symbol" % (userid)
+		tmepres=ms105.dict_sql(sql)
+		for item in tmepres:
+			resultlist.append((item['Symbol'],item['ratio']))
+
+
 		return render_to_response('accountdetail_ac.html',{
 			'res':res,
+			'resstock':resstock,
 			'userid':userid,
 			'username':username,
 			'resultlist':resultlist,
@@ -608,6 +624,9 @@ def futureaccountone(request):
 	account=userid
 	ICdata=[]
 	totalquanyiresult=order_get_dailyquanyi_forLilun(account,150521)
+	print "totalquanyiresult['result']",totalquanyiresult['result'][0:10]
+	#计算相应的股指映射权益 [[date,value],[]]
+	stock_yingshe_quanyi=order_get_stock_yingshe_quanyi(account,150521)
 	if totalquanyiresult['ispass']==0:
 		result=totalquanyiresult['result']
 		return render_to_response('futureaccountone.html',{
@@ -631,7 +650,13 @@ def futureaccountone(request):
 	else:
 		ispass=1
 		result=totalquanyiresult['result']
-		print 'result',result[0:10]
+		#加入股指的权益
+		result=[[item[1],item[0]] for item in result]
+		result=add_time_series(result,stock_yingshe_quanyi)
+		result=sorted(result,key=lambda a :a[0])
+		result=[[item[1],item[0]] for item in result]
+		#####
+
 		selectequates=[item for item in result if int(item[1])>=(int(mybegintime)-20000000)]
 		selectequates=[item for item in selectequates if int(item[1])<=(int(myendtime)-20000000)]
 		fisrtvalue=selectequates[0][0]
@@ -639,9 +664,9 @@ def futureaccountone(request):
 		result=selectequates
 
 		configinfo=totalquanyiresult['configinfo']
-		print "1######################################################"
+		# print "1######################################################"
 		(tempday,lilunquanyi,realquanyi)=range_series(result,[])
-		print "2######################################################"
+		# print "2######################################################"
 		tempdict={'acname':account,'symbol':"",'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
 		ICdata.append(tempdict)
 		liluntongji=kpi_tongji(lilunquanyi)
@@ -798,7 +823,6 @@ def fixdatacrtab(request):
 		else:
 			cmd='python /home/yuyang/myfile/evolutionwork/pythonfile/get_quotes_from_ftp_daily.py %s' % (newD)
 			sql="select * from [LogRecord].[dbo].[task_todo] where type='datafix' and cmd='%s' and status=0" % (cmd)
-			print sql 
 			res=ms.dict_sql(sql)
 			if res:
 				msg="已经插入过该补全数据任务，该任务将在16:00执行"
@@ -3383,7 +3407,6 @@ def order_get_ac_ratio_three(account):
 	if res:
 		return []
 	sql="WITH Emp AS ( SELECT ac,F_ac,ratio,stock FROM  [Future].[dbo].[p_follow] WHERE   ac='%s' UNION ALL  SELECT   D.AC,D.F_ac,D.ratio*emp.ratio/100,D.stock FROM   Emp         INNER JOIN [Future].[dbo].[p_follow] d ON d.ac = Emp.F_ac)     select '%s' as AC,f_AC+'__'+stock as f_AC,SUM(ratio) as ratio from Emp where  f_ac not in (select ac from Emp)  and ratio<>0 group by F_ac,stock order by F_ac" % (account,account)
-	print sql 
 	#sql="WITH Emp AS ( SELECT ac,F_ac,ratio FROM  [Future].[dbo].[p_follow] WHERE   ac='%s' UNION ALL  SELECT   D.AC,D.F_ac,D.ratio*emp.ratio/100 FROM   Emp         INNER JOIN [Future].[dbo].[p_follow] d ON d.ac = Emp.F_ac)     select '%s' as AC,f_AC,SUM(ratio) as ratio from Emp where  f_ac not in (select ac from Emp)  and ratio<>0 group by F_ac" % (account,account)
 	res=ms.dict_sql(sql)
 	accountlist=[]
@@ -3650,7 +3673,6 @@ def order_get_dailyquanyi_forLilun(account,fromDdy):
 				for item in res1:
 					newres1.append([item[0],item[1]*ratio/10.0])
 				totalquanyi=add_time_series(totalquanyi,newres1)
-				print 'totalquanyi',totalquanyi[0:5]
 				totalquanyi=sorted(totalquanyi,key=lambda a :a[0])
 	totalquanyi=[[item[1],item[0]] for item in totalquanyi]
 				# for item in totalquanyi:
@@ -3684,6 +3706,28 @@ def add_time_series(totalquanyi,res1):
 		result[item]=tempvalue
 	result=sorted(result.iteritems(), key=lambda d:d[1], reverse = False)
 	return result
+
+
+
+
+
+#计算账户股指映射的权益
+def order_get_stock_yingshe_quanyi(account,fromDdy):
+	ms105 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="future")
+	ms05 = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+	sql="SELECT account,REVERSE('0'+SUBSTRING(REVERSE([acanme]),2,100)) as acname,symbol,SUM(ratio) as ratio   FROM [future].[dbo].[account_position_stock_yingshe]   where account='%s'   group by account,REVERSE('0'+SUBSTRING(REVERSE([acanme]),2,100)),symbol" % (account)
+	res=ms105.dict_sql(sql)
+	totalquanyi=[]
+	for item in res:
+		sql="SELECT D  ,[quanyi] FROM [Future].[dbo].[dailyquanyi_V2] where ac='%s' and symbol='%s' and D>=%s" %(item['acname'],item['symbol'],fromDdy)
+		re1=ms05.dict_sql(sql)
+		tempquanyi=[[item1['D'],item1['quanyi']] for item1 in re1]
+		totalquanyi=add_time_series(totalquanyi,tempquanyi)
+	totalquanyi=sorted(totalquanyi,key=lambda a :a[0])
+	return totalquanyi
+
+
+
 
 #统计计算
 def kpi_tongji(lilunquanyi):
@@ -3758,7 +3802,6 @@ def kpi_tongji(lilunquanyi):
 			if tempi>Max_Day_to_New_High:
 				Max_Day_to_New_High=tempi
 	result={"Net_Profit":Net_Profit,"Max_Drawdown":Max_Drawdown,"Days":Days,"Day_Winrate":Day_Winrate,"Daily_Std":Daily_Std,"Ann_Sharpe":Ann_Sharpe,"Max_Day_Profit":Max_Day_Profit,"Max_Day_Loss":Max_Day_Loss,"Max_Win_Days":Max_Win_Days,"Max_Loss_Days":Max_Loss_Days,"Max_Day_to_New_High":Max_Day_to_New_High}
-	print result
 	return result
 
 
