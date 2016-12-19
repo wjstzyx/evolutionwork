@@ -112,8 +112,8 @@ def main_fun():
     # get_Kbarinfo(ms03,15,'2016-12-13 10:00:00')
 
     resultlist=[]
-    total_day_generate(fromdate='2016-10-01',interval=15,resultlist=resultlist)
-    sql="  select distinct  top(100)   stockdate from [Future].[dbo].[TSymbol_%smin] order by stockdate desc" % (15)
+    total_day_generate(fromdate='2016-11-01',interval=15,resultlist=resultlist)
+    sql="  select distinct  top(60)   stockdate from [Future].[dbo].[TSymbol_%smin] order by stockdate desc" % (15)
     res=ms.dict_sql(sql)
     firsttime=res[-1]['stockdate']
     lasttime=res[0]['stockdate']

@@ -215,7 +215,7 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto):
 	#totalsum=10
 	commvalue=1
 	pointvalue=1
-	sql="SELECT [symbol]  ,[pointvalue]  ,[commision] FROM [LogRecord].[dbo].[symbolpointvalue] where Symbol='%s'" % (symbolto)
+	sql="SELECT [symbol]  ,[multi] as [pointvalue]  ,[comm] as [commision] FROM [Future].[dbo].[Symbol_ID] where Symbol='%s'" % (symbolto)
 	res=ms.dict_sql(sql)
 	if res:
 		pointvalue=res[0]['pointvalue']
@@ -302,7 +302,7 @@ def cal_quanyi_foraccount(ac,myquotes,totalsum,symbolto,ratio):
 	#totalsum=10
 	commvalue=1
 	pointvalue=1
-	sql="SELECT [symbol]  ,[pointvalue]  ,[commision] FROM [LogRecord].[dbo].[symbolpointvalue] where Symbol='%s'" % (symbolto)
+	sql="SELECT [symbol]  ,[multi] as [pointvalue]  ,[comm] as [commision] FROM [Future].[dbo].[Symbol_ID] where Symbol='%s'" % (symbolto)
 	res=ms.dict_sql(sql)
 	if res:
 		pointvalue=res[0]['pointvalue']

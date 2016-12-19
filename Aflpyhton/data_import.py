@@ -407,13 +407,13 @@ def general_data(symbol):
 ##运行步骤(有些步骤是可以每天定时做的 #1  #2 )
 ##########
 # #1 530s
-gere_datafile(starttime='2015-02-01')
-#2 152s
-main_import_data()
+# gere_datafile(starttime='2015-02-01')
+# #2 152s
+# main_import_data()
 # acname='znStepMultiI'
 # choose_aflfile(acname)
 # main_run_afl()
-#5  
+#5
 
 #检测st_repoet_test中的策略是不是虚拟组有且唯一的策略号
 # test_is_all_ac_st()

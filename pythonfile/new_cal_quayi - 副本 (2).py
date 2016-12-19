@@ -201,7 +201,7 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto,isshow=1):
 	#totalsum=10
 	commvalue=1
 	pointvalue=1
-	sql="SELECT [symbol]  ,[pointvalue]  ,[commision] FROM [LogRecord].[dbo].[symbolpointvalue] where Symbol='%s'" % (symbolto)
+	sql="SELECT [symbol]  ,[multi] as [pointvalue]  ,[comm] as [commision] FROM [Future].[dbo].[Symbol_ID] where Symbol='%s'" % (symbolto)
 	res=ms.dict_sql(sql)
 	if res:
 		pointvalue=res[0]['pointvalue']
@@ -268,8 +268,8 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto,isshow=1):
 	plt.title('%s--%s--Tradeingtimes:%s--MaxDrawDown:%s' % (ac,symbolto,int(totalchangetime/totalsum),int(lasthighhuiche)))
 	plt.ylabel(u'平均每手净收益',fontproperties='SimHei')
 	pl.savefig('..\\myimage\\%s' % (ac))
-	# if isshow==1:
-	# 	pl.show()
+	if isshow==1:
+		pl.show()
 
 def cal_quanyi_foraccount(ac,myquotes,totalsum,symbolto,ratio):
 	if totalsum<=0:
@@ -277,7 +277,7 @@ def cal_quanyi_foraccount(ac,myquotes,totalsum,symbolto,ratio):
 	#totalsum=10
 	commvalue=1
 	pointvalue=1
-	sql="SELECT [symbol]  ,[pointvalue]  ,[commision] FROM [LogRecord].[dbo].[symbolpointvalue] where Symbol='%s'" % (symbolto)
+	sql="SELECT [symbol]  ,[multi] as [pointvalue]  ,[comm] as [commision] FROM [Future].[dbo].[Symbol_ID] where Symbol='%s'" % (symbolto)
 	res=ms.dict_sql(sql)
 	if res:
 		pointvalue=res[0]['pointvalue']
@@ -437,22 +437,13 @@ def multiple_ratio(myquotes,ratio):
 # show_all_ac('RU3v4e')
 
 
-
-sql="SELECT distinct  a.acname,c.symbol  FROM [LogRecord].[dbo].[temp_ac] a inner join Future.dbo.AC_RATIO b on a.acname=b.AC inner join Symbol_ID c on b.Stock=c.S_ID where a.acname>='PPtrend' order by a.acname"
-res=ms.dict_sql(sql)
-for item in res:
-	ac=item['acname']
-	symbol=item['symbol']
-	try:
-		(myquotes,totalsum)=input_groupbyquanyi(ac,symbol)
-		#仓位信息OK
-		# print totalsum
-		# for item in myquotes:
-		# 	print item 
-		ratio=1
-		myquotes=multiple_ratio(myquotes,ratio)
-		cal_quanyi(ac,myquotes,ratio*totalsum,symbol)
-	except:
-		print ac,item
+(myquotes,totalsum)=input_groupbyquanyi('RB3choosel','rb')
+#仓位信息OK
+print totalsum
+for item in myquotes:
+	print item 
+ratio=1
+myquotes=multiple_ratio(myquotes,ratio)
+cal_quanyi('RB3choosel',myquotes,ratio*totalsum,'rb')
 
 # show_account('myaccount2')

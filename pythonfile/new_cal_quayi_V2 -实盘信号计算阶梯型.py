@@ -11,8 +11,7 @@ import matplotlib.pylab as pl
 from matplotlib.dates import DayLocator, HourLocator, DateFormatter, drange
 import datetime
 ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
-ms105 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="future")
-# resList = ms.find_sql("select top 2 * from st_report")
+# resList = ms.find_sql("select top 2 * from real_st_report")
 # print resList
 # 返回行情list 或者0
 
@@ -22,13 +21,78 @@ def myround(num):
 	if num<=0:
 		return round(num+0.000000001)
 
-def input_groupbyquanyi(ac,quanyisymbol=''):
-	totalsum=1
-	symbol=quanyisymbol
-	#获取行情
-	sql="select datetime,rp,rp from [future].[dbo].[real_map_backup_forquanyi] where name='%s' order by datetime"% (ac)
-	positionlist=ms105.find_sql(sql)
-	if positionlist:
+def input_groupbyquanyi(ac,symbol,quanyisymbol=''):
+	if quanyisymbol=='':
+		quanyisymbol=symbol
+	# 清除临时表
+	try:
+		sql="drop table #temp_quanyi_new"
+		ms.insert_sql(sql)
+		sql="drop table #temp_p_log"
+		ms.insert_sql(sql)
+	except:
+		pass
+	# 产生临时p_log
+	#sql="select * into #temp_p_log from (SELECT   aa.*, sid.Symbol, (YEAR(GETDATE()) - 2000) * 10000 + MONTH(GETDATE()) * 100 + DAY(GETDATE()) AS D from (select  p.AC, p.STOCK, p.type, p.ST, p.P_size, a.ratio from P_BASIC p inner join AC_RATIO a on p.AC=a.AC and p.STOCK=a.Stock and p.type=a.type and p.AC='%s') as aa inner join Symbol_ID AS sid ON sid.S_ID = aa.STOCK where Symbol='%s') temp" % (ac,symbol)
+	sql ="select * into #temp_p_log from (select '%s' as ac,temp1.STOCK,temp1.type,temp1.ST,temp1.P_size as P_size,temp1.ratio,temp1.Symbol,temp1.num from (select p.*,a.ratio,sid.Symbol,isnull(n.num,1)as num from P_BASIC p inner join AC_RATIO a on p.AC=a.AC and p.AC='%s' inner join Symbol_ID  AS sid ON p.STOCK=sid.S_ID left join [LogRecord].[dbo].[Ninone_config] n on n.st=p.st) temp1 where Symbol='%s' )aaa"% (ac,ac,symbol)
+	print sql 
+	ms.insert_sql(sql)
+	sql="select SUM(p_size*ratio/100*num) as totalsum from #temp_p_log"
+	res=ms.dict_sql(sql)
+	totalsum=res[0]['totalsum']
+
+	#产生临时整个虚拟组real_st_report
+	sql="select * into  #temp_quanyi_new from ( select p.ac,p.symbol,real_st_report.type,real_st_report.id,real_st_report.p,real_st_report.pp,p.p_size,p.ratio ,real_st_report.st,real_st_report.stockdate from real_st_report  inner join #temp_p_log p on p.st=real_st_report.st and p.ac='%s' and p.symbol='%s')temp " % (ac,symbol)
+	print sql 
+	ms.insert_sql(sql)
+	#print 1,datetime.datetime.now()
+	sql="select count(1) from #temp_quanyi_new"
+	res=ms.find_sql(sql)[0][0]
+	if res>0:
+		#如果有记录才进行
+		#初始化每个时刻的仓位为0
+		deltepositionlist={}
+		sql="SELECT distinct stockdate from #temp_quanyi_new"
+		res1=ms.dict_sql(sql)
+		for item in res1:
+			deltepositionlist[item['stockdate']]=0
+		#初始化每个策略的初始位置为0
+		laststlistposition={}
+		sql="select distinct st from #temp_quanyi_new"
+		res1=ms.dict_sql(sql)
+		for item in res1:
+			laststlistposition[item['st']]=0
+		#开始计算每个时刻的仓位
+		sql="select (p*p_size*ratio/100) as p,st,stockdate from #temp_quanyi_new  order by stockdate"
+		res1=ms.dict_sql(sql)
+		for item in res1:
+			#赋值laststlistposition
+			if item['stockdate']==datetime.datetime(2016, 12, 2, 9, 14):
+				print "########@@@@@@@@@@@@@"
+				print deltepositionlist[item['stockdate']]
+				print item['p'],laststlistposition[item['st']]
+
+			deltepositionlist[item['stockdate']]=deltepositionlist[item['stockdate']]+(item['p']-laststlistposition[item['st']])
+			if item['stockdate']==datetime.datetime(2016, 12, 2, 9, 14):
+				print deltepositionlist[item['stockdate']]
+				print "@@@@@@@@@@@@@"
+
+			laststlistposition[item['st']]=item['p']
+		#print 2,datetime.datetime.now()
+
+		newlist=[(k,deltepositionlist[k]) for k in sorted(deltepositionlist.keys())]
+		#print 3,datetime.datetime.now()
+		positionlist=[]
+		lastp=0
+		for item in newlist:
+			temptotal=item[1]+lastp
+			lastp=temptotal
+			positionlist.append([item[0],item[1],temptotal])
+			# [datetime.datetime(2016, 7, 19, 14, 59), -4.0, 0.0]
+		#总仓位有部分与现有的不符合，但大多数一致，可以再找个虚拟组测试下
+		##print positionlist
+		for item in positionlist:
+			print item 
 		###以上已经准备好虚拟组的仓位信息
 		fisrttime=positionlist[0][0]
 		#[datetime.datetime(2015, 10, 21, 9, 0), 6.0, 6.0]
@@ -36,7 +100,7 @@ def input_groupbyquanyi(ac,quanyisymbol=''):
 		res=ms.dict_sql(sql)
 		# print res[:10]
 		#对行情日期遍历
-	
+
 		lastquote=res[0]
 		mymewquote=[]
 		temppositionlist=positionlist[:]
@@ -45,50 +109,50 @@ def input_groupbyquanyi(ac,quanyisymbol=''):
 		lastresvalue=res[-1]
 		res.append(lastresvalue)
 		for item in res:
-				StockDate=lastquote['StockDate']
-				C=lastquote['C']
-				if StockDate.strftime("%Y%m%d")!=item['StockDate'].strftime("%Y%m%d"):
-					# print 'StockDate is the last day'
-					
-					iskeep=1
-				else:
-					iskeep=0
-				lastquote=item
-				#--end
-				templastposition=[]
-				for item1 in temppositionlist:
-					if StockDate<=item1[0]:
-						#如果行情日期和仓位日期一直，直接插入
-						if StockDate==item1[0]:
-							temp=[StockDate,C,item1[2]]
+			StockDate=lastquote['StockDate']
+			C=lastquote['C']
+			if StockDate.strftime("%Y%m%d")!=item['StockDate'].strftime("%Y%m%d"):
+				# print 'StockDate is the last day'
+				
+				iskeep=1
+			else:
+				iskeep=0
+			lastquote=item
+			#--end
+			templastposition=[]
+			for item1 in temppositionlist:
+				if StockDate<=item1[0]:
+					#如果行情日期和仓位日期一直，直接插入
+					if StockDate==item1[0]:
+						temp=[StockDate,C,item1[2]]
+						mymewquote.append(temp)
+						if StockDate==datetime.datetime(2016, 8, 01, 14, 59):
+							print "1--item1",item1,lastpostiion
+						lastappend=temp
+						lastpostiion=item1
+
+
+					#如果行情日期小于仓位日期，取前一个仓位的日期
+					else:
+						temp=[StockDate,C,templastposition[2]]
+						if iskeep==1:
 							mymewquote.append(temp)
-							if StockDate==datetime.datetime(2016, 8, 01, 14, 59):
-								print "1--item1",item1,lastpostiion
 							lastappend=temp
-							lastpostiion=item1
-	
-	
-						#如果行情日期小于仓位日期，取前一个仓位的日期
+							if StockDate==datetime.datetime(2016, 8, 01, 14, 59):
+								print "2--iskeep",iskeep,StockDate
 						else:
-							temp=[StockDate,C,templastposition[2]]
-							if iskeep==1:
+							if lastappend==[] or lastappend[2]!=temp[2]:
 								mymewquote.append(temp)
-								lastappend=temp
 								if StockDate==datetime.datetime(2016, 8, 01, 14, 59):
-									print "2--iskeep",iskeep,StockDate
-							else:
-								if lastappend==[] or lastappend[2]!=temp[2]:
-									mymewquote.append(temp)
-									if StockDate==datetime.datetime(2016, 8, 01, 14, 59):
-										print "3--lastappend",lastappend,templastposition,temp
-									lastappend=temp	
-							lastpostiion=item1
-						break
-					templastposition=item1
-				if iskeep==1 and StockDate>temppositionlist[-1][0]:
-					temp=[StockDate,C,temppositionlist[-1][2]]
-					mymewquote.append(temp)
-					# lastappend=temp
+									print "3--lastappend",lastappend,templastposition,temp
+								lastappend=temp	
+						lastpostiion=item1
+					break
+				templastposition=item1
+			if iskeep==1 and StockDate>temppositionlist[-1][0]:
+				temp=[StockDate,C,temppositionlist[-1][2]]
+				mymewquote.append(temp)
+				# lastappend=temp
 		#插入当天行情的最后一根bar
 		lastClose=res[-1]['C']
 		lastdatetime=res[-1]['StockDate']
@@ -108,40 +172,43 @@ def input_groupbyquanyi(ac,quanyisymbol=''):
 				if timestr>=900 and  timestr<=929:
 					mymewquote.remove(item)
 			#--end
-		# #插入数据库
-		# lastrecordtime=datetime.datetime(2015,01,01,01,00)
-		# sql="select max(stockdate) as stockdate  from [Future].[dbo].[quanyi_log_groupby_v2] where ac='%s' and symbol='%s'" % (ac,symbol)
-		# timeinfo=ms.dict_sql(sql)[0]
-		# if timeinfo['stockdate'] is None:
-		# 	lastrecordtime=datetime.datetime(2015,01,01,01,00)
-		# else:
-		# 	lastrecordtime=timeinfo['stockdate']
-	
-		# insertvalue=""
-		# numofinsert=0
-		# for item in mymewquote:
-		# 	if item[0]>lastrecordtime:
-		# 		insertvalue=insertvalue+","+"('%s','%s',0,%s,'%s',%s,%s)" % (ac,symbol,item[1],item[0],item[2],totalsum)
-		# 		numofinsert=numofinsert+1
-		# 	if numofinsert>700:
-		# 		insertvalue=insertvalue.strip(',')
-		# 		sql="insert into [Future].[dbo].[quanyi_log_groupby_v2](ac,symbol,type,ClosePrice,stockdate,totalposition,totalNum) values%s" % 	insertvalue
-		# 		ms.insert_sql(sql)
-		# 		numofinsert=0
-		# 		insertvalue=""
-	
-	
-		# if insertvalue !="":
-		# 	insertvalue=insertvalue.strip(',')
-		# 	sql="insert into [Future].[dbo].[quanyi_log_groupby_v2](ac,symbol,type,ClosePrice,stockdate,totalposition,totalNum) values%s" % insertvalue
-		# 	ms.insert_sql(sql)
-		# 	# print sql
-		# ##--end
+		##插入数据库
+		lastrecordtime=datetime.datetime(2015,01,01,01,00)
+		sql="select max(stockdate) as stockdate  from [Future].[dbo].[real_quanyi_log_groupby_v2] where ac='%s' and symbol='%s'" % (ac,symbol)
+		timeinfo=ms.dict_sql(sql)[0]
+		if timeinfo['stockdate'] is None:
+			lastrecordtime=datetime.datetime(2015,01,01,01,00)
+		else:
+			lastrecordtime=timeinfo['stockdate']
+
+		insertvalue=""
+		numofinsert=0
+		for item in mymewquote:
+			if item[0]>lastrecordtime:
+				insertvalue=insertvalue+","+"('%s','%s',0,%s,'%s',%s,%s)" % (ac,symbol,item[1],item[0],item[2],totalsum)
+				numofinsert=numofinsert+1
+			if numofinsert>700:
+				insertvalue=insertvalue.strip(',')
+				sql="insert into [Future].[dbo].[real_quanyi_log_groupby_v2](ac,symbol,type,ClosePrice,stockdate,totalposition,totalNum) values%s" % insertvalue
+				ms.insert_sql(sql)
+				numofinsert=0
+				insertvalue=""
+
+
+		if insertvalue !="":
+			insertvalue=insertvalue.strip(',')
+			sql="insert into [Future].[dbo].[real_quanyi_log_groupby_v2](ac,symbol,type,ClosePrice,stockdate,totalposition,totalNum) values%s" % insertvalue
+			ms.insert_sql(sql)
+			# print sql
+		##--end
 		return mymewquote,totalsum
 		
 	else:
 		return 0,0.0001
 		
+
+
+
 
 
 
@@ -153,7 +220,7 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto):
 	atime=datetime.datetime.now()
 	todaytime=int(datetime.datetime.now().strftime("%Y%m%d"))-20000000
 	#todaytime=160628
-	sql="delete from dailyquanyi_V2 where ac='%s' and symbol='%s' and D=%s" % (ac,symbolto,todaytime)
+	sql="delete from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D=%s" % (ac,symbolto,todaytime)
 	ms.insert_sql(sql)
 	if totalsum<=0:
 		totalsum=1000000
@@ -178,15 +245,13 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto):
 	#得到总的需要计算日期的天数
 	#dayquanyilist=[quanyi,times,ref(-1)position]
 	dayquanyilist={}
-	sql="select distinct CONVERT(varchar(10), [datetime], 120 ) as datename from [future].[dbo].[real_map_backup] order by datename"
-	datelist=ms105.dict_sql(sql)
+	sql="select distinct CONVERT(varchar(10), stockdate, 120 ) as datename from [Future].[dbo].[real_quanyi_log_groupby_v2] order by datename"
+	datelist=ms.dict_sql(sql)
 	for item in datelist:
 		mytime=item['datename'].replace('-','')
 		mytime=str(int(mytime)-20000000)
 		dayquanyilist[mytime]=[0,0,0]
 	daylists=[k for k in sorted(dayquanyilist.keys())]
-	#print daylists
-	#print tempquotes
 
 
 	#将总权益分成每天的权益，最后再合成
@@ -215,7 +280,7 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto):
 
 
 
-	sql="select MAX(D)  as D from [Future].[dbo].[dailyquanyi_V2] where ac='%s' and Symbol='%s'" % (ac,symbolto)
+	sql="select MAX(D)  as D from [Future].[dbo].[real_dailyquanyi_V2] where ac='%s' and Symbol='%s'" % (ac,symbolto)
 	datelist=ms.dict_sql(sql)[0]
 	if datelist['D'] is None:
 		lastrecordday=150101
@@ -227,10 +292,19 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto):
 		changeD=item[0]
 		times=item[1][1]
 		if changeD>lastrecordday:
-			sql="insert into dailyquanyi_V2(ac,symbol,position,quanyi,D,totalnum,times) values('%s','%s',%s,%s,%s,%s,%s)" % (ac,symbolto,myround(position),lastdayquanyi,changeD,totalsum,times)
+			sql="insert into real_dailyquanyi_V2(ac,symbol,position,quanyi,D,totalnum,times) values('%s','%s',%s,%s,%s,%s,%s)" % (ac,symbolto,myround(position),lastdayquanyi,changeD,totalsum,times)
 			ms.insert_sql(sql)
 
 	##--end
+
+
+
+	
+
+
+
+
+
 
 
 
@@ -389,8 +463,8 @@ def real_account_groupbyquanyi(ac,symbol):
 	res=ms.dict_sql(sql)
 	totalsum=res[0]['totalsum']
 
-	#产生临时整个虚拟组st_report
-	sql="select * into  #temp_quanyi_new from ( select p.ac,p.symbol,st_report.type,st_report.id,st_report.p,st_report.pp,p.p_size,p.ratio ,st_report.st,st_report.stockdate from st_report  inner join #temp_p_log p on p.st=st_report.st and p.ac='%s' and p.symbol='%s')temp " % (ac,symbol)
+	#产生临时整个虚拟组real_st_report
+	sql="select * into  #temp_quanyi_new from ( select p.ac,p.symbol,real_st_report.type,real_st_report.id,real_st_report.p,real_st_report.pp,p.p_size,p.ratio ,real_st_report.st,real_st_report.stockdate from real_st_report  inner join #temp_p_log p on p.st=real_st_report.st and p.ac='%s' and p.symbol='%s')temp " % (ac,symbol)
 	#print sql
 	ms.insert_sql(sql)
 	#print 1,datetime.datetime.now()
@@ -540,44 +614,34 @@ def real_account_groupbyquanyi(ac,symbol):
 
 
 
-# (myquotes,totalsum)=input_groupbyquanyi('IF_Huitiaoall_0','IH')
-
-# cal_quanyi('IF_Huitiaoall_0',myquotes,totalsum,'IH')
+(myquotes,totalsum)=input_groupbyquanyi('pStepMultiI','p','p')
+for item in myquotes:
+	print item 
+# cal_quanyi('RBQGYP_TG',myquotes,totalsum,'RBnight')
 
 # show_account('myaccount2')
 
 
-def write_heart(type,name):
-	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
-	sql="update [LogRecord].[dbo].[quotes_python_heart] set [updatetime]=getdate() where type='%s' and name='%s' and [isactive]=1" % (type,name)
-	ms.insert_sql(sql)
 
 
+def main_fun():
 
 
-
-def main_fun(acanme=''):
-	#sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=3 and issumps=0 and isyepan in (0,1,12)  and acname='%s' order by id desc " % (acanme)
-	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=3 and issumps=0 and isyepan in (0,1,12) order by id desc "
+	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1 and issumps=0 and isyepan in (0,1,12)  AND quanyisymbol not in ('IF','IC','IH')  and acname in (SELECT f_ac   FROM [Future].[dbo].[p_follow] where ac='StepMultiI300w')order by id desc "
 	res=ms.dict_sql(sql)
 	for item in res:
 		print item['acname'],item['id']
 		positionsymbol=item['positionsymbol']
 		quanyisymbol=item['quanyisymbol']
-		(myquotes,totalsum)=input_groupbyquanyi(item['acname'],quanyisymbol)
-		#print 'myquotes',myquotes
+		(myquotes,totalsum)=input_groupbyquanyi(item['acname'],positionsymbol,quanyisymbol)
+		# print 'myquotes',myquotes
 		#直接设置数字 10
-		print "cal_quanyi"
 		cal_quanyi(item['acname'],myquotes,totalsum,quanyisymbol)
 
 
 
 
-if len(sys.argv)>1:
-    acanme=sys.argv[1]
 
 
-#acanme='LUD_5YD_0'
-main_fun('')
 
-# write_heart('daily_equity','nosum1')
+# main_fun()

@@ -624,7 +624,7 @@ def futureaccountone(request):
 	account=userid
 	ICdata=[]
 	totalquanyiresult=order_get_dailyquanyi_forLilun(account,150521)
-	print "totalquanyiresult['result']",totalquanyiresult['result'][0:10]
+	# print "totalquanyiresult['result']",totalquanyiresult['result'][0:10]
 	#计算相应的股指映射权益 [[date,value],[]]
 	stock_yingshe_quanyi=order_get_stock_yingshe_quanyi(account,150521)
 	if totalquanyiresult['ispass']==0:

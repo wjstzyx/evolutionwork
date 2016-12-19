@@ -60,7 +60,7 @@ def get_Kbarinfo(ms,period,stockdate):
     for item in res:
         symbol=item['Symbol']
         sql="Insert_Kbars '%s','%s',%s,%s,%s,%s,%s,%s,%s" % (symbol,stockdate,item['O'],item['C'],item['H'],item['L'],item['V'],item['OPI'],period)
-        # print sql
+        print sql
         ms.insert_sql(sql)
 
 
@@ -103,29 +103,83 @@ def write_heart(type,name):
     ms.insert_sql(sql)
 
 
+def main_fun(ms,starttime,period,type='history'):
+    if period in (5,15,20,30,60):
+        if type=='history':
+            resultlist=[]
+            total_day_generate(fromdate=starttime,interval=period,resultlist=resultlist)
+            #resultlist中存储着所需要的K线的开始时间 [datetime.datetime(2014, 1, 1, 9, 0), datetime.datetime(2014, 1, 1, 9, 15), datetime.datetime(2014, 1, 1, 9, 30)
+            for myitem in resultlist:
+                print myitem
+                get_Kbarinfo_history(ms,period,myitem)
+        if type=='now':
+            #从Tsymbol_nmin 表中选择最新的Kbar时间
+            resultlist=[]
+            total_day_generate(fromdate='2016-09-01',interval=period,resultlist=resultlist)
+            sql="  select distinct  top(2)   stockdate from [Future].[dbo].[TSymbol_%smin] order by stockdate desc" % (period)
+            res=ms.dict_sql(sql)
+            if not res:
+                fromtime=resultlist[0]
+                oldtime=resultlist[0]
+            if len(res)==1:
+                fromtime=res[0]['stockdate']
+                oldtime=res[0]['stockdate']
+            if len(res)==2:
+                oldtime=res[1]['stockdate']
+                fromtime=res[0]['stockdate']
+            print oldtime,fromtime
+            get_Kbarinfo(ms,period,oldtime)
+            get_Kbarinfo(ms,period,fromtime)
+            lasttime=100
+            while(1):
+                sql="select datediff(MINUTE,'%s',max(stockdate)) as diff from Tsymbol" % (fromtime)
+                res=ms.dict_sql(sql)
+                if res[0]['diff']>=period:
+                    oldtime=fromtime
+                    for item in resultlist:
+                        if item>oldtime:
+                            fromtime=item
+                            break
+                get_Kbarinfo(ms,period,oldtime)
+                get_Kbarinfo(ms,period,fromtime)
+                time.sleep(5)
+                nowtime=int(datetime.datetime.now().strftime('%H%M'))
+                print nowtime
+                if lasttime!=nowtime:
+                    write_heart('Kbars','%s' % (period))
+                    lasttime=nowtime
 
-def main_fun():
-    ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
-    ms05 = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
-    ms03 = MSSQL(host="192.168.0.3\SQLEXPRESS",user="future",pwd="K@ra0Key",db="future")
-    # get_Kbarinfo(ms05,15,'2016-12-13 10:00:00')
-    # get_Kbarinfo(ms03,15,'2016-12-13 10:00:00')
+                #写心跳
 
-    resultlist=[]
-    total_day_generate(fromdate='2016-09-01',interval=15,resultlist=resultlist)
-    sql="  select distinct  top(60)   stockdate from [Future].[dbo].[TSymbol_%smin] order by stockdate desc" % (15)
-    res=ms.dict_sql(sql)
-    firsttime=res[-1]['stockdate']
-    lasttime=res[0]['stockdate']
-    aaa=[item for item in resultlist if item >=firsttime ]
-    aaa=[item for item in aaa if item <=lasttime ]
-    for item in aaa:
-        print item 
-        get_Kbarinfo(ms05,15,item)
-        get_Kbarinfo(ms03,15,item)
-    write_heart('Kbars','queren')
-
-main_fun()
+                if nowtime>=500 and nowtime<=600:
+                    exit()
 
 
 
+
+
+
+    #产生目标K线时间list
+
+#usage xxxx.py ms05 15
+
+if len(sys.argv)==3:
+    database=sys.argv[1]
+    period=int(sys.argv[2])
+else:
+    database='ms05111'
+    period=511
+
+if database=='ms03':
+    try:
+        ms03 = MSSQL(host="192.168.0.3\SQLEXPRESS",user="future",pwd="K@ra0Key",db="future")
+    except:
+        pass
+    db=ms03
+if database=='ms05':
+    try:
+        ms05 = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+    except:
+        pass
+    db=ms05
+main_fun(db,starttime='2015-01-05',period=period,type='history')
