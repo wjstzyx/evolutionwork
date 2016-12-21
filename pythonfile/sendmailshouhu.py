@@ -14,6 +14,28 @@ nowtimehour=datetime.datetime.now().strftime("%H:%M")
 print nowtimehour
 
 
+
+def gene_bar(ms,period):
+	try:
+		cmd="ps -ef|grep 'generate_merge_bars_index_2.py %s %s' |grep -v 'grep' |awk '{print $2}'" % (ms,period)
+		output=os.popen(cmd)
+		res=output.read()
+		print res,type(res)
+		if res and (nowtimehour=='11:46' or nowtimehour=='19:46'):
+			processid=res
+			print processid
+			cmd="kill %s" % (processid)
+			os.system(cmd)
+			cmd='python /home/yuyang/myfile/evolutionwork/pythonfile/generate_merge_bars_index_2.py %s %s &' % (ms,period)
+			os.system(cmd)
+		if res=='':
+			cmd='python /home/yuyang/myfile/evolutionwork/pythonfile/generate_merge_bars_index_2.py %s %s &' % (ms,period)
+			os.system(cmd)
+	except:
+		pass
+
+
+
 try:
 	cmd="ps -ef|grep 'read_maillist.py'|grep -v 'grep'|awk '{print $2}'"
 	output=os.popen(cmd)
@@ -49,41 +71,18 @@ try:
 except:
 	pass	
 
-try:
-	cmd="ps -ef|grep 'generate_merge_bars_index_2.py ms05 15' |grep -v 'grep' |awk '{print $2}'"
-	output=os.popen(cmd)
-	res=output.read()
-	print res,type(res)
-	if res and (nowtimehour=='11:46' or nowtimehour=='19:46'):
-		processid=res
-		print processid
-		cmd="kill %s" % (processid)
-		os.system(cmd)
-		cmd='python /home/yuyang/myfile/evolutionwork/pythonfile/generate_merge_bars_index_2.py ms05 15 &'
-		os.system(cmd)
-	if res=='':
-		cmd='python /home/yuyang/myfile/evolutionwork/pythonfile/generate_merge_bars_index_2.py ms05 15 &'
-		os.system(cmd)
-except:
-	pass
 
-try:
-	cmd="ps -ef|grep 'generate_merge_bars_index_2.py ms03 15' |grep -v 'grep' |awk '{print $2}'"
-	output=os.popen(cmd)
-	res=output.read()
-	print res,type(res)
-	if res and (nowtimehour=='11:46' or nowtimehour=='19:46'):
-		processid=res
-		print processid
-		cmd="kill %s" % (processid)
-		os.system(cmd)
-		cmd='python /home/yuyang/myfile/evolutionwork/pythonfile/generate_merge_bars_index_2.py ms03 15 &'
-		os.system(cmd)
-	if res=='':
-		cmd='python /home/yuyang/myfile/evolutionwork/pythonfile/generate_merge_bars_index_2.py ms03 15 &'
-		os.system(cmd)
-except:
-	pass
+gene_bar('ms05',5)
+gene_bar('ms03',5)
+gene_bar('ms05',15)
+gene_bar('ms03',15)
+
+
+
+
+
+
+
 
 # nohup python /home/yuyang/myfile/evolutionwork/website1/elmanager/manage.py runserver 0.0.0.0:9001 &
 
