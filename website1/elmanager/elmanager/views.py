@@ -73,6 +73,16 @@ def jieti_st_position(request):
 			sql="select a.*,b.P as lilunP, b.tradetime as liluntime,c.P,c.tradetime,d.Symbol,b.TradName from (select st from P_BASIC where ac in (select f_ac from p_follow  where ac='StepMulti2' ))a left join [Future].[dbo].[for_backtest_Trading_logSymbol] b on a.ST=b.ST left join Future.dbo.Trading_logSymbol c on a.ST=c.ST left join Future.dbo.Symbol_ID d on cast(left(RIGHT(a.st,7),2) as int)=d.S_ID where d.Symbol not in ('AGN','AUN','CUN','Inight','Rbnight','MEZL','Pnight','LZL') and b.P<>c.P "
 			res1=ms.dict_sql(sql)
 			whichtype=1
+		if sttype=="jieti2_st":
+			#阶梯2--理论VS实际策略差异
+			sql="select t.P,t.tradetime,t.TradName,replace(p.AC,'StepMulti2','') as symbol,t.st from p_follow pf inner join P_BASIC  p on pf.F_ac=p.AC and pf.AC='StepMulti2' left join Trading_logSymbol t on p.ST=t.ST order by p.ac,t.p"
+			res1=ms.dict_sql(sql)
+			whichtype=2
+		if sttype=="jieti1_st":
+			#阶梯2--理论VS实际策略差异
+			sql="select t.P,t.tradetime,t.TradName,replace(p.AC,'StepMultiI','') as symbol,t.st from p_follow pf inner join P_BASIC  p on pf.F_ac=p.AC and pf.AC='StepMultiI300w' left join Trading_logSymbol t on p.ST=t.ST order by p.ac,t.p"
+			res1=ms.dict_sql(sql)
+			whichtype=2
 
 
 

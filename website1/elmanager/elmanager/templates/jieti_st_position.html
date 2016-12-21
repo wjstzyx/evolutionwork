@@ -55,6 +55,8 @@ function add_new_monitor(){
               <tr>
                 <td width="250px"><button class="btn" name="sttype" value="jieti1">阶梯1--理论VS实际策略差异</button></td>
                 <td width="250px"><button class="btn" name="sttype" value="jieti2">阶梯2--理论VS实际策略差异</button></td>
+                <td width="250px"><button class="btn" name="sttype" value="jieti1_st">阶梯1--实际信号</button></td>
+                <td width="250px"><button class="btn" name="sttype" value="jieti2_st">阶梯2--实际信号</button></td>
 
               </tr>
 <!--               <tr>
@@ -106,11 +108,51 @@ function add_new_monitor(){
            <tr> 
               <td><a href='/index/monitor/st_heart_analysis/?st={{item.st}}'>{{item.st}}</a></td>
               <td>{{item.lilunP}}</td>
-              <td>{{item.liluntime}}</td>
+              <td>{{item.liluntime|date:"Y-m-d H:i:s"}}</td>
               <td>{{item.P}}</td>
-              <td>{{item.tradetime}}</td>
+              <td>{{item.tradetime|date:"Y-m-d H:i:s"}}</td>
               <td>{{item.Symbol}}</td>
               <td>{{item.TradName}}</td>
+           </tr> 
+            {% endfor %}
+          </tbody> 
+         </table>          
+        </div> 
+
+       </div> 
+      </div> 
+     </div> 
+    </div> 
+{% endif %}
+
+{% if whichtype == 2 %}
+    <div class="row"> 
+     <div class="col-lg-8"> 
+      <div class="panel panel-default"> 
+       <div class="panel-heading"> 
+        <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>实际信号</h3> 
+       </div>
+       <div class="panel-body"> 
+        <div class="table-responsive"> 
+         <table class="table table-bordered table-hover table-striped" id="table1"> 
+          <thead> 
+           <tr> 
+            <th align=center >实际信号</th> 
+            <th align=center >实际信号时间</th> 
+            <th align=center >策略名字</th>
+            <th align=center >品种</th>
+            <th align=center>策略号</th>
+           </tr> 
+          </thead>  
+          <tbody id="mailtotable"> 
+            {% for item in res1 %}
+           <tr> 
+
+              <td>{{item.P}}</td>
+              <td>{{item.tradetime|date:"Y-m-d H:i:s"}}</td>
+              <td>{{item.TradName}}</td>
+              <td>{{item.symbol}}</td>
+              <td><a href='/index/monitor/st_heart_analysis/?st={{item.st}}'>{{item.st}}</a></td>
            </tr> 
             {% endfor %}
           </tbody> 
