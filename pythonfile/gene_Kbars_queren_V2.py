@@ -201,7 +201,6 @@ def compare_kbars(ms,period,fromtime):
                 print 'TSymbol_%smin short of Kbars  %s %s' % (period,symbol,item[0])
                 # use ather method fix the date
                 get_Kbarinfo(ms,period,item[0])
-    write_heart('Kbars','queren')
 
 
 
@@ -210,25 +209,32 @@ def main_fun():
     #ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
     ms05 = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
     ms03 = MSSQL(host="192.168.0.3\SQLEXPRESS",user="future",pwd="K@ra0Key",db="future")
-    fromtime=datetime.datetime.now()-datetime.timedelta(days=20)
+    fromtime=datetime.datetime.now()-datetime.timedelta(days=2)
     fromtime=fromtime.strftime('%Y-%m-%d')
     print fromtime
+    index=0
     try:
         compare_kbars(ms03,15,fromtime)
     except:
+        index=index+1
         pass
     try:
         compare_kbars(ms05,15,fromtime)
     except:
+        index=index+1
         pass
     try:
         compare_kbars(ms03,5,fromtime)
     except:
+        index=index+1
         pass
     try:
         compare_kbars(ms05,5,fromtime)
     except:
+        index=index+1
         pass
+    if index==0:
+        write_heart('Kbars','queren')
 # ms05 = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 # get_Kbarinfo(ms05,5,'2016-12-02 14:00:00')
 main_fun()
