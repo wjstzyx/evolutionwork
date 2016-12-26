@@ -36,13 +36,13 @@ function add_new_monitor(){
 </script>
 
   <div id="page-wrapper"> 
-   <div class="container-fluid" style="height: 320px"> 
+   <div class="container-fluid" style="height: 250px"> 
     <!-- Page Heading --> 
       <div class="row"> 
        <div class="col-lg-12"> 
         <h1 class="page-header"> 阶梯型策略理论实际信号对比 </h1> 
         <ol class="breadcrumb"> 
-         <li class="active"> <i class="fa fa-dashboard"></i> 阶梯型策略理论实际信号对比---请先确认理论AB已经正确打开-理论AB 在.10机器</li> 
+         <li class="active"> <i class="fa fa-dashboard"></i> 阶梯型策略理论实际信号对比---实际信号为C++产生-理论AB 在.10机器</li> 
         </ol> 
        </div> 
       </div>
@@ -52,13 +52,22 @@ function add_new_monitor(){
           <div class="row">
             <div class="col-lg-10">
             <table>
-              <tr>
-                <td width="250px"><button class="btn" name="sttype" value="jieti1">阶梯1--理论VS实际策略差异</button></td>
+<!--               <tr>
+                <td width="250px"><button class="btn" name="sttype" value="jieti1">阶梯1--AB/C++策略差异</button></td>
                 <td width="250px"><button class="btn" name="sttype" value="jieti2">阶梯2--理论VS实际策略差异</button></td>
                 <td width="250px"><button class="btn" name="sttype" value="jieti1_st_symbol">阶梯1--实际信号(按照品种排序)</button></td>
                 <td width="250px"><button class="btn" name="sttype" value="jieti1_st_name">阶梯1--实际信号(按策略名排序)</button></td>
                 <td width="250px"><button class="btn" name="sttype" value="jieti2_st_symbol">阶梯2--实际信号(按照品种排序)</button></td>
                 <td width="250px"><button class="btn" name="sttype" value="jieti2_st_name">阶梯2--实际信号(按策略名排序)</button></td>
+
+              </tr> -->
+
+              <tr>
+                <td width="250px"><button class="btn" name="sttype" value="jieti1">阶梯1--AB/C++策略差异</button></td>
+                <td width="250px"><button class="btn" name="sttype" value="jieti2">阶梯2--AB/C++策略差异</button></td>
+                <td width="250px"><button class="btn" name="sttype" value="tuji1">突击1--AB/C++策略差异</button></td>
+                <td width="250px"><button class="btn" name="sttype" value="tuji2">突击2--AB/C++策略差异</button></td>
+                <td width="250px"><button class="btn" name="sttype" value="tuji3">突击3--AB/C++策略差异</button></td>
 
               </tr>
 <!--               <tr>
@@ -86,35 +95,27 @@ function add_new_monitor(){
 
 {% if whichtype == 1 %}
     <div class="row"> 
-     <div class="col-lg-8"> 
+     <div class="col-lg-4"> 
       <div class="panel panel-default"> 
        <div class="panel-heading"> 
-        <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>理论VS实际策略差异(最多显示200个)</h3> 
+        <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>{{sttype}}  理论VS实际策略差异</h3> 
        </div>
        <div class="panel-body"> 
         <div class="table-responsive"> 
          <table class="table table-bordered table-hover table-striped" id="table1"> 
           <thead> 
            <tr> 
-            <th align=center>策略号</th>
-            <th align=center>理论信号</th>
-            <th align=center >理论信号时间</th> 
-            <th align=center >实际信号</th> 
-            <th align=center >实际信号时间</th> 
-            <th align=center >品种</th>
-            <th align=center >策略名字</th> 
+            <th align=center>品种（品种号）</th>
+            <th align=center>实际仓位（C++）</th>
+            <th align=center >理论仓位（AB）</th> 
            </tr> 
           </thead>  
           <tbody id="mailtotable"> 
             {% for item in res1 %}
            <tr> 
-              <td><a href='/index/monitor/st_heart_analysis/?st={{item.st}}'>{{item.st}}</a></td>
-              <td>{{item.lilunP}}</td>
-              <td>{{item.liluntime|date:"Y-m-d H:i:s"}}</td>
-              <td>{{item.P}}</td>
-              <td>{{item.tradetime|date:"Y-m-d H:i:s"}}</td>
-              <td>{{item.Symbol}}</td>
-              <td>{{item.TradName}}</td>
+              <td><a href='/index/monitor/distinct_cplus_ab/?st={{item.symbol}}@{{item.STOCK}}@{{sttype}}'>{{item.symbol}}-{{item.STOCK}}</a></td>
+              <td {% if item.ratio != item.ab_ratio %} bgColor=#0099ff {% endif %}>{{item.ratio}}</td>
+              <td>{{item.ab_ratio}}</td>
            </tr> 
             {% endfor %}
           </tbody> 
@@ -154,7 +155,7 @@ function add_new_monitor(){
               <td>{{item.tradetime|date:"Y-m-d H:i:s"}}</td>
               <td>{{item.TradName}}</td>
               <td>{{item.symbol}}</td>
-              <td><a href='/index/monitor/st_heart_analysis/?st={{item.st}}'>{{item.st}}</a></td>
+              <td><a href='/index/monitor/distinct_cplus_ab/?st={{item.st}}@{{sttype}}'>{{item.st}}</a></td>
            </tr> 
             {% endfor %}
           </tbody> 

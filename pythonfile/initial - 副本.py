@@ -14,12 +14,12 @@ ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 # -*- coding: utf-8 -*-
 
 
-sourcedir=r'C:\Users\YuYang\Desktop\StepMultituji1'
+sourcedir=r'C:\Users\YuYang\Desktop\ssss\tuji3'
 symboldir=os.listdir(sourcedir)
 for item in symboldir:
 
 	if os.path.isdir(sourcedir+'\\'+item):
-		matchObj = re.match( r'(.*)StepMultituji1', item, re.M|re.I)
+		matchObj = re.match( r'(.*)StepMultituji3', item, re.M|re.I)
 		if matchObj:
 			symbol=matchObj.group(1).strip(" ")
 
@@ -36,7 +36,7 @@ for item in symboldir:
 				if mma:
 					st= mma.group(1)
 					#print p_basic
-					# print item+','+str(s_id)+','+str(st)+','+str(1)+','+str(1)
+					#print item+','+str(s_id)+','+str(st)+','+str(1)+','+str(1)
 			#print p_follow
 			# print 'StepMultituji1,'+item+',1,1,'+str(s_id)+',1'
 			#ac_ratio

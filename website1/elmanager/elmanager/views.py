@@ -16,6 +16,38 @@ from dbconn import MSSQL
 # ms1 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="future")
 
 
+def distinct_cplus_ab(request):
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	if request.GET:
+		sttype=request.GET.get("st","")
+		print sttype
+		symbol=sttype.split('@')[0]
+		s_id=sttype.split('@')[1]
+		type=sttype.split('@')[2]
+		if type=='jieti1':
+			ac_count="StepMultiI300w"
+		if type=='jieti2':
+			ac_count="StepMulti2"
+		if type=='tuji1':
+			ac_count="StepMultituji1"
+
+		sql="select p,st,tradetime,TradName from Trading_logSymboltest where st in (select st from P_BASIC_cplus where ac in ( select f_ac from p_follow where ac='%s' and stock='%s')) order by p" % (ac_count,s_id)
+		realres=ms.dict_sql(sql)
+		sql="select p,st,tradetime,TradName from for_backtest_Trading_logSymbol where st in (select st from P_BASIC where ac in ( select f_ac from p_follow where ac='%s' and stock='%s')) order by p" % (ac_count,s_id)
+		lilunres=ms.dict_sql(sql)
+
+
+
+	return render_to_response('distinct_cplus_ab.html',{
+		'data':'',
+		'lilunres':lilunres,
+		'realres':realres,
+
+
+	})	
+
+
+
 def st_heart_analysis(request):
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 	if request.GET:
@@ -58,21 +90,27 @@ def jieti_st_position(request):
 	res11=""
 	res21=""
 	res31=""
+	sttype=""
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 	if request.POST:
 		sttype=request.POST.get("sttype","")
 		print sttype
 		if sttype=="jieti1":
-			#阶梯1--理论VS实际策略差异
-			sql="select a.*,b.P as lilunP, b.tradetime as liluntime,c.P,c.tradetime,d.Symbol,b.TradName from (select st from P_BASIC where ac in (select f_ac from p_follow  where ac='StepMultiI300w' ))a left join [Future].[dbo].[for_backtest_Trading_logSymbol] b on a.ST=b.ST left join Future.dbo.Trading_logSymbol c on a.ST=c.ST left join Future.dbo.Symbol_ID d on cast(left(RIGHT(a.st,7),2) as int)=d.S_ID where d.Symbol not in ('AGN','AUN','CUN','Inight','Rbnight','MEZL','Pnight','LZL') and b.P<>c.P "
+			sql=" select *from (  select mmk.*,symbol_id.S_ID from ( select sum(t.P) as sump_number,round(sum(t.P*ma.ratio),0) as ratio,t.symbol from (   select pb.st,pb.p_size*ac.ratio/100 as ratio from p_follow p inner join p_basic_cplus pb on p.F_ac=pb.ac and p.AC='StepMultiI300w'   inner join AC_RATIO ac on p.F_ac=ac.AC) ma   left join  [Future].[dbo].[Trading_logSymbolTest] t on   ma.st=t.ST   where t.typeac='stair1'   group by t.symbol  )mmk inner join symbol_id on mmk.symbol=symbol_id.Symbol  ) ja full outer join ( select sum(st.P) as ab_sump_number,round(sum(st.P*sma.ratio),0) as ab_ratio,sma.STOCK from (    select spb.st,spb.p_size*sac.ratio/100 as ratio,spb.STOCK from p_follow sp inner join p_basic spb on sp.F_ac=spb.ac and sp.AC='StepMultiI300w'   inner join AC_RATIO sac on sp.F_ac=sac.AC   ) sma    left join  [Future].[dbo].[for_backtest_Trading_logSymbol] st on    sma.st=st.ST   group by sma.STOCK  ) jb on ja.S_ID=jb.STOCK   order by ja.symbol "			
+
 			res1=ms.dict_sql(sql)
 			whichtype=1
 
 		if sttype=="jieti2":
-			#阶梯2--理论VS实际策略差异
-			sql="select a.*,b.P as lilunP, b.tradetime as liluntime,c.P,c.tradetime,d.Symbol,b.TradName from (select st from P_BASIC where ac in (select f_ac from p_follow  where ac='StepMulti2' ))a left join [Future].[dbo].[for_backtest_Trading_logSymbol] b on a.ST=b.ST left join Future.dbo.Trading_logSymbol c on a.ST=c.ST left join Future.dbo.Symbol_ID d on cast(left(RIGHT(a.st,7),2) as int)=d.S_ID where d.Symbol not in ('AGN','AUN','CUN','Inight','Rbnight','MEZL','Pnight','LZL') and b.P<>c.P "
+			sql=" select *from (  select mmk.*,symbol_id.S_ID from ( select sum(t.P) as sump_number,round(sum(t.P*ma.ratio),0) as ratio,t.symbol from (   select pb.st,pb.p_size*ac.ratio/100 as ratio from p_follow p inner join p_basic_cplus pb on p.F_ac=pb.ac and p.AC='StepMulti2'   inner join AC_RATIO ac on p.F_ac=ac.AC) ma   left join  [Future].[dbo].[Trading_logSymbolTest] t on   ma.st=t.ST   where t.typeac='stair2'   group by t.symbol  )mmk inner join symbol_id on mmk.symbol=symbol_id.Symbol  ) ja full outer join ( select sum(st.P) as ab_sump_number,round(sum(st.P*sma.ratio),0) as ab_ratio,sma.STOCK from (    select spb.st,spb.p_size*sac.ratio/100 as ratio,spb.STOCK from p_follow sp inner join p_basic spb on sp.F_ac=spb.ac and sp.AC='StepMulti2'   inner join AC_RATIO sac on sp.F_ac=sac.AC   ) sma    left join  [Future].[dbo].[for_backtest_Trading_logSymbol] st on    sma.st=st.ST   group by sma.STOCK  ) jb on ja.S_ID=jb.STOCK   order by ja.symbol "
 			res1=ms.dict_sql(sql)
 			whichtype=1
+
+		if sttype=="tuji1":
+			sql=" select *from (  select mmk.*,symbol_id.S_ID from ( select sum(t.P) as sump_number,round(sum(t.P*ma.ratio),0) as ratio,t.symbol from (   select pb.st,pb.p_size*ac.ratio/100 as ratio from p_follow p inner join p_basic_cplus pb on p.F_ac=pb.ac and p.AC='StepMultituji1'   inner join AC_RATIO ac on p.F_ac=ac.AC) ma   left join  [Future].[dbo].[Trading_logSymbolTest] t on   ma.st=t.ST   where t.typeac='tuji1'   group by t.symbol  )mmk inner join symbol_id on mmk.symbol=symbol_id.Symbol  ) ja full outer join ( select sum(st.P) as ab_sump_number,round(sum(st.P*sma.ratio),0) as ab_ratio,sma.STOCK from (    select spb.st,spb.p_size*sac.ratio/100 as ratio,spb.STOCK from p_follow sp inner join p_basic spb on sp.F_ac=spb.ac and sp.AC='StepMultituji1'   inner join AC_RATIO sac on sp.F_ac=sac.AC   ) sma    left join  [Future].[dbo].[for_backtest_Trading_logSymbol] st on    sma.st=st.ST   group by sma.STOCK  ) jb on ja.S_ID=jb.STOCK   order by ja.symbol "
+			res1=ms.dict_sql(sql)
+			whichtype=1
+
 		if sttype=="jieti2_st_symbol":
 			#阶梯2--理论VS实际策略差异
 			sql="select t.P,t.tradetime,t.TradName,replace(p.AC,'StepMulti2','') as symbol,t.st from p_follow pf inner join P_BASIC  p on pf.F_ac=p.AC and pf.AC='StepMulti2' left join Trading_logSymbol t on p.ST=t.ST order by p.ac,t.p"
@@ -107,6 +145,7 @@ def jieti_st_position(request):
 		'data':data,
 		'whichtype':whichtype,
 		'res1':res1,
+		'sttype':sttype,
 
 	})	
 
