@@ -132,7 +132,10 @@ def jieti_st_position(request):
 			res1=ms.dict_sql(sql)
 			whichtype=2
 
-
+		if sttype=="catch_distinct":
+			sql="SELECT [stno]      ,aa.Symbol      ,[stname]      ,[ps]      ,[refps]      ,[doing]      ,t.TradName  FROM [LogRecord].[dbo].[jt_strategy_state] a   inner join Trading_logSymbol t   on a.stno=t.ST   inner join symbol_id aa   on a.stockid=aa.S_ID  where ps<>0 and len(aa.Symbol)<=2 order by t.TradName  "
+			res1=ms.dict_sql(sql)
+			whichtype=3
 
 
 

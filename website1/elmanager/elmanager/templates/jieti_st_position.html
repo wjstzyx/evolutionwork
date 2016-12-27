@@ -52,15 +52,12 @@ function add_new_monitor(){
           <div class="row">
             <div class="col-lg-10">
             <table>
-<!--               <tr>
-                <td width="250px"><button class="btn" name="sttype" value="jieti1">阶梯1--AB/C++策略差异</button></td>
-                <td width="250px"><button class="btn" name="sttype" value="jieti2">阶梯2--理论VS实际策略差异</button></td>
-                <td width="250px"><button class="btn" name="sttype" value="jieti1_st_symbol">阶梯1--实际信号(按照品种排序)</button></td>
-                <td width="250px"><button class="btn" name="sttype" value="jieti1_st_name">阶梯1--实际信号(按策略名排序)</button></td>
+              <tr>
                 <td width="250px"><button class="btn" name="sttype" value="jieti2_st_symbol">阶梯2--实际信号(按照品种排序)</button></td>
                 <td width="250px"><button class="btn" name="sttype" value="jieti2_st_name">阶梯2--实际信号(按策略名排序)</button></td>
+                <td width="250px"><button class="btn" name="sttype" value="catch_distinct">阶梯2--映射查看</button></td>
 
-              </tr> -->
+              </tr>
 
               <tr>
                 <td width="250px"><button class="btn" name="sttype" value="jieti1">阶梯1--AB/C++策略差异</button></td>
@@ -156,6 +153,48 @@ function add_new_monitor(){
               <td>{{item.TradName}}</td>
               <td>{{item.symbol}}</td>
               <td><a href='/index/monitor/distinct_cplus_ab/?st={{item.st}}@{{sttype}}'>{{item.st}}</a></td>
+           </tr> 
+            {% endfor %}
+          </tbody> 
+         </table>          
+        </div> 
+
+       </div> 
+      </div> 
+     </div> 
+    </div> 
+{% endif %}
+
+{% if whichtype == 3 %}
+    <div class="row"> 
+     <div class="col-lg-5"> 
+      <div class="panel panel-default"> 
+       <div class="panel-heading"> 
+        <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>实际信号</h3> 
+       </div>
+       <div class="panel-body"> 
+        <div class="table-responsive"> 
+         <table class="table table-bordered table-hover table-striped" id="table1"> 
+          <thead> 
+           <tr> 
+            <th align=center >策略号</th> 
+            <th align=center >品种</th> 
+            <th align=center >ps</th>
+            <th align=center >refps</th>
+            <th align=center>doing</th>
+            <th align=center>策略名</th>
+           </tr> 
+          </thead>  
+          <tbody id="mailtotable"> 
+            {% for item in res1 %}
+           <tr> 
+
+              <td>{{item.stno}}</td>
+              <td>{{item.Symbol}}</td>
+              <td>{{item.ps}}</td>
+              <td>{{item.refps}}</td>
+              <td>{{item.doing}}</td>
+              <td>{{item.TradName}}</td>
            </tr> 
             {% endfor %}
           </tbody> 

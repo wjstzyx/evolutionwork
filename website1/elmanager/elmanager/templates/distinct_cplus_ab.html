@@ -103,7 +103,7 @@ function add_new_monitor(){
             <tbody id="mailtotable"> 
               {% for item in lilunres %}
              <tr> 
-                <td>{{item.st}}</td>
+                <td><a href='/index/monitor/st_heart_analysis/?st={{item.st}}'>{{item.st}}</a></td>
                 <td>{{item.p}}</td>
                 <td>{{item.tradetime}}</td>
                 <td>{{item.TradName}}</td>
