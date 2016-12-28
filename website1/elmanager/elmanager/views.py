@@ -53,8 +53,8 @@ def st_heart_analysis(request):
 	if request.GET:
 		sttype=request.GET.get("st","")
 		print sttype
-		sql="SELECT TOP 100    [st]     ,[computername]    ,convert(nvarchar,[stockdate],120) as stockdate  ,[p]    ,[signCON]   ,[Period]     ,[Timenum]    ,[baropen]    ,[barhigh]    ,[barlow]     ,[barclose]    ,[barvolume]     ,[symbol]   FROM [LogRecord].[dbo].[cache_st_heart] where st='%s' order by stockdate desc" % (sttype)
-		realres=ms.dict_sql(sql)
+		# sql="SELECT TOP 100    [st]     ,[computername]    ,convert(nvarchar,[stockdate],120) as stockdate  ,[p]    ,[signCON]   ,[Period]     ,[Timenum]    ,[baropen]    ,[barhigh]    ,[barlow]     ,[barclose]    ,[barvolume]     ,[symbol]   FROM [LogRecord].[dbo].[cache_st_heart] where st='%s' order by stockdate desc" % (sttype)
+		# realres=ms.dict_sql(sql)
 		sql="SELECT TOP 100    [st]     ,[computername]    ,convert(nvarchar,[stockdate],120) as stockdate    ,[p]    ,[signCON]   ,[Period]     ,[Timenum]    ,[baropen]    ,[barhigh]    ,[barlow]     ,[barclose]    ,[barvolume]     ,[symbol]   FROM [LogRecord].[dbo].[backtest_cache_st_heart] where st='%s' order by stockdate desc" % (sttype)
 		lilunres=ms.dict_sql(sql)
 
@@ -73,7 +73,7 @@ def st_heart_analysis(request):
 	return render_to_response('st_heart_analysis.html',{
 		'data':'',
 		'lilunres':lilunres,
-		'realres':realres,
+		# 'realres':realres,
 
 
 	})	
@@ -3900,7 +3900,7 @@ def cal_distinct_position_lilun():
 	#2 shangpin yingshe
 	totalsql=""
 	ms1 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="Future")
-	res=['670611','666061010','666061001','28032','11808319','11803593','05810058','032442']
+	res=['05810058','032442']
 	for item in res:
 		userid=item
 		tempsql="select '%s' as [userID],STOCK as [stockID],Expr1 as position,GETDATE() as inserttime from future.dbo.view_%s" % (userid,userid)
