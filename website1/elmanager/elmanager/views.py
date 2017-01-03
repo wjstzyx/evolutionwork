@@ -127,7 +127,7 @@ def jieti_st_position(request):
 			res1=ms.dict_sql(sql)
 			whichtype=2
 		if sttype=="jieti1_st_name":
-			#阶梯2--理论VS实际策略差异
+			#阶梯2--理论VS实际策略差异todays_withdraw
 			sql="select t.P,t.tradetime,t.TradName,replace(p.AC,'StepMultiI','') as symbol,t.st from p_follow pf inner join P_BASIC  p on pf.F_ac=p.AC and pf.AC='StepMultiI300w' left join Trading_logSymbol t on p.ST=t.ST order by  t.TradName,t.p"
 			res1=ms.dict_sql(sql)
 			whichtype=2
@@ -854,12 +854,13 @@ def futureaccounttotal(request):
 			else:
 				equity=0
 				todays_withdraw=0
-				todays_deposit=0			
+				todays_deposit=0		
 			commission=tempres[-1]['Commission']
 			daily_profit=round(equity-todays_deposit-yesterdays_equity+yesterdays_withdraw,2)
 			daily_rate=round(daily_profit/(yesterdays_equity+0.00002)*100,2)
 			templist=[tempres[-1]['date'],int(item['primarymoney']),item['future_company'],item['userid'],round(equity_on_month_begin,1),round(monthly_equity,1),str(monthly_rate)+"%",round(equity,1),round(commission,1),round(daily_profit,1),str(daily_rate)+"%",item['beizhu'],todays_withdraw]
 		else:
+			todays_withdraw=0
 			templist=[19900101,int(item['primarymoney']),item['future_company'],item['userid'],round(equity_on_month_begin,1),round(monthly_equity,1),str(monthly_rate)+"%",round(equity,1),round(commission,1),round(daily_profit,1),str(daily_rate)+"%",item['beizhu'],todays_withdraw]		
 		returnlist.append(templist)
 	return render_to_response('futureaccounttotal.html',{

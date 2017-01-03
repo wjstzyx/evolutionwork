@@ -66,23 +66,26 @@ def soup_parse(company_name=""):
             content_li.append( [ myname,  unique_id ] )
     #begin search detail
     contentlist=[]
+
     for item in content_li:
         to_write=get_wantedname(item[0],item[1])
         mydict={}
         for item1  in to_write:
-            mydict[item1[0]]=item1[1]
-            # print item[0],item1[0],item1[1]
+            mydict[item1[0]]=item1[1].strip('\n')
+            # print item[0],item1[0],item1[1].strip('\n')
         #judge is have
-        wanted_title=[u'组织机构代码',u'法定代表人']
-        for iitem in wanted_title:
-            tempc=[item[0]]
+        wanted_title=[u'法定代表人',u'成立日期',u'注册资本',u'股东',u'企业地址',u'经营范围']
+        tempc=[item[0]]
+        for iitem in wanted_title:            
             if mydict.has_key(iitem):
                 tempc.append(mydict[iitem])
             else:
-                tempc.append(u'无')
+                tempc.append('no')
+        # print tempc[0],tempc[1],tempc[2],tempc[3],tempc[4],tempc[5],tempc[6]
         contentlist.append(tempc)
-        time.sleep(0.5)
-    for tiem in contentlist:
+        time.sleep(0.2)
+    
+    for item in contentlist:
         print item 
 
         
@@ -90,7 +93,7 @@ def soup_parse(company_name=""):
 
 
    
-soup_parse('远澜')
+soup_parse('上海远澜')
 
 
 

@@ -62,7 +62,7 @@ def run_aflfile(ab,database,Ticker,aflfle,settingfile):
 
 	try:
 		aa.Backtest(0)
-		#time.sleep(5)
+		#time.sleep(500)
 		#aa.Explore()
 		#aa.Backtest(0)
 		#resultFile = ResultFolder + "\\" + basename + "-ps.csv"
@@ -94,6 +94,10 @@ def main_import_data():
 
 #获得afl 和配置文件的对应关系
 def main_run_afl():
+	#truncate table st_report_test
+	sql="truncate table st_report_test"
+	ms.insert_sql(sql)
+
 	#todo:解析symbl 直接赋值给Ticker
 	aflfiledir=ABautoroot+"\\ABautofile\\aflfile"
 	aflfiles=os.listdir(aflfiledir)
@@ -119,6 +123,8 @@ def main_run_afl():
 				itemsettingdir=ABautoroot+"\\ABautofile\\setting\\a21_25"
 			if timeperiod in ('26min','27min','28min','29min','30min'):
 				itemsettingdir=ABautoroot+"\\ABautofile\\setting\\a26_30"
+			if timeperiod in ('31min','32min','33min','34min','35min'):
+				itemsettingdir=ABautoroot+"\\ABautofile\\setting\\a31-35"
 			itemfile=aflfiledir+"\\"+file
 			settingfile=itemsettingdir+"\\"+timeperiod+".ABS"
 			Ticker=basename.split('-')[0].strip(" ")
@@ -343,7 +349,7 @@ def add_prename(symbol='',tieminteval=''):
 		filemame= item.decode('gb2312').encode('utf-8')
 		print filemame
 		if os.path.isdir(targetdir+'\\'+item):
-			matchObj = re.match( r'(.*)StepMultiI', item, re.M|re.I)
+			matchObj = re.match( r'(.*)StepMultiI_up', item, re.M|re.I)
 			if matchObj:
 				symbol=matchObj.group(1).strip(" ")
 			else:
@@ -355,10 +361,15 @@ def add_prename(symbol='',tieminteval=''):
 				newfilename=symbol+"-"+item1
 				oldfile=targetdir+"\\"+item+"\\"+item1
 				newfile=targetdir+"\\"+item+"\\"+newfilename
+				newfilename=newfilename.replace('_','-')
 				copufilename=r'E:\ABautofile\tempfile'+"\\"+newfilename
 				shutil.move(oldfile,newfile)
 				shutil.copyfile(newfile,copufilename)
 		print filemame,'文件夹'
+	#copy tempfile to toalaflfile
+	#move tempfile to aflfile
+	#mkdir tempfile
+
 
 # add_prename()
 
@@ -407,14 +418,14 @@ def general_data(symbol):
 ##运行步骤(有些步骤是可以每天定时做的 #1  #2 )
 ##########
 # #1 530s
-gere_datafile(starttime='2016-12-24')
-#2 152s
-main_import_data()
+# gere_datafile(starttime='2016-12-25')
+# #2 152s
+# main_import_data()
 # acname='znStepMultiI'
 # choose_aflfile(acname)
-main_run_afl()
+# main_run_afl()
 #5
 
 #检测st_repoet_test中的策略是不是虚拟组有且唯一的策略号
-# test_is_all_ac_st()
+test_is_all_ac_st()
 # show_progress(87,100)
