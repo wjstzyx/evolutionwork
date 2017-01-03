@@ -828,8 +828,11 @@ def futureaccounttotal(request):
 		monthly_equity=(todays_equity-todays1_withdraw)-(equity_on_month_begin-Withdraw_on_month_begin)+deltawithdeposit
 		monthly_rate=round(monthly_equity/(real_equity_on_month_begin+0.00002)*100,2)
 
-
-		sql="SELECT [date] ,[userid] ,[prebalance] ,[deposit] ,[Withdraw] ,[CloseProfit]  ,[PositionProfit]  ,[Commission]  ,[CloseBalance]  FROM [LogRecord].[dbo].[AccountsBalance] where userid='%s'  and date>='%s' order by date" % (userid,month-100)
+		#lastmonth
+		sql="SELECT distinct floor([date]/100)*100 as date FROM [LogRecord].[dbo].[AccountsBalance] order by  floor([date]/100)*100 desc "
+		tmep11res=ms.dict_sql(sql)
+		lastmonth=tmep11res[-2]['date']
+		sql="SELECT [date] ,[userid] ,[prebalance] ,[deposit] ,[Withdraw] ,[CloseProfit]  ,[PositionProfit]  ,[Commission]  ,[CloseBalance]  FROM [LogRecord].[dbo].[AccountsBalance] where userid='%s'  and date>='%s' order by date" % (userid,lastmonth)
 		tempres=ms.dict_sql(sql)
 		equity=0
 		monthly_commitssion=0
