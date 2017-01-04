@@ -14,35 +14,37 @@ ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 # -*- coding: utf-8 -*-
 
 def monitor_position_change(acname):
-	sql="select '%s' as name, Expr1  from [Future].[dbo].View_%s" % (acname,acname)
+	sql="select '%s' as name, Expr1 ,s.Symbol as stock  from [Future].[dbo].View_%s a   inner join symbol_id s on a.STOCK=s.S_ID and LEN(s.Symbol)<3" % (acname,acname)
 	res=ms.dict_sql(sql)
-	nowposition=res[0]['Expr1']
-	sql="SELECT   [lastposition]  FROM [LogRecord].[dbo].[mytemp_position] where acname='%s'" % (acname)
-	res=ms.dict_sql(sql)
-	if res:
-		lastposition=res[0]['lastposition']
-		sql=" update [LogRecord].[dbo].[mytemp_position] set lastposition=%s,inserttime=GETDATE() where acname='%s'" % (nowposition,acname)
-		ms.insert_sql(sql)
-	else:
-		lastposition=0
-		sql="insert into [LogRecord].[dbo].[mytemp_position](acname,lastposition) values('%s',%s)" % (acname,nowposition)
-		ms.insert_sql(sql)
+	for itemaa in res:
+
+		nowposition=itemaa['Expr1']
+		sql="SELECT   [lastposition]  FROM [LogRecord].[dbo].[mytemp_position] where acname='%s' and s_id='%s'" % (acname,itemaa['stock'])
+		res=ms.dict_sql(sql)
+		if res:
+			lastposition=res[0]['lastposition']
+			sql=" update [LogRecord].[dbo].[mytemp_position] set lastposition=%s,inserttime=GETDATE() where acname='%s' and s_id='%s'" % (nowposition,acname,itemaa['stock'])
+			ms.insert_sql(sql)
+		else:
+			lastposition=0
+			sql="insert into [LogRecord].[dbo].[mytemp_position](acname,lastposition,s_id) values('%s',%s,'%s')" % (acname,nowposition,itemaa['stock'])
+			ms.insert_sql(sql)
 
 
-	if nowposition!=lastposition:
-		print 'nowposition',nowposition
-		print 'lastposition',lastposition
-		#发送邮件
-		subject=" %s 仓位为 %s " % (acname,nowposition)+datetime.datetime.now().strftime("%H:%M:%S")
-		# mailtolist="yuyang@evolutionlabs.com.cn"
-		message=subject
-		sendmessage=["13764504303"]
-		smsresult=sendsms(sendmessage,message)
-		print 'smsresult',smsresult
-		# sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,message,0,sendmessage)
-		# ms.insert_sql(sql)
-	else:
-		print 'OK'
+		if nowposition!=lastposition:
+			print 'nowposition',nowposition
+			print 'lastposition',lastposition
+			#发送邮件
+			subject=" %s %s 仓位为 %s " % (acname,itemaa['stock'],nowposition)+datetime.datetime.now().strftime("%H:%M:%S")
+			# mailtolist="yuyang@evolutionlabs.com.cn"
+			message=subject
+			sendmessage=["13764504303"]
+			smsresult=sendsms(sendmessage,message)
+			print 'smsresult',smsresult
+			# sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,message,0,sendmessage)
+			# ms.insert_sql(sql)
+		else:
+			print 'OK'
 
 
 
@@ -67,4 +69,4 @@ def istasktodo(type):
 		print item 
 
 istasktodo('datafix')
-monitor_position_change('test_Pselect')
+monitor_position_change('16606569')

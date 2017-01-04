@@ -20,7 +20,7 @@ def myround(num):
 	if num<=0:
 		return round(num+0.000000001)
 
-def input_groupbyquanyi(ac,symbol):
+def input_groupbyquanyi_1(ac,symbol,myratio):
 	# 清除临时表
 	try:
 		sql="drop table #temp_quanyi_new"
@@ -32,7 +32,7 @@ def input_groupbyquanyi(ac,symbol):
 	# 产生临时p_log
 	#sql="select * into #temp_p_log from (SELECT   aa.*, sid.Symbol, (YEAR(GETDATE()) - 2000) * 10000 + MONTH(GETDATE()) * 100 + DAY(GETDATE()) AS D from (select  p.AC, p.STOCK, p.type, p.ST, p.P_size, a.ratio from P_BASIC p inner join AC_RATIO a on p.AC=a.AC and p.STOCK=a.Stock and p.type=a.type and p.AC='%s') as aa inner join Symbol_ID AS sid ON sid.S_ID = aa.STOCK where Symbol='%s') temp" % (ac,symbol)
 	sql ="select * into #temp_p_log from (select '%s' as ac,temp1.STOCK,temp1.type,temp1.ST,temp1.P_size as P_size,temp1.ratio,temp1.Symbol,temp1.num from (select p.*,a.ratio,sid.Symbol,isnull(n.num,1)as num from P_BASIC p inner join AC_RATIO a on p.AC=a.AC and p.AC='%s' inner join Symbol_ID  AS sid ON p.STOCK=sid.S_ID left join [LogRecord].[dbo].[Ninone_config] n on n.st=p.st) temp1 where Symbol='%s' )aaa"% (ac,ac,symbol)
-	# print sql
+	print sql
 	ms.insert_sql(sql)
 	sql="select SUM(p_size*ratio/100*num) as totalsum from #temp_p_log"
 	res=ms.dict_sql(sql)
@@ -40,7 +40,8 @@ def input_groupbyquanyi(ac,symbol):
 
 	#产生临时整个虚拟组st_report
 	sql="select * into  #temp_quanyi_new from ( select p.ac,p.symbol,st_report.type,st_report.id,st_report.p,st_report.pp,p.p_size,p.ratio ,st_report.st,st_report.stockdate from st_report  inner join #temp_p_log p on p.st=st_report.st and p.ac='%s' and p.symbol='%s')temp " % (ac,symbol)
-	# print sql
+	print sql
+	exit()
 	ms.insert_sql(sql)
 	#print 1,datetime.datetime.now()
 	sql="select count(1) from #temp_quanyi_new"
@@ -77,23 +78,60 @@ def input_groupbyquanyi(ac,symbol):
 			positionlist.append([item[0],item[1],temptotal])
 			# [datetime.datetime(2016, 7, 19, 14, 59), -4.0, 0.0]
 		#总仓位有部分与现有的不符合，但大多数一致，可以再找个虚拟组测试下
-		##print positionlist
-		###以上已经准备好虚拟组的仓位信息
-		fisrttime=positionlist[0][0]
-		#[datetime.datetime(2015, 10, 21, 9, 0), 6.0, 6.0]
-		sql="select	C,StockDate from TSymbol_quotes_backup where Symbol='%s' and  stockdate >='%s' order by StockDate " % (symbol,fisrttime)
-		res=ms.dict_sql(sql)
-		# print res[:10]
-		#对行情日期遍历
+		positionlist=[[item[0],item[2]*myratio] for item in positionlist]
+		return positionlist
+		
 
-		lastquote=res[0]
-		mymewquote=[]
-		temppositionlist=positionlist[:]
-		lastappend=[]
-		lastpostiion=temppositionlist[0]
-		lastresvalue=res[-1]
-		res.append(lastresvalue)
-		for item in res:
+
+
+
+
+
+
+
+
+
+				
+
+
+
+
+
+
+
+
+
+
+			
+
+
+
+
+
+	# newesttime=str(nowD+20000000)+" 08:00:00"
+	# newesttime=datetime.datetime.strptime(str(newesttime),"%Y%m%d %H:%M:%S")
+	# sql="delete from dayp_quanyi_log_groupby where ac='%s' and symbol='%s' and type=%s and stockdate>'%s'" % (ac,symbol,type,newesttime)
+	# ms.insert_sql(sql)
+	#--end
+def input_groupbyquanyi_2(myquotes,symbol):
+	positionlist=[[item[0],0,item[1]] for item in myquotes]
+	##print positionlist
+	###以上已经准备好虚拟组的仓位信息
+	fisrttime=positionlist[0][0]
+	#[datetime.datetime(2015, 10, 21, 9, 0), 6.0, 6.0]
+	sql="select	C,StockDate from TSymbol_quotes_backup where Symbol='%s' and  stockdate >='%s' order by StockDate " % (symbol,fisrttime)
+	res=ms.dict_sql(sql)
+	# print res[:10]
+	#对行情日期遍历
+
+	lastquote=res[0]
+	mymewquote=[]
+	temppositionlist=positionlist[:]
+	lastappend=[]
+	lastpostiion=temppositionlist[0]
+	lastresvalue=res[-1]
+	res.append(lastresvalue)
+	for item in res:
 			StockDate=lastquote['StockDate']
 			C=lastquote['C']
 			if StockDate.strftime("%Y%m%d")!=item['StockDate'].strftime("%Y%m%d"):
@@ -111,8 +149,6 @@ def input_groupbyquanyi(ac,symbol):
 					if StockDate==item1[0]:
 						temp=[StockDate,C,item1[2]]
 						mymewquote.append(temp)
-						if StockDate==datetime.datetime(2015, 10, 21, 9, 5):
-							print "1--item1",item1,lastpostiion
 						lastappend=temp
 						lastpostiion=item1
 
@@ -123,13 +159,9 @@ def input_groupbyquanyi(ac,symbol):
 						if iskeep==1:
 							mymewquote.append(temp)
 							lastappend=temp
-							if StockDate==datetime.datetime(2015, 10, 21, 9, 5):
-								print "2--iskeep",iskeep,StockDate
 						else:
 							if lastappend==[] or lastappend[2]!=temp[2]:
 								mymewquote.append(temp)
-								if StockDate==datetime.datetime(2015, 10, 21, 9, 5):
-									print "3--lastappend",lastappend,templastposition,temp
 								lastappend=temp	
 						lastpostiion=item1
 					break
@@ -139,28 +171,22 @@ def input_groupbyquanyi(ac,symbol):
 				temp=[StockDate,C,temppositionlist[-1][2]]
 				mymewquote.append(temp)
 				# lastappend=temp
-		#插入当天行情的最后一根bar
-		lastClose=res[-1]['C']
-		lastdatetime=res[-1]['StockDate']
-		lastquoteposition=mymewquote[-1][2]
-		if lastdatetime!=mymewquote[-1][0]:
-			mymewquote.append([lastdatetime,lastClose,lastquoteposition])
-		# for item in positionlist:
-		# 	print item[0],item[2]
-		# for item in mymewquote:
-		# 	print item[0],item[1],item[2] 
-		# #分商品和IC  IF 两类	(这个是delta仓位，其实不能去除)
-		if 	symbol in ('IC','IF'):
-			#去除9:00-9:29分钟的信号
-			for item in mymewquote:
-				timestr=item[0].strftime("%H%M")
-				timestr=int(timestr)
-				if timestr>=900 and  timestr<=929:
-					mymewquote.remove(item)
-			#--end
-		return mymewquote,totalsum
-	else:
-		return 0,0.0001
+	#插入当天行情的最后一根bar
+	lastClose=res[-1]['C']
+	lastdatetime=res[-1]['StockDate']
+	lastquoteposition=mymewquote[-1][2]
+	if lastdatetime!=mymewquote[-1][0]:
+		mymewquote.append([lastdatetime,lastClose,lastquoteposition])
+	if 	symbol in ('IC','IF'):
+		#去除9:00-9:29分钟的信号
+		for item in mymewquote:
+			timestr=item[0].strftime("%H%M")
+			timestr=int(timestr)
+			if timestr>=900 and  timestr<=929:
+				mymewquote.remove(item)
+		#--end
+	return mymewquote
+
 
 
 
@@ -333,9 +359,95 @@ def add_acquanyi(acquanyi1,acquanyi2):
 	#print dict(zip(alltime,allquanyi))
 	return dict(zip(alltime,allquanyi))
 
+#获得账号点菜系统虚拟组(第三版本-p_follow)
+def order_get_ac_ratio_three(account):
+	#获取总账户配置的虚拟组的ratio
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+	#sql="WITH Emp AS ( SELECT ac,F_ac,ratio FROM  [LogRecord].[dbo].[order_p_follow] WHERE   ac='%s' UNION ALL  SELECT   D.AC,D.F_ac,D.ratio*emp.ratio/100 FROM   Emp         INNER JOIN [LogRecord].[dbo].[order_p_follow] d ON d.ac = Emp.F_ac)SELECT AC,f_AC,ratio FROM  Emp" % (account)
+	#sql="select AC,f_AC,ratio from [LogRecord].[dbo].[order_p_follow] where ac='%s'" % (account)
+	#检测是否自循环
+	sql="select * from [Future].[dbo].[p_follow]  where ac=F_ac and ac='%s'" % (account)
+	res=ms.dict_sql(sql)
+	if res:
+		return []
+	sql="WITH Emp AS ( SELECT ac,F_ac,ratio,stock FROM  [Future].[dbo].[p_follow] WHERE   ac='%s' UNION ALL  SELECT   D.AC,D.F_ac,D.ratio*emp.ratio/100,D.stock FROM   Emp         INNER JOIN [Future].[dbo].[p_follow] d ON d.ac = Emp.F_ac)     select '%s' as AC,f_AC+'__'+stock as f_AC,SUM(ratio) as ratio from Emp where  f_ac not in (select ac from Emp)  and ratio<>0 group by F_ac,stock order by F_ac" % (account,account)
+	#sql="WITH Emp AS ( SELECT ac,F_ac,ratio FROM  [Future].[dbo].[p_follow] WHERE   ac='%s' UNION ALL  SELECT   D.AC,D.F_ac,D.ratio*emp.ratio/100 FROM   Emp         INNER JOIN [Future].[dbo].[p_follow] d ON d.ac = Emp.F_ac)     select '%s' as AC,f_AC,SUM(ratio) as ratio from Emp where  f_ac not in (select ac from Emp)  and ratio<>0 group by F_ac" % (account,account)
+	res=ms.dict_sql(sql)
+	accountlist=[]
+	aclist=[]
+	for item in res:
+		accountlist.append(item['AC'])
+		aclist.append(item['f_AC'])
+	accountlist=list(set(accountlist))
+	aclist=list(set(aclist))
+	ac_ratio={}
+	for item in aclist:
+		ac_ratio[item]=0
+	for item in res:
+		ac_ratio[item['f_AC']]=ac_ratio[item['f_AC']]+item['ratio']
+	# print ac_ratio
+	#删除基本账户信息
+	for key in accountlist:
+		if ac_ratio.has_key(key):
+			del ac_ratio[key]
+	# print ac_ratio
+	return ac_ratio
 
+def add_time_series(totalquanyi,res1):
+	totalquanyitime=[k[0] for k in totalquanyi]
+	res1time=[k[0] for k in res1]
+	totalquanyidict={}
+	for item in totalquanyi:
+		totalquanyidict[item[0]]=item[1]
+	res1dict={}
+	for item in res1:
+		res1dict[item[0]]=item[1]
+	daylist=list(set(totalquanyitime).union(set(res1time)))
+	daylist=sorted(daylist)
+	totalquanyilastvalue=0
+	res1lastvalues=0
+	result={}
+	for item in daylist:
+		tempvalue=0
+		if item in totalquanyitime:
+			totalquanyilastvalue=totalquanyidict[item]
+		if item in res1time:
+			res1lastvalues=res1dict[item]
+		tempvalue=float(totalquanyilastvalue)+float(res1lastvalues)
+		result[item]=tempvalue
+	result=sorted(result.iteritems(), key=lambda d:d[1], reverse = False)
+	result=[[item[0],item[1]] for item in result]
+	return result
 
 def show_account(accountname):
+	#通过递归查询到账户配置的虚拟组信息
+	ac_ratio_list=order_get_ac_ratio_three(accountname)
+	#按照品种归类
+	totalposiion={}
+	for key in ac_ratio_list:
+		acname=key.split('__')[0]
+		stockid=key.split('__')[1]
+		sql="select top 1 symbol from symbol_id where s_id='%s' and len(symbol)<3" % (stockid)
+		symbol=ms.dict_sql(sql)[0]['symbol']
+		ratio=ac_ratio_list[key]/100.0
+		myquotes=input_groupbyquanyi_1(acname,symbol,1)
+		if totalposiion.has_key(symbol):
+			myquotes=add_time_series(totalposiion[symbol],myquotes)
+			totalposiion[symbol]=myquotes
+			#相加
+		else:
+			totalposiion[symbol]=myquotes
+
+		# print myquotes[0]
+		# print key ,acname,stockid,symbol,ratio
+	for key in totalposiion:
+		print key 
+		myquotes=input_groupbyquanyi_2(totalposiion[key],key)
+		# print myquotes
+		cal_quanyi(key,myquotes,1,key,isshow=1)
+
+
+	exit()
 	sql="select ac,ratio,symbol from [Future].[dbo].[backtest_account_ac] where [accountname]='%s'" % (accountname)
 	res=ms.dict_sql(sql)
 	myqanyi=[]
@@ -437,13 +549,13 @@ def multiple_ratio(myquotes,ratio):
 # show_all_ac('RU3v4e')
 
 
-(myquotes,totalsum)=input_groupbyquanyi('hcStepMultituji2','hc')
-#仓位信息OK
-print totalsum
+# (myquotes,totalsum)=input_groupbyquanyi('hcStepMultituji2','hc')
+# #仓位信息OK
+# print totalsum
 # for item in myquotes:
 # 	print item 
-ratio=0.1
-myquotes=multiple_ratio(myquotes,ratio)
-cal_quanyi('hcStepMultituji2',myquotes,ratio*totalsum,'hc')
+# ratio=0.1
+# myquotes=multiple_ratio(myquotes,ratio)
+# cal_quanyi('hcStepMultituji2',myquotes,ratio*totalsum,'hc')
 
-# show_account('myaccount2')
+show_account('16606569')

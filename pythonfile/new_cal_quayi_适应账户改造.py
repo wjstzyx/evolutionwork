@@ -20,7 +20,10 @@ def myround(num):
 	if num<=0:
 		return round(num+0.000000001)
 
-def input_groupbyquanyi(ac,symbol):
+def input_groupbyquanyi(symbol):
+	sql="select s_id from symbol_id where symbol='%s'" % (symbol)
+	s_id=ms.dict_sql(sql)[0]['s_id']
+
 	# 清除临时表
 	try:
 		sql="drop table #temp_quanyi_new"
@@ -30,17 +33,13 @@ def input_groupbyquanyi(ac,symbol):
 	except:
 		pass
 	# 产生临时p_log
-	#sql="select * into #temp_p_log from (SELECT   aa.*, sid.Symbol, (YEAR(GETDATE()) - 2000) * 10000 + MONTH(GETDATE()) * 100 + DAY(GETDATE()) AS D from (select  p.AC, p.STOCK, p.type, p.ST, p.P_size, a.ratio from P_BASIC p inner join AC_RATIO a on p.AC=a.AC and p.STOCK=a.Stock and p.type=a.type and p.AC='%s') as aa inner join Symbol_ID AS sid ON sid.S_ID = aa.STOCK where Symbol='%s') temp" % (ac,symbol)
-	sql ="select * into #temp_p_log from (select '%s' as ac,temp1.STOCK,temp1.type,temp1.ST,temp1.P_size as P_size,temp1.ratio,temp1.Symbol,temp1.num from (select p.*,a.ratio,sid.Symbol,isnull(n.num,1)as num from P_BASIC p inner join AC_RATIO a on p.AC=a.AC and p.AC='%s' inner join Symbol_ID  AS sid ON p.STOCK=sid.S_ID left join [LogRecord].[dbo].[Ninone_config] n on n.st=p.st) temp1 where Symbol='%s' )aaa"% (ac,ac,symbol)
-	# print sql
+	sql="select * into #temp_p_log from ( select p.*,a.ratio*tp.ratio/100.0 as ratio from temp_p_follow tp inner join P_BASIC p on tp.f_AC=p.AC inner join AC_RATIO a on p.AC=a.AC)aaa"
 	ms.insert_sql(sql)
-	sql="select SUM(p_size*ratio/100*num) as totalsum from #temp_p_log"
-	res=ms.dict_sql(sql)
-	totalsum=res[0]['totalsum']
+
 
 	#产生临时整个虚拟组st_report
-	sql="select * into  #temp_quanyi_new from ( select p.ac,p.symbol,st_report.type,st_report.id,st_report.p,st_report.pp,p.p_size,p.ratio ,st_report.st,st_report.stockdate from st_report  inner join #temp_p_log p on p.st=st_report.st and p.ac='%s' and p.symbol='%s')temp " % (ac,symbol)
-	# print sql
+	sql="select * into  #temp_quanyi_new from ( select p.ac,st_report.type,st_report.id,st_report.p,st_report.pp,p.p_size,p.ratio ,st_report.st,st_report.stockdate from st_report  inner join #temp_p_log p on p.st=st_report.st and p.ac in (select distinct f_ac  from temp_p_follow where stock='%s') )temp" % (s_id)	
+
 	ms.insert_sql(sql)
 	#print 1,datetime.datetime.now()
 	sql="select count(1) from #temp_quanyi_new"
@@ -111,8 +110,6 @@ def input_groupbyquanyi(ac,symbol):
 					if StockDate==item1[0]:
 						temp=[StockDate,C,item1[2]]
 						mymewquote.append(temp)
-						if StockDate==datetime.datetime(2015, 10, 21, 9, 5):
-							print "1--item1",item1,lastpostiion
 						lastappend=temp
 						lastpostiion=item1
 
@@ -158,9 +155,9 @@ def input_groupbyquanyi(ac,symbol):
 				if timestr>=900 and  timestr<=929:
 					mymewquote.remove(item)
 			#--end
-		return mymewquote,totalsum
+		return mymewquote
 	else:
-		return 0,0.0001
+		return 0
 
 
 
@@ -336,74 +333,37 @@ def add_acquanyi(acquanyi1,acquanyi2):
 
 
 def show_account(accountname):
-	sql="select ac,ratio,symbol from [Future].[dbo].[backtest_account_ac] where [accountname]='%s'" % (accountname)
+	#生成临时p_follow
+	# 清除临时表
+	try:
+		sql="drop table temp_p_follow"
+		ms.insert_sql(sql)
+	except:
+		pass	
+	sql="WITH Emp AS ( SELECT ac,F_ac,ratio,stock FROM  [Future].[dbo].[p_follow] WHERE   ac='%s'  UNION ALL   SELECT   D.AC,D.F_ac,D.ratio*emp.ratio/100,D.stock FROM   Emp      INNER JOIN [Future].[dbo].[p_follow] d ON d.ac = Emp.F_ac)      select *into temp_p_follow from (     select '%s' as AC,f_AC,stock ,SUM(ratio) as ratio from Emp where  f_ac not in (select ac from Emp)  and ratio<>0 group by F_ac,stock )aaa   " % (accountname,accountname)
+	ms.insert_sql(sql)
+
+	#对每个品种分别调用 仓位合成函数
+	sql=" select  s.Symbol,SUM(TP.RATIO) AS ratio from temp_p_follow  tp  inner join symbol_id s on tp.stock=s.S_ID where LEN(s.Symbol)<3  GROUP BY s.Symbol  order by s.Symbol "
 	res=ms.dict_sql(sql)
-	myqanyi=[]
-	mydatetime=[]
-	totalquanyidict={}
-	sql="select sum(ratio) as ratio from [Future].[dbo].[backtest_account_ac] where [accountname]='%s'" % (accountname)
-	i=ms.dict_sql(sql)[0]['ratio']
+
 	for item in res:
-		ratio=item['ratio']
-		ac=item['ac']
-		symbol=item['symbol']
-		(myquotes,totalsum)=input_groupbyquanyi(ac,symbol)
-		oneacquanyidict=cal_quanyi_foraccount(ac,myquotes,totalsum,symbol,ratio)
-		#totalquanyidict=dict(Counter(totalquanyidict)+Counter(oneacquanyidict))
-		totalquanyidict=add_acquanyi(totalquanyidict,oneacquanyidict)
-	#totalquanyidict对此排序
-	temptotalquanyidict=[(k,totalquanyidict[k]) for k in sorted(totalquanyidict.keys())]
-	avalue=[]
-	yvalue=[]
-	myindex=[]
-	indexnum=0
-	#最大回撤相关
-	lasthighquanyi=0
-	lasthighhuiche=0
-	nowhuiche=0
-	if i==0:
-		i=1
-	for item in temptotalquanyidict:
-		itemquanyi=item[1]/i
-		avalue.append(item[0])
-		yvalue.append(itemquanyi)
-		myindex.append(indexnum)
-		indexnum=indexnum+1
-		#计算回撤相关
-		nowhuiche=lasthighquanyi-itemquanyi
-		if itemquanyi>lasthighquanyi:
-			lasthighquanyi=itemquanyi
-		if nowhuiche>lasthighhuiche:
-			lasthighhuiche=nowhuiche
-		##--end
-	if lasthighhuiche<0:
-		lasthighhuiche=0
-	#开始画图
-	# print myindex
-	# print yvalue
-	plt.figure(figsize=(16,8))
-	lenx=len(avalue)
-	pl.plot(myindex, yvalue, 'r') 	 
-	pl.subplots_adjust(bottom=0.3) 	 
-	ax = pl.gca() 
-	ax.fmt_xdata = pl.DateFormatter('%Y-%m-%d') 
-	pl.xticks(rotation=75) 	 
-	#生成x轴的间隔
-	aa=int(lenx/30)
-	numx=[]
-	labvalue=[]
-	for i in range(0,lenx-aa,aa):
-		numx.append(i)
-		labvalue.append(avalue[i].strftime("%Y-%m-%d"))
-	numx.append(myindex[-1])
-	labvalue.append(avalue[myindex[-1]].strftime("%Y-%m-%d"))
-	pl.xticks(numx, labvalue) 
-	pl.grid()
-	plt.title('%s--MaxDrawDown:%s' % (accountname,int(lasthighhuiche)))
-	#plt.ylabel(u'平均每手净收益',fontproperties='SimHei')
-	plt.ylabel(u'Profit Per Hand')
-	pl.savefig('..\\myimage\\%s' % (accountname))
-	pl.show() 
+		symbol=item['Symbol']
+		totalnum=item['ratio']/10.0
+		print symbol,totalnum
+		myquotes=input_groupbyquanyi(symbol)
+		# for item in myquotes:
+		# 	print item 
+		# ratio=1.0/int(totalnum)
+		ratio=1
+		myquotes=multiple_ratio(myquotes,ratio)
+		cal_quanyi(symbol,myquotes,1,symbol)
+
+
+
+
+
+
 
 
 
@@ -435,15 +395,41 @@ def multiple_ratio(myquotes,ratio):
 
 
 # show_all_ac('RU3v4e')
+# A 2.0
+# AG 1.0
+# AL 1.0
+# bu 2.0
+# c 2.0
+# cs 2.0
+# FG 2.0
+# hc 3.0
+# I 3.0
+# J 2.0
+# JM 3.0
+# L 2.0
+# M 3.0
+# NI 5.0
+# P 3.0
+# pp 6.0
+# RB 9.0
+# RU 4.0
+# ZC 3.0
+# ZN 3.0
 
+# (myquotes,totalsum)=input_groupbyquanyi('hcStepMultituji2','hc')
+# #仓位信息OK
+# print totalsum
+# # for item in myquotes:
+# # 	print item 
+# ratio=0.1
+# myquotes=multiple_ratio(myquotes,ratio)
+# cal_quanyi('hcStepMultituji2',myquotes,ratio*totalsum,'hc')
 
-(myquotes,totalsum)=input_groupbyquanyi('hcStepMultituji2','hc')
-#仓位信息OK
-print totalsum
-# for item in myquotes:
-# 	print item 
-ratio=0.1
-myquotes=multiple_ratio(myquotes,ratio)
-cal_quanyi('hcStepMultituji2',myquotes,ratio*totalsum,'hc')
-
-# show_account('myaccount2')
+show_account('16606569')
+# symbol='RB'
+# myquotes=input_groupbyquanyi(symbol)
+# # for item in myquotes:
+# # 	print item 
+# ratio=3/9.0
+# myquotes=multiple_ratio(myquotes,ratio)
+# cal_quanyi(symbol,myquotes,1,symbol)
