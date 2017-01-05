@@ -52,7 +52,7 @@ def total_day_generate(resultlist,fromdate='2014-01-01',interval=15):
 
 
 def get_Kbarinfo(ms,period,stockdate):
-    sql="select a.*,b.O,c.C from  (select Symbol,MIN(StockDate) as openstockdate,MAX(StockDate) as closestockdate,MAX(H) as H,MIN(L) as L,SUM(V) as V,SUM(OPI) as OPI from TSymbol where StockDate>='%s'  AND DATEDIFF(MINUTE,'%s',StockDate)<%s  group by Symbol ) a inner join  TSymbol b on a.Symbol=b.Symbol and a.openstockdate=b.StockDate inner join TSymbol c on a.Symbol=c.Symbol and a.closestockdate=c.StockDate " % (stockdate,stockdate,period)
+    sql="select a.*,b.O,c.C,c.OPI from  (select Symbol,MIN(StockDate) as openstockdate,MAX(StockDate) as closestockdate,MAX(H) as H,MIN(L) as L,SUM(V) as V from TSymbol where StockDate>='%s'  AND DATEDIFF(MINUTE,'%s',StockDate)<%s  group by Symbol ) a inner join  TSymbol b on a.Symbol=b.Symbol and a.openstockdate=b.StockDate inner join TSymbol c on a.Symbol=c.Symbol and a.closestockdate=c.StockDate " % (stockdate,stockdate,period)
     # print sql 
     res=ms.dict_sql(sql)
     #put in table
@@ -67,7 +67,7 @@ def get_Kbarinfo(ms,period,stockdate):
 
 
 def get_Kbarinfo_history(ms,period,stockdate):
-    sql="select a.*,b.O,c.C from  (select Symbol,MIN(StockDate) as openstockdate,MAX(StockDate) as closestockdate,MAX(H) as H,MIN(L) as L,SUM(V) as V,SUM(OPI) as OPI from TSymbol_quotes_backup where StockDate>='%s'  AND DATEDIFF(MINUTE,'%s',StockDate)<%s  group by Symbol ) a inner join  TSymbol_quotes_backup b on a.Symbol=b.Symbol and a.openstockdate=b.StockDate inner join TSymbol_quotes_backup c on a.Symbol=c.Symbol and a.closestockdate=c.StockDate " % (stockdate,stockdate,period)
+    sql="select a.*,b.O,c.C,c.OPI from  (select Symbol,MIN(StockDate) as openstockdate,MAX(StockDate) as closestockdate,MAX(H) as H,MIN(L) as L,SUM(V) as V from TSymbol_quotes_backup where StockDate>='%s'  AND DATEDIFF(MINUTE,'%s',StockDate)<%s  group by Symbol ) a inner join  TSymbol_quotes_backup b on a.Symbol=b.Symbol and a.openstockdate=b.StockDate inner join TSymbol_quotes_backup c on a.Symbol=c.Symbol and a.closestockdate=c.StockDate " % (stockdate,stockdate,period)
     # print sql 
     res=ms.dict_sql(sql)
     #put in table
@@ -126,22 +126,32 @@ def gene_history_Kbars(ms,period,fromtime='2015-01-01'):
         newquotes={}
         for item in quotes:
             stockdate=item['StockDate']
+            #print "#",stockdate,cpmparetime,tempaaa[0]
             if (stockdate - cpmparetime).total_seconds()>=period*60 and len(tempaaa)>0:
                 # next tempaaa
                 tt=1
-                cpmparetime=tempaaa.pop(0)
                 while (tt):
-                    if (stockdate - cpmparetime).total_seconds()<period*60 and (stockdate - cpmparetime).total_seconds()>=0:
+                    #print stockdate,cpmparetime,(stockdate - cpmparetime).total_seconds()
+                    if (stockdate - cpmparetime).total_seconds()<0:
+                        #stockdate 后移动
                         tt=0
                         tempindex=0
                     else:
-                        if len(tempaaa)>0:
-                            cpmparetime=tempaaa.pop(0)
+                        if (stockdate - cpmparetime).total_seconds()<period*60 and (stockdate - cpmparetime).total_seconds()>=0:
+                            tt=0
+                            tempindex=0
                         else:
-                            print '3333'
-                            break
+                            if len(tempaaa)>0:
+                                cpmparetime=tempaaa.pop(0)
+                            else:
+                                print tempaaa
+                                print stockdate,cpmparetime
+                                print '3333',cpmparetime
+                                break
 
             if (stockdate - cpmparetime).total_seconds()<period*60 and (stockdate - cpmparetime).total_seconds()>=0:
+                # print cpmparetime
+
                 # 1min bar is between the period,group by
                 if tempindex==0:
                     #tempquote=[o,c,h,l,v,opi]
@@ -153,7 +163,7 @@ def gene_history_Kbars(ms,period,fromtime='2015-01-01'):
                     tempquote[2]=max(tempquote[2],item['H'])
                     tempquote[3]=min(tempquote[3],item['L'])
                     tempquote[4]=tempquote[4]+item['V']
-                    tempquote[5]=tempquote[5]+item['OPI']
+                    tempquote[5]=item['OPI']
                     # tempquote.append(stockdate)
                 tempindex=tempindex+1
                 newquotes[cpmparetime]=tempquote
@@ -172,7 +182,7 @@ def gene_history_Kbars(ms,period,fromtime='2015-01-01'):
 
 def compare_kbars(ms,period,fromtime):
     kbars=gene_history_Kbars(ms,period,fromtime)
-    sql="select distinct symbol from Tsymbol"
+    sql="select distinct symbol from Tsymbol "
     symbollist=ms.dict_sql(sql)
     for symboldict in symbollist:
         symbol=symboldict['symbol']        
@@ -235,9 +245,40 @@ def main_fun():
         pass
     if index==0:
         write_heart('Kbars','queren')
-# ms05 = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+#ms05 = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 # get_Kbarinfo(ms05,5,'2016-12-02 14:00:00')
 main_fun()
 
 
 
+
+#########for generate######################
+#ms03 = MSSQL(host="192.168.0.3\SQLEXPRESS",user="future",pwd="K@ra0Key",db="future")
+#ms05 = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+def from_begin_generate_Kbars(myms,period,starttime):    
+    print "begin"
+    totalKbars=gene_history_Kbars(myms,period,starttime)
+    for key in totalKbars:
+        if len( totalKbars[key])>0:
+            content=""
+            i=0
+            for item in totalKbars[key]:
+                i=i+1
+                temp="('%s','%s',%s,%s,%s,%s,%s,%s)" % (key,item[0],item[1][0],item[1][1],item[1][2],item[1][3],item[1][4],item[1][5])
+                # print temp
+                content=content+","+temp
+                if i>998:
+                    content=content.strip(',')
+                    sql="insert into [Future].[dbo].[TSymbol_%smin](symbol,[StockDate],O,C,H,L,V,OPI) values%s" % (period,content)
+                    myms.insert_sql(sql)
+                    content=""
+                    i=0
+            content=content.strip(',')
+            if len(content)>10:
+                sql="insert into [Future].[dbo].[TSymbol_%smin](symbol,[StockDate],O,C,H,L,V,OPI) values%s" % (period,content)
+                myms.insert_sql(sql)
+        else:
+            print key
+
+
+# from_begin_generate_Kbars(ms03,30,'2015-01-01')

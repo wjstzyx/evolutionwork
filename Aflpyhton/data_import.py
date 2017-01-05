@@ -38,6 +38,8 @@ def import_data(dirfrom,dirformat,database):
 
 
 
+
+
 def run_aflfile(ab,database,Ticker,aflfle,settingfile):
 	ab.LoadDatabase(database)
 	ab.Documents.Open(Ticker)
@@ -90,6 +92,21 @@ def main_import_data():
 		print dirfrom
 		import_data(dirfrom,dirformat,database)
 
+#将数据文件夹中的数据全部导入
+def main_import_data_v2():
+	cmd='taskkill /F /IM Broker.exe'
+	os.system(cmd)
+	datafir=ABautoroot+"\\ABautofile\\datafile"
+	datafiles = os.listdir(datafir)
+	ab = Dispatch("Broker.Application")	
+	ab.LoadDatabase(database)
+	for file in datafiles:
+		dirfrom=datafir+"\\"+file
+		print dirfrom
+		ab.Import(0,dirfrom,dirformat)
+
+	ab.SaveDataBase()
+	print "数据成功导入"
 
 
 #获得afl 和配置文件的对应关系
@@ -125,6 +142,12 @@ def main_run_afl():
 				itemsettingdir=ABautoroot+"\\ABautofile\\setting\\a26_30"
 			if timeperiod in ('31min','32min','33min','34min','35min'):
 				itemsettingdir=ABautoroot+"\\ABautofile\\setting\\a31-35"
+			if timeperiod in ('36min','37min','38min','39min','40min'):
+				itemsettingdir=ABautoroot+"\\ABautofile\\setting\\a36-40"
+			if timeperiod in ('41min','42min','43min','44min','45min'):
+				itemsettingdir=ABautoroot+"\\ABautofile\\setting\\a41-45"
+			if timeperiod in ('46min','47min','48min','49min','50min'):
+				itemsettingdir=ABautoroot+"\\ABautofile\\setting\\a46-50"
 			itemfile=aflfiledir+"\\"+file
 			settingfile=itemsettingdir+"\\"+timeperiod+".ABS"
 			Ticker=basename.split('-')[0].strip(" ")
@@ -349,7 +372,7 @@ def add_prename(symbol='',tieminteval=''):
 		filemame= item.decode('gb2312').encode('utf-8')
 		print filemame
 		if os.path.isdir(targetdir+'\\'+item):
-			matchObj = re.match( r'(.*)StepMultiI_up', item, re.M|re.I)
+			matchObj = re.match( r'(.*)StepMultigaosheng2', item, re.M|re.I)
 			if matchObj:
 				symbol=matchObj.group(1).strip(" ")
 			else:
