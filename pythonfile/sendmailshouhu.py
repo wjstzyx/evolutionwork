@@ -76,6 +76,7 @@ gene_bar('ms05',5)
 gene_bar('ms03',5)
 gene_bar('ms05',15)
 gene_bar('ms03',15)
+gene_bar('ms05',30)
 
 
 

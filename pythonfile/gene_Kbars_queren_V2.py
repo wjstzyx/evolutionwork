@@ -243,6 +243,12 @@ def main_fun():
     except:
         index=index+1
         pass
+    try:
+        compare_kbars(ms05,30,fromtime)
+    except:
+        index=index+1
+        pass
+
     if index==0:
         write_heart('Kbars','queren')
 #ms05 = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
