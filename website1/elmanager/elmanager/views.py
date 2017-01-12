@@ -2306,7 +2306,7 @@ def map_acname_position(request):
 		data1=[]
 		if res1:
 			for item  in res1:
-				stockdate=(item['stockdate']- datetime.timedelta(hours = 5)).strftime("%Y-%m-%d %H:%M:%S")
+				stockdate=(item['stockdate']+ datetime.timedelta(hours = 8)).strftime("%Y-%m-%d %H:%M:%S")
 				timeArray = time.strptime(stockdate, "%Y-%m-%d %H:%M:%S")
 				timeStamp = int(time.mktime(timeArray))
 				totalposition=round(item['totalposition'],3)
@@ -2320,7 +2320,7 @@ def map_acname_position(request):
 		data2=[]
 		if res2:
 			for item  in res2:
-				stockdate=(item['stockdate']- datetime.timedelta(hours = 5)).strftime("%Y-%m-%d %H:%M:%S")
+				stockdate=(item['stockdate']+ datetime.timedelta(hours = 8)).strftime("%Y-%m-%d %H:%M:%S")
 				timeArray = time.strptime(stockdate, "%Y-%m-%d %H:%M:%S")
 				timeStamp = int(time.mktime(timeArray))
 				totalposition=round(item['totalposition'],3)
@@ -2339,7 +2339,7 @@ def map_acname_position(request):
 		data1=[]
 		if res1:
 			for item  in res1:
-				stockdate=(item['stockdate']- datetime.timedelta(hours = 5)).strftime("%Y-%m-%d %H:%M:%S")
+				stockdate=(item['stockdate']+ datetime.timedelta(hours = 8)).strftime("%Y-%m-%d %H:%M:%S")
 				timeArray = time.strptime(stockdate, "%Y-%m-%d %H:%M:%S")
 				timeStamp = int(time.mktime(timeArray))
 				totalposition=round(item['totalposition'],3)
@@ -2353,7 +2353,7 @@ def map_acname_position(request):
 		data2=[]
 		if res2:
 			for item  in res2:
-				stockdate=(item['stockdate']- datetime.timedelta(hours = 5)).strftime("%Y-%m-%d %H:%M:%S")
+				stockdate=(item['stockdate']+ datetime.timedelta(hours = 8)).strftime("%Y-%m-%d %H:%M:%S")
 				timeArray = time.strptime(stockdate, "%Y-%m-%d %H:%M:%S")
 				timeStamp = int(time.mktime(timeArray))
 				totalposition=round(item['totalposition'],3)
