@@ -3886,7 +3886,7 @@ def general_HongsongAll():
 
 #将账号仓位快照入库
 def cal_distinct_position_lilun():
-	#1 put lilun equity into account_position_lilun
+	#1 put lilun equity into account_position_lilun,添加不存在报警机制
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 	sql="truncate table [LogRecord].[dbo].account_position_lilun"
 	ms.insert_sql(sql)
@@ -3895,8 +3895,18 @@ def cal_distinct_position_lilun():
 	totalsql=""
 	for item in res:
 		userid=item['userid']
-		tempsql="select '%s' as [userID],STOCK as [stockID],Expr1 as position,GETDATE() as nowtime from future.dbo.view_%s" % (userid,userid)
-		totalsql=totalsql+" union all "+tempsql
+		ispass=0
+		try:
+			sql="select 1 from future.dbo.view_%s" % (userid)
+			ms.insert_sql(sql)
+			ispass=1
+		except:
+			sql="insert into [LogRecord].[dbo].account_position_lilun([userID],[stockID],[position],[inserttime],beizhu) values('%s',0,'%s',getdate(),'%s')" % (userid,0,'No view in 0.5 database')
+			print sql
+			ms.insert_sql(sql)
+		if ispass==1:
+			tempsql="select '%s' as [userID],STOCK as [stockID],Expr1 as position,GETDATE() as nowtime from future.dbo.view_%s" % (userid,userid)
+			totalsql=totalsql+" union all "+tempsql
 	totalsql=totalsql.strip(" union all ")
 	totalsql="insert into [LogRecord].[dbo].account_position_lilun([userID],[stockID],[position],[inserttime]) "+ totalsql
 	ms.insert_sql(totalsql)
@@ -3924,16 +3934,8 @@ def cal_distinct_position_lilun():
 	for item in res:
 		print "'"+item['symbol']+"'"
 		symbol_id=symboldict[item['symbol']]
-
 		sql="insert into [LogRecord].[dbo].account_position_lilun([userID],[stockID],[position],[inserttime]) values('%s','%s','%s',getdate())" % (item['account'],symbol_id,item['Position'])
 		ms.insert_sql(sql)
-
-
-
-
-
-	# sql="SELECT a.account as userID,a.stock as stockID,(handperstock*position) as position,GETDATE() as inserttime  FROM [future].[dbo].[SP_ACCOUNT_STRATEGY] a  left join [future].[dbo].[SP_STRATEGY] b  on a.stock=b.stock and a.strategyname=b.name where  position<>0"
-	# tempres=ms1.dict_sql(sql)
 	totalsql=""
 	tempv=""
 	for item in tempres:

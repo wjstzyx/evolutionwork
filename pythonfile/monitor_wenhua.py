@@ -351,63 +351,6 @@ def ismonitorday():
 
 
 
-#将账号仓位快照入库
-def cal_distinct_position_lilun():
-	#1 put lilun equity into account_position_lilun
-	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
-	sql="truncate table [LogRecord].[dbo].account_position_lilun"
-	ms.insert_sql(sql)
-	sql="select distinct userid from [LogRecord].[dbo].[account_position] order by userid"
-	res=ms.dict_sql(sql)
-	totalsql=""
-	for item in res:
-		userid=item['userid']
-		tempsql="select '%s' as [userID],STOCK as [stockID],Expr1 as position,GETDATE() as nowtime from future.dbo.view_%s" % (userid,userid)
-		totalsql=totalsql+" union all "+tempsql
-	totalsql=totalsql.strip(" union all ")
-	totalsql="insert into [LogRecord].[dbo].account_position_lilun([userID],[stockID],[position],[inserttime]) "+ totalsql
-	ms.insert_sql(totalsql)
-
-	#2 shangpin yingshe
-	totalsql=""
-	ms1 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="Future")
-	res=['670611','666061010','666061001','28032','11808319','11803593','05810058','032442']
-	for item in res:
-		userid=item
-		tempsql="select '%s' as [userID],STOCK as [stockID],Expr1 as position,GETDATE() as inserttime from future.dbo.view_%s" % (userid,userid)
-		totalsql=totalsql+" union all "+tempsql
-	totalsql=totalsql.strip(" union all ")
-	#totalsql="insert into [LogRecord].[dbo].account_position_lilun([userID],[stockID],[position],[inserttime]) "+ totalsql
-	tempres=ms1.dict_sql(totalsql)
-
-	#3 stock yinghse
-	sql="SELECT [Symbol]  ,[S_ID] FROM [Future].[dbo].[Symbol_ID] where Symbol in ('IC','IF','IH','TF','T')"
-	res=ms.dict_sql(sql)
-	symboldict={}
-	for item in res:
-		symboldict[item['Symbol']]=item['S_ID']
-	sql="SELECT a.account,a.symbol,sum(a.ratio*b.position ) as Position  FROM [future].[dbo].[account_position_stock_yingshe] a left join [future].[dbo].[RealPosition] b on a.acanme=b.Name group by a.account,a.symbol"
-	res=ms1.dict_sql(sql)
-	for item in res:
-		symbol_id=symboldict[item['symbol']]
-		sql="insert into [LogRecord].[dbo].account_position_lilun([userID],[stockID],[position],[inserttime]) values('%s','%s','%s',getdate())" % (item['account'],symbol_id,item['Position'])
-		ms.insert_sql(sql)
-
-
-
-
-
-	# sql="SELECT a.account as userID,a.stock as stockID,(handperstock*position) as position,GETDATE() as inserttime  FROM [future].[dbo].[SP_ACCOUNT_STRATEGY] a  left join [future].[dbo].[SP_STRATEGY] b  on a.stock=b.stock and a.strategyname=b.name where  position<>0"
-	# tempres=ms1.dict_sql(sql)
-	totalsql=""
-	tempv=""
-	for item in tempres:
-		tempv=",('%s','%s','%s','%s')" % (item['userID'],item['stockID'],int(item['position']),item['inserttime'].strftime("%Y-%m-%d %H:%M:%S"))
-		totalsql=totalsql+tempv
-	totalsql=totalsql.strip(",")
-	totalsql="insert into [LogRecord].[dbo].account_position_lilun([userID],[stockID],[position],[inserttime]) values%s" % (totalsql)
-	ms.insert_sql(totalsql)
-
 
 
 
@@ -431,7 +374,6 @@ def account_database_isdistinct():
 		starttime=datetime.datetime.strptime(starttime,'%H:%M:%S')
 		endtime=datetime.datetime.strptime(endtime,'%H:%M:%S')
 		if nowtime>starttime and nowtime<=endtime:
-			cal_distinct_position_lilun()
 			nowday=datetime.datetime.now().strftime('%Y%m%d')
 			#delete 
 			sql="select kb.id from (select ISNULL(realuserID,userID) as userID,ISNULL(realstockID,stockID) as stockID,ISNULL(realposition,0) as realposition,ISNULL(position,0) as position,GETDATE() as nowtime from (select aaa.userID as realuserID,aaa.stockID as realstockID,aaa.position as realposition,aaa.inserttime as realinserttime,  bbb.* from (        select * from  (   select a.userID,a.stockID,(a.longhave-a.shorthave) as position,inserttime from [LogRecord].[dbo].[account_position] a inner join (     select MAX(time) as time  ,userid   FROM [LogRecord].[dbo].[account_position]  where date='%s' group by userid) b  on a.time=b.time and a.userID=b.userID     and a.date='%s')ka ) aaa full outer join (     select userID,stockID,sum(position)as position,MAX(inserttime)as inserttime  from [LogRecord].[dbo].[account_position_lilun]  group by userID,stockID ) bbb       on aaa.userID=bbb.userID and aaa.stockID=bbb.stockID  where aaa.position<>bbb.position or (bbb.userID is null and aaa.position<>0) or (aaa.userID is null and bbb.position<>0 ) and (bbb.userID in (select distinct userID from [LogRecord].[dbo].account_position))) gg) ka right join [LogRecord].[dbo].[account_position_temp_compare] kb on ka.userID=kb.userid and ka.stockID=kb.stockID where ka.userID is null" % (nowday,nowday)
@@ -452,16 +394,14 @@ def account_database_isdistinct():
 					if item['timediff']>2:
 						# print '报警'
 						# print "@@@@@@@@@@@@@ERROE@@@@@@@@@@@@@@"
-						subject='实盘仓位出现差异'
-						msg='实盘仓位出现差异'
+						subject='实盘仓位与数据库不一致'
+						msg='实盘仓位与数据库不一致'
 						sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,msg,0,sendmessage)
 						ms.insert_sql(sql)
 						break
-
 #阶梯1,2 AB仓位对比报警
 def jieti_AB_isdistinct():
 	#查询发件人
-	print '###jieti_AB_isdistinct'
 	(mailtolist,sendmessage)=get_messagelist()
 	# print mailtolist
 	#待检测的ABmachine列表
@@ -517,34 +457,39 @@ if ismonitorday()==0:
 	exit()
 
 print "begin"
+
 while(1):
 	try:
 		monitor_wenhua()
-	except:
+	except Exception,e:
+		print e,"monitor_wenhua"
 		pass
 	try:
 		monitor_AB()
-	except:
+	except Exception,e:
+		print e,"monitor_AB"
 		pass
 	try:
 		monitor_AB_st_day()
 		monitor_AB_st_night()
 	except Exception,e:
-		print e
+		print e,"monitor_AB_st_night"
 		pass
 	try:
 		monitor_Thunder()
 	except Exception,e:
-		print e
+		print e,"monitor_Thunder"
 		pass
 	try:
 		account_database_isdistinct()
-	except:
-		pass 
+	except Exception,e:
+		print e,"account_database_isdistinct"
+		pass
 	try:
 		jieti_AB_isdistinct()
-	except:
-		pass 
+	except Exception,e:
+		print e,"jieti_AB_isdistinct"
+		pass
 	break
 	time.sleep(50)
 	mytime=int(datetime.datetime.now().strftime('%H%M'))
