@@ -228,7 +228,6 @@ def total_monitor(request):
 			whichtype=3
 
 		if sttype=="real_lilun_position":
-			cal_distinct_position_lilun()
 			real_miss_set,lilun_miss_set,disticnt_set=show_distinct()
 			res1={}
 			sql="select distinct symbol,s_id from future.dbo.symbol_id where symbol not like '%%night%%'  and symbol not in ('CUN','AUN','AGN','LZL','MEZL','RMZL')"
