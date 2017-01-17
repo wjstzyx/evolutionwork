@@ -265,9 +265,9 @@ def monitor_Thunder():
 		nowtime=datetime.datetime.strptime(nowtime,'%H:%M:%S')
 		starttime=datetime.datetime.strptime(starttime,'%H:%M:%S')
 		endtime=datetime.datetime.strptime(endtime,'%H:%M:%S')
-		if nowtime>starttime and nowtime<=endtime:
+		if nowtime>starttime and nowtime<=endtime :
 			#检测最新更新时间与当时的时间差，如果相差70s就报警
-			sql="SELECT time  FROM [future].[dbo].[Program_night] where name='%s'" % (symbol)
+			sql="SELECT time  FROM [future].[dbo].[Program] where name='%s'" % (symbol)
 			res=ms1.find_sql(sql)
 			if res:
 				lasttime=res[0][0]
@@ -325,18 +325,6 @@ def get_messagelist():
 
 
 def ismonitorday():
-	# refer to http://apistore.baidu.com/apiworks/servicedetail/1116.html
-	url = 'http://apis.baidu.com/xiaogg/holiday/holiday?d=20160902'
-	req = urllib2.Request(url)
-	req.add_header("apikey", "6677fe3debefda50dd040fbf98d0d38b")
-	resp = urllib2.urlopen(req)
-	content = resp.read()
-	if(content):
-	    print(content)
-
-
-
-
 	sql="select top 1 D from TSymbol where T>'05:00' ORDER BY id desc"
 	lastday=ms.find_sql(sql)[0][0]
 	lastday='20'+lastday[2:4]+lastday[5:7]+lastday[8:10]
@@ -377,6 +365,8 @@ def account_database_isdistinct():
 			nowday=datetime.datetime.now().strftime('%Y%m%d')
 			#delete 
 			sql="select kb.id from (select ISNULL(realuserID,userID) as userID,ISNULL(realstockID,stockID) as stockID,ISNULL(realposition,0) as realposition,ISNULL(position,0) as position,GETDATE() as nowtime from (select aaa.userID as realuserID,aaa.stockID as realstockID,aaa.position as realposition,aaa.inserttime as realinserttime,  bbb.* from (        select * from  (   select a.userID,a.stockID,(a.longhave-a.shorthave) as position,inserttime from [LogRecord].[dbo].[account_position] a inner join (     select MAX(time) as time  ,userid   FROM [LogRecord].[dbo].[account_position]  where date='%s' group by userid) b  on a.time=b.time and a.userID=b.userID     and a.date='%s')ka ) aaa full outer join (     select userID,stockID,sum(position)as position,MAX(inserttime)as inserttime  from [LogRecord].[dbo].[account_position_lilun]  group by userID,stockID ) bbb       on aaa.userID=bbb.userID and aaa.stockID=bbb.stockID  where aaa.position<>bbb.position or (bbb.userID is null and aaa.position<>0) or (aaa.userID is null and bbb.position<>0 ) and (bbb.userID in (select distinct userID from [LogRecord].[dbo].account_position))) gg) ka right join [LogRecord].[dbo].[account_position_temp_compare] kb on ka.userID=kb.userid and ka.stockID=kb.stockID where ka.userID is null" % (nowday,nowday)
+			print "@@@@@@@@@@@@delete"
+			print sql 
 			res=ms.dict_sql(sql)
 			for item in res:
 				id=item['id']
@@ -385,6 +375,8 @@ def account_database_isdistinct():
 
 			#update
 			sql="select ka.*,kb.realposition as oldrealposition,kb.lilunposition as oldlilunposition, DATEDIFF(MINUTE, kb.inserttime,ka.nowtime) as timediff  from (select ISNULL(realuserID,userID) as userID,ISNULL(realstockID,stockID) as stockID,ISNULL(realposition,0) as realposition,ISNULL(position,0) as position,GETDATE() as nowtime from (select aaa.userID as realuserID,aaa.stockID as realstockID,aaa.position as realposition,aaa.inserttime as realinserttime,  bbb.* from (        select * from  (   select a.userID,a.stockID,(a.longhave-a.shorthave) as position,inserttime from [LogRecord].[dbo].[account_position] a inner join (     select MAX(time) as time  ,userid   FROM [LogRecord].[dbo].[account_position]  where date='%s' group by userid) b  on a.time=b.time and a.userID=b.userID     and a.date='%s')ka ) aaa full outer join (     select userID,stockID,sum(position)as position,MAX(inserttime)as inserttime  from [LogRecord].[dbo].[account_position_lilun]  group by userID,stockID ) bbb       on aaa.userID=bbb.userID and aaa.stockID=bbb.stockID  where aaa.position<>bbb.position or (bbb.userID is null and aaa.position<>0) or (aaa.userID is null and bbb.position<>0 ) and (bbb.userID in (select distinct userID from [LogRecord].[dbo].account_position))) gg) ka left join [LogRecord].[dbo].[account_position_temp_compare] kb on ka.userID=kb.userid and ka.stockID=kb.stockID" % (nowday,nowday)
+			print "####update"
+			print sql 
 			res=ms.dict_sql(sql)
 			for item in res:
 				if item['oldrealposition'] is None:
