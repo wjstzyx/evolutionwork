@@ -265,7 +265,7 @@ def monitor_Thunder():
 		nowtime=datetime.datetime.strptime(nowtime,'%H:%M:%S')
 		starttime=datetime.datetime.strptime(starttime,'%H:%M:%S')
 		endtime=datetime.datetime.strptime(endtime,'%H:%M:%S')
-		if nowtime>starttime and nowtime<=endtime :
+		if nowtime>starttime and nowtime<=endtime:
 			#检测最新更新时间与当时的时间差，如果相差70s就报警
 			sql="SELECT time  FROM [future].[dbo].[Program] where name='%s'" % (symbol)
 			res=ms1.find_sql(sql)
@@ -389,7 +389,7 @@ def account_database_isdistinct():
 						subject='实盘仓位与数据库不一致'
 						msg='实盘仓位与数据库不一致'
 						sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,msg,0,sendmessage)
-						ms.insert_sql(sql)
+						#ms.insert_sql(sql)
 						break
 #阶梯1,2 AB仓位对比报警
 def jieti_AB_isdistinct():
