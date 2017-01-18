@@ -13,6 +13,21 @@ ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 # print resList
 # -*- coding: utf-8 -*-
 
+def get_messagelist():
+	sql="select email from [LogRecord].[dbo].[mailtolist] where istomail=1"
+	reslist=ms.find_sql(sql)
+	mailtolist=''
+	sendmessage=''
+	for item in reslist:
+		if "@" in item[0]:
+			mailtolist=mailtolist+','+item[0]
+		else:
+			sendmessage=sendmessage+','+item[0]
+	mailtolist=mailtolist.strip(',')
+	sendmessage=sendmessage.strip(',')
+	return mailtolist,sendmessage
+
+
 #将账号仓位快照入库
 def cal_position_lilun():
 	#1 put lilun equity into account_position_lilun,添加不存在报警机制
@@ -84,6 +99,54 @@ def cal_position_lilun():
 	ms.insert_sql(totalsql)
 
 
+#仓位报警-差异超过3分钟就报警
+def account_database_isdistinct():
+	#查询发件人
+	(mailtolist,sendmessage)=get_messagelist()
+	# print mailtolist
+	#待检测的ABmachine列表
+	sql="select item,starttime,endtime from [LogRecord].[dbo].[monitorconfig] where type='Account_distinguish' and ismonitor=1"
+	res=ms.dict_sql(sql)
+	for item in res:
+		symbol=item['item']
+		starttime=item['starttime']
+		endtime=item['endtime']
+		sql="select getdate()"
+		getnow=ms.find_sql(sql)[0][0]
+		nowtime=getnow.strftime('%H:%M:%S')
+		nowtime=datetime.datetime.strptime(nowtime,'%H:%M:%S')
+		starttime=datetime.datetime.strptime(starttime,'%H:%M:%S')
+		endtime=datetime.datetime.strptime(endtime,'%H:%M:%S')
+		if nowtime>starttime and nowtime<=endtime:
+			nowday=datetime.datetime.now().strftime('%Y%m%d')
+			#delete 
+			sql="select kb.id from (select ISNULL(realuserID,userID) as userID,ISNULL(realstockID,stockID) as stockID,ISNULL(realposition,0) as realposition,ISNULL(position,0) as position,GETDATE() as nowtime from (select aaa.userID as realuserID,aaa.stockID as realstockID,aaa.position as realposition,aaa.inserttime as realinserttime,  bbb.* from (        select * from  (   select a.userID,a.stockID,(a.longhave-a.shorthave) as position,inserttime from [LogRecord].[dbo].[account_position] a inner join (     select MAX(time) as time  ,userid   FROM [LogRecord].[dbo].[account_position]  where date='%s' group by userid) b  on a.time=b.time and a.userID=b.userID     and a.date='%s')ka ) aaa full outer join (     select userID,stockID,sum(position)as position,MAX(inserttime)as inserttime  from [LogRecord].[dbo].[account_position_lilun]  group by userID,stockID ) bbb       on aaa.userID=bbb.userID and aaa.stockID=bbb.stockID  where aaa.position<>bbb.position or (bbb.userID is null and aaa.position<>0) or (aaa.userID is null and bbb.position<>0 ) and (bbb.userID in (select distinct userID from [LogRecord].[dbo].account_position))) gg) ka right join [LogRecord].[dbo].[account_position_temp_compare] kb on ka.userID=kb.userid and ka.stockID=kb.stockID where ka.userID is null" % (nowday,nowday)
+			print "@@@@@@@@@@@@delete"
+			print sql 
+			res=ms.dict_sql(sql)
+			for item in res:
+				id=item['id']
+				sql="delete from [LogRecord].[dbo].[account_position_temp_compare] where id=%s" % (id)
+				ms.insert_sql(sql)
+
+			#update
+			sql="select ka.*,kb.realposition as oldrealposition,kb.lilunposition as oldlilunposition, DATEDIFF(MINUTE, kb.inserttime,ka.nowtime) as timediff  from (select ISNULL(realuserID,userID) as userID,ISNULL(realstockID,stockID) as stockID,ISNULL(realposition,0) as realposition,ISNULL(position,0) as position,GETDATE() as nowtime from (select aaa.userID as realuserID,aaa.stockID as realstockID,aaa.position as realposition,aaa.inserttime as realinserttime,  bbb.* from (        select * from  (   select a.userID,a.stockID,(a.longhave-a.shorthave) as position,inserttime from [LogRecord].[dbo].[account_position] a inner join (     select MAX(time) as time  ,userid   FROM [LogRecord].[dbo].[account_position]  where date='%s' group by userid) b  on a.time=b.time and a.userID=b.userID     and a.date='%s')ka ) aaa full outer join (     select userID,stockID,sum(position)as position,MAX(inserttime)as inserttime  from [LogRecord].[dbo].[account_position_lilun]  group by userID,stockID ) bbb       on aaa.userID=bbb.userID and aaa.stockID=bbb.stockID  where aaa.position<>bbb.position or (bbb.userID is null and aaa.position<>0) or (aaa.userID is null and bbb.position<>0 ) and (bbb.userID in (select distinct userID from [LogRecord].[dbo].account_position))) gg) ka left join [LogRecord].[dbo].[account_position_temp_compare] kb on ka.userID=kb.userid and ka.stockID=kb.stockID" % (nowday,nowday)
+			print "####update"
+			print sql 
+			res=ms.dict_sql(sql)
+			for item in res:
+				if item['oldrealposition'] is None:
+					sql="insert into [LogRecord].[dbo].[account_position_temp_compare]([userID]  ,[stockID] ,[realposition]  ,[lilunposition]  ,[inserttime]) values('%s',%s,%s,%s,getdate())" % (item['userID'],item['stockID'],item['realposition'],item['position'])
+					ms.insert_sql(sql)
+				else:
+					if item['timediff']>2:
+						# print '报警'
+						# print "@@@@@@@@@@@@@ERROE@@@@@@@@@@@@@@"
+						subject='实盘仓位与数据库不一致'
+						msg='实盘仓位与数据库不一致'
+						sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,msg,0,sendmessage)
+						#ms.insert_sql(sql)
+						break
 
 
 
@@ -126,6 +189,8 @@ def monitor_add_errorinfo(type,myitem):
 
 try:
 	cal_position_lilun()
+	account_database_isdistinct()
+
 except:
 	monitor_add_errorinfo('crontab','cal_position_lilun')
 	print '$$$send error info'

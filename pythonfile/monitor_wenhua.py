@@ -472,11 +472,11 @@ while(1):
 	except Exception,e:
 		print e,"monitor_Thunder"
 		pass
-	try:
-		account_database_isdistinct()
-	except Exception,e:
-		print e,"account_database_isdistinct"
-		pass
+	# try:
+	# 	account_database_isdistinct()
+	# except Exception,e:
+	# 	print e,"account_database_isdistinct"
+	# 	pass
 	try:
 		jieti_AB_isdistinct()
 	except Exception,e:
