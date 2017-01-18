@@ -119,34 +119,59 @@ def account_database_isdistinct():
 		endtime=datetime.datetime.strptime(endtime,'%H:%M:%S')
 		if nowtime>starttime and nowtime<=endtime:
 			nowday=datetime.datetime.now().strftime('%Y%m%d')
+			sql="select aaa.userID as realuserID,aaa.stockID as realstockID,aaa.position as realposition,aaa.inserttime as realinserttime,  bbb.* from (        select * from  	(   select a.userID,a.stockID,(a.longhave-a.shorthave) as position,inserttime from [LogRecord].[dbo].[account_position] a inner join (  select MAX(time) as 	time  ,userid   FROM [LogRecord].[dbo].[account_position]  where date='%s' group by userid) b  on a.time=b.time and a.userID=b.userID and a.date='%s')ka ) aaa 	full outer join (     select userID,stockID,sum(position)as position,MAX(inserttime)as inserttime  from [LogRecord].[dbo].[account_position_lilun]  group by 	userID,stockID ) bbb       on aaa.userID=bbb.userID and aaa.stockID=bbb.stockID  where aaa.position<>bbb.position or (bbb.userID is null and aaa.position<>0) 	or (aaa.userID is null and bbb.position<>0 ) and (bbb.userID in (select distinct userID from [LogRecord].[dbo].account_position)) order by aaa.userID" % (nowday,nowday)
+			res=ms.dict_sql(sql)
+			newrecord=[]
+			for item in res:
+				if item['realuserID'] is None:
+					temp=[item['userID'],item['stockID'],0,item['position'],item['inserttime']]
+				if item['userID'] is None:
+					temp=[item['realuserID'],item['realstockID'],item['realposition'],0,item['realinserttime']]
+				if item['realuserID'] is not None and item['userID'] is not None:
+					temp=[item['realuserID'],item['realstockID'],item['realposition'],item['position'],item['realinserttime']]
+				newrecord.append(temp)
+			#listnew
+			newlistquotes=[aa[0]+'_'+str(int(aa[1])) for aa in newrecord]
+			#print newlistquotes
+			# for item in newrecord:
+			# 	print item 
+			sql="SELECT id,[userID]   ,[stockID]   ,[realposition]   ,[lilunposition]    ,[inserttime] FROM [LogRecord].[dbo].[account_position_temp_compare]"
+			res=ms.dict_sql(sql)
 			#delete 
-			sql="select kb.id from (select ISNULL(realuserID,userID) as userID,ISNULL(realstockID,stockID) as stockID,ISNULL(realposition,0) as realposition,ISNULL(position,0) as position,GETDATE() as nowtime from (select aaa.userID as realuserID,aaa.stockID as realstockID,aaa.position as realposition,aaa.inserttime as realinserttime,  bbb.* from (        select * from  (   select a.userID,a.stockID,(a.longhave-a.shorthave) as position,inserttime from [LogRecord].[dbo].[account_position] a inner join (     select MAX(time) as time  ,userid   FROM [LogRecord].[dbo].[account_position]  where date='%s' group by userid) b  on a.time=b.time and a.userID=b.userID     and a.date='%s')ka ) aaa full outer join (     select userID,stockID,sum(position)as position,MAX(inserttime)as inserttime  from [LogRecord].[dbo].[account_position_lilun]  group by userID,stockID ) bbb       on aaa.userID=bbb.userID and aaa.stockID=bbb.stockID  where aaa.position<>bbb.position or (bbb.userID is null and aaa.position<>0) or (aaa.userID is null and bbb.position<>0 ) and (bbb.userID in (select distinct userID from [LogRecord].[dbo].account_position))) gg) ka right join [LogRecord].[dbo].[account_position_temp_compare] kb on ka.userID=kb.userid and ka.stockID=kb.stockID where ka.userID is null" % (nowday,nowday)
-			print "@@@@@@@@@@@@delete"
-			print sql 
-			res=ms.dict_sql(sql)
+			oldlistquotes=[]
 			for item in res:
-				id=item['id']
-				sql="delete from [LogRecord].[dbo].[account_position_temp_compare] where id=%s" % (id)
-				ms.insert_sql(sql)
-
-			#update
-			sql="select ka.*,kb.realposition as oldrealposition,kb.lilunposition as oldlilunposition, DATEDIFF(MINUTE, kb.inserttime,ka.nowtime) as timediff  from (select ISNULL(realuserID,userID) as userID,ISNULL(realstockID,stockID) as stockID,ISNULL(realposition,0) as realposition,ISNULL(position,0) as position,GETDATE() as nowtime from (select aaa.userID as realuserID,aaa.stockID as realstockID,aaa.position as realposition,aaa.inserttime as realinserttime,  bbb.* from (        select * from  (   select a.userID,a.stockID,(a.longhave-a.shorthave) as position,inserttime from [LogRecord].[dbo].[account_position] a inner join (     select MAX(time) as time  ,userid   FROM [LogRecord].[dbo].[account_position]  where date='%s' group by userid) b  on a.time=b.time and a.userID=b.userID     and a.date='%s')ka ) aaa full outer join (     select userID,stockID,sum(position)as position,MAX(inserttime)as inserttime  from [LogRecord].[dbo].[account_position_lilun]  group by userID,stockID ) bbb       on aaa.userID=bbb.userID and aaa.stockID=bbb.stockID  where aaa.position<>bbb.position or (bbb.userID is null and aaa.position<>0) or (aaa.userID is null and bbb.position<>0 ) and (bbb.userID in (select distinct userID from [LogRecord].[dbo].account_position))) gg) ka left join [LogRecord].[dbo].[account_position_temp_compare] kb on ka.userID=kb.userid and ka.stockID=kb.stockID" % (nowday,nowday)
-			print "####update"
-			print sql 
-			res=ms.dict_sql(sql)
-			for item in res:
-				if item['oldrealposition'] is None:
-					sql="insert into [LogRecord].[dbo].[account_position_temp_compare]([userID]  ,[stockID] ,[realposition]  ,[lilunposition]  ,[inserttime]) values('%s',%s,%s,%s,getdate())" % (item['userID'],item['stockID'],item['realposition'],item['position'])
+				oldlistquotes.append(item['userID']+'_'+str(int(item['stockID'])))
+				if item['userID']+'_'+str(int(item['stockID'])) not in newlistquotes:
+					print item['userID']+'_'+str(int(item['stockID'])),'delete'
+					id=item['id']
+					sql="delete from [LogRecord].[dbo].[account_position_temp_compare] where id=%s" % (id)
+					ms.insert_sql(sql)
+			#update and insert 
+			for aa in newrecord:
+				uniquekey=aa[0]+'_'+str(int(aa[1]))
+				if uniquekey  not in oldlistquotes:
+					print 'update   insert'
+					sql="insert into [LogRecord].[dbo].[account_position_temp_compare](userID,stockID,realposition,lilunposition,inserttime) values('%s','%s','%s','%s	',getdate())" % (aa[0],aa[1],aa[2],aa[3])
 					ms.insert_sql(sql)
 				else:
-					if item['timediff']>2:
+					sql="SELECT DATEDIFF(MINUTE, inserttime,getdate()) as timediff  FROM [LogRecord].[dbo].[account_position_temp_compare] where userID='%s' and stockID='%s'" %	 (aa[0],int(aa[1]))
+					mytime=ms.dict_sql(sql)
+					atime=mytime[0]['timediff']
+					if atime>2:
 						# print '报警'
 						# print "@@@@@@@@@@@@@ERROE@@@@@@@@@@@@@@"
-						subject='实盘仓位与数据库不一致'
-						msg='实盘仓位与数据库不一致'
-						sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,msg,0,sendmessage)
-						#ms.insert_sql(sql)
+						subject='%s 实盘仓位与数据库不一致' % (aa[0])
+						msg=subject
+						sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,	mailtolist,msg,0,sendmessage)
+						#print sql 
+						ms.insert_sql(sql)
 						break
+
+
+
+
+
+
 
 
 
