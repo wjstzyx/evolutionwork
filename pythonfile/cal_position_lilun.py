@@ -151,7 +151,7 @@ def account_database_isdistinct():
 				uniquekey=aa[0]+'_'+str(int(aa[1]))
 				if uniquekey  not in oldlistquotes:
 					print 'update   insert'
-					sql="insert into [LogRecord].[dbo].[account_position_temp_compare](userID,stockID,realposition,lilunposition,inserttime) values('%s','%s','%s','%s	',getdate())" % (aa[0],aa[1],aa[2],aa[3])
+					sql="insert into [LogRecord].[dbo].[account_position_temp_compare](userID,stockID,realposition,lilunposition,inserttime) values('%s','%s','%s','%s',getdate())" % (aa[0],aa[1],aa[2],int(aa[3]))
 					ms.insert_sql(sql)
 				else:
 					sql="SELECT DATEDIFF(MINUTE, inserttime,getdate()) as timediff  FROM [LogRecord].[dbo].[account_position_temp_compare] where userID='%s' and stockID='%s'" %	 (aa[0],int(aa[1]))
@@ -177,6 +177,7 @@ def account_database_isdistinct():
 
 def monitor_add_errorinfo(type,myitem):
 	#查询发件人
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 	sql="select email from [LogRecord].[dbo].[mailtolist] where istomail=1"
 	reslist=ms.find_sql(sql)
 	mailtolist=''
@@ -209,8 +210,14 @@ def monitor_add_errorinfo(type,myitem):
 			subject='ctontab出错 %s' % (myitem)
 			msg=subject
 			sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,mailtolist,msg,0,sendmessage)
+			print sql 
 			ms.insert_sql(sql)
 			break
+
+
+
+
+
 
 try:
 	cal_position_lilun()
