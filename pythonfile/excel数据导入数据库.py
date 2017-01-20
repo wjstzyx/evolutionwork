@@ -12,7 +12,7 @@ ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 # print resList
 # -*- coding: utf-8 -*-
 
-root1=r'C:\Users\YuYang\Documents\Tencent Files\794513386\FileRecv\data-qd\future_index_1m_2'
+root1=r'C:\Users\YuYang\Documents\Tencent Files\794513386\FileRecv\future_index_shipan'
 
 files=os.listdir(root1)
 for item in files:
@@ -25,7 +25,7 @@ for item in files:
 	totalstr=""
 	i=0
 	for row in content:
-		if row[0]>='20161011' and row[0]<='20161229':
+		if row[0]>='20161230' and row[0]<='20170112':
 			D=row[0][0:4]+"/"+row[0][4:6]+"/"+row[0][6:]
 			T=row[1][0:2]+":"+row[1][2:4]
 			stockdate=D+" "+T

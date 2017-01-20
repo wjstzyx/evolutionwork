@@ -16,6 +16,66 @@ from dbconn import MSSQL
 # ms1 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="future")
 
 
+def realshowmonitor_huifu(request):
+	if request.POST:
+		ms= MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+		id=request.POST.get("date","")
+		sql="update [LogRecord].[dbo].[all_monitor_info] set isactive=1 where id=%s" % (id)
+		ms.insert_sql(sql)
+	result={'res1':1}
+	result=simplejson.dumps(result,ensure_ascii = False)
+	return HttpResponse(result,mimetype='application/json')
+
+
+
+def realshowmonitor_hulue(request):
+	if request.POST:
+		ms= MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+		id=request.POST.get("date","")
+		sql="update [LogRecord].[dbo].[all_monitor_info] set isactive=0 where id=%s" % (id)
+		ms.insert_sql(sql)
+	result={'res1':1}
+	result=simplejson.dumps(result,ensure_ascii = False)
+	return HttpResponse(result,mimetype='application/json')
+
+
+
+
+def realshowmonitor_newalert(request):
+	ms= MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+	sql="SELECT id,[type],[item] ,[msg], classcode ,convert(nvarchar,[updatetime],108) as updatetime FROM [LogRecord].[dbo].[all_monitor_info] where isactive=1 and issolved=0 order by updatetime "
+	res1=ms.dict_sql(sql)
+	sql="SELECT top 50 id,[type],[item] ,[msg], classcode ,convert(nvarchar,[updatetime],108) as updatetime FROM [LogRecord].[dbo].[all_monitor_info] where isactive=1 and issolved=1  order by updatetime desc"
+	res_solved=ms.dict_sql(sql)
+	sql="SELECT id,[type],[item] ,[msg], classcode ,convert(nvarchar,[updatetime],108) as updatetime FROM [LogRecord].[dbo].[all_monitor_info] where isactive=0 and issolved=0  order by updatetime desc"
+	res_noactive=ms.dict_sql(sql)
+
+	result={'res1':res1,'res_solved':res_solved,'res_noactive':res_noactive}
+	result=simplejson.dumps(result,ensure_ascii = False)
+	return HttpResponse(result,mimetype='application/json')
+
+
+
+
+def realshowmonitor(request):
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+	#获取没有解决的问题
+	sql="SELECT id, [type],[item] ,[msg], classcode ,[updatetime]FROM [LogRecord].[dbo].[all_monitor_info] where isactive=1 and issolved=0 order by updatetime "
+	res1=ms.dict_sql(sql)
+
+
+	return render_to_response('realshowmonitor.html',{
+		'data':'',
+		'lilunres':'',
+		'res1':res1,
+		# 'realres':realres,
+
+
+	})	
+
+
+
+
 def distinct_cplus_ab(request):
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 	if request.GET:

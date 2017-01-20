@@ -117,7 +117,7 @@ def account_database_isdistinct():
 		nowtime=datetime.datetime.strptime(nowtime,'%H:%M:%S')
 		starttime=datetime.datetime.strptime(starttime,'%H:%M:%S')
 		endtime=datetime.datetime.strptime(endtime,'%H:%M:%S')
-		if nowtime>starttime and nowtime<=endtime:
+		if nowtime>starttime and nowtime<=endtime or 1==1:
 			nowday=datetime.datetime.now().strftime('%Y%m%d')
 			sql="select aaa.userID as realuserID,aaa.stockID as realstockID,aaa.position as realposition,aaa.inserttime as realinserttime,  bbb.* from (        select * from  	(   select a.userID,a.stockID,(a.longhave-a.shorthave) as position,inserttime from [LogRecord].[dbo].[account_position] a inner join (  select MAX(time) as 	time  ,userid   FROM [LogRecord].[dbo].[account_position]  where date='%s' group by userid) b  on a.time=b.time and a.userID=b.userID and a.date='%s')ka ) aaa 	full outer join (     select userID,stockID,sum(position)as position,MAX(inserttime)as inserttime  from [LogRecord].[dbo].[account_position_lilun]  group by 	userID,stockID ) bbb       on aaa.userID=bbb.userID and aaa.stockID=bbb.stockID  where aaa.position<>bbb.position or (bbb.userID is null and aaa.position<>0) 	or (aaa.userID is null and bbb.position<>0 ) and (bbb.userID in (select distinct userID from [LogRecord].[dbo].account_position)) order by aaa.userID" % (nowday,nowday)
 			res=ms.dict_sql(sql)
@@ -142,9 +142,13 @@ def account_database_isdistinct():
 			for item in res:
 				oldlistquotes.append(item['userID']+'_'+str(int(item['stockID'])))
 				if item['userID']+'_'+str(int(item['stockID'])) not in newlistquotes:
-					print item['userID']+'_'+str(int(item['stockID'])),'delete'
+					myuniqueid=item['userID']+'_'+str(int(item['stockID']))
+					print myuniqueid,'delete'
 					id=item['id']
 					sql="delete from [LogRecord].[dbo].[account_position_temp_compare] where id=%s" % (id)
+					ms.insert_sql(sql)
+					#置为isactive=0
+					sql="update [LogRecord].[dbo].[all_monitor_info] set [issolved]=1 where TYPE='Account' and item='%s' and [issolved]=0" % (myuniqueid)
 					ms.insert_sql(sql)
 			#update and insert 
 			for aa in newrecord:
@@ -165,7 +169,14 @@ def account_database_isdistinct():
 						sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,	mailtolist,msg,0,sendmessage)
 						#print sql 
 						ms.insert_sql(sql)
-						break
+						#插入信息显示
+						type='Account'
+						item=uniquekey
+						msg='实盘仓位与数据库不一致'	
+						classcode='fa-comment'			
+						sql=" insert into [LogRecord].[dbo].[all_monitor_info](type,item,msg,[issolved],[isactive],[inserttime],[updatetime],[classcode]) values('%s','%s','%s','%s','%s',getdate(),getdate(),'%s')" % (type,item,msg,0,1,classcode)
+						#print sql 
+						ms.insert_sql(sql)
 
 
 
@@ -216,7 +227,8 @@ def monitor_add_errorinfo(type,myitem):
 
 
 
-
+account_database_isdistinct()
+exit()
 
 
 try:

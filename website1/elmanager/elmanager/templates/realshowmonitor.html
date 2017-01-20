@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+{% load i18n static %}
+{% load url from future %}
+
+{% block extrahead %}
+
+{% endblock %}
+{% block extrastyle %}
+{% endblock %}
+
+{% block content_title %}{% endblock %}
+{% block content %}
+
+<script>
+function save_monitor_info(id){
+	var id=$("#id_"+id).html();
+	var type=$("#type_"+id).val();
+	var item=$("#item_"+id).val();
+	var ismonitor=$("#ismonitor_"+id).val();
+  var starttime=$("#starttime_"+id).val();
+  var endtime=$("#endtime_"+id).val();
+	data={"id":id,"type":type,"item":item,"ismonitor":ismonitor,"starttime":starttime,"endtime":endtime};
+    $.ajax({
+        url:"{% url 'elmanager.views.save_monitor_info' %}",
+        data:data,
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+            alert("保存成功")
+        }
+
+    });
+}
+
+function aaaadd_whitelist(id){
+	var data={"id":id};
+    $.ajax({
+        url:"{% url 'elmanager.views.delete_monitor_info' %}",
+        data:data,
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+        	window.location.href="/index/monitor/configmonitorlist/";
+        }
+    });
+
+
+
+}
+
+function add_whitelist(r,acname,type,tableid){
+  var data={"acname":acname,"type":type};
+  $.ajax({
+        url:"{% url 'elmanager.views.add_whitelist' %}",
+        data:data,
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+          var i=r.parentNode.parentNode.rowIndex;
+          document.getElementById(tableid).deleteRow(i);      
+        }
+  });
+
+}
+function remove_whitelist(r,acname,type,tableid){
+  var data={"acname":acname,"type":type};
+  $.ajax({
+        url:"{% url 'elmanager.views.remove_whitelist' %}",
+        data:data,
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+          var i=r.parentNode.parentNode.rowIndex;
+          document.getElementById(tableid).deleteRow(i);      
+        }
+  });
+
+}
+
+
+
+
+
+
+function add_new_monitor(){
+    $.ajax({
+        url:"{% url 'elmanager.views.add_new_monitor' %}",
+        data:{"date":"data"},
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+        	window.location.href="/index/monitor/configmonitorlist/"
+            
+        }    
+    });
+
+
+}
+
+
+
+function refresh_alert()
+{ 
+  var htmlstr= '';
+  var solvedstr='';
+  var noactive='';
+  console.info('###ddddd');
+    $.ajax({
+        url:"{% url 'elmanager.views.realshowmonitor_newalert' %}",
+        data:{"date":"data"},
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+
+          for (var i=0;i<result.res1.length;i++)
+          { var tempstr='';
+            id=result.res1[i].id;
+            type=result.res1[i].type;
+            msg=result.res1[i].msg;
+            item=result.res1[i].item;
+            classcode=result.res1[i].classcode;
+            datetime=result.res1[i].updatetime;
+            tempstr += '<a class="list-group-item" id="'+id+'" style="background-color:#FF9900">';
+            tempstr += '<i class="fa '+classcode+' fa-fw"></i>';
+            tempstr += type+'&nbsp;&nbsp;&nbsp;&nbsp;'+item+'&nbsp;&nbsp;&nbsp;&nbsp;'+msg;
+            tempstr += '<span class="pull-right text-muted small"><em>'+datetime+'</em>';
+            tempstr += '<button class="btn-default" onclick="hulue('+id+')">忽略</button>';
+            tempstr += '</span></a>';
+            htmlstr += tempstr;            
+          }
+          for (var i=0;i<result.res_solved.length;i++)
+          { var tempstr='';
+            type=result.res_solved[i].type;
+            msg=result.res_solved[i].msg;
+            item=result.res_solved[i].item;
+            classcode=result.res_solved[i].classcode;
+            datetime=result.res_solved[i].updatetime;
+            tempstr += '<a class="list-group-item" id="'+type+item+'" style="color:grey">';
+            tempstr += '<i class="fa '+classcode+' fa-fw"></i>';
+            tempstr += type+'&nbsp;&nbsp;&nbsp;&nbsp;'+item+'&nbsp;&nbsp;&nbsp;&nbsp;'+msg;
+            tempstr += '<span class="pull-right text-muted small"><em>'+datetime+'</em>';
+            tempstr += '</span></a>';
+            solvedstr += tempstr;            
+          }
+          for (var i=0;i<result.res_noactive.length;i++)
+          { var tempstr='';
+            id=result.res_noactive[i].id;
+            type=result.res_noactive[i].type;
+            msg=result.res_noactive[i].msg;
+            item=result.res_noactive[i].item;
+            classcode=result.res_noactive[i].classcode;
+            datetime=result.res_noactive[i].updatetime;
+            tempstr += '<a class="list-group-item" id="'+id+'">';
+            tempstr += '<i class="fa '+classcode+' fa-fw"></i>';
+            tempstr += type+'&nbsp;&nbsp;&nbsp;&nbsp;'+item+'&nbsp;&nbsp;&nbsp;&nbsp;'+msg;
+            tempstr += '<span class="pull-right text-muted small"><em>'+datetime+'</em>';
+            tempstr += '<button class="btn-default" onclick="huifu('+id+')">恢复</button>';
+            tempstr += '</span></a>';
+            noactive += tempstr;            
+          }
+            
+        }    
+    });
+
+  $('#newalert').html(htmlstr)
+  $('#solved').html(solvedstr)
+  $('#noactive').html(noactive)
+
+}
+
+timename=setInterval("refresh_alert();",4000);
+
+
+function hulue(item)
+{
+    $.ajax({
+        url:"{% url 'elmanager.views.realshowmonitor_hulue' %}",
+        data:{"date":item},
+        type:"POST",
+        dataType:"json",
+        async:true
+    });
+  var box = document.getElementById(item);
+  var main = document.getElementById("noactive");
+  if (box){
+    box.parentNode.removeChild(box);
+    main.appendChild(box);
+  }
+}
+
+
+function huifu(item)
+{
+    $.ajax({
+        url:"{% url 'elmanager.views.realshowmonitor_huifu' %}",
+        data:{"date":item},
+        type:"POST",
+        dataType:"json",
+        async:true
+    });
+  var box = document.getElementById(item);
+  var main = document.getElementById("newalert");
+  if (box){
+    box.parentNode.removeChild(box);
+    main.appendChild(box);
+  }
+
+
+}
+
+</script>
+
+  <div id="page-wrapper"> 
+   <div class="container-fluid" style="height: 920px"> 
+    <!-- Page Heading --> 
+      <div class="row"> 
+       <div class="col-lg-12"> 
+        <h1 class="page-header">报警实时监控</h1> 
+        <ol class="breadcrumb"> 
+         <li class="active"> <i class="fa fa-dashboard"></i> 报警实时监控---报警实时监控</li> 
+        </ol> 
+       </div> 
+      </div>
+
+
+
+      <div class="col-lg-6" >
+      <div class="panel panel-default">
+         <div class="panel-heading">
+             <i class="fa fa-bell fa-fw"></i>报警内容
+         </div>
+         <div class="panel-body">
+             <div class="list-group" id="newalert">
+                {% for item in res1 %}
+                 <a class="list-group-item" style="background-color:#FF9900" id="{{item.id}}">
+                     <i class="fa {{item.classcode}} fa-fw"></i>
+                     {{item.type}}&nbsp;&nbsp;&nbsp;&nbsp;{{item.msg}} 
+                     <span class="pull-right text-muted small"><em>{{item.updatetime|date:"H:i"}}</em>
+                     <button class="btn-default" onclick="hulue({{item.id}})">忽略</button>
+
+                     </span>
+                 </a>
+                {% endfor %}
+
+             </div>
+             <!-- /.list-group -->
+         </div>
+         <!-- /.历史信息 -->
+                      </br>
+             <h4 >History</h4>
+         <div class="panel-body" style=" overflow-y:auto; height:550px;">
+             <div class="list-group" id='solved'>
+
+             </div>
+         </div>
+                              <!-- /.panel-body -->
+      </div>
+      </div>
+
+      <div class="col-lg-6">
+      <div class="panel panel-default">
+         <div class="panel-heading">
+             <i class="fa fa-bell fa-fw"></i> 被忽略的报警
+         </div>
+         <!-- /.panel-heading -->
+         <div class="panel-body">
+             <div class="list-group" id="noactive">
+             </div>
+         </div>
+                              <!-- /.panel-body -->
+      </div>
+      </div>
+
+
+
+
+
+    </div>
+  </div> 
+
+
+{% endblock %}
