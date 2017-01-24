@@ -2769,7 +2769,7 @@ def acwantedequlitynew(request):
 	res1=res[:aa]
 	res2=res[aa:]
 
-	sql="select distinct ac from p_follow where ac like '%stepmulti%' and ac <>'StepMultiI300w' order by ac"
+	sql="select distinct ac from p_follow where ac like '%stepmulti%' and ac not in ('StepMultiI300w','StepMulti2') order by ac"
 	res3=ms.dict_sql(sql)
 
 
