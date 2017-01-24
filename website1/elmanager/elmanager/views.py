@@ -2586,6 +2586,96 @@ def stockmapequty(request):
 
 
 
+def acwantedequlitynew_jieti(request):
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	userid = request.COOKIES.get('userid','')
+	username = request.COOKIES.get('username','')
+	#验证权限
+	sql="SELECT a.username,b.function_id,b.function_content  FROM [LogRecord].[dbo].[account_user] a  inner join [LogRecord].[dbo].[account_group] b  on   a.groupname=b.groupname where a.userid='%s' " % (userid)
+	res=ms.dict_sql(sql)
+	isauthpass=0
+	if res:
+		for item in res:
+			if int(item['function_id'])==2:
+				isauthpass=1
+	if isauthpass==0:
+		response = HttpResponse("该功能正在完善，请返回 !! <a href='/index/'>返回</a>")
+		return response
+
+
+	if request.GET:
+		ac=request.GET.get("ac","")
+
+	rbdata=[]
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist]  where  acname in ( select f_ac from p_follow where ac='%s' ) order by symbol" % (ac)
+	print sql 
+	res=ms.dict_sql(sql)
+	for item in res:
+		acname=item['ac']
+		symbol=item['symbol']
+		#第一个价格
+		sql="select top 1 quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		tempquanyi=ms.find_sql(sql)
+		if tempquanyi==[]:
+			tempquanyi=0
+		else:
+			tempquanyi=tempquanyi[0][0]
+		sql="select quanyi-(%s) as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (tempquanyi,acname,symbol)
+		res1=ms.find_sql(sql)
+		sql="select quanyi as  quanyia,D from real_dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		res2=ms.find_sql(sql)		
+		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
+		#计算交易次数(200天平均)
+		sql="select round(AVG(times)/10,2) as avg from (  select top 200 * from [Future].[dbo].[dailyquanyi_V2] where ac='%s' order by D desc) a where abs(position)+ABS(quanyi)+abs(times)<>0" % (acname)
+		res1=ms.dict_sql(sql)
+		avgtime=res1[0]['avg']
+		if tempday:
+			tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':tempday[-1]}
+
+		else:
+			tempdict={'acname':acname,'symbol':symbol,'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi,'avgtime':avgtime,'lastday':0}
+		rbdata.append(tempdict)
+
+
+
+	#计算整个阶梯组权益
+	ICdata={}
+	totalquanyiresult=order_get_dailyquanyi_forLilun(ac,150521)
+	if totalquanyiresult['ispass']==0:
+		message="配置似乎不是很正确，请俞洋检查下配置"
+	else:
+		result=totalquanyiresult['result']
+		selectequates=[item for item in result]
+		fisrtvalue=selectequates[0][0]
+		selectequates=[[round(item[0]-fisrtvalue,2),item[1]] for item in selectequates]
+		result=selectequates
+		(tempday,lilunquanyi,realquanyi)=range_series(result,[])
+		# print "2######################################################"
+		tempdict={'acname':ac,'symbol':"",'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
+		ICdata=tempdict
+		liluntongji=kpi_tongji(lilunquanyi)
+		liluntongji['Net_Profit']=round(liluntongji['Net_Profit']/10000,3)
+		liluntongji['Max_Drawdown']=round(liluntongji['Max_Drawdown']/10000,3)
+		liluntongji['Daily_Std']=round(liluntongji['Daily_Std']/10000,3)
+		liluntongji['Max_Day_Profit']=round(liluntongji['Max_Day_Profit']/10000,3)
+		liluntongji['Max_Day_Loss']=round(liluntongji['Max_Day_Loss']/10000,3)
+
+
+
+
+
+
+
+	return render_to_response('acwantedequlitynew_jieti.html',{
+		'AGdata':rbdata,
+		'ICdata':ICdata,
+		'username':username,
+		'realtongji':liluntongji,
+		'ac':ac,
+	})	
+
+
+
 
 
 def acwantedequlitynew_oneacname(request):
@@ -2679,6 +2769,10 @@ def acwantedequlitynew(request):
 	res1=res[:aa]
 	res2=res[aa:]
 
+	sql="select distinct ac from p_follow where ac like '%stepmulti%' and ac <>'StepMultiI300w' order by ac"
+	res3=ms.dict_sql(sql)
+
+
 
 
 
@@ -2689,6 +2783,7 @@ def acwantedequlitynew(request):
 	return render_to_response('acwantedequlityindex.html',{
 		'res1':res1,
 		'res2':res2,
+		'res3':res3,
 		'username':username,
 	})	
 
