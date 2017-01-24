@@ -189,7 +189,17 @@ def input_groupbyquanyi(ac,symbol,quanyisymbol=''):
 			ms.insert_sql(sql)
 			# print sql
 		##--end
-		return mymewquote,totalsum
+		
+		#从表中选取
+		# for item in mymewquote:
+		# 	print item[0],item[1],round(item[2],3)
+		# exit()
+		sql="select q.stockdate,t.C,q.totalposition from quanyi_log_groupby_v2 q   inner join TSymbol_quotes_backup t   on q.stockdate=t.StockDate and t.Symbol='%s' where q.ac='%s' and q.symbol='%s'   order by q.stockdate" % (quanyisymbol,ac,symbol)
+		res=ms.find_sql(sql)
+		# for item in res:
+		# 	print item[0],item[1],round(item[2],3)
+		# exit()
+		return res,totalsum
 		
 	else:
 		return 0,0.0001
