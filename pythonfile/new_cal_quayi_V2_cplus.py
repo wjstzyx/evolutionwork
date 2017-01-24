@@ -35,7 +35,6 @@ def input_groupbyquanyi(ac,symbol,quanyisymbol=''):
 	# 产生临时p_log
 	#sql="select * into #temp_p_log from (SELECT   aa.*, sid.Symbol, (YEAR(GETDATE()) - 2000) * 10000 + MONTH(GETDATE()) * 100 + DAY(GETDATE()) AS D from (select  p.AC, p.STOCK, p.type, p.ST, p.P_size, a.ratio from P_BASIC_cplus p inner join AC_RATIO a on p.AC=a.AC and p.STOCK=a.Stock and p.type=a.type and p.AC='%s') as aa inner join Symbol_ID AS sid ON sid.S_ID = aa.STOCK where Symbol='%s') temp" % (ac,symbol)
 	sql ="select * into #temp_p_log from (select '%s' as ac,temp1.STOCK,temp1.type,temp1.ST,temp1.P_size as P_size,temp1.ratio,temp1.Symbol,temp1.num from (select p.*,a.ratio,sid.Symbol,isnull(n.num,1)as num from P_BASIC_cplus p inner join AC_RATIO a on p.AC=a.AC and p.AC='%s' inner join Symbol_ID  AS sid ON p.STOCK=sid.S_ID left join [LogRecord].[dbo].[Ninone_config] n on n.st=p.st) temp1 where Symbol='%s' )aaa"% (ac,ac,symbol)
-	#print sql 
 	ms.insert_sql(sql)
 	sql="select SUM(p_size*ratio/100*num) as totalsum from #temp_p_log"
 	res=ms.dict_sql(sql)
@@ -43,7 +42,6 @@ def input_groupbyquanyi(ac,symbol,quanyisymbol=''):
 
 	#产生临时整个虚拟组real_st_report
 	sql="select * into  #temp_quanyi_new from ( select p.ac,p.symbol,real_st_report.type,real_st_report.id,real_st_report.p,real_st_report.pp,p.p_size,p.ratio ,real_st_report.st,real_st_report.stockdate from real_st_report  inner join #temp_p_log p on p.st=real_st_report.st and p.ac='%s' and p.symbol='%s')temp " % (ac,symbol)
-	#print sql 
 	ms.insert_sql(sql)
 	#print 1,datetime.datetime.now()
 	sql="select count(1) from #temp_quanyi_new"
@@ -160,6 +158,8 @@ def input_groupbyquanyi(ac,symbol,quanyisymbol=''):
 				if timestr>=900 and  timestr<=929:
 					mymewquote.remove(item)
 			#--end
+		# for item in mymewquote:
+		# 	print item 
 		##插入数据库
 		lastrecordtime=datetime.datetime(2015,01,01,01,00)
 		sql="select max(stockdate) as stockdate  from [Future].[dbo].[quanyi_log_groupby_v2] where ac='%s' and symbol='%s'" % (ac,symbol)
@@ -196,7 +196,12 @@ def input_groupbyquanyi(ac,symbol,quanyisymbol=''):
 		return res,totalsum
 		
 	else:
-		return 0,0.0001
+		sql="select q.stockdate,t.C,q.totalposition from quanyi_log_groupby_v2 q   inner join TSymbol_quotes_backup t   on q.stockdate=t.StockDate and t.Symbol='%s' where q.ac='%s' and q.symbol='%s'   order by q.stockdate" % (quanyisymbol,ac,symbol)
+		res=ms.find_sql(sql)
+		if res:
+			return res,totalsum
+		else:
+			return 0,0.0001
 		
 
 
@@ -606,10 +611,10 @@ def real_account_groupbyquanyi(ac,symbol):
 
 
 
-# (myquotes,totalsum)=input_groupbyquanyi('agStepMultituji1','ag','ag')
+# (myquotes,totalsum)=input_groupbyquanyi('RBStepMultituji1','rb','rb')
 # for item in myquotes:
 # 	print item 
-# cal_quanyi('agStepMultituji1',myquotes,totalsum,'ag')
+# cal_quanyi('RBStepMultituji1',myquotes,totalsum,'rb')
 
 # show_account('myaccount2')
 
