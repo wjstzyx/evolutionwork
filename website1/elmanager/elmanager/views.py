@@ -2610,7 +2610,7 @@ def acwantedequlitynew_oneacname(request):
 	quanyisymbol=symbol
 
 	rbdata=[]
-	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('%s') and iscaculate in (1,2)  and [isstatistic] =1 and [isforhistory]=0 order by sortnum" % (symbol)
+	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('%s') and iscaculate in (1,2,8,9)  and [isstatistic] =1 and [isforhistory]=0 order by sortnum" % (symbol)
 	res=ms.dict_sql(sql)
 	for item in res:
 		acname=item['ac']

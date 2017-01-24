@@ -84,7 +84,7 @@ def input_groupbyquanyi(ac,symbol,quanyisymbol=''):
 		###以上已经准备好虚拟组的仓位信息
 		fisrttime=positionlist[0][0]
 		#[datetime.datetime(2015, 10, 21, 9, 0), 6.0, 6.0]
-		sql="select	C,StockDate from TSymbol_quotes_backup where Symbol='%s' and  stockdate >='%s' order by StockDate " % (quanyisymbol,fisrttime)
+		sql="select	C,StockDate from TSymbol_allfuture where Symbol='%s' and  stockdate >='%s' order by StockDate " % (quanyisymbol,fisrttime)
 		res=ms.dict_sql(sql)
 		# print res[:10]
 		#对行情日期遍历
@@ -494,7 +494,7 @@ def real_account_groupbyquanyi(ac,symbol):
 		###以上已经准备好虚拟组的仓位信息
 		fisrttime=positionlist[0][0]
 		#[datetime.datetime(2015, 10, 21, 9, 0), 6.0, 6.0]
-		sql="select	C,StockDate from TSymbol_quotes_backup where Symbol='%s' and  stockdate >='%s' order by StockDate " % (symbol,fisrttime)
+		sql="select	C,StockDate from TSymbol_allfuture where Symbol='%s' and  stockdate >='%s' order by StockDate " % (symbol,fisrttime)
 		res=ms.dict_sql(sql)
 		# print res[:10]
 		#对行情日期遍历
@@ -602,9 +602,9 @@ def real_account_groupbyquanyi(ac,symbol):
 
 
 
-(myquotes,totalsum)=input_groupbyquanyi('agStepMultidnhiprofit','ag','ag')
-for item in myquotes:
-	print item 
+# (myquotes,totalsum)=input_groupbyquanyi('RBQGSTREVYP_TG','RBnight','RBnight')
+# for item in myquotes:
+# 	print item 
 # cal_quanyi('RBQGYP_TG',myquotes,totalsum,'RBnight')
 
 # show_account('myaccount2')
@@ -619,7 +619,7 @@ def write_heart(type,name):
 
 def main_fun_sumps():
 	#获取需要处理的列表
-	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1 and issumps=1 and isyepan in (0,1,12) order by id desc "
+	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=9 and issumps=1 and isyepan in (0,1,12) order by id desc "
 	#sql="SELECT top 17 id,[acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('RB') and iscaculate=1 order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
@@ -636,7 +636,7 @@ def main_fun():
 	#sql="SELECT TOP 1000 [id]      ,[acname]      ,[positionsymbol]      ,[quanyisymbol]      ,[iscaculate]      ,[isforhistory]      ,[isstatistic]      ,[isyepan]      ,[iscalcubyvick]      ,[sortnum]      ,[issumps]  FROM [LogRecord].[dbo].[quanyicaculatelist] where [positionsymbol]<>[quanyisymbol]  order by id desc"
 
 
-	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1 and issumps=0 and isyepan in (0,1,12)  AND quanyisymbol not in ('IF','IC','IH')  and acname in (SELECT f_ac   FROM [Future].[dbo].[p_follow] where ac ='StepMultidnhisharp')order by id desc "
+	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=9 and issumps=0 and isyepan in (0,1,12)  AND quanyisymbol not in ('IF','IC','IH') order by id desc "
 	#sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1 and issumps=0 and isyepan in (0,1,12)  and id<=715 order by id desc "
 	#sql="SELECT top 17 id,[acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('RB') and iscaculate=1 order by sortnum"
 	res=ms.dict_sql(sql)
@@ -657,4 +657,7 @@ def test_is_ok():
 	sql=""
 
 
-# main_fun()
+main_fun()
+main_fun_sumps()
+
+write_heart('daily_equity','nosum1')

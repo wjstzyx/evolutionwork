@@ -24,7 +24,8 @@ import math
 
 ABautoroot=r'E:'
 dirformat=r'D:\Program Files\AmiBroker\Formats\custom3.format'
-database=r'D:\Program Files\AmiBroker\newlianxu'
+#database=r'D:\Program Files\AmiBroker\newlianxu'
+database=r'D:\Program Files\AmiBroker\allfuture'
 ABprogramedir="D:\\Program Files\\AmiBroker"
 
 
@@ -148,6 +149,10 @@ def main_run_afl():
 				itemsettingdir=ABautoroot+"\\ABautofile\\setting\\a41-45"
 			if timeperiod in ('46min','47min','48min','49min','50min'):
 				itemsettingdir=ABautoroot+"\\ABautofile\\setting\\a46-50"
+			if timeperiod in ('51min','52min','53min','54min','55min'):
+				itemsettingdir=ABautoroot+"\\ABautofile\\setting\\a51-55"
+			if timeperiod in ('56min','57min','58min','59min','60min'):
+				itemsettingdir=ABautoroot+"\\ABautofile\\setting\\a56-60"
 			itemfile=aflfiledir+"\\"+file
 			settingfile=itemsettingdir+"\\"+timeperiod+".ABS"
 			Ticker=basename.split('-')[0].strip(" ")
@@ -212,6 +217,22 @@ def gere_datafile(starttime):
 	res1=ms.dict_sql(sql)
 	for symbol in res1:
 		sql="select CONVERT(varchar(20),StockDate,111) as data, CONVERT(varchar(20),StockDate,8) as time,O,H,L,C,V,OPI from TSymbol_quotes_backup where Symbol='%s' and stockdate>='%s'  order by StockDate" % (symbol['symbol'],starttime)
+		rows=ms.dict_sql(sql)
+		datafir=ABautoroot+"\\ABautofile\\\datafile"
+		import csv
+		fieldnames = ['data', 'time', 'O', 'H', 'L', 'C', 'V', 'OPI']
+		dict_writer = csv.DictWriter(file(datafir+'\\%s.csv' % (symbol['symbol']), 'wb'), fieldnames=fieldnames)
+		# dict_writer.writerow(fieldnames)
+		dict_writer.writerows(rows)
+	
+	print "No1. data_merge finished"
+
+
+def gere_datafile_allfuture(starttime):
+	sql="select distinct symbol from TSymbol_allfuture"
+	res1=ms.dict_sql(sql)
+	for symbol in res1:
+		sql="select CONVERT(varchar(20),StockDate,111) as data, CONVERT(varchar(20),StockDate,8) as time,O,H,L,C,V,OPI from TSymbol_allfuture where Symbol='%s' and stockdate>='%s'  order by StockDate" % (symbol['symbol'],starttime)
 		rows=ms.dict_sql(sql)
 		datafir=ABautoroot+"\\ABautofile\\\datafile"
 		import csv
@@ -372,7 +393,7 @@ def add_prename(symbol='',tieminteval=''):
 		filemame= item.decode('gb2312').encode('utf-8')
 		print filemame
 		if os.path.isdir(targetdir+'\\'+item):
-			matchObj = re.match( r'(.*)StepMultigaosheng2', item, re.M|re.I)
+			matchObj = re.match( r'(.*)StepMultidnhisharp', item, re.M|re.I)
 			if matchObj:
 				symbol=matchObj.group(1).strip(" ")
 			else:
@@ -441,9 +462,15 @@ def general_data(symbol):
 ##运行步骤(有些步骤是可以每天定时做的 #1  #2 )
 ##########
 # #1 530s
-# gere_datafile(starttime='2016-12-25')
+# gere_datafile(starttime='2015-01-01')
+
 # #2 152s
 # main_import_data()
+
+# all future
+# gere_datafile_allfuture(starttime='2015-01-01')
+# main_import_data()
+
 # acname='znStepMultiI'
 # choose_aflfile(acname)
 # main_run_afl()

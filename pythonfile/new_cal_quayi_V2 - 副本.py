@@ -189,6 +189,7 @@ def input_groupbyquanyi(ac,symbol,quanyisymbol=''):
 			ms.insert_sql(sql)
 			# print sql
 		##--end
+		
 		#从表中选取
 		# for item in mymewquote:
 		# 	print item[0],item[1],round(item[2],3)
