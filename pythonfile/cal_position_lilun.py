@@ -227,8 +227,6 @@ def monitor_add_errorinfo(type,myitem):
 
 
 
-account_database_isdistinct()
-exit()
 
 
 try:
