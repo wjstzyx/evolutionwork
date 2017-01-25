@@ -43,11 +43,11 @@ def realshowmonitor_hulue(request):
 
 def realshowmonitor_newalert(request):
 	ms= MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
-	sql="SELECT id,[type],[item] ,[msg], classcode ,convert(nvarchar,[updatetime],108) as updatetime FROM [LogRecord].[dbo].[all_monitor_info] where isactive=1 and issolved=0 order by updatetime "
+	sql="SELECT id,[type],[item] ,[msg], classcode ,convert(nvarchar,[updatetime],120) as updatetime FROM [LogRecord].[dbo].[all_monitor_info] where isactive=1 and issolved=0 order by updatetime "
 	res1=ms.dict_sql(sql)
-	sql="SELECT top 50 id,[type],[item] ,[msg], classcode ,convert(nvarchar,[updatetime],108) as updatetime FROM [LogRecord].[dbo].[all_monitor_info] where isactive=1 and issolved=1  order by updatetime desc"
+	sql="SELECT top 50 id,[type],[item] ,[msg], classcode ,convert(nvarchar,[updatetime],120) as updatetime FROM [LogRecord].[dbo].[all_monitor_info] where isactive=1 and issolved=1  order by updatetime desc"
 	res_solved=ms.dict_sql(sql)
-	sql="SELECT id,[type],[item] ,[msg], classcode ,convert(nvarchar,[updatetime],108) as updatetime FROM [LogRecord].[dbo].[all_monitor_info] where isactive=0 and issolved=0  order by updatetime desc"
+	sql="SELECT id,[type],[item] ,[msg], classcode ,convert(nvarchar,[updatetime],120) as updatetime FROM [LogRecord].[dbo].[all_monitor_info] where isactive=0 and issolved=0  order by updatetime desc"
 	res_noactive=ms.dict_sql(sql)
 
 	result={'res1':res1,'res_solved':res_solved,'res_noactive':res_noactive}

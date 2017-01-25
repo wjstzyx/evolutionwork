@@ -164,11 +164,11 @@ def account_database_isdistinct():
 					if atime>2:
 						# print '报警'
 						# print "@@@@@@@@@@@@@ERROE@@@@@@@@@@@@@@"
-						subject='%s 实盘仓位与数据库不一致' % (aa[0])
-						msg=subject
-						sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,	mailtolist,msg,0,sendmessage)
-						#print sql 
-						ms.insert_sql(sql)
+						# subject='%s 实盘仓位与数据库不一致' % (aa[0])
+						# msg=subject
+						# sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,	mailtolist,msg,0,sendmessage)
+						# #print sql 
+						# ms.insert_sql(sql)
 						#插入信息显示
 						type='Account'
 						item=uniquekey
@@ -228,10 +228,19 @@ def monitor_add_errorinfo(type,myitem):
 
 
 
+def crontab_delete_record():
+	hour=datetime.datetime.now().hour
+	minutes=datetime.datetime.now().minute
+	if hour==19 and (minutes>=0 or minutes<=5):
+		sql="delete from [LogRecord].[dbo].[all_monitor_info] where issolved=1 and isactive=1 and  DATEDIFF(day,updatetime,GETDATE())>5"
+		ms.insert_sql(sql)
+
+
 
 try:
 	cal_position_lilun()
 	account_database_isdistinct()
+	crontab_delete_record()
 
 except:
 	monitor_add_errorinfo('crontab','cal_position_lilun')
