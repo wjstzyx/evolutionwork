@@ -173,10 +173,18 @@ def account_database_isdistinct():
 						type='Account'
 						item=uniquekey
 						msg='实盘仓位与数据库不一致'	
-						classcode='fa-comment'			
-						sql=" insert into [LogRecord].[dbo].[all_monitor_info](type,item,msg,[issolved],[isactive],[inserttime],[updatetime],[classcode]) values('%s','%s','%s','%s','%s',getdate(),getdate(),'%s')" % (type,item,msg,0,1,classcode)
-						#print sql 
-						ms.insert_sql(sql)
+						classcode='fa-comment'
+						sql="select 1 from [LogRecord].[dbo].[all_monitor_info] where type='%s' and item='%s' and issolved=0" % (type,item)
+						res=ms.dict_sql(sql)
+						print sql 
+						if res:
+							sql="update [LogRecord].[dbo].[all_monitor_info] set updatetime=getdate()  where type='%s' and item='%s'" % (type,item)
+							print sql 
+							ms.insert_sql(sql)
+						else:
+							sql=" insert into [LogRecord].[dbo].[all_monitor_info](type,item,msg,[issolved],[isactive],[inserttime],[updatetime],[classcode]) values('%s','%s','%s','%s','%s',getdate(),getdate(),'%s')" % (type,item,msg,0,1,classcode)
+							print sql 
+							ms.insert_sql(sql)
 
 
 
