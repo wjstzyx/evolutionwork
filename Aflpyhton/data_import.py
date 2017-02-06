@@ -24,8 +24,8 @@ import math
 
 ABautoroot=r'E:'
 dirformat=r'D:\Program Files\AmiBroker\Formats\custom3.format'
-#database=r'D:\Program Files\AmiBroker\newlianxu'
-database=r'D:\Program Files\AmiBroker\allfuture'
+database=r'D:\Program Files\AmiBroker\newlianxu'
+#database=r'D:\Program Files\AmiBroker\allfuture'
 ABprogramedir="D:\\Program Files\\AmiBroker"
 
 
@@ -464,7 +464,7 @@ def general_data(symbol):
 # #1 530s
 # gere_datafile(starttime='2015-01-01')
 
-# #2 152s
+# # #2 152s
 # main_import_data()
 
 # all future

@@ -89,34 +89,49 @@ function showaccompare(acname){
   <script>
       $(function () {
           $('#{{item.acname}}').highcharts({
+
               title: {
                   text: '{{item.acname}}--{{item.symbol}}--近200日平均日交易次数 {{item.avgtime}}',
-                  x: -20 //center
               },
-              xAxis: {
-                  categories:{{item.xaxis}}
-              },
-              yAxis: {
+              xAxis: [{
+                  categories:{{item.xaxis}},
+              }],
+              yAxis: [{
                   title: {
-                      text: '每手净收益'
+                      text: '每手净收益',
+                      style: {
+                          color: Highcharts.getOptions().colors[1]
+                      }
                   },
-                  plotLines: [{
-                      value: 0,
-                      width: 1,
-                      color: '#808080'
-                  }]
-              },
-              tooltip: {
-                  valueSuffix: '元'
-              },
-              legend: {
-                  layout: 'vertical',
-                  align: 'right',
-                  verticalAlign: 'middle',
-                  borderWidth: 0
-              },
-              series: [{
+
+                  labels: {
+                      style: {
+                          color: Highcharts.getOptions().colors[1]
+                      }},
+
+              },{
+                  min: -10,
+                  max: 10,
+                  title:{
+                      text:'仓位（总10手）',
+                      style: {
+                          color: Highcharts.getOptions().colors[0]
+                      }
+                },
+
+
+                  labels: {
+                      format: '{value}手',
+                      style: {                          
+                          color: Highcharts.getOptions().colors[0]
+                      }},
+
+                opposite:true,
+              }],
+               series: [{
+                  type:'column',
                   name: '实际',
+                  yAxis: 1,
                   data: {{item.realquanyi}}
               }, {
                   name: '理论',
