@@ -2697,7 +2697,15 @@ def acwantedequlitynew_oneacname(request):
 
 	if request.GET:
 		symbol=request.GET.get("symbol","")
+		begintime=request.GET.get("begintime","")
 	quanyisymbol=symbol
+	# begintime=161020
+	if begintime=='onemonth':
+		mydate=datetime.datetime.now()-datetime.timedelta(days=60)
+		mydate=mydate.strftime('%y%m%d')
+		begintime=int(mydate)
+
+
 
 	rbdata=[]
 	sql="select acname as ac,quanyisymbol as symbol from [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('%s') and iscaculate in (1,2,8,9)  and [isstatistic] =1 and [isforhistory]=0 order by sortnum" % (symbol)
@@ -2706,15 +2714,15 @@ def acwantedequlitynew_oneacname(request):
 		acname=item['ac']
 		symbol=item['symbol']
 		#第一个价格
-		sql="select top 1 quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		sql="select top 1 quanyi as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=%s order by D" % (acname,symbol,begintime)
 		tempquanyi=ms.find_sql(sql)
 		if tempquanyi==[]:
 			tempquanyi=0
 		else:
 			tempquanyi=tempquanyi[0][0]
-		sql="select quanyi-(%s) as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (tempquanyi,acname,symbol)
+		sql="select quanyi-(%s) as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=%s order by D" % (tempquanyi,acname,symbol,begintime)
 		res1=ms.find_sql(sql)
-		sql="select position as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=151020 order by D" % (acname,symbol)
+		sql="select position as  quanyia,D from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=%s order by D" % (acname,symbol,begintime)
 		res2=ms.find_sql(sql)		
 		(tempday,lilunquanyi,realquanyi)=range_series(res1,res2)
 		#计算交易次数(200天平均)
