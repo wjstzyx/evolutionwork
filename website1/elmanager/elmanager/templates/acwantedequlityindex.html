@@ -97,12 +97,15 @@ function showaccompare(acname){
          <table class="table table-bordered table-hover table-striped"> 
           <thead> 
            <tr> 
-            <th align=center width=6%>批次</th> 
+            <th align=center width=6%>批次</th>
+            <th align=center width=6%>上实盘时间</th> 
            </tr> 
           </thead>  
           <tbody id="mailtotable"> 
           {% for item in res3 %}
-            <tr><td><a href='/index/quanyi/acwantedequlitynew_jieti/?ac={{item.ac}}'  target="_black"     >{{item.ac}}</a></td></tr>
+            <tr><td><a href='/index/quanyi/acwantedequlitynew_jieti/?ac={{item.ac}}'  target="_black"     >{{item.ac}}</a></td>
+                <td>{{item.starttime}}</td>
+            </tr>
           {% endfor %}
           </tbody> 
          </table> 
