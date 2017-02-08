@@ -161,7 +161,7 @@ def account_database_isdistinct():
 					sql="SELECT DATEDIFF(MINUTE, inserttime,getdate()) as timediff  FROM [LogRecord].[dbo].[account_position_temp_compare] where userID='%s' and stockID='%s'" %	 (aa[0],int(aa[1]))
 					mytime=ms.dict_sql(sql)
 					atime=mytime[0]['timediff']
-					if atime>2:
+					if atime>3:
 						# print '报警'
 						# print "@@@@@@@@@@@@@ERROE@@@@@@@@@@@@@@"
 						# subject='%s 实盘仓位与数据库不一致' % (aa[0])
