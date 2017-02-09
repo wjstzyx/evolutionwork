@@ -4,6 +4,8 @@ import sys, urllib, urllib2, json
 import sys
 import datetime
 import time 
+import numpy as np
+import pandas as pd
 reload(sys)
 sys.setdefaultencoding('utf8')
 from dbconn import MSSQL
@@ -24,6 +26,69 @@ endtime=equity_day+" 16:00:00"
 sql="select  distinct top (4) convert(nvarchar(10),stockdate,120) as day from TSymbol where StockDate<='%s' order by day desc" % (equity_day)
 beginday=ms.find_sql(sql)
 begintime=beginday[-1][0]
+
+
+
+
+#################general steps ########################
+### setp 1 获取原始仓位序列 #####
+def get_origin_position_list(p_followac,acname,ratio=1):
+	sql="select q.ClosePrice,q.stockdate,round(q.totalposition*mr.ratio*%s,0) as totalposition ,q.symbol,sid.S_ID from p_follow p inner join quanyi_log_groupby_v2 q on p.F_ac=q.AC and p.AC='%s' inner join LogRecord.dbo.test_margin mr on q.symbol=mr.symbol inner join symbol_id sid on q.symbol=sid.Symbol where q.AC='%s' and stockdate>='%s' and stockdate<='%s' order by stockdate" % (ratio,p_followac,acname,begintime,endtime)
+	res1=ms.dict_sql(sql)
+	if res1:
+		symbol=res1[0]['symbol']
+		sql="select MAX(StockDate) as stockdate from TSymbol where symbol='%s' and StockDate>='%s' and StockDate<='%s' and t<='15:30'group by D order by D" % (symbol,begintime,endtime)
+		insertstockdate=ms.dict_sql(sql)
+		insertstockdate_pd=pd.DataFrame(insertstockdate)
+		postionpd=pd.DataFrame(res1)
+		postionpd=postionpd.append(insertstockdate_pd,ignore_index=True)
+		postionpd=postionpd.sort_values(['stockdate'])
+		postionpd = postionpd.fillna(method='ffill')
+		return postionpd,symbol
+	else:
+		return pd.DataFrame(columns=['ClosePrice','S_ID','stockdate','symbol','totalposition']),'no'
+
+
+def get_Tsymbol_by_symbol(symbol,postionpd):
+	sql="select stockdate,C from TSymbol_allfuture where symbol='%s' and StockDate>='%s' and StockDate<='%s' AND stockdate<>'2017-02-09 14:56:00' order by StockDate" % (symbol,begintime,endtime)
+	quotes=ms.dict_sql(sql)
+	quotes_pd=pd.DataFrame(quotes)
+	fisrsttime=postionpd.iloc[[0]]['stockdate'][0]
+	quotes_pd = quotes_pd[quotes_pd['stockdate']>=fisrsttime]
+	total=pd.merge(quotes_pd,postionpd,'outer',left_on='stockdate',right_on='stockdate')
+	#排序
+	total=total.sort_values(['stockdate'])
+	total['C']=total['C'].fillna(method='ffill')
+	total=total[pd.notnull(total['totalposition'])]
+	total=total.drop_duplicates()
+	total=total[['stockdate','C','totalposition']]
+	return total
+
+
+
+
+
+
+
+
+
+	print 1
+
+
+
+
+
+postionpd,symbol=get_origin_position_list('StepMultigaosheng1','csStepMultigaosheng1',1)
+get_Tsymbol_by_symbol(symbol,postionpd)
+print 1
+exit()
+
+
+
+
+
+
+
 
 def change_scatter_tocontinue(datalist,delta=60):
 	newdatalist=[]
