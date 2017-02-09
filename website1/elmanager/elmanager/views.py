@@ -3256,13 +3256,17 @@ def showaccompare(requst):
 	else:
 		print "aaaaa"
 		acname='Rb_QGpLud'
-	acname='IF_Huitiaoall_0'
 	#acname='9KDHPM'
 	##获取5日前日期
+	p_followac='StepMultigaosheng1'
+	realaccount='1636737'
+	begintime='2017-02-05'
+	endtime='2017-02-09 16:00:00'
+
 	nowtime=(datetime.datetime.now()-datetime.timedelta(days=10)).strftime("%Y-%m-%d %H:%M:%S")
-	sql="SELECT top 2000 datetime as stockdate,vp as totalposition from [future].[dbo].[real_map_backup] where name='%s'  and datetime>='%s' order by datetime" % (acname,nowtime)
+	sql="select q.stockdate,round(q.totalposition*mr.ratio*1,0) as totalposition ,q.symbol,sid.S_ID from p_follow p inner join quanyi_log_groupby_v2 q on p.F_ac=q.AC and p.AC='%s' inner join LogRecord.dbo.test_margin mr on q.symbol=mr.symbol inner join symbol_id sid on q.symbol=sid.Symbol where q.AC='%s' and stockdate>='%s' and stockdate<='%s' order by stockdate" % (p_followac,acname,begintime,endtime)
 	print sql
-	res1=ms105.dict_sql(sql)
+	res1=ms.dict_sql(sql)
 	data1=[]
 	if res1:
 		for item  in res1:
@@ -3275,8 +3279,9 @@ def showaccompare(requst):
 		newdata1=change_scatter_tocontinue(data1)
 	else:
 		newdata1=[]
-	sql="SELECT top 2000 datetime as stockdate,rp as totalposition from [future].[dbo].[real_map_backup] where name='%s'  and datetime>='%s' order by datetime" % (acname,nowtime)
-	res2=ms105.dict_sql(sql)
+	realstokid=res1[0]['S_ID']
+	sql="SELECT [inserttime] as stockdate ,[longhave]-[shorthave] as totalposition FROM [LogRecord].[dbo].[account_position] where userid='%s'   and inserttime<='%s' and inserttime>='%s' and stockid=%s order by inserttime" % (realaccount,endtime,begintime,realstokid)
+	res2=ms.dict_sql(sql)
 	data2=[]
 	if res2:
 		for item  in res2:

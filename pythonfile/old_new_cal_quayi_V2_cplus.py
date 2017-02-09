@@ -256,14 +256,14 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto):
 		datetime=item[0]
 		D=datetime.strftime('%Y%m%d')
 		thisday=str(int(D)-20000000)
-		deltatime=abs((item[2])-(lastposition))
-		totalquanyi=((lastposition)*(item[1]-lastC)*float(pointvalue)-deltatime*commvalue)/round(totalsum,3)+totalquanyi
-		deltaquanyi=((lastposition)*(item[1]-lastC)*float(pointvalue)-deltatime*commvalue)/round(totalsum,3)
+		deltatime=abs(myround(item[2])-myround(lastposition))
+		totalquanyi=(myround(lastposition)*(item[1]-lastC)*float(pointvalue)-deltatime*commvalue)/round(totalsum,3)+totalquanyi
+		deltaquanyi=(myround(lastposition)*(item[1]-lastC)*float(pointvalue)-deltatime*commvalue)/round(totalsum,3)
 		lastposition=item[2]
 		lastC=item[1]
 		dayquanyilist[thisday][0]=dayquanyilist[thisday][0]+deltaquanyi
 		dayquanyilist[thisday][1]=dayquanyilist[thisday][1]+deltatime
-		dayquanyilist[thisday][2]=(lastposition)
+		dayquanyilist[thisday][2]=myround(lastposition)
 
 	####写入数据库
 	newlist=[[k,dayquanyilist[k]] for k in sorted(dayquanyilist.keys())]

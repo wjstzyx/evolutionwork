@@ -11,7 +11,7 @@ import matplotlib.pylab as pl
 from matplotlib.dates import DayLocator, HourLocator, DateFormatter, drange
 import datetime
 ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
-# resList = ms.find_sql("select top 2 * from real_st_report")
+# resList = ms.find_sql("select top 2 * from st_report")
 # print resList
 # 返回行情list 或者0
 
@@ -33,15 +33,17 @@ def input_groupbyquanyi(ac,symbol,quanyisymbol=''):
 	except:
 		pass
 	# 产生临时p_log
-	#sql="select * into #temp_p_log from (SELECT   aa.*, sid.Symbol, (YEAR(GETDATE()) - 2000) * 10000 + MONTH(GETDATE()) * 100 + DAY(GETDATE()) AS D from (select  p.AC, p.STOCK, p.type, p.ST, p.P_size, a.ratio from P_BASIC_cplus p inner join AC_RATIO a on p.AC=a.AC and p.STOCK=a.Stock and p.type=a.type and p.AC='%s') as aa inner join Symbol_ID AS sid ON sid.S_ID = aa.STOCK where Symbol='%s') temp" % (ac,symbol)
-	sql ="select * into #temp_p_log from (select '%s' as ac,temp1.STOCK,temp1.type,temp1.ST,temp1.P_size as P_size,temp1.ratio,temp1.Symbol,temp1.num from (select p.*,a.ratio,sid.Symbol,isnull(n.num,1)as num from P_BASIC_cplus p inner join AC_RATIO a on p.AC=a.AC and p.AC='%s' inner join Symbol_ID  AS sid ON p.STOCK=sid.S_ID left join [LogRecord].[dbo].[Ninone_config] n on n.st=p.st) temp1 where Symbol='%s' )aaa"% (ac,ac,symbol)
+	#sql="select * into #temp_p_log from (SELECT   aa.*, sid.Symbol, (YEAR(GETDATE()) - 2000) * 10000 + MONTH(GETDATE()) * 100 + DAY(GETDATE()) AS D from (select  p.AC, p.STOCK, p.type, p.ST, p.P_size, a.ratio from P_BASIC p inner join AC_RATIO a on p.AC=a.AC and p.STOCK=a.Stock and p.type=a.type and p.AC='%s') as aa inner join Symbol_ID AS sid ON sid.S_ID = aa.STOCK where Symbol='%s') temp" % (ac,symbol)
+	sql ="select * into #temp_p_log from (select '%s' as ac,temp1.STOCK,temp1.type,temp1.ST,temp1.P_size as P_size,temp1.ratio,temp1.Symbol,temp1.num from (select p.*,a.ratio,sid.Symbol,isnull(n.num,1)as num from P_BASIC p inner join AC_RATIO a on p.AC=a.AC and p.AC='%s' inner join Symbol_ID  AS sid ON p.STOCK=sid.S_ID left join [LogRecord].[dbo].[Ninone_config] n on n.st=p.st) temp1 where Symbol='%s' )aaa"% (ac,ac,symbol)
+	#print sql 
 	ms.insert_sql(sql)
 	sql="select SUM(p_size*ratio/100*num) as totalsum from #temp_p_log"
 	res=ms.dict_sql(sql)
 	totalsum=res[0]['totalsum']
 
-	#产生临时整个虚拟组real_st_report
-	sql="select * into  #temp_quanyi_new from ( select p.ac,p.symbol,real_st_report.type,real_st_report.id,real_st_report.p,real_st_report.pp,p.p_size,p.ratio ,real_st_report.st,real_st_report.stockdate from real_st_report  inner join #temp_p_log p on p.st=real_st_report.st and p.ac='%s' and p.symbol='%s')temp " % (ac,symbol)
+	#产生临时整个虚拟组st_report
+	sql="select * into  #temp_quanyi_new from ( select p.ac,p.symbol,st_report.type,st_report.id,st_report.p,st_report.pp,p.p_size,p.ratio ,st_report.st,st_report.stockdate from st_report  inner join #temp_p_log p on p.st=st_report.st and p.ac='%s' and p.symbol='%s')temp " % (ac,symbol)
+	#print sql 
 	ms.insert_sql(sql)
 	#print 1,datetime.datetime.now()
 	sql="select count(1) from #temp_quanyi_new"
@@ -158,8 +160,6 @@ def input_groupbyquanyi(ac,symbol,quanyisymbol=''):
 				if timestr>=900 and  timestr<=929:
 					mymewquote.remove(item)
 			#--end
-		# for item in mymewquote:
-		# 	print item 
 		##插入数据库
 		lastrecordtime=datetime.datetime(2015,01,01,01,00)
 		sql="select max(stockdate) as stockdate  from [Future].[dbo].[quanyi_log_groupby_v2] where ac='%s' and symbol='%s'" % (ac,symbol)
@@ -189,19 +189,20 @@ def input_groupbyquanyi(ac,symbol,quanyisymbol=''):
 			ms.insert_sql(sql)
 			# print sql
 		##--end
-
+		
 		#从表中选取
+		# for item in mymewquote:
+		# 	print item[0],item[1],round(item[2],3)
+		# exit()
 		sql="select q.stockdate,t.C,q.totalposition from quanyi_log_groupby_v2 q   inner join TSymbol_quotes_backup t   on q.stockdate=t.StockDate and t.Symbol='%s' where q.ac='%s' and q.symbol='%s'   order by q.stockdate" % (quanyisymbol,ac,symbol)
 		res=ms.find_sql(sql)
+		# for item in res:
+		# 	print item[0],item[1],round(item[2],3)
+		# exit()
 		return res,totalsum
 		
 	else:
-		sql="select q.stockdate,t.C,q.totalposition from quanyi_log_groupby_v2 q   inner join TSymbol_quotes_backup t   on q.stockdate=t.StockDate and t.Symbol='%s' where q.ac='%s' and q.symbol='%s'   order by q.stockdate" % (quanyisymbol,ac,symbol)
-		res=ms.find_sql(sql)
-		if res:
-			return res,totalsum
-		else:
-			return 0,0.0001
+		return 0,0.0001
 		
 
 
@@ -256,14 +257,14 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto):
 		datetime=item[0]
 		D=datetime.strftime('%Y%m%d')
 		thisday=str(int(D)-20000000)
-		deltatime=abs((item[2])-(lastposition))
-		totalquanyi=((lastposition)*(item[1]-lastC)*float(pointvalue)-deltatime*commvalue)/round(totalsum,3)+totalquanyi
-		deltaquanyi=((lastposition)*(item[1]-lastC)*float(pointvalue)-deltatime*commvalue)/round(totalsum,3)
+		deltatime=abs(myround(item[2])-myround(lastposition))
+		totalquanyi=(myround(lastposition)*(item[1]-lastC)*float(pointvalue)-deltatime*commvalue)/round(totalsum,3)+totalquanyi
+		deltaquanyi=(myround(lastposition)*(item[1]-lastC)*float(pointvalue)-deltatime*commvalue)/round(totalsum,3)
 		lastposition=item[2]
 		lastC=item[1]
 		dayquanyilist[thisday][0]=dayquanyilist[thisday][0]+deltaquanyi
 		dayquanyilist[thisday][1]=dayquanyilist[thisday][1]+deltatime
-		dayquanyilist[thisday][2]=(lastposition)
+		dayquanyilist[thisday][2]=myround(lastposition)
 
 	####写入数据库
 	newlist=[[k,dayquanyilist[k]] for k in sorted(dayquanyilist.keys())]
@@ -451,8 +452,8 @@ def real_account_groupbyquanyi(ac,symbol):
 	except:
 		pass
 	# 产生临时p_log
-	#sql="select * into #temp_p_log from (SELECT   aa.*, sid.Symbol, (YEAR(GETDATE()) - 2000) * 10000 + MONTH(GETDATE()) * 100 + DAY(GETDATE()) AS D from (select  p.AC, p.STOCK, p.type, p.ST, p.P_size, a.ratio from P_BASIC_cplus p inner join AC_RATIO a on p.AC=a.AC and p.STOCK=a.Stock and p.type=a.type and p.AC='%s') as aa inner join Symbol_ID AS sid ON sid.S_ID = aa.STOCK where Symbol='%s') temp" % (ac,symbol)
-	sql ="select * into #temp_p_log from (select '%s' as ac,temp1.STOCK,temp1.type,temp1.ST,temp1.P_size*f.ratio/100 as P_size,temp1.ratio,temp1.Symbol,temp1.num from (select p.*,a.ratio,sid.Symbol,isnull(n.num,1)as num from P_BASIC_cplus p inner join AC_RATIO a on p.AC=a.AC inner join Symbol_ID AS sid ON p.STOCK=sid.S_ID left join [LogRecord].[dbo].[Ninone_config] n on n.st=p.st ) temp1 inner join p_follow f on temp1.AC=f.F_ac and f.AC='%s' and f.ratio<>0 where P_size<>0  and Symbol='%s')aaa" % (ac,ac,symbol)
+	#sql="select * into #temp_p_log from (SELECT   aa.*, sid.Symbol, (YEAR(GETDATE()) - 2000) * 10000 + MONTH(GETDATE()) * 100 + DAY(GETDATE()) AS D from (select  p.AC, p.STOCK, p.type, p.ST, p.P_size, a.ratio from P_BASIC p inner join AC_RATIO a on p.AC=a.AC and p.STOCK=a.Stock and p.type=a.type and p.AC='%s') as aa inner join Symbol_ID AS sid ON sid.S_ID = aa.STOCK where Symbol='%s') temp" % (ac,symbol)
+	sql ="select * into #temp_p_log from (select '%s' as ac,temp1.STOCK,temp1.type,temp1.ST,temp1.P_size*f.ratio/100 as P_size,temp1.ratio,temp1.Symbol,temp1.num from (select p.*,a.ratio,sid.Symbol,isnull(n.num,1)as num from P_BASIC p inner join AC_RATIO a on p.AC=a.AC inner join Symbol_ID AS sid ON p.STOCK=sid.S_ID left join [LogRecord].[dbo].[Ninone_config] n on n.st=p.st ) temp1 inner join p_follow f on temp1.AC=f.F_ac and f.AC='%s' and f.ratio<>0 where P_size<>0  and Symbol='%s')aaa" % (ac,ac,symbol)
 
 	#print sql
 	ms.insert_sql(sql)
@@ -460,8 +461,8 @@ def real_account_groupbyquanyi(ac,symbol):
 	res=ms.dict_sql(sql)
 	totalsum=res[0]['totalsum']
 
-	#产生临时整个虚拟组real_st_report
-	sql="select * into  #temp_quanyi_new from ( select p.ac,p.symbol,real_st_report.type,real_st_report.id,real_st_report.p,real_st_report.pp,p.p_size,p.ratio ,real_st_report.st,real_st_report.stockdate from real_st_report  inner join #temp_p_log p on p.st=real_st_report.st and p.ac='%s' and p.symbol='%s')temp " % (ac,symbol)
+	#产生临时整个虚拟组st_report
+	sql="select * into  #temp_quanyi_new from ( select p.ac,p.symbol,st_report.type,st_report.id,st_report.p,st_report.pp,p.p_size,p.ratio ,st_report.st,st_report.stockdate from st_report  inner join #temp_p_log p on p.st=st_report.st and p.ac='%s' and p.symbol='%s')temp " % (ac,symbol)
 	#print sql
 	ms.insert_sql(sql)
 	#print 1,datetime.datetime.now()
@@ -611,10 +612,10 @@ def real_account_groupbyquanyi(ac,symbol):
 
 
 
-# (myquotes,totalsum)=input_groupbyquanyi('RBStepMultituji1','rb','rb')
+# (myquotes,totalsum)=input_groupbyquanyi('RBQGSTREVYP_TG','RBnight','RBnight')
 # for item in myquotes:
 # 	print item 
-# cal_quanyi('RBStepMultituji1',myquotes,totalsum,'rb')
+# cal_quanyi('RBQGYP_TG',myquotes,totalsum,'RBnight')
 
 # show_account('myaccount2')
 
@@ -628,7 +629,7 @@ def write_heart(type,name):
 
 def main_fun_sumps():
 	#获取需要处理的列表
-	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=8 and issumps=1 and isyepan in (0,1,12) order by id desc "
+	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1 and issumps=1 and isyepan in (0,1,12) order by id desc "
 	#sql="SELECT top 17 id,[acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('RB') and iscaculate=1 order by sortnum"
 	res=ms.dict_sql(sql)
 	for item in res:
@@ -645,7 +646,7 @@ def main_fun():
 	#sql="SELECT TOP 1000 [id]      ,[acname]      ,[positionsymbol]      ,[quanyisymbol]      ,[iscaculate]      ,[isforhistory]      ,[isstatistic]      ,[isyepan]      ,[iscalcubyvick]      ,[sortnum]      ,[issumps]  FROM [LogRecord].[dbo].[quanyicaculatelist] where [positionsymbol]<>[quanyisymbol]  order by id desc"
 
 
-	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=8 and issumps=0 and isyepan in (0,1,12)  AND quanyisymbol not in ('IF','IC','IH') order by id desc "
+	sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1 and issumps=0 and isyepan in (0,1,12)  AND quanyisymbol not in ('IF','IC','IH') order by id desc "
 	#sql="SELECT id, [acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where iscaculate=1 and issumps=0 and isyepan in (0,1,12)  and id<=715 order by id desc "
 	#sql="SELECT top 17 id,[acname] ,[positionsymbol] ,[quanyisymbol] ,[iscaculate]  ,[isforbacktest]  ,[isstatistic] FROM [LogRecord].[dbo].[quanyicaculatelist] where quanyisymbol in ('RB') and iscaculate=1 order by sortnum"
 	res=ms.dict_sql(sql)
@@ -669,4 +670,4 @@ def test_is_ok():
 main_fun()
 main_fun_sumps()
 
-# write_heart('daily_equity','nosum1')
+write_heart('daily_equity','nosum1')

@@ -77,6 +77,87 @@ def order_get_ac_ratio_three(account):
 	return ac_ratio
 
 
+def order_get_dailyquanyi_margin(account,fromDdy):
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+	ac_ratio=order_get_ac_ratio_three(account)
+	totalquanyi=[]
+	#获取对齐时间
+	Dlist=[]
+	tempresult=""
+	configinfo=[]
+	Dlist.append(fromDdy)
+	if ac_ratio==[]:
+		return {"ispass":0,"result":"存在有自己跟随自己的配置，请修正"}
+	if ac_ratio=={}:
+		return {"ispass":0,"result":"P_follow中不存在相应配置，请确认是否正确"}
+	for key in ac_ratio:
+		realac=key.split("__")[0]
+		quanyisymbols_id=key.split("__")[-1]
+		sql="select top(1) [positionsymbol] from [LogRecord].[dbo].[quanyicaculatelist]  where acname='%s'" % (realac)
+		res11=ms.dict_sql(sql)
+		if res11:
+			positionsymbol=res11[0]['positionsymbol']
+		else:
+			return {"ispass":0,"result":"虚拟组权益没有准备，请联系俞洋--%s" % (realac)}
+		sql="select  a.acname,s.S_ID,s.Symbol from LogRecord.dbo.quanyicaculatelist a left join Symbol_ID s on a.quanyisymbol=s.Symbol where a.acname='%s' and  s.S_ID='%s'" % (realac,quanyisymbols_id)
+		quanyisymbol=ms.dict_sql(sql)[0]['Symbol']
+		sql="SELECT top 1  (convert(int,replace(convert(varchar(10),DATEADD(day,1,stockdate),120),'-',''))-20000000) as D  FROM [Future].[dbo].[quanyi_log_groupby_v2] where ac='%s' and symbol='%s' order by stockdate" % (realac,positionsymbol)
+		# or
+		sql="select top 1 D from dailyquanyi_V2 where ac='%s' and symbol='%s' and not (position=0 and quanyi=0 and times=0) order by D" % (realac,positionsymbol)
+		tempD=ms.dict_sql(sql)
+		if tempD:
+			Dlist.append(tempD[0]['D'])
+			configinfo.append([key,ac_ratio[key],tempD[0]['D']])
+		else:
+			Dlist.append(200000)
+			sql="select ac from [LogRecord].[dbo].[order_p_follow]  where F_ac='%s' and stock='%s'" % (realac,quanyisymbol)
+			tempres=ms.dict_sql(sql)
+			tempresult=tempresult+" 基本账户 %s 中 %s 没有产生过信号,请补全近两年策略信号</br>" % (tempres[0]['ac'],key)
+			configinfo.append([key,ac_ratio[key],200000])
+	fromDdy=max(Dlist)
+	if 200000 in Dlist:
+		return {"ispass":0,"result":tempresult,"configinfo":configinfo}
+
+		
+	for key in ac_ratio:
+
+		realac=key.split("__")[0]
+		quanyisymbols_id=key.split("__")[-1]
+		sql="select  a.acname,s.S_ID,s.Symbol from LogRecord.dbo.quanyicaculatelist a left join Symbol_ID s on a.quanyisymbol=s.Symbol where a.acname='%s' and  s.S_ID='%s'" % (realac,quanyisymbols_id)
+		quanyisymbol=ms.dict_sql(sql)[0]['Symbol']
+
+
+		ratio=ac_ratio[key]
+		if ratio<>0:
+			sql="SELECT [quanyisymbol]  FROM [LogRecord].[dbo].[quanyicaculatelist] where acname='%s' and quanyisymbol='%s'" % (realac,quanyisymbol)
+			res=ms.dict_sql(sql)
+			if not res:
+				# print {"ispass":0,"result":"%s does not has equity" % (key)}
+				return {"ispass":0,"result":"%s 不在配置表 quanyicaculatelist 中，请加上并获得历史信号" % (key),"configinfo":configinfo}
+			else:
+				symbol=res[0]['quanyisymbol']
+				acname=realac
+				sql="select top 1 D,quanyi as  quanyia from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=%s order by D" % (acname,symbol,fromDdy)
+				tempres=ms.find_sql(sql)
+				if tempres==[]:
+					initoalquanyi=0
+				else:
+					initoalquanyi=tempres[0][1]
+				initoalquanyi=0
+				sql="select D,(quanyi-(%s)) as  quanyia from dailyquanyi_V2 where ac='%s' and symbol='%s' and D>=%s order by D" % (initoalquanyi,acname,symbol,fromDdy)
+				res1=ms.find_sql(sql)
+				#乘以ratio
+				newres1=[]
+				for item in res1:
+					newres1.append([item[0],item[1]*ratio/10.0])
+				totalquanyi=add_time_series(totalquanyi,newres1)
+				totalquanyi=sorted(totalquanyi,key=lambda a :a[0])
+	totalquanyi=[[item[1],item[0]] for item in totalquanyi]
+				# for item in totalquanyi:
+				# 	print item 
+	return {"ispass":1,"result":totalquanyi,"configinfo":configinfo}
+
+
 def order_get_dailyquanyi_forLilun(account,fromDdy):
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 	ac_ratio=order_get_ac_ratio_three(account)
@@ -163,15 +244,20 @@ def stepmulti_equity(ac):
 		message="配置似乎不是很正确，请俞洋检查下配置"
 	else:
 		result=totalquanyiresult['result']
-		selectequates=[item for item in result]
+		selectequates=[item for item in result if  item[1]>'161220']
 		fisrtvalue=selectequates[0][0]
-		selectequates=[[round(item[0]-fisrtvalue,2),item[1]] for item in selectequates]
+		selectequates=[[str(round(item[0]-fisrtvalue,2)),item[1]] for item in selectequates]
 		result=selectequates
-		csvfile=r''
-		write_list_ro_csv(csvfile,)
-		print result
-
+		csvfile=r'D:\test\tmp\\'+ac+".csv"
+		print csvfile
+		write_list_ro_csv(csvfile,result)
+stepmulti_equity('StepMultidnhiprofit')
+stepmulti_equity('StepMultigaosheng1')
+stepmulti_equity('StepMultidnhisharp')
+stepmulti_equity('StepMultiI300w_up')
+stepmulti_equity('StepMultituji3')
 stepmulti_equity('StepMultituji2')
+stepmulti_equity('StepMultituji1')
 def ac_equity():
 	sql="select distinct ac,symbol from [Future].[dbo].[dailyquanyi_V2] where D>170101 and symbol='P' "
 	res=ms.dict_sql(sql)
