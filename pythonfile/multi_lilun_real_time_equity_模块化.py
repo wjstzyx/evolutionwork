@@ -6,6 +6,7 @@ import datetime
 import time 
 import numpy as np
 import pandas as pd
+from pandas.tseries import offsets
 reload(sys)
 sys.setdefaultencoding('utf8')
 from dbconn import MSSQL
@@ -77,9 +78,50 @@ def get_Tsymbol_by_symbol(symbol,postionpd):
 
 
 
+def cal_equity(symbol,totalpo):
+	print totalpo
+	#compute commvalue  pointvalue
+	symbolto=symbol
+	commvalue=1
+	pointvalue=1
+	sql="SELECT [symbol]  ,[multi] as [pointvalue]  ,[comm] as [commision] FROM [Future].[dbo].[Symbol_ID] where Symbol='%s'" % (symbolto)
+	res=ms.dict_sql(sql)
+	if res:
+		pointvalue=res[0]['pointvalue']
+		commvalue=res[0]['commision']
+	#print pointvalue,commvalue
+	totalpo['profit']=(totalpo['totalposition'].round()).shift()*(totalpo['C']-totalpo['C'].shift())*pointvalue
+	totalpo['comm']=abs((totalpo['totalposition'].round())-(totalpo['totalposition'].shift().round()))*commvalue
+	totalpo['equity']=totalpo['profit']-totalpo['comm']
+	newtotalpo=totalpo
+	return  newtotalpo
+
+
+
+def equity_resharp(newtotalpo):
+	deltatime=offsets.DateOffset(hours=6)
+	newtotalpo['stockdate']=newtotalpo['stockdate']+deltatime
+	newtotalpo['day']=newtotalpo['stockdate'].applymap(lambda x: x.strftime('%Y%m%d'))
+	
+
+	print 1
+
+	pass
+
+
+
+
+
+
+	##############################
+	pass
+
+
 
 postionpd,symbol=get_origin_position_list('StepMultigaosheng1','csStepMultigaosheng1',1)
-get_Tsymbol_by_symbol(symbol,postionpd)
+totalpo=get_Tsymbol_by_symbol(symbol,postionpd)
+newtotalpo=cal_equity(symbol,totalpo)
+equity_resharp(newtotalpo)
 print 1
 exit()
 
