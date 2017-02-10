@@ -290,7 +290,7 @@ def total_monitor(request):
 		if sttype=="real_lilun_position":
 			real_miss_set,lilun_miss_set,disticnt_set=show_distinct()
 			res1={}
-			sql="select distinct symbol,s_id from future.dbo.symbol_id where symbol not like '%%night%%'  and symbol not in ('CUN','AUN','AGN','LZL','RMZL')"
+			sql="select distinct symbol,s_id from future.dbo.symbol_id where symbol not like '%%night%%'  and symbol not in ('CUN','AUN','AGN','LZL','MEZL','RMZL')"
 			res=ms.dict_sql(sql)
 			symboldict={}
 			for item in res:
