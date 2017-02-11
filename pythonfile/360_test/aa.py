@@ -1,25 +1,75 @@
+#coding=utf-8
+#!/usr/bin/env python
+import sys
+reload(sys)
+sys.setdefaultencoding('utf8')
 from pandas import Series, DataFrame
 import pandas as pd
 import numpy as np
+import csv
 import datetime
 from dbconn import MSSQL
 ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
-sql="select top 10 c,stockdate from Tsymbol"
-res=ms.dict_sql(sql)
-print res
-aa=pd.DataFrame(res)
-bb=pd.DataFrame([{'c':np.nan,'stockdate':'2016-12-20 09:47:00'},{'stockdate':'2017-12-20 09:39:00'}])
-print aa
-print bb
-cc=aa.append(bb,ignore_index=True)
-cc['stockdate'] = pd.to_datetime(cc['stockdate'])
-#cc.sort(columns='stockdate')
+##读入excel
 
-cc['index'] = cc.index
-cc = cc.sort_values(['stockdate','index'],ascending=[True,True])
-cc = cc.fillna(method='ffill')
+def in_putdata():
+	xlsfile = r'D:\test\aaa.csv'
+	df0 = pd.read_csv(xlsfile,encoding='gbk',dtype=str)
+	mydata=df0[[u'买卖方向',u'合约',u'数量',u'价格',u'成交日期',u'成交时间']]
+	mydata=mydata[pd.notnull(mydata[u'成交时间'])]
+
+	mydata=mydata.as_matrix()
+	for item in mydata:
+		conid=item[1]
+		if item[0]==u'买':
+			ratio=1
+		else:
+			ratio=-1
+		amont=item[2]
+		price=item[3].replace(',','')
+		sql="insert into [Future].[dbo].[test_tradelog]([Direction],[InstrumentID],[Volume],[Price],[TradeDate],[TradeTime]) values(%s,'%s',%s,%s,'%s','%s')" % (ratio,conid,amont,price,item[4],item[5])
+		print sql
+		ms.insert_sql(sql)
 
 
-print cc
 
-print 1
+
+
+def get_delta_info(symbol):
+	sql="  select Future.dbo.m_getstr([InstrumentID]) as symbol,Direction,[Volume],  Price,convert(datetime,substring(TradeDate,0,5)+'-'+substring(TradeDate,5,2)+'-'+substring(TradeDate,7,2)+' '+[TradeTime],120) as stockdate from      [Future].[dbo].[test_tradelog] where Future.dbo.m_getstr([InstrumentID])='%s' order by stockdate " % (symbol)
+	res=ms.dict_sql(sql)
+	newdata = []
+	lastrecord = res[0]
+	deltaequity = 0
+	tempresult=[[lastrecord['Direction'],lastrecord['Volume'],lastrecord['Price']]]
+	for item in res:
+		mydatetime=item['stockdate'].strftime('%Y-%m-%d %H:%M')
+		if mydatetime == lastrecord['stockdate'].strftime('%Y-%m-%d %H:%M'):
+			tempresult.append([item['Direction'],item['Volume'],item['Price']])
+			#deltaequity = ((item['Price']) - (lastrecord['Price'])) * item['Volume'] * item['Direction']+0.01
+		if mydatetime > lastrecord['stockdate'].strftime('%Y-%m-%d %H:%M'):
+			#computer deltaequity
+			if len(tempresult)>1:
+				#print tempresult
+				myprice = tempresult[-1][2]
+				#print 'tempresult',mydatetime,myprice,tempresult
+				for item1 in tempresult:
+					#print deltaequity
+					deltaequity =deltaequity+(item1[2] - myprice) * (-item1[1]) * item1[0]
+			else:
+				deltaequity=0
+
+			newdata.append([lastrecord['stockdate'].strftime('%Y-%m-%d %H:%M') + ':00', lastrecord['symbol'], lastrecord['Price'], deltaequity])
+			deltaequity = 0
+			tempresult=[ [item['Direction'], item['Volume'], item['Price']]]
+		lastrecord = item
+	# add last line
+	newdata.append([mydatetime + ':00', lastrecord['symbol'], lastrecord['Price'], deltaequity])
+	aaa=pd.DataFrame(newdata,columns=['stockdate','symbol','price','deltapoint'])
+	return aaa
+
+
+
+
+get_delta_info('ru')
+exit()

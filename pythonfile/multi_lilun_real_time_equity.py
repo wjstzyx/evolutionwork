@@ -50,7 +50,7 @@ def cal_ac_day_equity(p_followac,acname,ratio=1):
 	if res:
 		pointvalue=res[0]['pointvalue']
 		commvalue=res[0]['commision']
-	#print pointvalue,commvalue
+	print pointvalue,commvalue
 	##############################
 
 	#compute every stockdate delta_equity
@@ -58,7 +58,7 @@ def cal_ac_day_equity(p_followac,acname,ratio=1):
 	lastclose=res1[0]['ClosePrice']
 	totalequity={}
 	for item in res1:
-		#print item['stockdate'],item['ClosePrice'],item['totalposition']
+		print item['stockdate'],item['ClosePrice'],item['totalposition']
 		deltatime=abs(item['totalposition']-lastposition)
 		deltaquanyi=(lastposition*(item['ClosePrice']-lastclose)*float(pointvalue)-deltatime*commvalue)
 		lastposition=item['totalposition']
@@ -85,7 +85,9 @@ def cal_ac_day_equity_real(account,symbolid,symbol):
 	realaccount=account
 	#sql="select t.Symbol,t.C as ClosePrice,t.StockDate as stockdate,a.totalposition from TSymbol_allfuture t inner join  symbol_id sid on t.Symbol=sid.Symbol and len(sid.symbol)<3 inner join (SELECT convert(nvarchar(16),[inserttime],120)+':00' as stockdate ,[longhave]-[shorthave] as totalposition FROM [LogRecord].[dbo].[account_position] where userid='%s'   and inserttime<='%s' and inserttime>='%s' and stockid=%s )a on t.StockDate=a.stockdate and sid.S_ID=%s order by a.stockdate" % (realaccount,endtime,begintime,realstokid,realstokid)
 
-	sql="select t.StockDate as stockdate,0 as delta,a.totalposition from TSymbol_allfuture t inner join  symbol_id sid on t.Symbol=sid.Symbol and len(sid.symbol)<3 inner join (SELECT convert(nvarchar(16),[inserttime],120)+':00' as stockdate ,[longhave]-[shorthave] as totalposition FROM [LogRecord].[dbo].[account_position] where userid='%s'   and inserttime<='%s' and inserttime>='%s' and stockid=%s )a on t.StockDate=a.stockdate and sid.S_ID=%s order by a.stockdate" % (realaccount,endtime,begintime,realstokid,realstokid)	
+	sql="select t.StockDate as stockdate,0 as delta,a.totalposition from TSymbol_allfuture t inner join  symbol_id sid on t.Symbol=sid.Symbol and len(sid.symbol)<3 inner join (SELECT convert(nvarchar(16),[inserttime],120)+':00' as stockdate ,[longhave]-[shorthave] as totalposition FROM [LogRecord].[dbo].[account_position] where userid='%s'   and inserttime<='%s' and inserttime>='%s' and stockid=%s )a on t.StockDate=a.stockdate and sid.S_ID=%s order by a.stockdate" % (realaccount,endtime,begintime,realstokid,realstokid)
+	print sql 
+	exit()
 	res2=ms.find_sql(sql)
 	if res2:
 		# merge with Tsymbol_allfuture stockdate
@@ -349,19 +351,19 @@ def cal_ac_day_equity_real_new(account,symbolid,symbol):
 
 
 
-sql="select * from (select distinct f_ac from p_follow where ac='StepMultiI300w_up') a order by replace(f_ac,'StepMultiI_up','')"
-myres=ms.dict_sql(sql)
-for myitem in myres:
-	#print myitem
-	cal_ac_day_equity('StepMultiI300w_up',myitem['f_ac'],2.2)
-print 'lilun_total',sum(lilun_total)
+# sql="select * from (select distinct f_ac from p_follow where ac='StepMultiI300w_up') a order by replace(f_ac,'StepMultiI_up','')"
+# myres=ms.dict_sql(sql)
+# for myitem in myres:
+# 	print myitem
+# 	cal_ac_day_equity('StepMultiI300w_up',myitem['f_ac'],2.2)
+# print 'lilun_total',sum(lilun_total)
 
-sql="select replace(f_ac,'StepMultiI_up','') as symbol ,Stock from p_follow where ac='StepMultiI300w_up' order by replace(f_ac,'StepMultiI_up','')"
-myres2=ms.dict_sql(sql)
-for myitem in myres2:
-	#print 'begin:',myitem['symbol'],myitem['Stock']
-	cal_ac_day_equity_real('666061010',myitem['Stock'],myitem['symbol'])
-print 'real_total',sum(real_total)
-exit()
-# cal_ac_day_equity_real_new('666061010',20,'L')
-# cal_ac_day_equity('StepMultiI300w_up','lStepMultiI_up',2.2)
+# sql="select replace(f_ac,'StepMultiI_up','') as symbol ,Stock from p_follow where ac='StepMultiI300w_up' order by replace(f_ac,'StepMultiI_up','')"
+# myres2=ms.dict_sql(sql)
+# for myitem in myres2:
+# 	#print 'begin:',myitem['symbol'],myitem['Stock']
+# 	cal_ac_day_equity_real('666061010',myitem['Stock'],myitem['symbol'])
+# print 'real_total',sum(real_total)
+# exit()
+cal_ac_day_equity_real('666061010',20,'L')
+# cal_ac_day_equity('StepMultiI300w_up','srStepMultiI_up',2.2)

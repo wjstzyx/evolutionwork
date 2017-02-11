@@ -17,12 +17,14 @@ ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 
 global lilun_total
 global real_total
-step_acname='StepMultigaosheng1'
-account='1636737'
-totalratio=1
-equity_day='2017-02-09'
+step_acname='StepMultiI300w_up'
+replacestr='StepMultiI_up'
+account='666061010'
+totalratio=2.2
+equity_day='2017-01-20'
 
-
+lilun_total=[]
+real_total=[]
 endtime=equity_day+" 16:00:00"
 sql="select  distinct top (4) convert(nvarchar(10),stockdate,120) as day from TSymbol where StockDate<='%s' order by day desc" % (equity_day)
 beginday=ms.find_sql(sql)
@@ -51,12 +53,13 @@ def get_origin_position_list(p_followac,acname,ratio=1):
 
 
 def get_Tsymbol_by_symbol(symbol,postionpd):
-	sql="select stockdate,C from TSymbol_allfuture where symbol='%s' and StockDate>='%s' and StockDate<='%s' AND stockdate<>'2017-02-09 14:56:00' order by StockDate" % (symbol,begintime,endtime)
+	sql="select stockdate,C from TSymbol_allfuture where symbol='%s' and StockDate>='%s' and StockDate<='%s' order by StockDate" % (symbol,begintime,endtime)
 	quotes=ms.dict_sql(sql)
 	quotes_pd=pd.DataFrame(quotes)
-	fisrsttime=postionpd.iloc[[0]]['stockdate'][0]
+	fisrsttime=postionpd['stockdate'].iloc[[0]].values[0]
 	quotes_pd = quotes_pd[quotes_pd['stockdate']>=fisrsttime]
 	total=pd.merge(quotes_pd,postionpd,'outer',left_on='stockdate',right_on='stockdate')
+
 	#排序
 	total=total.sort_values(['stockdate'])
 	total['C']=total['C'].fillna(method='ffill')
@@ -73,13 +76,8 @@ def get_Tsymbol_by_symbol(symbol,postionpd):
 
 
 
-	print 1
-
-
-
 
 def cal_equity(symbol,totalpo):
-	print totalpo
 	#compute commvalue  pointvalue
 	symbolto=symbol
 	commvalue=1
@@ -101,10 +99,12 @@ def cal_equity(symbol,totalpo):
 def equity_resharp(newtotalpo):
 	deltatime=offsets.DateOffset(hours=6)
 	newtotalpo['stockdate']=newtotalpo['stockdate']+deltatime
-	newtotalpo['day']=newtotalpo['stockdate'].applymap(lambda x: x.strftime('%Y%m%d'))
-	
+	newtotalpo['day']=newtotalpo['stockdate'].apply(lambda x: x.strftime('%Y%m%d'))
+	day_equity=pd.groupby(newtotalpo,'day').sum()
+	return day_equity[['profit','comm','equity']]
 
-	print 1
+
+
 
 	pass
 
@@ -118,73 +118,146 @@ def equity_resharp(newtotalpo):
 
 
 
-postionpd,symbol=get_origin_position_list('StepMultigaosheng1','csStepMultigaosheng1',1)
-totalpo=get_Tsymbol_by_symbol(symbol,postionpd)
-newtotalpo=cal_equity(symbol,totalpo)
-equity_resharp(newtotalpo)
-print 1
-exit()
+# postionpd,symbol=get_origin_position_list('StepMultigaosheng1','csStepMultigaosheng1',1)
+# totalpo=get_Tsymbol_by_symbol(symbol,postionpd)
+# newtotalpo=cal_equity(symbol,totalpo)
+# day_equity=equity_resharp(newtotalpo)
+# print day_equity
+# print 1
+# exit()
+
+def account_get_origin_position_list(account,symbolid,symbol):
+	sql="SELECT 0 as ClosePrice,convert(datetime,convert(nvarchar(16),[inserttime],120)+':00',120) as stockdate ,[longhave]-[shorthave] as totalposition,bb.Symbol as symbol,  stockID as S_ID FROM [LogRecord].[dbo].[account_position]aa inner join Future.dbo.symbol_id bb on aa.stockID=bb.S_ID and len(bb.symbol)<3  where userid='%s'   and inserttime<='%s' and inserttime>='%s' and stockid=%s " % (account,endtime,begintime,symbolid)
+	res1=ms.dict_sql(sql)
+	if res1:
+		postionpd=pd.DataFrame(res1)
+		symbol=res1[0]['symbol']
+	else:
+		postionpd=pd.DataFrame([{'ClosePrice':0,'stockdate':datetime.datetime.strptime(begintime+" 00:00:00",'%Y-%m-%d %H:%M:%S'),'totalposition':0,'Symbol':symbol,'S_ID':symbolid}])
+	sql="select MAX(StockDate) as stockdate from TSymbol where symbol='%s' and StockDate>='%s' and StockDate<='%s' and t<='15:30'group by D order by D" % (symbol,begintime,endtime)
+	insertstockdate=ms.dict_sql(sql)
+	insertstockdate_pd=pd.DataFrame(insertstockdate)
+
+	postionpd=postionpd.append(insertstockdate_pd,ignore_index=True)
+	postionpd=postionpd.sort_values(['stockdate'])
+	postionpd = postionpd.fillna(method='ffill')
+	return postionpd,symbol
+
+
+
+
+
+# 计算 成交回报记录
+def get_delta_info(symbol,symbolid):
+	#获取成交回报
+	sql="  select Future.dbo.m_getstr([InstrumentID]) as symbol,Direction,[Volume],  Price,convert(datetime,substring(TradeDate,0,5)+'-'+substring(TradeDate,5,2)+'-'+substring(TradeDate,7,2)+' '+[TradeTime],120) as stockdate from [Future].[dbo].[test_tradelog] where Future.dbo.m_getstr([InstrumentID])='%s' and convert(datetime,substring(TradeDate,0,5)+'-'+substring(TradeDate,5,2)+'-'+substring(TradeDate,7,2)+' '+[TradeTime],120)>='%s' order by stockdate " % (symbol,begintime)
+	#如果一条记录都没有如何处理
+	#pass
+	res=ms.dict_sql(sql)
+	deltapd=pd.DataFrame(res)
+	deltapd['deltaposition']=deltapd['Direction']*deltapd['Volume']
+	#get initial position
+	abegintime=res[0]['stockdate']
+	#  如果 这段时间没有成交记录，则选择开始时间的仓位信息
+	abegintime=min(abegintime,datetime.datetime.strptime(begintime,'%Y-%m-%d'))
+	sql="SELECT top (1) 0 as ClosePrice,convert(datetime,convert(nvarchar(16),[inserttime],120)+':00',120) as stockdate ,[longhave]-[shorthave] as totalposition,bb.Symbol as symbol,  stockID as S_ID FROM [LogRecord].[dbo].[account_position]aa inner join Future.dbo.symbol_id bb on aa.stockID=bb.S_ID and len(bb.symbol)<3  where userid='%s'   and inserttime<='%s' and stockid=%s order by [inserttime] desc " % (account,abegintime,symbolid)
+	alastposition=0
+	tempres=ms.dict_sql(sql)
+	alastposition=tempres[0]['totalposition']
+	atime_position=tempres[0]['stockdate']
+	sql="SELECT top 1 C  FROM [Future].[dbo].[TSymbol_ZL] where symbol='%s' and stockdate<='%s' order by stockdate desc" % (symbol,atime_position)
+	# 如果找不到记录，则另 C=0
+	tempres=ms.dict_sql(sql)
+	if tempres:
+		atime_price=ms.dict_sql(sql)[0]['C']
+	else:
+		atime_price=0
+	addline=pd.DataFrame([{'stockdate':atime_position,'deltaposition':0,'symbol':symbol,'Price':atime_price,}])
+	deltapd=deltapd.append(addline,ignore_index=True)
+	deltapd=deltapd.sort_values(['stockdate'])
+
+
+
+	deltapd['totalposition'] = deltapd['deltaposition'].cumsum()+alastposition
+	# add everyday edntime
+	sql="select stockdate,C as Price from [TSymbol_ZL] where symbol='%s' and stockdate in ( select MAX(StockDate) as stockdate from [TSymbol_ZL] where symbol='%s' and StockDate>='%s' and StockDate<='%s' and t<='15:30'group by D )" % (symbol,symbol,begintime,endtime)
+	insertstockdate=ms.dict_sql(sql)
+	insertstockdate_pd=pd.DataFrame(insertstockdate)
+	deltapd=deltapd.append(insertstockdate_pd,ignore_index=True)
+	deltapd=deltapd.sort_values(['stockdate'])
+	deltapd = deltapd.fillna(method='ffill')
+	deltapd['C']=deltapd['Price']
+	deltapd=deltapd[deltapd['stockdate']<=endtime]
+	return deltapd[['C','stockdate','symbol','totalposition']]
+
+
+	print sql
+	exit()
+	#
+	# newdata = []
+	# lastrecord = res[0]
+	# deltaequity = 0
+	# tempresult=[[lastrecord['Direction'],lastrecord['Volume'],lastrecord['Price']]]
+	# for item in res:
+	# 	mydatetime=item['stockdate'].strftime('%Y-%m-%d %H:%M')
+	# 	if mydatetime == lastrecord['stockdate'].strftime('%Y-%m-%d %H:%M'):
+	# 		tempresult.append([item['Direction'],item['Volume'],item['Price']])
+	# 		#deltaequity = ((item['Price']) - (lastrecord['Price'])) * item['Volume'] * item['Direction']+0.01
+	# 	if mydatetime > lastrecord['stockdate'].strftime('%Y-%m-%d %H:%M'):
+	# 		#computer deltaequity
+	# 		if len(tempresult)>1:
+	# 			#print tempresult
+	# 			myprice = tempresult[-1][2]
+	# 			#print 'tempresult',mydatetime,myprice,tempresult
+	# 			for item1 in tempresult:
+	# 				#print deltaequity
+	# 				deltaequity =deltaequity+(item1[2] - myprice) * (-item1[1]) * item1[0]
+	# 		else:
+	# 			deltaequity=0
+	#
+	# 		newdata.append([datetime.datetime.strptime(lastrecord['stockdate'].strftime('%Y-%m-%d %H:%M') + ':00','%Y-%m-%d %H:%M:%S'), lastrecord['symbol'], lastrecord['Price'], deltaequity])
+	# 		deltaequity = 0
+	# 		tempresult=[ [item['Direction'], item['Volume'], item['Price']]]
+	# 	lastrecord = item
+	# # add last line
+	# newdata.append([mydatetime + ':00', lastrecord['symbol'], lastrecord['Price'], deltaequity])
+	# aaa=pd.DataFrame(newdata,columns=['stockdate','symbol','price','deltapoint'])
+	# return aaa
+
+
+
+
+def merge_position_price(df1,df2):
+	df2=df2[(df2['stockdate']<=endtime) & (df2['stockdate']>=begintime+' 01:00:00')]
+	#df1 is [stockdate        C  totalposition  profit  comm  equity]
+	#df2 is [stockdate symbol    price  deltapoint]
+	aa=pd.merge(df1,df2,'outer',left_on=['stockdate'],right_on=['stockdate'])
+	aa =aa.sort_values('stockdate')
+	aa.to_csv(r'D:\test\bbb.csv',sep=',')
 
 
 
 
 
 
+# postionpd,symbol=account_get_origin_position_list(account,1,'ru')
+# totalpo = get_Tsymbol_by_symbol(symbol, postionpd)
+# print 1
+# exit()
 
 
-def change_scatter_tocontinue(datalist,delta=60):
-	newdatalist=[]
-	newdatalist.append(datalist[0][:])
-	lastdate=datalist[0][:]
-	for item in datalist[1:]:
-		while (item[0]-lastdate[0])>60:
-			lastdate[0]=lastdate[0]+60
-			newdatalist.append([lastdate[0],lastdate[1]])
-		newdatalist.append(item)
-		lastdate=item[:]
-	return newdatalist
 
 
-lilun_total=[]
-real_total=[]
-	# for totalitem in totalres:
-	# 	p_followac=totalitem['F_ac']
-	# 	ratio=totalitem['ratio']/100.0	
+
+
 
 def cal_ac_day_equity(p_followac,acname,ratio=1):
-	sql="select q.ClosePrice,q.stockdate,round(q.totalposition*mr.ratio*%s,0) as totalposition ,q.symbol,sid.S_ID from p_follow p inner join quanyi_log_groupby_v2 q on p.F_ac=q.AC and p.AC='%s' inner join LogRecord.dbo.test_margin mr on q.symbol=mr.symbol inner join symbol_id sid on q.symbol=sid.Symbol where q.AC='%s' and stockdate>='%s' and stockdate<='%s' order by stockdate" % (ratio,p_followac,acname,begintime,endtime)
-	res1=ms.dict_sql(sql)
-	#compute commvalue  pointvalue
-	symbolto=res1[0]['symbol']
-	commvalue=1
-	pointvalue=1
-	sql="SELECT [symbol]  ,[multi] as [pointvalue]  ,[comm] as [commision] FROM [Future].[dbo].[Symbol_ID] where Symbol='%s'" % (symbolto)
-	res=ms.dict_sql(sql)
-	if res:
-		pointvalue=res[0]['pointvalue']
-		commvalue=res[0]['commision']
-	#print pointvalue,commvalue
-	##############################
-
-	#compute every stockdate delta_equity
-	lastposition=res1[0]['totalposition']
-	lastclose=res1[0]['ClosePrice']
-	totalequity={}
-	for item in res1:
-		#print item['stockdate'],item['ClosePrice'],item['totalposition']
-		deltatime=abs(item['totalposition']-lastposition)
-		deltaquanyi=(lastposition*(item['ClosePrice']-lastclose)*float(pointvalue)-deltatime*commvalue)
-		lastposition=item['totalposition']
-		lastclose=item['ClosePrice']
-		totalequity[item['stockdate']]=deltaquanyi
-	dictlist=sorted(totalequity.iteritems(),key=lambda d:d[0],reverse=False)
-	cal_day=dictlist[-1][0].strftime('%Y%m%d')
-	lastdaytime=datetime.datetime.strptime(cal_day+" 08:00:00",'%Y%m%d %H:%M:%S')
-
-	lastday_equity=0
-	for item in dictlist:
-		if item[0]>lastdaytime:
-			lastday_equity=lastday_equity+item[1]
+	postionpd, symbol = get_origin_position_list(p_followac, acname, ratio)
+	totalpo = get_Tsymbol_by_symbol(symbol, postionpd)
+	newtotalpo = cal_equity(symbol, totalpo)
+	day_equity = equity_resharp(newtotalpo)
+	lastday_equity=day_equity['equity'][-1]
+	cal_day=day_equity.index[-1]
 	lilun_total.append(lastday_equity)
 	print cal_day,acname,lastday_equity
 
@@ -194,287 +267,41 @@ def cal_ac_day_equity(p_followac,acname,ratio=1):
 
 
 def cal_ac_day_equity_real(account,symbolid,symbol):
-	realstokid=symbolid
-	realaccount=account
-	#sql="select t.Symbol,t.C as ClosePrice,t.StockDate as stockdate,a.totalposition from TSymbol_allfuture t inner join  symbol_id sid on t.Symbol=sid.Symbol and len(sid.symbol)<3 inner join (SELECT convert(nvarchar(16),[inserttime],120)+':00' as stockdate ,[longhave]-[shorthave] as totalposition FROM [LogRecord].[dbo].[account_position] where userid='%s'   and inserttime<='%s' and inserttime>='%s' and stockid=%s )a on t.StockDate=a.stockdate and sid.S_ID=%s order by a.stockdate" % (realaccount,endtime,begintime,realstokid,realstokid)
-
-	sql="select t.StockDate as stockdate,0 as delta,a.totalposition from TSymbol_allfuture t inner join  symbol_id sid on t.Symbol=sid.Symbol and len(sid.symbol)<3 inner join (SELECT convert(nvarchar(16),[inserttime],120)+':00' as stockdate ,[longhave]-[shorthave] as totalposition FROM [LogRecord].[dbo].[account_position] where userid='%s'   and inserttime<='%s' and inserttime>='%s' and stockid=%s )a on t.StockDate=a.stockdate and sid.S_ID=%s order by a.stockdate" % (realaccount,endtime,begintime,realstokid,realstokid)	
-	res2=ms.find_sql(sql)
-	if res2:
-		# merge with Tsymbol_allfuture stockdate
-		positionlist=res2
-		fisrttime=positionlist[0][0]
-		#[datetime.datetime(2015, 10, 21, 9, 0), 6.0, 6.0]
-		sql="select	C,StockDate from TSymbol_allfuture where Symbol='%s' and  stockdate >='%s' and stockdate<='%s' order by StockDate " % (symbol,begintime,endtime)
-		res=ms.dict_sql(sql)
-		lastquote=res[0]
-		mymewquote=[]
-		temppositionlist=positionlist[:]
-		lastappend=[]
-		lastpostiion=temppositionlist[0]
-		lastresvalue=res[-1]
-		res.append(lastresvalue)
-		for item in res:
-			StockDate=lastquote['StockDate']
-			C=lastquote['C']
-			if StockDate.strftime("%Y%m%d")!=item['StockDate'].strftime("%Y%m%d"):
-				# print 'StockDate is the last day'
-				
-				iskeep=1
-			else:
-				iskeep=0
-			lastquote=item
-			#--end
-			templastposition=[0,0,0]
-			for item1 in temppositionlist:
-				if StockDate<=item1[0]:
-					#如果行情日期和仓位日期一直，直接插入
-					if StockDate==item1[0]:
-						temp=[StockDate,C,item1[2]]
-						mymewquote.append(temp)
-						if StockDate==datetime.datetime(2016, 8, 01, 14, 59):
-							print "1--item1",item1,lastpostiion
-						lastappend=temp
-						lastpostiion=item1
-					#如果行情日期小于仓位日期，取前一个仓位的日期
-					else:
-						temp=[StockDate,C,templastposition[2]]
-						if iskeep==1:
-							mymewquote.append(temp)
-							lastappend=temp
-							if StockDate==datetime.datetime(2016, 8, 01, 14, 59):
-								print "2--iskeep",iskeep,StockDate
-						else:
-							if lastappend==[] or lastappend[2]!=temp[2]:
-								mymewquote.append(temp)
-								if StockDate==datetime.datetime(2016, 8, 01, 14, 59):
-									print "3--lastappend",lastappend,templastposition,temp
-								lastappend=temp	
-						lastpostiion=item1
-					break
-				templastposition=item1
-			if iskeep==1 and StockDate>temppositionlist[-1][0]:
-				temp=[StockDate,C,temppositionlist[-1][2]]
-				mymewquote.append(temp)
-				# lastappend=temp
-		#插入当天行情的最后一根bar
-		lastClose=res[-1]['C']
-		lastdatetime=res[-1]['StockDate']
-		lastquoteposition=mymewquote[-1][2]
-		if lastdatetime!=mymewquote[-1][0]:
-			mymewquote.append([lastdatetime,lastClose,lastquoteposition])
-		# for item in positionlist:
-		# 	print item[0],item[2]
-		# for item in mymewquote:
-		# 	print item[0],item[1],item[2] 
-		# #分商品和IC  IF 两类	(这个是delta仓位，其实不能去除)
-		if 	symbol in ('IC','IF'):
-			#去除9:00-9:29分钟的信号
-			for item in mymewquote:
-				timestr=item[0].strftime("%H%M")
-				timestr=int(timestr)
-				if timestr>=900 and  timestr<=929:
-					mymewquote.remove(item)
-			#--end
-		# for item in mymewquote:
-		# 	print item 
-
-	########################################
-		#compute commvalue  pointvalue
-		symbolto=symbol
-		commvalue=1
-		pointvalue=1
-		sql="SELECT [symbol]  ,[multi] as [pointvalue]  ,[comm] as [commision] FROM [Future].[dbo].[Symbol_ID] where Symbol='%s'" % (symbolto)
-		res=ms.dict_sql(sql)
-		if res:
-			pointvalue=res[0]['pointvalue']
-			commvalue=res[0]['commision']
-		##############################
-
-		#compute every stockdate delta_equity
-		lastposition=mymewquote[0][2]
-		lastclose=mymewquote[0][1]
-		totalequity={}
-		for item in mymewquote:
-			#print item[0],item[1],item[2]
-			deltatime=abs(item[2]-lastposition)
-			deltaquanyi=(lastposition*(item[1]-lastclose)*float(pointvalue)-deltatime*commvalue)
-			lastposition=item[2]
-			lastclose=item[1]
-			totalequity[item[0]]=deltaquanyi
-		dictlist=sorted(totalequity.iteritems(),key=lambda d:d[0],reverse=False)
-		cal_day=dictlist[-1][0].strftime('%Y%m%d')
-		lastdayendtime=datetime.datetime.strptime(cal_day+" 15:00:00",'%Y%m%d %H:%M:%S')
-		lastdaybegintime=lastdayendtime-datetime.timedelta(hours=18)
-		#lastdaytime=datetime.datetime.strptime(cal_day+" 08:00:00",'%Y%m%d %H:%M:%S')
-
-		lastday_equity=0
-		for item in dictlist:
-			if item[0]>=lastdaybegintime:
-				lastday_equity=lastday_equity+item[1]
-		print cal_day,symbolto,lastday_equity
-	else:
-		lastday_equity=0
-		print 'notexit',symbol,lastday_equity
+	postionpd, symbol = account_get_origin_position_list(account, symbolid,symbol)
+	totalpo = get_Tsymbol_by_symbol(symbol, postionpd)
+	newtotalpo = cal_equity(symbol, totalpo)
+	day_equity = equity_resharp(newtotalpo)
+	lastday_equity=day_equity['equity'][-1]
+	cal_day=day_equity.index[-1]
 	real_total.append(lastday_equity)
-
-def cal_ac_day_equity_real_new(account,symbolid,symbol):
-	realstokid=symbolid
-	realaccount=account
-	sql="SELECT convert(datetime,convert(nvarchar(16),[inserttime],120)+':00',120) as stockdate ,[longhave]-[shorthave] as totalposition FROM [LogRecord].[dbo].[account_position] where userid='666061010'   and inserttime<='2017-02-08 16:00:00' and inserttime>='2017-02-05' and stockid=20 order by stockdate "
-	res2=ms.find_sql(sql)
-	# add every day last bar
-	#ger every day last bar
-	sql="select distinct  CONVERT(nvarchar(10),stockdate,120) as day from TSymbol_allfuture where symbol='CF' and stockdate<='2017-02-08 16:00:00' and stockdate>='2017-02-05'  order by day"
-	daylist=ms.find_sql(sql)
-	maxstockdatelist=[]
-	for item in daylist:
-		sql="select max(stockdate) as stockdate from TSymbol_allfuture where symbol='CF' and stockdate<='%s 15:31:00'" % (item)
-		temp1=ms.find_sql(sql)
-		maxstockdatelist.append(temp1[0][0])
-	print  maxstockdatelist
+	print cal_day,symbol,lastday_equity
 
 
+def cal_ac_day_equity_huibao(account, symbolid, symbol):
+	#step 1
+	postionpd = get_delta_info(symbol,symbolid)
 
-
-
-	sql="select t.Symbol,t.C as ClosePrice,t.StockDate as stockdate,a.totalposition from TSymbol_allfuture t inner join  symbol_id sid on t.Symbol=sid.Symbol and len(sid.symbol)<3 inner join (SELECT convert(nvarchar(16),[inserttime],120)+':00' as stockdate ,[longhave]-[shorthave] as totalposition FROM [LogRecord].[dbo].[account_position] where userid='%s'   and inserttime<='%s' and inserttime>='%s' and stockid=%s )a on t.StockDate=a.stockdate and sid.S_ID=%s order by a.stockdate" % (realaccount,endtime,begintime,realstokid,realstokid)
-	sql="select t.StockDate as stockdate,0 as delta,a.totalposition from TSymbol_allfuture t inner join  symbol_id sid on t.Symbol=sid.Symbol and len(sid.symbol)<3 inner join (SELECT convert(nvarchar(16),[inserttime],120)+':00' as stockdate ,[longhave]-[shorthave] as totalposition FROM [LogRecord].[dbo].[account_position] where userid='%s'   and inserttime<='%s' and inserttime>='%s' and stockid=%s )a on t.StockDate=a.stockdate and sid.S_ID=%s order by a.stockdate" % (realaccount,endtime,begintime,realstokid,realstokid)
-	res2=ms.find_sql(sql)
-	print sql 
-	# merge with Tsymbol_allfuture stockdate
-	positionlist=res2
-	fisrttime=positionlist[0][0]
-	#[datetime.datetime(2015, 10, 21, 9, 0), 6.0, 6.0]
-	sql="select	C,StockDate from TSymbol_allfuture where Symbol='%s' and  stockdate >='%s' and stockdate<='%s' order by StockDate " % (symbol,begintime,endtime)
-	res=ms.dict_sql(sql)
-	lastquote=res[0]
-	mymewquote=[]
-	temppositionlist=positionlist[:]
-	lastappend=[]
-	lastpostiion=temppositionlist[0]
-	lastresvalue=res[-1]
-	res.append(lastresvalue)
-	for item in res:
-		StockDate=lastquote['StockDate']
-		C=lastquote['C']
-		if StockDate.strftime("%Y%m%d")!=item['StockDate'].strftime("%Y%m%d"):
-			# print 'StockDate is the last day'
-			
-			iskeep=1
-		else:
-			iskeep=0
-		lastquote=item
-		#--end
-		templastposition=[0,0,0]
-		for item1 in temppositionlist:
-			if StockDate<=item1[0]:
-				#如果行情日期和仓位日期一直，直接插入
-				if StockDate==item1[0]:
-					temp=[StockDate,C,item1[2]]
-					mymewquote.append(temp)
-					if StockDate==datetime.datetime(2016, 8, 01, 14, 59):
-						print "1--item1",item1,lastpostiion
-					lastappend=temp
-					lastpostiion=item1
-				#如果行情日期小于仓位日期，取前一个仓位的日期
-				else:
-					temp=[StockDate,C,templastposition[2]]
-					if iskeep==1:
-						mymewquote.append(temp)
-						lastappend=temp
-						if StockDate==datetime.datetime(2016, 8, 01, 14, 59):
-							print "2--iskeep",iskeep,StockDate
-					else:
-						if lastappend==[] or lastappend[2]!=temp[2]:
-							mymewquote.append(temp)
-							if StockDate==datetime.datetime(2016, 8, 01, 14, 59):
-								print "3--lastappend",lastappend,templastposition,temp
-							lastappend=temp	
-					lastpostiion=item1
-				break
-			templastposition=item1
-		if iskeep==1 and StockDate>temppositionlist[-1][0]:
-			temp=[StockDate,C,temppositionlist[-1][2]]
-			mymewquote.append(temp)
-			# lastappend=temp
-	#插入当天行情的最后一根bar
-	lastClose=res[-1]['C']
-	lastdatetime=res[-1]['StockDate']
-	lastquoteposition=mymewquote[-1][2]
-	if lastdatetime!=mymewquote[-1][0]:
-		mymewquote.append([lastdatetime,lastClose,lastquoteposition])
-	# for item in positionlist:
-	# 	print item[0],item[2]
-	# for item in mymewquote:
-	# 	print item[0],item[1],item[2] 
-	# #分商品和IC  IF 两类	(这个是delta仓位，其实不能去除)
-	if 	symbol in ('IC','IF'):
-		#去除9:00-9:29分钟的信号
-		for item in mymewquote:
-			timestr=item[0].strftime("%H%M")
-			timestr=int(timestr)
-			if timestr>=900 and  timestr<=929:
-				mymewquote.remove(item)
-		#--end
-	# for item in mymewquote:
-	# 	print item 
-
-	########################################
-	if res2:
-		#compute commvalue  pointvalue
-		symbolto=symbol
-		commvalue=1
-		pointvalue=1
-		sql="SELECT [symbol]  ,[multi] as [pointvalue]  ,[comm] as [commision] FROM [Future].[dbo].[Symbol_ID] where Symbol='%s'" % (symbolto)
-		res=ms.dict_sql(sql)
-		if res:
-			pointvalue=res[0]['pointvalue']
-			commvalue=res[0]['commision']
-		##############################
-
-		#compute every stockdate delta_equity
-		lastposition=mymewquote[0][2]
-		lastclose=mymewquote[0][1]
-		totalequity={}
-		for item in mymewquote:
-			print item[0],item[1],item[2]
-			deltatime=abs(item[2]-lastposition)
-			deltaquanyi=(lastposition*(item[1]-lastclose)*float(pointvalue)-deltatime*commvalue)
-			lastposition=item[2]
-			lastclose=item[1]
-			totalequity[item[0]]=deltaquanyi
-		dictlist=sorted(totalequity.iteritems(),key=lambda d:d[0],reverse=False)
-		cal_day=dictlist[-1][0].strftime('%Y%m%d')
-		lastdayendtime=datetime.datetime.strptime(cal_day+" 15:00:00",'%Y%m%d %H:%M:%S')
-		lastdaybegintime=lastdayendtime-datetime.timedelta(hours=18)
-		#lastdaytime=datetime.datetime.strptime(cal_day+" 08:00:00",'%Y%m%d %H:%M:%S')
-
-		lastday_equity=0
-		for item in dictlist:
-			if item[0]>=lastdaybegintime:
-				lastday_equity=lastday_equity+item[1]
-		print cal_day,symbolto,lastday_equity
-	else:
-		lastday_equity=0
-		#print 'not exit',symbol,lastday_equity
+	newtotalpo = cal_equity(symbol, postionpd)
+	day_equity = equity_resharp(newtotalpo)
+	lastday_equity = day_equity['equity'][-1]
+	cal_day = day_equity.index[-1]
 	real_total.append(lastday_equity)
+	print cal_day, symbol,symbolid, lastday_equity
 
 
-
-# sql="select * from (select distinct f_ac from p_follow where ac='%s') a order by replace(f_ac,'%s','')" % (step_acname,step_acname)
+# sql="select * from (select distinct f_ac from p_follow where ac='%s') a order by replace(f_ac,'%s','')" % (step_acname,replacestr)
 # myres=ms.dict_sql(sql)
 # for myitem in myres:
 # 	#print myitem
 # 	cal_ac_day_equity(step_acname,myitem['f_ac'],totalratio)
-# print 'lilun_total',sum(lilun_total)
+# print '####lilun_total',sum(lilun_total)
 
-sql="select replace(f_ac,'%s','') as symbol ,Stock from p_follow where ac='%s' order by replace(f_ac,'%s','')" % (step_acname,step_acname,step_acname)
-myres2=ms.dict_sql(sql)
-for myitem in myres2:
-	#print 'begin:',myitem['symbol'],myitem['Stock']
-	cal_ac_day_equity_real(account,myitem['Stock'],myitem['symbol'])
-print 'real_total',sum(real_total)
-exit()
-# cal_ac_day_equity_real('1636737',1,'ru')
-# cal_ac_day_equity('StepMultigaosheng1','csStepMultigaosheng1',1)
+# sql="select replace(f_ac,'%s','') as symbol ,Stock from p_follow where ac='%s' order by replace(f_ac,'%s','')" % (replacestr,step_acname,replacestr)
+# myres2=ms.dict_sql(sql)
+# for myitem in myres2:
+# 	#print 'begin:',myitem['Stock'],myitem['symbol']
+# 	cal_ac_day_equity_huibao(account,myitem['Stock'],myitem['symbol'])
+# print '#####real_total',sum(real_total)
+# exit()
+cal_ac_day_equity_huibao(account,7,'yy')
+# cal_ac_day_equity('StepMultiI300w_up','srStepMultiI_up',2.2)
