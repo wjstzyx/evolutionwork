@@ -10,7 +10,8 @@ from pandas.tseries import offsets
 reload(sys)
 sys.setdefaultencoding('utf8')
 from dbconn import MSSQL
-ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+#ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+ms = MSSQL(host="27.115.14.62:3888",user="future",pwd="K@ra0Key",db="future")
 # resList = ms.find_sql("select top 2 * from st_report")
 # print resList
 # -*- coding: utf-8 -*-
@@ -151,20 +152,17 @@ def account_get_origin_position_list(account,symbolid,symbol):
 def get_delta_info(symbol,symbolid):
 	#获取成交回报
 	sql="  select Future.dbo.m_getstr([InstrumentID]) as symbol,Direction,[Volume],  Price,convert(datetime,substring(TradeDate,0,5)+'-'+substring(TradeDate,5,2)+'-'+substring(TradeDate,7,2)+' '+[TradeTime],120) as stockdate from [Future].[dbo].[test_tradelog] where Future.dbo.m_getstr([InstrumentID])='%s' and convert(datetime,substring(TradeDate,0,5)+'-'+substring(TradeDate,5,2)+'-'+substring(TradeDate,7,2)+' '+[TradeTime],120)>='%s' order by stockdate " % (symbol,begintime)
-	#如果一条记录都没有如何处理
-	#pass
 	res=ms.dict_sql(sql)
-	deltapd=pd.DataFrame(res)
-	deltapd['deltaposition']=deltapd['Direction']*deltapd['Volume']
-	#get initial position
-	abegintime=res[0]['stockdate']
-	#  如果 这段时间没有成交记录，则选择开始时间的仓位信息
-	abegintime=min(abegintime,datetime.datetime.strptime(begintime,'%Y-%m-%d'))
+	#如果一条记录都没有如何处理,选择最早的一条仓位信息
+	abegintime=datetime.datetime.strptime(begintime,'%Y-%m-%d')
 	sql="SELECT top (1) 0 as ClosePrice,convert(datetime,convert(nvarchar(16),[inserttime],120)+':00',120) as stockdate ,[longhave]-[shorthave] as totalposition,bb.Symbol as symbol,  stockID as S_ID FROM [LogRecord].[dbo].[account_position]aa inner join Future.dbo.symbol_id bb on aa.stockID=bb.S_ID and len(bb.symbol)<3  where userid='%s'   and inserttime<='%s' and stockid=%s order by [inserttime] desc " % (account,abegintime,symbolid)
-	alastposition=0
 	tempres=ms.dict_sql(sql)
-	alastposition=tempres[0]['totalposition']
-	atime_position=tempres[0]['stockdate']
+	if tempres:
+		alastposition=tempres[0]['totalposition']
+		atime_position=tempres[0]['stockdate']
+	else:
+		print symbol,'不存在期货账户仓位信息'
+		exit()
 	sql="SELECT top 1 C  FROM [Future].[dbo].[TSymbol_ZL] where symbol='%s' and stockdate<='%s' order by stockdate desc" % (symbol,atime_position)
 	# 如果找不到记录，则另 C=0
 	tempres=ms.dict_sql(sql)
@@ -172,8 +170,35 @@ def get_delta_info(symbol,symbolid):
 		atime_price=ms.dict_sql(sql)[0]['C']
 	else:
 		atime_price=0
-	addline=pd.DataFrame([{'stockdate':atime_position,'deltaposition':0,'symbol':symbol,'Price':atime_price,}])
-	deltapd=deltapd.append(addline,ignore_index=True)
+
+	addline={'stockdate':atime_position,'Direction':0,'Volume':0,'symbol':symbol,'Price':atime_price}
+	if res:
+		firsttime=res[0]['stockdate']
+		if firsttime>abegintime:
+			res.append(addline)
+	else:
+		res.append(addline)
+
+	deltapd=pd.DataFrame(res)
+	deltapd['deltaposition']=deltapd['Direction']*deltapd['Volume']
+	# #get initial position
+	# abegintime=res[0]['stockdate']
+	# #  如果 这段时间没有成交记录，则选择开始时间的仓位信息
+	# abegintime=min(abegintime,datetime.datetime.strptime(begintime,'%Y-%m-%d'))
+	# sql="SELECT top (1) 0 as ClosePrice,convert(datetime,convert(nvarchar(16),[inserttime],120)+':00',120) as stockdate ,[longhave]-[shorthave] as totalposition,bb.Symbol as symbol,  stockID as S_ID FROM [LogRecord].[dbo].[account_position]aa inner join Future.dbo.symbol_id bb on aa.stockID=bb.S_ID and len(bb.symbol)<3  where userid='%s'   and inserttime<='%s' and stockid=%s order by [inserttime] desc " % (account,abegintime,symbolid)
+	# alastposition=0
+	# tempres=ms.dict_sql(sql)
+	# alastposition=tempres[0]['totalposition']
+	# atime_position=tempres[0]['stockdate']
+	# sql="SELECT top 1 C  FROM [Future].[dbo].[TSymbol_ZL] where symbol='%s' and stockdate<='%s' order by stockdate desc" % (symbol,atime_position)
+	# # 如果找不到记录，则另 C=0
+	# tempres=ms.dict_sql(sql)
+	# if tempres:
+	# 	atime_price=ms.dict_sql(sql)[0]['C']
+	# else:
+	# 	atime_price=0
+	# addline=pd.DataFrame([{'stockdate':atime_position,'deltaposition':0,'symbol':symbol,'Price':atime_price,}])
+	# deltapd=deltapd.append(addline,ignore_index=True)
 	deltapd=deltapd.sort_values(['stockdate'])
 
 
@@ -190,39 +215,6 @@ def get_delta_info(symbol,symbolid):
 	deltapd=deltapd[deltapd['stockdate']<=endtime]
 	return deltapd[['C','stockdate','symbol','totalposition']]
 
-
-	print sql
-	exit()
-	#
-	# newdata = []
-	# lastrecord = res[0]
-	# deltaequity = 0
-	# tempresult=[[lastrecord['Direction'],lastrecord['Volume'],lastrecord['Price']]]
-	# for item in res:
-	# 	mydatetime=item['stockdate'].strftime('%Y-%m-%d %H:%M')
-	# 	if mydatetime == lastrecord['stockdate'].strftime('%Y-%m-%d %H:%M'):
-	# 		tempresult.append([item['Direction'],item['Volume'],item['Price']])
-	# 		#deltaequity = ((item['Price']) - (lastrecord['Price'])) * item['Volume'] * item['Direction']+0.01
-	# 	if mydatetime > lastrecord['stockdate'].strftime('%Y-%m-%d %H:%M'):
-	# 		#computer deltaequity
-	# 		if len(tempresult)>1:
-	# 			#print tempresult
-	# 			myprice = tempresult[-1][2]
-	# 			#print 'tempresult',mydatetime,myprice,tempresult
-	# 			for item1 in tempresult:
-	# 				#print deltaequity
-	# 				deltaequity =deltaequity+(item1[2] - myprice) * (-item1[1]) * item1[0]
-	# 		else:
-	# 			deltaequity=0
-	#
-	# 		newdata.append([datetime.datetime.strptime(lastrecord['stockdate'].strftime('%Y-%m-%d %H:%M') + ':00','%Y-%m-%d %H:%M:%S'), lastrecord['symbol'], lastrecord['Price'], deltaequity])
-	# 		deltaequity = 0
-	# 		tempresult=[ [item['Direction'], item['Volume'], item['Price']]]
-	# 	lastrecord = item
-	# # add last line
-	# newdata.append([mydatetime + ':00', lastrecord['symbol'], lastrecord['Price'], deltaequity])
-	# aaa=pd.DataFrame(newdata,columns=['stockdate','symbol','price','deltapoint'])
-	# return aaa
 
 
 
@@ -262,10 +254,6 @@ def cal_ac_day_equity(p_followac,acname,ratio=1):
 	print cal_day,acname,lastday_equity
 
 
-
-
-
-
 def cal_ac_day_equity_real(account,symbolid,symbol):
 	postionpd, symbol = account_get_origin_position_list(account, symbolid,symbol)
 	totalpo = get_Tsymbol_by_symbol(symbol, postionpd)
@@ -289,19 +277,41 @@ def cal_ac_day_equity_huibao(account, symbolid, symbol):
 	print cal_day, symbol,symbolid, lastday_equity
 
 
-# sql="select * from (select distinct f_ac from p_follow where ac='%s') a order by replace(f_ac,'%s','')" % (step_acname,replacestr)
-# myres=ms.dict_sql(sql)
-# for myitem in myres:
-# 	#print myitem
-# 	cal_ac_day_equity(step_acname,myitem['f_ac'],totalratio)
-# print '####lilun_total',sum(lilun_total)
+def main_get_lilun(step_acname,replacestr,totalratio):
+	sql="select * from (select distinct f_ac from p_follow where ac='%s') a order by replace(f_ac,'%s','')" % (step_acname,replacestr)
+	myres=ms.dict_sql(sql)
+	for myitem in myres:
+		#print myitem
+		cal_ac_day_equity(step_acname,myitem['f_ac'],totalratio)
+	print '####lilun_total',sum(lilun_total)
 
-# sql="select replace(f_ac,'%s','') as symbol ,Stock from p_follow where ac='%s' order by replace(f_ac,'%s','')" % (replacestr,step_acname,replacestr)
-# myres2=ms.dict_sql(sql)
-# for myitem in myres2:
-# 	#print 'begin:',myitem['Stock'],myitem['symbol']
-# 	cal_ac_day_equity_huibao(account,myitem['Stock'],myitem['symbol'])
-# print '#####real_total',sum(real_total)
-# exit()
-cal_ac_day_equity_huibao(account,7,'yy')
+
+def main_get_account_position(account,step_acname,replacestr):
+	sql="select replace(f_ac,'%s','') as symbol ,Stock from p_follow where ac='%s' order by replace(f_ac,'%s','')" % (replacestr,step_acname,replacestr)
+	myres2=ms.dict_sql(sql)
+	for myitem in myres2:
+		#print 'begin:',myitem['Stock'],myitem['symbol']
+		cal_ac_day_equity_real(account,myitem['Stock'],myitem['symbol'])
+	print '#####real_total',sum(real_total)
+
+def main_get_huibao_position(account,step_acname,replacestr):
+	sql="select replace(f_ac,'%s','') as symbol ,Stock from p_follow where ac='%s' order by replace(f_ac,'%s','')" % (replacestr,step_acname,replacestr)
+	myres2=ms.dict_sql(sql)
+	for myitem in myres2:
+		#print 'begin:',myitem['Stock'],myitem['symbol']
+		cal_ac_day_equity_huibao(account,myitem['Stock'],myitem['symbol'])
+	print '#####real_total',sum(real_total)
+
+
 # cal_ac_day_equity('StepMultiI300w_up','srStepMultiI_up',2.2)
+# cal_ac_day_equity_huibao(account,3,'sr')
+# cal_ac_day_equity_huibao(account,3,'sr')
+
+# 计算理论当天权益
+main_get_lilun(step_acname,replacestr,totalratio)
+
+# 计算期货账户仓位 当天权益
+main_get_account_position(account,step_acname,replacestr)
+
+# 计算成交回报 当天权益
+main_get_huibao_position(account,step_acname,replacestr)
