@@ -23,30 +23,30 @@
       <file leaf-file-name="multi_lilun_real_time_equity_模块化.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/multi_lilun_real_time_equity_模块化.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="200">
-              <caret line="317" column="0" lean-forward="true" selection-start-line="317" selection-start-column="0" selection-end-line="317" selection-end-column="0" />
+            <state relative-caret-position="255">
+              <caret line="335" column="0" lean-forward="true" selection-start-line="335" selection-start-column="0" selection-end-line="335" selection-end-column="0" />
               <folding>
                 <element signature="n#!!doc" expanded="false" />
-                <element signature="e#404#460#0" expanded="false" />
-                <element signature="e#916#971#0" expanded="false" />
-                <element signature="e#1056#2124#0" expanded="false" />
-                <element signature="e#1513#2022#0" expanded="false" />
-                <element signature="e#2173#2817#0" expanded="false" />
-                <element signature="e#2861#3509#0" expanded="false" />
-                <element signature="e#3105#3168#0" expanded="false" />
-                <element signature="e#3546#3871#0" expanded="false" />
-                <element signature="e#3875#3965#0" expanded="false" />
-                <element signature="e#4199#5349#0" expanded="false" />
-                <element signature="e#4662#4717#0" expanded="false" />
-                <element signature="e#5405#9148#0" expanded="false" />
-                <element signature="e#9190#9533#0" expanded="false" />
-                <element signature="e#9272#9337#0" expanded="false" />
-                <element signature="e#9738#10088#0" expanded="false" />
-                <element signature="e#10145#10501#0" expanded="false" />
-                <element signature="e#10562#10858#0" expanded="false" />
-                <element signature="e#10917#11210#0" expanded="false" />
-                <element signature="e#11277#11632#0" expanded="false" />
-                <element signature="e#11697#12054#0" expanded="false" />
+                <element signature="e#37#70#0" expanded="true" />
+                <element signature="e#413#469#0" expanded="false" />
+                <element signature="e#990#1313#0" expanded="false" />
+                <element signature="e#1371#1426#0" expanded="false" />
+                <element signature="e#1511#2579#0" expanded="false" />
+                <element signature="e#1968#2477#0" expanded="false" />
+                <element signature="e#2628#3272#0" expanded="false" />
+                <element signature="e#3316#3964#0" expanded="false" />
+                <element signature="e#3560#3623#0" expanded="false" />
+                <element signature="e#4001#4326#0" expanded="false" />
+                <element signature="e#4330#4420#0" expanded="false" />
+                <element signature="e#4654#5804#0" expanded="false" />
+                <element signature="e#5117#5172#0" expanded="false" />
+                <element signature="e#5860#9603#0" expanded="false" />
+                <element signature="e#9645#9988#0" expanded="false" />
+                <element signature="e#9727#9792#0" expanded="false" />
+                <element signature="e#10193#10628#0" expanded="false" />
+                <element signature="e#10685#11128#0" expanded="false" />
+                <element signature="e#11189#11571#0" expanded="false" />
+                <element signature="e#11630#11923#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -55,11 +55,12 @@
       <file leaf-file-name="aa.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/360_test/aa.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="378">
-              <caret line="37" column="0" lean-forward="false" selection-start-line="37" selection-start-column="0" selection-end-line="37" selection-end-column="0" />
+            <state relative-caret-position="36">
+              <caret line="72" column="0" lean-forward="true" selection-start-line="72" selection-start-column="0" selection-end-line="83" selection-end-column="0" />
               <folding>
-                <element signature="e#320#895#0" expanded="false" />
-                <element signature="e#930#2575#0" expanded="false" />
+                <element signature="e#332#907#0" expanded="false" />
+                <element signature="e#942#2587#0" expanded="false" />
+                <element signature="e#2656#3010#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -78,8 +79,8 @@
         <option value="$PROJECT_DIR$/test11.py" />
         <option value="$PROJECT_DIR$/new_cal_quayi.py" />
         <option value="$PROJECT_DIR$/new_cal_quayi - 副本.py" />
-        <option value="$PROJECT_DIR$/360_test/aa.py" />
         <option value="$PROJECT_DIR$/导入主力合约数据_from文华.py" />
+        <option value="$PROJECT_DIR$/360_test/aa.py" />
         <option value="$PROJECT_DIR$/multi_lilun_real_time_equity_模块化.py" />
       </list>
     </option>
@@ -146,23 +147,6 @@
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
     </configuration>
-    <configuration default="false" name="aa" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/360_test" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="pythonfile" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/360_test/aa.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <method />
-    </configuration>
     <configuration default="false" name="new_cal_quayi - 副本" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -210,6 +194,23 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="pythonfile" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/multi_lilun_real_time_equity_模块化.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="aa" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="D:\Program Files (x86)\Anaconda2\python.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/360_test" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="pythonfile" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/360_test/aa.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
@@ -350,16 +351,16 @@
     </configuration>
     <list size="5">
       <item index="0" class="java.lang.String" itemvalue="Python.new_cal_quayi" />
-      <item index="1" class="java.lang.String" itemvalue="Python.aa" />
-      <item index="2" class="java.lang.String" itemvalue="Python.new_cal_quayi - 副本" />
-      <item index="3" class="java.lang.String" itemvalue="Python.导入主力合约数据_from文华" />
-      <item index="4" class="java.lang.String" itemvalue="Python.multi_lilun_real_time_equity_模块化" />
+      <item index="1" class="java.lang.String" itemvalue="Python.new_cal_quayi - 副本" />
+      <item index="2" class="java.lang.String" itemvalue="Python.导入主力合约数据_from文华" />
+      <item index="3" class="java.lang.String" itemvalue="Python.multi_lilun_real_time_equity_模块化" />
+      <item index="4" class="java.lang.String" itemvalue="Python.aa" />
     </list>
     <recent_temporary>
       <list size="5">
         <item index="0" class="java.lang.String" itemvalue="Python.multi_lilun_real_time_equity_模块化" />
-        <item index="1" class="java.lang.String" itemvalue="Python.导入主力合约数据_from文华" />
-        <item index="2" class="java.lang.String" itemvalue="Python.aa" />
+        <item index="1" class="java.lang.String" itemvalue="Python.aa" />
+        <item index="2" class="java.lang.String" itemvalue="Python.导入主力合约数据_from文华" />
         <item index="3" class="java.lang.String" itemvalue="Python.new_cal_quayi - 副本" />
         <item index="4" class="java.lang.String" itemvalue="Python.new_cal_quayi" />
       </list>
@@ -383,18 +384,18 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1386" height="788" extended-state="0" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.17956205" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32946146" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.46980855" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.46980855" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39915523" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39911634" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -445,14 +446,19 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/multi_lilun_real_time_equity_模块化.py</url>
-          <line>107</line>
+          <line>122</line>
           <option name="timeStamp" value="34" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/multi_lilun_real_time_equity_模块化.py</url>
+          <line>286</line>
+          <option name="timeStamp" value="106" />
         </line-breakpoint>
       </breakpoints>
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
-      <option name="time" value="105" />
+      <option name="time" value="107" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -463,26 +469,26 @@
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="n#!!doc" expanded="false" />
-            <element signature="e#404#460#0" expanded="false" />
-            <element signature="e#916#971#0" expanded="false" />
-            <element signature="e#1056#2124#0" expanded="false" />
-            <element signature="e#1513#2022#0" expanded="false" />
-            <element signature="e#2173#2817#0" expanded="false" />
-            <element signature="e#2861#3509#0" expanded="false" />
-            <element signature="e#3105#3168#0" expanded="false" />
-            <element signature="e#3546#3871#0" expanded="false" />
-            <element signature="e#3875#3965#0" expanded="false" />
-            <element signature="e#4199#5349#0" expanded="false" />
-            <element signature="e#4662#4717#0" expanded="false" />
-            <element signature="e#5405#9148#0" expanded="false" />
-            <element signature="e#9190#9533#0" expanded="false" />
-            <element signature="e#9272#9337#0" expanded="false" />
-            <element signature="e#9738#10088#0" expanded="false" />
-            <element signature="e#10145#10501#0" expanded="false" />
-            <element signature="e#10562#10858#0" expanded="false" />
-            <element signature="e#10917#11210#0" expanded="false" />
-            <element signature="e#11277#11632#0" expanded="false" />
-            <element signature="e#11697#12054#0" expanded="false" />
+            <element signature="e#37#70#0" expanded="true" />
+            <element signature="e#413#469#0" expanded="false" />
+            <element signature="e#990#1313#0" expanded="false" />
+            <element signature="e#1371#1426#0" expanded="false" />
+            <element signature="e#1511#2579#0" expanded="false" />
+            <element signature="e#1968#2477#0" expanded="false" />
+            <element signature="e#2628#3272#0" expanded="false" />
+            <element signature="e#3316#3964#0" expanded="false" />
+            <element signature="e#3560#3623#0" expanded="false" />
+            <element signature="e#4001#4326#0" expanded="false" />
+            <element signature="e#4330#4420#0" expanded="false" />
+            <element signature="e#4654#5804#0" expanded="false" />
+            <element signature="e#5117#5172#0" expanded="false" />
+            <element signature="e#5860#9603#0" expanded="false" />
+            <element signature="e#9645#9988#0" expanded="false" />
+            <element signature="e#9727#9792#0" expanded="false" />
+            <element signature="e#10193#10628#0" expanded="false" />
+            <element signature="e#10685#11128#0" expanded="false" />
+            <element signature="e#11189#11571#0" expanded="false" />
+            <element signature="e#11630#11923#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -492,8 +498,9 @@
         <state relative-caret-position="420">
           <caret line="37" column="0" lean-forward="false" selection-start-line="37" selection-start-column="0" selection-end-line="37" selection-end-column="0" />
           <folding>
-            <element signature="e#320#895#0" expanded="false" />
-            <element signature="e#930#2575#0" expanded="false" />
+            <element signature="e#332#907#0" expanded="false" />
+            <element signature="e#942#2587#0" expanded="false" />
+            <element signature="e#2656#3010#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -503,8 +510,9 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#320#895#0" expanded="false" />
-            <element signature="e#930#2575#0" expanded="false" />
+            <element signature="e#332#907#0" expanded="false" />
+            <element signature="e#942#2587#0" expanded="false" />
+            <element signature="e#2656#3010#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -591,13 +599,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/pydevd.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="318">
-          <caret line="963" column="0" lean-forward="false" selection-start-line="963" selection-start-column="0" selection-end-line="963" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://C:/_wenhua_/wh6all/catchquotesall_multidatabase.py" />
     <entry file="file://$PROJECT_DIR$/导入主力合约数据_from文华.py">
       <provider selected="true" editor-type-id="text-editor">
@@ -608,41 +609,50 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/360_test/aa.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="378">
-          <caret line="37" column="0" lean-forward="false" selection-start-line="37" selection-start-column="0" selection-end-line="37" selection-end-column="0" />
+        <state relative-caret-position="36">
+          <caret line="72" column="0" lean-forward="true" selection-start-line="72" selection-start-column="0" selection-end-line="83" selection-end-column="0" />
           <folding>
-            <element signature="e#320#895#0" expanded="false" />
-            <element signature="e#930#2575#0" expanded="false" />
+            <element signature="e#332#907#0" expanded="false" />
+            <element signature="e#942#2587#0" expanded="false" />
+            <element signature="e#2656#3010#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/pydevd.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="252">
+          <caret line="979" column="36" lean-forward="true" selection-start-line="979" selection-start-column="36" selection-end-line="979" selection-end-column="36" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/multi_lilun_real_time_equity_模块化.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="200">
-          <caret line="317" column="0" lean-forward="true" selection-start-line="317" selection-start-column="0" selection-end-line="317" selection-end-column="0" />
+        <state relative-caret-position="255">
+          <caret line="335" column="0" lean-forward="true" selection-start-line="335" selection-start-column="0" selection-end-line="335" selection-end-column="0" />
           <folding>
             <element signature="n#!!doc" expanded="false" />
-            <element signature="e#404#460#0" expanded="false" />
-            <element signature="e#916#971#0" expanded="false" />
-            <element signature="e#1056#2124#0" expanded="false" />
-            <element signature="e#1513#2022#0" expanded="false" />
-            <element signature="e#2173#2817#0" expanded="false" />
-            <element signature="e#2861#3509#0" expanded="false" />
-            <element signature="e#3105#3168#0" expanded="false" />
-            <element signature="e#3546#3871#0" expanded="false" />
-            <element signature="e#3875#3965#0" expanded="false" />
-            <element signature="e#4199#5349#0" expanded="false" />
-            <element signature="e#4662#4717#0" expanded="false" />
-            <element signature="e#5405#9148#0" expanded="false" />
-            <element signature="e#9190#9533#0" expanded="false" />
-            <element signature="e#9272#9337#0" expanded="false" />
-            <element signature="e#9738#10088#0" expanded="false" />
-            <element signature="e#10145#10501#0" expanded="false" />
-            <element signature="e#10562#10858#0" expanded="false" />
-            <element signature="e#10917#11210#0" expanded="false" />
-            <element signature="e#11277#11632#0" expanded="false" />
-            <element signature="e#11697#12054#0" expanded="false" />
+            <element signature="e#37#70#0" expanded="true" />
+            <element signature="e#413#469#0" expanded="false" />
+            <element signature="e#990#1313#0" expanded="false" />
+            <element signature="e#1371#1426#0" expanded="false" />
+            <element signature="e#1511#2579#0" expanded="false" />
+            <element signature="e#1968#2477#0" expanded="false" />
+            <element signature="e#2628#3272#0" expanded="false" />
+            <element signature="e#3316#3964#0" expanded="false" />
+            <element signature="e#3560#3623#0" expanded="false" />
+            <element signature="e#4001#4326#0" expanded="false" />
+            <element signature="e#4330#4420#0" expanded="false" />
+            <element signature="e#4654#5804#0" expanded="false" />
+            <element signature="e#5117#5172#0" expanded="false" />
+            <element signature="e#5860#9603#0" expanded="false" />
+            <element signature="e#9645#9988#0" expanded="false" />
+            <element signature="e#9727#9792#0" expanded="false" />
+            <element signature="e#10193#10628#0" expanded="false" />
+            <element signature="e#10685#11128#0" expanded="false" />
+            <element signature="e#11189#11571#0" expanded="false" />
+            <element signature="e#11630#11923#0" expanded="false" />
           </folding>
         </state>
       </provider>

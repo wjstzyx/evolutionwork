@@ -3,7 +3,8 @@
 import sys, urllib, urllib2, json
 import sys
 import datetime
-import time 
+import time
+import os
 import numpy as np
 import pandas as pd
 from pandas.tseries import offsets
@@ -24,12 +25,26 @@ account='666061010'
 totalratio=2.2
 equity_day='2017-01-20'
 
+
 lilun_total=[]
 real_total=[]
 endtime=equity_day+" 16:00:00"
 sql="select  distinct top (4) convert(nvarchar(10),stockdate,120) as day from TSymbol where StockDate<='%s' order by day desc" % (equity_day)
 beginday=ms.find_sql(sql)
 begintime=beginday[-1][0]
+
+
+
+def write_position_csv(type,symbol,endtime='2017-11-12',df1=1):
+	filepath = os.path.split(os.path.realpath(__file__))[0]
+
+	parentpath = os.path.dirname(filepath)
+	newpath=parentpath+'\\all_future_position\\'+type+"\\"+str(endtime)+"\\"+str(symbol)+'.csv'
+	a_parent=os.path.dirname(newpath)
+	if  not os.path.isdir(a_parent):
+		os.makedirs(a_parent)
+	df1.to_csv(newpath,sep=',',index=False)
+	#print '## generate  position file ',symbol,newpath
 
 
 
@@ -247,6 +262,7 @@ def cal_ac_day_equity(p_followac,acname,ratio=1):
 	postionpd, symbol = get_origin_position_list(p_followac, acname, ratio)
 	totalpo = get_Tsymbol_by_symbol(symbol, postionpd)
 	newtotalpo = cal_equity(symbol, totalpo)
+	write_position_csv(type='Lilun', symbol=symbol, endtime=equity_day, df1=newtotalpo)
 	day_equity = equity_resharp(newtotalpo)
 	lastday_equity=day_equity['equity'][-1]
 	cal_day=day_equity.index[-1]
@@ -258,6 +274,7 @@ def cal_ac_day_equity_real(account,symbolid,symbol):
 	postionpd, symbol = account_get_origin_position_list(account, symbolid,symbol)
 	totalpo = get_Tsymbol_by_symbol(symbol, postionpd)
 	newtotalpo = cal_equity(symbol, totalpo)
+	write_position_csv(type='Account', symbol=symbol, endtime=equity_day, df1=newtotalpo)
 	day_equity = equity_resharp(newtotalpo)
 	lastday_equity=day_equity['equity'][-1]
 	cal_day=day_equity.index[-1]
@@ -270,6 +287,7 @@ def cal_ac_day_equity_huibao(account, symbolid, symbol):
 	postionpd = get_delta_info(symbol,symbolid)
 
 	newtotalpo = cal_equity(symbol, postionpd)
+	write_position_csv(type='huibao', symbol=symbol, endtime=equity_day, df1=newtotalpo)
 	day_equity = equity_resharp(newtotalpo)
 	lastday_equity = day_equity['equity'][-1]
 	cal_day = day_equity.index[-1]
@@ -304,7 +322,7 @@ def main_get_huibao_position(account,step_acname,replacestr):
 
 
 # cal_ac_day_equity('StepMultiI300w_up','srStepMultiI_up',2.2)
-# cal_ac_day_equity_huibao(account,3,'sr')
+# cal_ac_day_equity_real(account,3,'sr')
 # cal_ac_day_equity_huibao(account,3,'sr')
 
 # 计算理论当天权益

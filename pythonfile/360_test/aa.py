@@ -6,10 +6,11 @@ sys.setdefaultencoding('utf8')
 from pandas import Series, DataFrame
 import pandas as pd
 import numpy as np
+import  os
 import csv
 import datetime
 from dbconn import MSSQL
-ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+#ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 ##读入excel
 
 def in_putdata():
@@ -70,6 +71,22 @@ def get_delta_info(symbol):
 
 
 
+def write_position_csv(type,symbol,endtime='2017-11-12',df1=1):
+	filepath = os.path.split(os.path.realpath(__file__))[0]
 
-get_delta_info('ru')
+	parentpath = os.path.dirname(filepath)
+	newpath=parentpath+'\\all_future_position\\'+str(endtime)+"\\"+str(symbol)+'.csv'
+	a_parent=os.path.dirname(newpath)
+	if  not os.path.isdir(a_parent):
+		os.makedirs(a_parent)
+	df1.to_csv(newpath,sep=',',)
+	print '## generate  position file ',symbol,newpath
+
+
+
+
+
+
+# get_delta_info('ru')
+write_position_csv(11,1)
 exit()
