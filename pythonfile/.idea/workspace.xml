@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="eece8c21-7037-41bd-b1ca-dd84324dac29" name="Default" comment="" />
+    <list default="true" id="c350f7e1-de29-467a-b437-a99a5f41866b" name="Default" comment="" />
     <ignored path="pythonfile.iws" />
     <ignored path=".idea/workspace.xml" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -19,59 +19,125 @@
     <favorites_list name="pythonfile" />
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+    <leaf>
+      <file leaf-file-name="new_position_generate.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/new_position_generate.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="759">
+              <caret line="143" column="0" selection-start-line="143" selection-start-column="0" selection-end-line="143" selection-end-column="0" />
+              <folding>
+                <element signature="n#!!doc" expanded="false" />
+                <element signature="e#296#374#0" expanded="false" />
+                <element signature="e#561#1922#0" expanded="false" />
+                <element signature="e#909#1314#0" expanded="false" />
+                <element signature="e#1530#1734#0" expanded="false" />
+                <element signature="e#1991#3363#0" expanded="false" />
+                <element signature="e#4566#5344#0" expanded="false" />
+                <element signature="e#4810#4873#0" expanded="false" />
+                <element signature="e#5400#5671#0" expanded="false" />
+                <element signature="e#5755#6031#0" expanded="false" />
+                <element signature="e#5960#6011#0" expanded="false" />
+                <element signature="e#6039#6073#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file leaf-file-name="multi_lilun_real_time_equity_模块化.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/multi_lilun_real_time_equity_模块化.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="189">
-              <caret line="10" column="0" lean-forward="false" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="34" />
+            <state relative-caret-position="215">
+              <caret line="596" column="0" selection-start-line="596" selection-start-column="0" selection-end-line="596" selection-end-column="0" />
               <folding>
                 <element signature="n#!!doc" expanded="false" />
-                <element signature="e#3252#4296#0" expanded="false" />
-                <element signature="e#4340#5163#0" expanded="false" />
-                <element signature="e#5204#6029#0" expanded="false" />
+                <element signature="e#411#489#0" expanded="false" />
+                <element signature="e#1580#1911#0" expanded="false" />
+                <element signature="e#1913#1964#0" expanded="false" />
+                <element signature="e#2109#3178#0" expanded="false" />
+                <element signature="e#2567#3076#0" expanded="false" />
+                <element signature="e#3227#4271#0" expanded="false" />
+                <element signature="e#4315#5138#0" expanded="false" />
+                <element signature="e#4559#4622#0" expanded="false" />
+                <element signature="e#5179#6004#0" expanded="false" />
+                <element signature="e#5423#5486#0" expanded="false" />
+                <element signature="e#6041#6390#0" expanded="false" />
+                <element signature="e#6431#6756#0" expanded="false" />
+                <element signature="e#6825#7975#0" expanded="false" />
+                <element signature="e#7288#7343#0" expanded="false" />
+                <element signature="e#8019#8171#0" expanded="false" />
+                <element signature="e#8061#8145#0" expanded="false" />
+                <element signature="e#8224#12040#0" expanded="false" />
+                <element signature="e#9317#9399#0" expanded="false" />
+                <element signature="e#9409#9444#0" expanded="false" />
+                <element signature="e#9819#9898#0" expanded="false" />
+                <element signature="e#10022#10045#0" expanded="false" />
+                <element signature="e#12088#18157#0" expanded="false" />
+                <element signature="e#12088#12167#0" expanded="false" />
+                <element signature="e#12205#12667#0" expanded="false" />
+                <element signature="e#12677#13173#0" expanded="false" />
+                <element signature="e#13815#13901#0" expanded="false" />
+                <element signature="e#13911#13947#0" expanded="false" />
+                <element signature="e#15594#15680#0" expanded="false" />
+                <element signature="e#15690#15726#0" expanded="false" />
+                <element signature="e#16263#16349#0" expanded="false" />
+                <element signature="e#16359#16395#0" expanded="false" />
+                <element signature="e#17454#17540#0" expanded="false" />
+                <element signature="e#17550#17587#0" expanded="false" />
+                <element signature="e#18223#24361#0" expanded="false" />
+                <element signature="e#18339#18880#0" expanded="false" />
+                <element signature="e#18890#19470#0" expanded="false" />
+                <element signature="e#20113#20199#0" expanded="false" />
+                <element signature="e#20209#20245#0" expanded="false" />
+                <element signature="e#21798#21884#0" expanded="false" />
+                <element signature="e#21894#21930#0" expanded="false" />
+                <element signature="e#22467#22553#0" expanded="false" />
+                <element signature="e#22563#22599#0" expanded="false" />
+                <element signature="e#23658#23744#0" expanded="false" />
+                <element signature="e#23754#23791#0" expanded="false" />
+                <element signature="e#24403#24746#0" expanded="false" />
+                <element signature="e#24485#24550#0" expanded="false" />
+                <element signature="e#25643#26418#0" expanded="false" />
+                <element signature="e#26479#27169#0" expanded="false" />
+                <element signature="e#26479#26486#0" expanded="false" />
+                <element signature="e#27542#27927#0" expanded="false" />
+                <element signature="e#27724#27839#0" expanded="false" />
+                <element signature="e#27981#28321#0" expanded="false" />
+                <element signature="e#28163#28280#0" expanded="false" />
+                <element signature="e#28325#28387#0" expanded="false" />
+                <element signature="e#29340#29401#0" expanded="false" />
+                <element signature="e#29410#29481#0" expanded="false" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="new_position_generate.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/new_position_generate.py">
+      <file leaf-file-name="every_gererate_distinct.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/every_gererate_distinct.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="273">
-              <caret line="105" column="0" lean-forward="true" selection-start-line="105" selection-start-column="0" selection-end-line="105" selection-end-column="0" />
+            <state relative-caret-position="284">
+              <caret line="42" column="22" selection-start-line="42" selection-start-column="22" selection-end-line="42" selection-end-column="22" />
               <folding>
                 <element signature="e#37#70#0" expanded="true" />
-                <element signature="e#561#2541#0" expanded="false" />
-                <element signature="e#2612#3704#0" expanded="false" />
-                <element signature="e#3746#4524#0" expanded="false" />
-                <element signature="e#4580#4851#0" expanded="false" />
+                <element signature="e#512#1301#0" expanded="false" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="aa.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/360_test/aa.py">
+      <file leaf-file-name="merge_all_future.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/merge_all_future.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="735">
-              <caret line="93" column="0" lean-forward="false" selection-start-line="93" selection-start-column="0" selection-end-line="93" selection-end-column="0" />
+            <state relative-caret-position="415">
+              <caret line="75" column="8" selection-start-line="75" selection-start-column="8" selection-end-line="75" selection-end-column="8" />
               <folding>
-                <element signature="e#332#907#0" expanded="false" />
-                <element signature="e#942#2587#0" expanded="false" />
-                <element signature="e#2656#3010#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="导入主力合约数据_from文华.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/导入主力合约数据_from文华.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1659">
-              <caret line="118" column="33" lean-forward="false" selection-start-line="118" selection-start-column="33" selection-end-line="118" selection-end-column="33" />
-              <folding>
-                <element signature="e#572#2013#0" expanded="false" />
+                <element signature="n#!!doc" expanded="false" />
+                <element signature="e#37#70#0" expanded="true" />
+                <element signature="e#314#370#0" expanded="false" />
+                <element signature="e#711#1580#0" expanded="false" />
+                <element signature="e#855#1371#0" expanded="false" />
+                <element signature="e#1627#2338#0" expanded="false" />
+                <element signature="e#1748#2162#0" expanded="false" />
+                <element signature="e#2657#3837#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -79,29 +145,41 @@
       </file>
     </leaf>
   </component>
-  <component name="FindInProjectRecents">
-    <findStrings>
-      <find>merge</find>
-    </findStrings>
-  </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/merge_all_future.py" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/every_gererate_distinct.py" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/360_test/aa.py" root0="SKIP_INSPECTION" />
     <setting file="file://$PROJECT_DIR$/new_position_generate.py" root0="SKIP_INSPECTION" />
     <setting file="file://$PROJECT_DIR$/multi_lilun_real_time_equity_模块化.py" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/导入主力合约数据_from_csv.py" root0="SKIP_INSPECTION" />
   </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/360_test/aa.py" />
-        <option value="$PROJECT_DIR$/multi_lilun_real_time_equity_模块化.py" />
+        <option value="$PROJECT_DIR$/导入主力合约数据_from_csv.py" />
         <option value="$PROJECT_DIR$/new_position_generate.py" />
+        <option value="$PROJECT_DIR$/merge_all_future.py" />
+        <option value="$PROJECT_DIR$/multi_lilun_real_time_equity_模块化.py" />
+        <option value="$PROJECT_DIR$/every_gererate_distinct.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
     <option name="x" value="-8" />
     <option name="y" value="-8" />
-    <option name="width" value="1386" />
-    <option name="height" value="788" />
+    <option name="width" value="1936" />
+    <option name="height" value="1056" />
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="false">
+    <OptionsSetting value="true" id="Add" />
+    <OptionsSetting value="true" id="Remove" />
+    <OptionsSetting value="true" id="Checkout" />
+    <OptionsSetting value="true" id="Update" />
+    <OptionsSetting value="true" id="Status" />
+    <OptionsSetting value="true" id="Edit" />
+    <ConfirmationsSetting value="0" id="Add" />
+    <ConfirmationsSetting value="0" id="Remove" />
   </component>
   <component name="ProjectView">
     <navigator currentView="ProjectPane" proportions="" version="1">
@@ -118,8 +196,16 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scratches" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="pythonfile" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+          </PATH>
           <PATH>
             <PATH_ELEMENT>
               <option name="myItemId" value="pythonfile" />
@@ -146,19 +232,14 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
-      <pane id="Scratches" />
     </panes>
-  </component>
-  <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\YYfiles\evolutionwork\pythonfile" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.new_position_generate">
+  <component name="RunManager" selected="Python.every_gererate_distinct">
     <configuration default="false" name="multi_lilun_real_time_equity_模块化" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -172,6 +253,23 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="pythonfile" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/multi_lilun_real_time_equity_模块化.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="merge_all_future" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="pythonfile" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/merge_all_future.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
@@ -199,13 +297,30 @@
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="D:\Program Files (x86)\Anaconda2\python.exe" />
+      <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="false" />
+      <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="pythonfile" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/new_position_generate.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="every_gererate_distinct" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="pythonfile" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/every_gererate_distinct.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
@@ -344,16 +459,20 @@
       <option name="USE_KEYWORD" value="false" />
       <method />
     </configuration>
-    <list size="3">
+    <list size="5">
       <item index="0" class="java.lang.String" itemvalue="Python.multi_lilun_real_time_equity_模块化" />
-      <item index="1" class="java.lang.String" itemvalue="Python.导入主力合约数据_from文华" />
-      <item index="2" class="java.lang.String" itemvalue="Python.new_position_generate" />
+      <item index="1" class="java.lang.String" itemvalue="Python.merge_all_future" />
+      <item index="2" class="java.lang.String" itemvalue="Python.导入主力合约数据_from文华" />
+      <item index="3" class="java.lang.String" itemvalue="Python.new_position_generate" />
+      <item index="4" class="java.lang.String" itemvalue="Python.every_gererate_distinct" />
     </list>
     <recent_temporary>
-      <list size="3">
-        <item index="0" class="java.lang.String" itemvalue="Python.new_position_generate" />
+      <list size="5">
+        <item index="0" class="java.lang.String" itemvalue="Python.every_gererate_distinct" />
         <item index="1" class="java.lang.String" itemvalue="Python.multi_lilun_real_time_equity_模块化" />
-        <item index="2" class="java.lang.String" itemvalue="Python.导入主力合约数据_from文华" />
+        <item index="2" class="java.lang.String" itemvalue="Python.merge_all_future" />
+        <item index="3" class="java.lang.String" itemvalue="Python.new_position_generate" />
+        <item index="4" class="java.lang.String" itemvalue="Python.导入主力合约数据_from文华" />
       </list>
     </recent_temporary>
   </component>
@@ -362,34 +481,34 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="eece8c21-7037-41bd-b1ca-dd84324dac29" name="Default" comment="" />
-      <created>1486952964731</created>
+      <changelist id="c350f7e1-de29-467a-b437-a99a5f41866b" name="Default" comment="" />
+      <created>1487035069266</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1486952964731</updated>
+      <updated>1487035069266</updated>
     </task>
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1386" height="788" extended-state="0" />
-    <editor active="false" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.15620437" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39915523" sideWeight="0.525" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.21207659" sideWeight="0.47708333" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3976436" sideWeight="0.475" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32946146" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32946146" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39915523" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
@@ -409,119 +528,198 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/multi_lilun_real_time_equity_模块化.py</url>
-          <line>463</line>
-          <option name="timeStamp" value="17" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/new_position_generate.py</url>
-          <line>115</line>
-          <option name="timeStamp" value="21" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/new_position_generate.py</url>
-          <line>111</line>
+          <line>305</line>
           <option name="timeStamp" value="27" />
         </line-breakpoint>
       </breakpoints>
-      <option name="time" value="28" />
+      <option name="time" value="39" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/multi_lilun_real_time_equity_模块化.py">
+    <entry file="file://C:/Python27/Lib/site-packages/pandas/core/frame.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1638">
-          <caret line="87" column="31" lean-forward="true" selection-start-line="87" selection-start-column="30" selection-end-line="87" selection-end-column="31" />
-          <folding>
-            <element signature="n#!!doc" expanded="false" />
-            <element signature="e#3252#4296#0" expanded="false" />
-            <element signature="e#4340#5163#0" expanded="false" />
-            <element signature="e#5204#6029#0" expanded="false" />
-          </folding>
+        <state relative-caret-position="180">
+          <caret line="1973" column="0" selection-start-line="1973" selection-start-column="0" selection-end-line="1973" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/new_position_generate.py">
+    <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/pydevd.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#37#70#0" expanded="true" />
-            <element signature="e#561#2541#0" expanded="false" />
-            <element signature="e#2612#3704#0" expanded="false" />
-            <element signature="e#3746#4524#0" expanded="false" />
-            <element signature="e#4580#4851#0" expanded="false" />
-          </folding>
+        <state relative-caret-position="425">
+          <caret line="966" column="26" selection-start-line="966" selection-start-column="26" selection-end-line="966" selection-end-column="26" />
+          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/360_test/aa.py">
+    <entry file="file://$PROJECT_DIR$/360_test/bb.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="735">
-          <caret line="92" column="0" lean-forward="true" selection-start-line="92" selection-start-column="0" selection-end-line="92" selection-end-column="0" />
+        <state relative-caret-position="460">
+          <caret line="20" column="0" selection-start-line="20" selection-start-column="0" selection-end-line="20" selection-end-column="0" />
           <folding>
-            <element signature="e#332#907#0" expanded="false" />
-            <element signature="e#942#2587#0" expanded="false" />
-            <element signature="e#2656#3010#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/导入主力合约数据_from文华.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1659">
-          <caret line="118" column="33" lean-forward="false" selection-start-line="118" selection-start-column="33" selection-end-line="118" selection-end-column="33" />
-          <folding>
-            <element signature="e#572#2013#0" expanded="false" />
+            <element signature="e#0#9#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/360_test/aa.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="735">
-          <caret line="93" column="0" lean-forward="false" selection-start-line="93" selection-start-column="0" selection-end-line="93" selection-end-column="0" />
+        <state relative-caret-position="412">
+          <caret line="41" column="0" selection-start-line="41" selection-start-column="0" selection-end-line="41" selection-end-column="0" />
           <folding>
-            <element signature="e#332#907#0" expanded="false" />
-            <element signature="e#942#2587#0" expanded="false" />
-            <element signature="e#2656#3010#0" expanded="false" />
+            <element signature="n#!!doc" expanded="false" />
+            <element signature="e#331#1043#0" expanded="false" />
+            <element signature="e#682#1043#0" expanded="false" />
+            <element signature="e#737#766#0" expanded="false" />
+            <element signature="e#1078#2723#0" expanded="false" />
+            <element signature="e#1594#2521#0" expanded="false" />
+            <element signature="e#1967#2501#0" expanded="false" />
+            <element signature="e#2018#2250#0" expanded="false" />
+            <element signature="e#2156#2250#0" expanded="false" />
+            <element signature="e#2792#3146#0" expanded="false" />
+            <element signature="e#3175#3197#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/导入主力合约数据_from_csv.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="146">
+          <caret line="107" column="40" selection-start-line="107" selection-start-column="40" selection-end-line="107" selection-end-column="40" />
+          <folding>
+            <element signature="n#!!doc" expanded="false" />
+            <element signature="e#365#1806#0" expanded="false" />
+            <element signature="e#365#441#0" expanded="false" />
+            <element signature="e#737#1806#0" expanded="false" />
+            <element signature="e#1651#1681#0" expanded="false" />
+            <element signature="e#1719#1735#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/导入主力合约数据_from文华.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1659">
-          <caret line="118" column="33" lean-forward="false" selection-start-line="118" selection-start-column="33" selection-end-line="118" selection-end-column="33" />
+        <state relative-caret-position="514">
+          <caret line="130" column="0" selection-start-line="130" selection-start-column="0" selection-end-line="130" selection-end-column="0" />
           <folding>
             <element signature="e#572#2013#0" expanded="false" />
+            <element signature="e#2058#3539#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/multi_lilun_real_time_equity_模块化.py">
+    <entry file="file://$PROJECT_DIR$/merge_all_future.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="189">
-          <caret line="10" column="0" lean-forward="false" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="34" />
+        <state relative-caret-position="415">
+          <caret line="75" column="8" selection-start-line="75" selection-start-column="8" selection-end-line="75" selection-end-column="8" />
           <folding>
             <element signature="n#!!doc" expanded="false" />
-            <element signature="e#3252#4296#0" expanded="false" />
-            <element signature="e#4340#5163#0" expanded="false" />
-            <element signature="e#5204#6029#0" expanded="false" />
+            <element signature="e#37#70#0" expanded="true" />
+            <element signature="e#314#370#0" expanded="false" />
+            <element signature="e#711#1580#0" expanded="false" />
+            <element signature="e#855#1371#0" expanded="false" />
+            <element signature="e#1627#2338#0" expanded="false" />
+            <element signature="e#1748#2162#0" expanded="false" />
+            <element signature="e#2657#3837#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/new_position_generate.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="273">
-          <caret line="105" column="0" lean-forward="true" selection-start-line="105" selection-start-column="0" selection-end-line="105" selection-end-column="0" />
+        <state relative-caret-position="759">
+          <caret line="143" column="0" selection-start-line="143" selection-start-column="0" selection-end-line="143" selection-end-column="0" />
+          <folding>
+            <element signature="n#!!doc" expanded="false" />
+            <element signature="e#296#374#0" expanded="false" />
+            <element signature="e#561#1922#0" expanded="false" />
+            <element signature="e#909#1314#0" expanded="false" />
+            <element signature="e#1530#1734#0" expanded="false" />
+            <element signature="e#1991#3363#0" expanded="false" />
+            <element signature="e#4566#5344#0" expanded="false" />
+            <element signature="e#4810#4873#0" expanded="false" />
+            <element signature="e#5400#5671#0" expanded="false" />
+            <element signature="e#5755#6031#0" expanded="false" />
+            <element signature="e#5960#6011#0" expanded="false" />
+            <element signature="e#6039#6073#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/multi_lilun_real_time_equity_模块化.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="215">
+          <caret line="596" column="0" selection-start-line="596" selection-start-column="0" selection-end-line="596" selection-end-column="0" />
+          <folding>
+            <element signature="n#!!doc" expanded="false" />
+            <element signature="e#411#489#0" expanded="false" />
+            <element signature="e#1580#1911#0" expanded="false" />
+            <element signature="e#1913#1964#0" expanded="false" />
+            <element signature="e#2109#3178#0" expanded="false" />
+            <element signature="e#2567#3076#0" expanded="false" />
+            <element signature="e#3227#4271#0" expanded="false" />
+            <element signature="e#4315#5138#0" expanded="false" />
+            <element signature="e#4559#4622#0" expanded="false" />
+            <element signature="e#5179#6004#0" expanded="false" />
+            <element signature="e#5423#5486#0" expanded="false" />
+            <element signature="e#6041#6390#0" expanded="false" />
+            <element signature="e#6431#6756#0" expanded="false" />
+            <element signature="e#6825#7975#0" expanded="false" />
+            <element signature="e#7288#7343#0" expanded="false" />
+            <element signature="e#8019#8171#0" expanded="false" />
+            <element signature="e#8061#8145#0" expanded="false" />
+            <element signature="e#8224#12040#0" expanded="false" />
+            <element signature="e#9317#9399#0" expanded="false" />
+            <element signature="e#9409#9444#0" expanded="false" />
+            <element signature="e#9819#9898#0" expanded="false" />
+            <element signature="e#10022#10045#0" expanded="false" />
+            <element signature="e#12088#18157#0" expanded="false" />
+            <element signature="e#12088#12167#0" expanded="false" />
+            <element signature="e#12205#12667#0" expanded="false" />
+            <element signature="e#12677#13173#0" expanded="false" />
+            <element signature="e#13815#13901#0" expanded="false" />
+            <element signature="e#13911#13947#0" expanded="false" />
+            <element signature="e#15594#15680#0" expanded="false" />
+            <element signature="e#15690#15726#0" expanded="false" />
+            <element signature="e#16263#16349#0" expanded="false" />
+            <element signature="e#16359#16395#0" expanded="false" />
+            <element signature="e#17454#17540#0" expanded="false" />
+            <element signature="e#17550#17587#0" expanded="false" />
+            <element signature="e#18223#24361#0" expanded="false" />
+            <element signature="e#18339#18880#0" expanded="false" />
+            <element signature="e#18890#19470#0" expanded="false" />
+            <element signature="e#20113#20199#0" expanded="false" />
+            <element signature="e#20209#20245#0" expanded="false" />
+            <element signature="e#21798#21884#0" expanded="false" />
+            <element signature="e#21894#21930#0" expanded="false" />
+            <element signature="e#22467#22553#0" expanded="false" />
+            <element signature="e#22563#22599#0" expanded="false" />
+            <element signature="e#23658#23744#0" expanded="false" />
+            <element signature="e#23754#23791#0" expanded="false" />
+            <element signature="e#24403#24746#0" expanded="false" />
+            <element signature="e#24485#24550#0" expanded="false" />
+            <element signature="e#25643#26418#0" expanded="false" />
+            <element signature="e#26479#27169#0" expanded="false" />
+            <element signature="e#26479#26486#0" expanded="false" />
+            <element signature="e#27542#27927#0" expanded="false" />
+            <element signature="e#27724#27839#0" expanded="false" />
+            <element signature="e#27981#28321#0" expanded="false" />
+            <element signature="e#28163#28280#0" expanded="false" />
+            <element signature="e#28325#28387#0" expanded="false" />
+            <element signature="e#29340#29401#0" expanded="false" />
+            <element signature="e#29410#29481#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/every_gererate_distinct.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="284">
+          <caret line="42" column="22" selection-start-line="42" selection-start-column="22" selection-end-line="42" selection-end-column="22" />
           <folding>
             <element signature="e#37#70#0" expanded="true" />
-            <element signature="e#561#2541#0" expanded="false" />
-            <element signature="e#2612#3704#0" expanded="false" />
-            <element signature="e#3746#4524#0" expanded="false" />
-            <element signature="e#4580#4851#0" expanded="false" />
+            <element signature="e#512#1301#0" expanded="false" />
           </folding>
         </state>
       </provider>

@@ -10,22 +10,27 @@ import  os
 import csv
 import datetime
 from dbconn import MSSQL
-#ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 ##读入excel
 
 def in_putdata():
 	xlsfile = r'D:\test\aaa.csv'
 	df0 = pd.read_csv(xlsfile,encoding='gbk',dtype=str)
+	new_col = dict()
+	for col in df0.columns:
+		new_col[col]=col.strip(' ')
+	df0.rename(columns = new_col,inplace=True)
 	mydata=df0[[u'买卖方向',u'合约',u'数量',u'价格',u'成交日期',u'成交时间']]
 	mydata=mydata[pd.notnull(mydata[u'成交时间'])]
 
 	mydata=mydata.as_matrix()
 	for item in mydata:
 		conid=item[1]
-		if item[0]==u'买':
+		if item[0]=='买':
 			ratio=1
 		else:
-			ratio=-1
+			if item[0]=='卖':
+				ratio=-1
 		amont=item[2]
 		price=item[3].replace(',','')
 		sql="insert into [Future].[dbo].[test_tradelog]([Direction],[InstrumentID],[Volume],[Price],[TradeDate],[TradeTime]) values(%s,'%s',%s,%s,'%s','%s')" % (ratio,conid,amont,price,item[4],item[5])
@@ -87,7 +92,7 @@ def write_position_csv(type,symbol,endtime='2017-11-12',df1=1):
 
 
 print  1
-# in_putdata()
+#in_putdata()
 # get_delta_info('ru')
 #write_position_csv(11,1)
 exit()

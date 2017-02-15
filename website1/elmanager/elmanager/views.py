@@ -5,6 +5,9 @@ from django.http import HttpResponse,HttpResponseRedirect
 from django.shortcuts import render_to_response
 import datetime
 import time
+import pandas as pd
+import csv
+import numpy as np
 import math
 from django.utils import simplejson
 import hashlib
@@ -14,6 +17,30 @@ sys.setdefaultencoding( "utf-8" )
 from dbconn import MSSQL
 # ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
 # ms1 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="future")
+
+
+def account_lilun_distinct(request):
+	data=""
+	isres=0
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	if request.POST:
+		sttype=request.POST.get("sttype","")
+		print sttype
+		if sttype=='day':
+			sql="SELECT top 400 a.st,a.TradName,b.address,b.stockdate  FROM [Future].[dbo].[Trading_logSymbol] a  inner join(  SELECT [st],address,stockdate   FROM [LogRecord].[dbo].[ST_heart]   where DATEDIFF(MINUTE, [stockdate], getdate())>=3 and type in (1,12)  ) b on a.ST=b.st"
+		else:
+			sql="SELECT top 400 a.st,a.TradName,b.address,b.stockdate  FROM [Future].[dbo].[Trading_logSymbol] a  inner join(  SELECT [st],address,stockdate   FROM [LogRecord].[dbo].[ST_heart]   where DATEDIFF(MINUTE, [stockdate], getdate())>=3 and type in (2,12)  ) b on a.ST=b.st"
+		res=ms.dict_sql(sql)
+		data=res
+		if data:
+			isres=1
+		else:
+			isres=2
+
+	return render_to_response('account_lilun_distinct.html',{
+		'data':data,
+		'isres':isres
+	})	
 
 
 def realshowmonitor_huifu(request):
@@ -2652,6 +2679,9 @@ def acwantedequlitynew_jieti(request):
 		(tempday,lilunquanyi,realquanyi)=range_series(result,[])
 		# print "2######################################################"
 		tempdict={'acname':ac,'symbol':"",'xaxis':tempday,'lilunquanyi':lilunquanyi,'realquanyi':realquanyi}
+		# ### write to _csv
+		# tmpdata=pd.DataFrame({'day':tempday,'lilunquanyi':lilunquanyi})
+		# tmpdata.to_csv(r'D:\test'+"\\"+ac+".csv")
 		ICdata=tempdict
 		liluntongji=kpi_tongji(lilunquanyi)
 		liluntongji['Net_Profit']=round(liluntongji['Net_Profit']/10000,3)
@@ -3258,13 +3288,13 @@ def showaccompare(requst):
 		acname='Rb_QGpLud'
 	#acname='9KDHPM'
 	##获取5日前日期
-	p_followac='StepMultigaosheng1'
-	realaccount='1636737'
-	begintime='2017-02-05'
-	endtime='2017-02-09 16:00:00'
+	p_followac='StepMultiI300w_up'
+	realaccount='666061010'
+	begintime='2017-01-10'
+	endtime='2017-01-14 16:00:00'
 
 	nowtime=(datetime.datetime.now()-datetime.timedelta(days=10)).strftime("%Y-%m-%d %H:%M:%S")
-	sql="select q.stockdate,round(q.totalposition*mr.ratio*1,0) as totalposition ,q.symbol,sid.S_ID from p_follow p inner join quanyi_log_groupby_v2 q on p.F_ac=q.AC and p.AC='%s' inner join LogRecord.dbo.test_margin mr on q.symbol=mr.symbol inner join symbol_id sid on q.symbol=sid.Symbol where q.AC='%s' and stockdate>='%s' and stockdate<='%s' order by stockdate" % (p_followac,acname,begintime,endtime)
+	sql="select q.stockdate,round(q.totalposition*mr.ratio*2.2,0) as totalposition ,q.symbol,sid.S_ID from p_follow p inner join quanyi_log_groupby_v2 q on p.F_ac=q.AC and p.AC='%s' inner join LogRecord.dbo.test_margin mr on q.symbol=mr.symbol inner join symbol_id sid on q.symbol=sid.Symbol where q.AC='%s' and stockdate>='%s' and stockdate<='%s' order by stockdate" % (p_followac,acname,begintime,endtime)
 	print sql
 	res1=ms.dict_sql(sql)
 	data1=[]
