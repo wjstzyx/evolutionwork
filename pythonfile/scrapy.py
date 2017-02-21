@@ -81,7 +81,7 @@ def soup_parse(company_name=""):
                 tempc.append(mydict[iitem])
             else:
                 tempc.append('no')
-        # print tempc[0],tempc[1],tempc[2],tempc[3],tempc[4],tempc[5],tempc[6]
+        print tempc[0],tempc[1],tempc[2],tempc[3],tempc[4],tempc[5],tempc[6]
         contentlist.append(tempc)
         time.sleep(0.2)
     

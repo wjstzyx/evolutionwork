@@ -24,8 +24,8 @@ import math
 
 ABautoroot=r'E:'
 dirformat=r'D:\Program Files\AmiBroker\Formats\custom3.format'
-database=r'D:\Program Files\AmiBroker\newlianxu'
-#database=r'D:\Program Files\AmiBroker\allfuture'
+#database=r'D:\Program Files\AmiBroker\newlianxu'
+database=r'D:\Program Files\AmiBroker\allfuture'
 ABprogramedir="D:\\Program Files\\AmiBroker"
 
 
@@ -389,13 +389,20 @@ def put_in_target_position(filemame,targetroot,tempfilepath,item):
 def add_prename(symbol='',tieminteval=''):
 	targetdir=r'E:\ABautofile\z_change_prename'
 	aflfiles=os.listdir(targetdir)
+	if not os.path.isdir(r'E:\ABautofile\tempfile'):
+		os.mkdir(r'E:\ABautofile\tempfile')
+	else:
+		#os.system("rd /S /Q r'E:\ABautofile\tempfile'")
+		shutil.rmtree(r'E:\ABautofile\tempfile')
+		os.mkdir(r'E:\ABautofile\tempfile')
 	for item in aflfiles:
 		filemame= item.decode('gb2312').encode('utf-8')
 		print filemame
 		if os.path.isdir(targetdir+'\\'+item):
-			matchObj = re.match( r'(.*)StepMultidnhisharp', item, re.M|re.I)
+			matchObj = re.match( r'(.*)Step(.*)', item, re.M|re.I)
 			if matchObj:
 				symbol=matchObj.group(1).strip(" ")
+				mytype=matchObj.group(2).strip(" ")
 			else:
 				print "no symbol",targetdir+'\\'+filemame
 				exit()
@@ -410,7 +417,13 @@ def add_prename(symbol='',tieminteval=''):
 				shutil.move(oldfile,newfile)
 				shutil.copyfile(newfile,copufilename)
 		print filemame,'文件夹'
+	#rename file drop ' '
+	for item in os.listdir(r'E:\ABautofile\tempfile'):
+		filemame= item.decode('gb2312').encode('utf-8')
+		newfilename=filemame.replace(' ','')
+		os.rename(r'E:\ABautofile\tempfile'+"\\"+filemame,r'E:\ABautofile\tempfile'+"\\"+newfilename)
 	#copy tempfile to toalaflfile
+
 	#move tempfile to aflfile
 	#mkdir tempfile
 
@@ -461,8 +474,8 @@ def general_data(symbol):
 ##########
 ##运行步骤(有些步骤是可以每天定时做的 #1  #2 )
 ##########
-# #1 530s
-# gere_datafile(starttime='2015-01-01')
+#1 530s
+gere_datafile(starttime='2017-01-20')
 
 # # #2 152s
 # main_import_data()
@@ -473,7 +486,7 @@ def general_data(symbol):
 
 # acname='znStepMultiI'
 # choose_aflfile(acname)
-# main_run_afl()
+main_run_afl()
 #5
 
 #检测st_repoet_test中的策略是不是虚拟组有且唯一的策略号

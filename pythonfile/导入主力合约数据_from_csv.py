@@ -55,7 +55,7 @@ def write_to_database(tablename,lastquotes,n,isday):
 
 
 
-def read_to_datanbase(filepath,symbol):
+def read_to_datanbase(filepath,symbol,limittime):
 	csvfile = file(filepath, 'rb')
 	reader = csv.reader(csvfile)
 	linelist=[]
@@ -63,7 +63,7 @@ def read_to_datanbase(filepath,symbol):
 		linelist.append(line)
 	csvfile.close()
 	#选择最近的一条记录
-	sql=" SELECT max(StockDate) as stockdate FROM [Future].[dbo].[TSymbol_ZL] WHERE symbol='%s' and Stockdate<='2017-01-19 23:59:59' " % (symbol)
+	sql=" SELECT max(StockDate) as stockdate FROM [Future].[dbo].[TSymbol_ZL] WHERE symbol='%s' and Stockdate<='%s' " % (symbol,limittime)
 	maxstockdate=ms.dict_sql(sql)[0]['stockdate']
 	print symbol,'maxstockdate',maxstockdate
 	if maxstockdate is None:
@@ -88,7 +88,7 @@ def read_to_datanbase(filepath,symbol):
 		Volume = round(float(insertdate[6]), n)
 		OpenInterest = round(float(insertdate[7]), n)
 		sql = "(%s,%s,%s,%s,%s,%s,'%s','%s','%s','%s')" % (Open, Close, High, Low, Volume, OpenInterest, Date, Time, stockdate,symbol)
-		if stockdate>maxstockdate and stockdate<='2017-01-19 23:59:59':
+		if stockdate>maxstockdate and stockdate<=limittime:
 			tempsql=tempsql+','+sql
 			counti=counti+1
 		if counti>998:
@@ -112,14 +112,14 @@ sql="select distinct symbol from [Future].[dbo].[TSymbol_ZL] order by symbol"
 res=ms.find_sql(sql)
 symbollist=[item[0].lower() for item in res ]
 
-
+limittime='2017-01-01 23:59:59'
 filelist=os.listdir(datadir)
 for item in filelist:
 	symbol=item.split('_')[0].split('zl')[0]
 	if symbol.lower() in symbollist or symbol.lower()=='y':
 		filepath=datadir+"\\"+item
 		print filepath
-		read_to_datanbase(filepath, symbol)
+		read_to_datanbase(filepath, symbol,limittime)
 	else:
 		print '#####',symbol
 exit()
