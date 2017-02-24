@@ -9,10 +9,7 @@ import pandas as pd
 from pandas.tseries import offsets
 import numpy as np
 ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
-#ms = MSSQL(host="27.115.14.62:3888",user="future",pwd="K@ra0Key",db="future")
-# resList = ms.find_sql("select top 2 * from st_report")
-# print resList
-# -*- coding: utf-8 -*-
+
 
 global begintime
 begintime='2015-04-20'
@@ -148,7 +145,7 @@ def write_to_database_position(df1,symbol,acname):
 #这是夜盘的权益计算
 #看看 日盘 或者 日夜连做的权益是否一样计算
 
-position = get_position_cplus(acname='csStepMultiI_up',symbol='cs')
+position = get_position(acname='csStepMultiI_up',symbol='cs')
 newposition = generate_new_position(position,symbol='cs')
 write_to_database_position(newposition,symbol='cs')
 equity_split=cal_equity('cs',newposition)

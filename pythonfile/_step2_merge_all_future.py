@@ -46,7 +46,8 @@ def merge_fromhuibao(lilundir):
             totalpd=pd.merge(totalpd,df1,'outer',left_on='day',right_on='day')
         totalpd= totalpd.set_index(totalpd['day'])
 
-
+    # delete first day data
+    totalpd=totalpd.iloc[2:]
     totalpd['Col_sum'] = totalpd[symbillist].apply(lambda x: x.sum(), axis=1)
     totalpd['Col_sum_zl'] = totalpd[symbol_zl_list].apply(lambda x: x.sum(), axis=1)
 
@@ -136,6 +137,7 @@ def merge__by_date_by_symbol(lilundir):
 
 if mytype=='lilun':
     aa,by_symbol=merge_fromhuibao(lilundir)
+    aa.sort_index(inplace=True)
     path=r'C:\YYfiles\evolutionwork\all_future_position\results'
     aa.to_csv(path+"\\"+acname+"_"+mytype+".csv")
     by_symbol.to_csv(path + "\\" + acname + "_by_symbol_" + mytype + ".csv")
@@ -149,83 +151,5 @@ if mytype=='huibao':
     aa.to_csv(path+"\\"+acname+"_"+mytype+".csv")
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#
-#
-# positionhuibao=r'C:\YYfiles\evolutionwork\all_future_position\huibao\2017-02-10'
-# positionaccount=r'C:\YYfiles\evolutionwork\all_future_position\Account\2017-02-10'
-# positionlilun=r'C:\YYfiles\evolutionwork\all_future_position\Lilun\2017-02-10'
-# def plot_position(symbol):
-#     liilun=positionlilun+"\\Lilun_"+symbol.lower()+".csv"
-#     if os.path.isfile(liilun):
-#         pass
-#     else:
-#         liilun = positionlilun + "\\Lilun_" + symbol.upper() + ".csv"
-#     df1=pd.read_csv(liilun)
-#     df1=df1[['stockdate','totalposition']]
-#     account=positionaccount+"\\Account_"+symbol.lower()+".csv"
-#     if os.path.isfile(account):
-#         pass
-#     else:
-#         account = positionlilun + "\\Account_" + symbol.upper() + ".csv"
-#     df2=pd.read_csv(account)
-#     df2=df2[['stockdate','totalposition']]
-#     huibao=positionhuibao+"\\huibao_"+symbol.lower()+".csv"
-#     if os.path.isfile(huibao):
-#         pass
-#     else:
-#         huibao = positionlilun + "\\huibao_" + symbol.upper() + ".csv"
-#     df3=pd.read_csv(huibao)
-#     df3=df3[['stockdate','totalposition']]
-#     aaa=pd.merge(df1,df2,'outer','stockdate',suffixes=('_lilun','_account'))
-#     aaa=pd.merge(aaa,df3,'outer','stockdate')
-#     aaa=aaa.sort_values(['stockdate'])
-#     aaa['lilun']=aaa['totalposition_lilun']
-#     aaa['account'] = aaa['totalposition_account']
-#     aaa['huibao'] = aaa['totalposition']
-#     aaa =aaa.set_index('stockdate')
-#     aaa=aaa.fillna(method='ffill')
-#     return aaa[['lilun','account','huibao']]
-#
-
-
-
-# sql='select distinct symbol from tsymbol_allfuture order by symbol'
-# res=ms.dict_sql(sql)
-# for item in res:
-#     try:
-#         print item['symbol']
-#         sss=plot_position(item['symbol'])
-#         sss['myindex']=sss.index
-#         sss=sss[(sss['myindex']>='2017-01-19 00:00:00') & (sss['myindex']<='2017-02-10 00:00:00')]
-#         sss[['account','huibao']].plot()
-#         plt.show()
-#     except:
-#         pass
 
 

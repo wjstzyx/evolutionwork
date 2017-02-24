@@ -3280,54 +3280,60 @@ def showaccompare(requst):
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 	ms105 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="future") 
 	if requst.GET:
-		print "bb"
-		print requst.GET
 		acname=requst.GET.get('acname','')
 	else:
-		print "aaaaa"
 		acname='Rb_QGpLud'
 	#acname='9KDHPM'
 	##获取5日前日期
-	p_followac='StepMultiI300w_up'
+	p_followac='StepMultigaosheng1'
 	realaccount='666061010'
-	begintime='2017-01-10'
-	endtime='2017-01-14 16:00:00'
+	begintime='2017-01-01'
+	endtime='2017-02-15 16:00:00'
+	totaldata=[]
+	sql=" select  f_ac from p_follow where ac='%s' order by f_ac" % (p_followac)
+	totalres=ms.dict_sql(sql)
+	for totalitem in totalres:
+		acname=totalitem['f_ac']
+		print acname
+		nowtime=(datetime.datetime.now()-datetime.timedelta(days=10)).strftime("%Y-%m-%d %H:%M:%S")
+		sql="select q.stockdate,round(q.totalposition*1,0) as totalposition ,q.symbol,sid.S_ID from p_follow p inner join quanyi_log_groupby_v2 q on p.F_ac=q.AC and p.AC='%s' inner join LogRecord.dbo.test_margin mr on q.symbol=mr.symbol inner join symbol_id sid on q.symbol=sid.Symbol where q.AC='%s' and stockdate>='%s' and stockdate<='%s' order by stockdate" % (p_followac,acname,begintime,endtime)
+		res1=ms.dict_sql(sql)
+		data1=[]
+		if res1:
+			for item  in res1:
+				stockdate=(item['stockdate']+ datetime.timedelta(hours = 8)).strftime("%Y-%m-%d %H:%M:%S")
+				timeArray = time.strptime(stockdate, "%Y-%m-%d %H:%M:%S")
+				timeStamp = int(time.mktime(timeArray))
+				totalposition=round(item['totalposition'],3)
+				tempdata1=[timeStamp,totalposition]
+				data1.append(tempdata1)
+			newdata1=change_scatter_tocontinue(data1)
+		else:
+			newdata1=[]
+		realstokid=res1[0]['S_ID']
+		#sql="SELECT [inserttime] as stockdate ,[longhave]-[shorthave] as totalposition FROM [LogRecord].[dbo].[account_position] where userid='%s'   and inserttime<='%s' and inserttime>='%s' and stockid=%s order by inserttime" % (realaccount,endtime,begintime,realstokid)
+		sql="select q.stockdate,round(q.totalposition*1,0) as totalposition ,q.symbol,sid.S_ID from p_follow p inner join quanyi_log_groupby_v3 q on p.F_ac=q.AC and p.AC='%s' inner join LogRecord.dbo.test_margin mr on q.symbol=mr.symbol inner join symbol_id sid on q.symbol=sid.Symbol where q.AC='%s' and stockdate>='%s' and stockdate<='%s' order by stockdate" % (p_followac,acname,begintime,endtime)
+		res2=ms.dict_sql(sql)
+		data2=[]
+		if res2:
+			for item  in res2:
+				stockdate=(item['stockdate']+ datetime.timedelta(hours = 8)).strftime("%Y-%m-%d %H:%M:%S")
+				timeArray = time.strptime(stockdate, "%Y-%m-%d %H:%M:%S")
+				timeStamp = int(time.mktime(timeArray))
+				totalposition=round(item['totalposition'],3)
+				tempdata1=[timeStamp,totalposition]
+				data2.append(tempdata1)
+			newdata2=change_scatter_tocontinue(data2)
+		else:
+			newdata2=[]
+		totaldata.append([acname,newdata1,newdata2])
 
-	nowtime=(datetime.datetime.now()-datetime.timedelta(days=10)).strftime("%Y-%m-%d %H:%M:%S")
-	sql="select q.stockdate,round(q.totalposition*mr.ratio*2.2,0) as totalposition ,q.symbol,sid.S_ID from p_follow p inner join quanyi_log_groupby_v2 q on p.F_ac=q.AC and p.AC='%s' inner join LogRecord.dbo.test_margin mr on q.symbol=mr.symbol inner join symbol_id sid on q.symbol=sid.Symbol where q.AC='%s' and stockdate>='%s' and stockdate<='%s' order by stockdate" % (p_followac,acname,begintime,endtime)
-	print sql
-	res1=ms.dict_sql(sql)
-	data1=[]
-	if res1:
-		for item  in res1:
-			stockdate=(item['stockdate']+ datetime.timedelta(hours = 8)).strftime("%Y-%m-%d %H:%M:%S")
-			timeArray = time.strptime(stockdate, "%Y-%m-%d %H:%M:%S")
-			timeStamp = int(time.mktime(timeArray))
-			totalposition=round(item['totalposition'],3)
-			tempdata1=[timeStamp,totalposition]
-			data1.append(tempdata1)
-		newdata1=change_scatter_tocontinue(data1)
-	else:
-		newdata1=[]
-	realstokid=res1[0]['S_ID']
-	sql="SELECT [inserttime] as stockdate ,[longhave]-[shorthave] as totalposition FROM [LogRecord].[dbo].[account_position] where userid='%s'   and inserttime<='%s' and inserttime>='%s' and stockid=%s order by inserttime" % (realaccount,endtime,begintime,realstokid)
-	res2=ms.dict_sql(sql)
-	data2=[]
-	if res2:
-		for item  in res2:
-			stockdate=(item['stockdate']+ datetime.timedelta(hours = 8)).strftime("%Y-%m-%d %H:%M:%S")
-			timeArray = time.strptime(stockdate, "%Y-%m-%d %H:%M:%S")
-			timeStamp = int(time.mktime(timeArray))
-			totalposition=round(item['totalposition'],3)
-			tempdata1=[timeStamp,totalposition]
-			data2.append(tempdata1)
-		newdata2=change_scatter_tocontinue(data2)
-	else:
-		newdata2=[]
+
 	return render_to_response('showaccompare.html',{
 		'data':acname,
 		'data1':newdata1,
 		'data2':newdata2,
+		'totaldata':totaldata,
 	})	
 
 
@@ -3474,7 +3480,6 @@ def delete_monitor_info(request):
 def change_scatter_tocontinue(datalist,delta=60):
 	newdatalist=[]
 	newdatalist.append(datalist[0][:])
-	print newdatalist
 	lastdate=datalist[0][:]
 	for item in datalist[1:]:
 		while (item[0]-lastdate[0])>60:
@@ -3482,7 +3487,20 @@ def change_scatter_tocontinue(datalist,delta=60):
 			newdatalist.append([lastdate[0],lastdate[1]])
 		newdatalist.append(item)
 		lastdate=item[:]
-	return newdatalist
+	#return newdatalist
+
+	####### delete replecate record
+	tempc=[]
+	tempc.append(newdatalist[0])
+	for i in range(1,len(newdatalist)-1):
+		if newdatalist[i][1]==newdatalist[i-1][1] and newdatalist[i][1]==newdatalist[i+1][1]:
+			pass
+		else:
+			tempc.append(newdatalist[i])
+	tempc.append(newdatalist[-1])
+	return tempc
+
+
 
 #变化量变成累积量
 def change_delta_toaccumu(datalist1,datalist2):

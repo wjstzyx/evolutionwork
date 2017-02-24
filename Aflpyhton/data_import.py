@@ -25,7 +25,9 @@ import math
 ABautoroot=r'E:'
 dirformat=r'D:\Program Files\AmiBroker\Formats\custom3.format'
 #database=r'D:\Program Files\AmiBroker\newlianxu'
-database=r'D:\Program Files\AmiBroker\allfuture'
+#database=r'D:\Program Files\AmiBroker\allfuture'
+database=r'E:\AB_python\MarketClose_NewAnalysis\FileDataFeed'
+
 ABprogramedir="D:\\Program Files\\AmiBroker"
 
 
@@ -65,7 +67,8 @@ def run_aflfile(ab,database,Ticker,aflfle,settingfile):
 
 	try:
 		aa.Backtest(0)
-		#time.sleep(500)
+		# aa.Scan(0)
+		#time.sleep(10)
 		#aa.Explore()
 		#aa.Backtest(0)
 		#resultFile = ResultFolder + "\\" + basename + "-ps.csv"
@@ -169,8 +172,6 @@ def main_run_afl():
 	for item in totalconfig:
 		tempi=tempi+1
 		if item[0]!=tempdir:
-			print item 
-			print tempdir
 			oldfilenamepath=ABprogramedir+"\\"+"broker.prefs"
 			newfilenamepath=item[0]+"\\"+"broker.prefs"
 			if os.path.isfile(oldfilenamepath): 
@@ -213,7 +214,7 @@ def gere_datafile_merge(starttime='',lastdays=30):
 	print "No1. data_merge finished"
 
 def gere_datafile(starttime):
-	sql="select distinct symbol from TSymbol"
+	sql="select distinct symbol from TSymbol where LEN(symbol)<3 order by symbol"
 	res1=ms.dict_sql(sql)
 	for symbol in res1:
 		sql="select CONVERT(varchar(20),StockDate,111) as data, CONVERT(varchar(20),StockDate,8) as time,O,H,L,C,V,OPI from TSymbol_quotes_backup where Symbol='%s' and stockdate>='%s'  order by StockDate" % (symbol['symbol'],starttime)
@@ -229,7 +230,7 @@ def gere_datafile(starttime):
 
 
 def gere_datafile_allfuture(starttime):
-	sql="select distinct symbol from TSymbol_allfuture"
+	sql="select distinct symbol from TSymbol_allfuture where LEN(symbol)<3 order by symbol"
 	res1=ms.dict_sql(sql)
 	for symbol in res1:
 		sql="select CONVERT(varchar(20),StockDate,111) as data, CONVERT(varchar(20),StockDate,8) as time,O,H,L,C,V,OPI from TSymbol_allfuture where Symbol='%s' and stockdate>='%s'  order by StockDate" % (symbol['symbol'],starttime)
@@ -302,17 +303,25 @@ def rename_afl(filepath):
 
 
 #检测st_repoet_test中的策略是不是虚拟组有且唯一的策略号
-def test_is_all_ac_st():
+def test_is_all_ac_st(type=0):
 	sql="select SUM(1) as sum from P_BASIC where st in (select distinct st from st_report_test)"
 	res1=ms.dict_sql(sql)
 	sql="select SUM(1) as sum from P_BASIC where ac in (select distinct ac from P_BASIC where st in (select distinct st from st_report_test))"
 	res2=ms.dict_sql(sql)
 	print 'begin '
-	if res1[0]['sum']==res2[0]['sum']:
+	if res1[0]['sum']==res2[0]['sum'] or type:
+		today=datetime.datetime.now()
+		mydate=today.strftime("%Y-%m-%d")+' 09:00:00'
+		hour=today.hour
+		if hour<15 and hour>8:
+			sql="delete from st_report_test where stockdate >='%s'" % (mydate)
+			ms.insert_sql(sql)
 		sql="delete from st_report where st in (select distinct st from st_report_test)"
 		ms.insert_sql(sql)
 		sql="insert into st_report([P],[PP],[ST],[D],[T],[stockdate],[type]) select [P],[PP],[ST],[D],[T],[stockdate] ,0 as type  from st_report_test"
 		ms.insert_sql(sql)
+
+
 		print "success 已经将st_report_test 信息导入 st_report"
 		
 	else:
@@ -475,7 +484,7 @@ def general_data(symbol):
 ##运行步骤(有些步骤是可以每天定时做的 #1  #2 )
 ##########
 #1 530s
-gere_datafile(starttime='2017-01-20')
+# gere_datafile(starttime='2015-01-20')
 
 # # #2 152s
 # main_import_data()
@@ -486,9 +495,9 @@ gere_datafile(starttime='2017-01-20')
 
 # acname='znStepMultiI'
 # choose_aflfile(acname)
-main_run_afl()
-#5
+# main_run_afl()
+# #5
 
-#检测st_repoet_test中的策略是不是虚拟组有且唯一的策略号
-test_is_all_ac_st()
+# #检测st_repoet_test中的策略是不是虚拟组有且唯一的策略号 type=0 严格执行， type=1 直接复制
+test_is_all_ac_st(type=0)
 # show_progress(87,100)
