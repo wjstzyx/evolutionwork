@@ -902,6 +902,7 @@ def futureaccounttotal(request):
 		else:
 			equity_on_month_begin=0.1
 			Withdraw_on_month_begin=0
+		tempbegin=equity_on_month_begin
 		if item['primarymoney']>10 and equity_on_month_begin<10:
 			equity_on_month_begin=item['primarymoney']
 		real_equity_on_month_begin=equity_on_month_begin-Withdraw_on_month_begin
@@ -933,7 +934,7 @@ def futureaccounttotal(request):
 		# print (equity_on_month_begin-Withdraw_on_month_begin)
 		# print deltawithdeposit
 		real_equity_on_month_begin=real_equity_on_month_begin-deltawithdeposit+todays1_withdraw
-		monthly_equity=(todays_equity-todays1_withdraw)-(equity_on_month_begin-Withdraw_on_month_begin)+deltawithdeposit
+		monthly_equity=(todays_equity-todays1_withdraw)-(tempbegin-Withdraw_on_month_begin)+deltawithdeposit
 		monthly_rate=round(monthly_equity/(real_equity_on_month_begin+0.00002)*100,2)
 
 		#lastmonth
