@@ -6,6 +6,7 @@ reload(sys)
 sys.setdefaultencoding('utf8')
 from dbconn import MSSQL
 import numpy as np
+import pandas as pd
 import datetime
 ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 import multiprocessing
@@ -15,27 +16,18 @@ import multiprocessing
 
 def delete_mlti(st):
 	print st
-	sql="select id,round(p,6),round(pp,6),st,stockdate from st_report where st='%s' order by  stockdate desc,id desc" % (st)
-	ares=ms.find_sql(sql)
-	firstvalue=ares[0][1:]
-	delvalue=[]
-	for aitem in ares[1:]:
-		if aitem[1:]==firstvalue:
-			delvalue.append(str(aitem[0]))
-		firstvalue=aitem[1:]
-	mylenth=len(delvalue)
-	print mylenth
-	i=0
-	while(1):
-		temp=delvalue[5000*i:5000*i+5000]
-		temp = ','.join(temp)
-		if temp<>'':
-			print st,i,[5000*i,5000*i+5000]
-			sql = 'delete from st_report where id in (%s)' % (temp)
-			ms.insert_sql(sql)
-		i=i+1
-		if 5000*i>mylenth:
-			break
+	sql="select id,round(p,6) as P,round(pp,6) as PP,st,stockdate from st_report where st='%s' order by  stockdate ,id" % (st)
+	res=ms.dict_sql(sql)
+	df1=pd.DataFrame(res)
+	print 1
+	df1['delta']=df1['P'].shift()-df1['PP']
+	df2=df1[df1['delta']<>0]
+	print 2
+
+
+
+delete_mlti('1062100000')
+exit()
 
 
 

@@ -156,6 +156,7 @@ def main_run_afl():
 				itemsettingdir=ABautoroot+"\\ABautofile\\setting\\a51-55"
 			if timeperiod in ('56min','57min','58min','59min','60min'):
 				itemsettingdir=ABautoroot+"\\ABautofile\\setting\\a56-60"
+			print timeperiod
 			itemfile=aflfiledir+"\\"+file
 			settingfile=itemsettingdir+"\\"+timeperiod+".ABS"
 			Ticker=basename.split('-')[0].strip(" ")

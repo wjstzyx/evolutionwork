@@ -70,7 +70,7 @@ def realshowmonitor_hulue(request):
 
 def realshowmonitor_newalert(request):
 	ms= MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
-	sql="SELECT a.id,a.[type],a.[item]+'_'+b.Symbol as item  ,a.[msg], b.Symbol,classcode ,convert(nvarchar,[inserttime],120) as updatetime FROM [LogRecord].[dbo].[all_monitor_info] a inner join symbol_id b on substring(a.item,CHARINDEX('_',a.item)+1,3)=b.S_ID and len(b.Symbol)<3 where isactive=1 and issolved=0 order by updatetime "
+	sql="SELECT a.id,a.[type],a.[item] item  ,a.[msg], 'symbol',classcode ,convert(nvarchar,[inserttime],120) as updatetime  FROM [LogRecord].[dbo].[all_monitor_info]  a where isactive=1 and issolved=0 order by updatetime"
 	res1=ms.dict_sql(sql)
 	sql="SELECT top 50 a.id,a.[type],a.[item]+'_'+b.Symbol as item  ,a.[msg], b.Symbol,classcode ,convert(nvarchar,[inserttime],120) as updatetime FROM [LogRecord].[dbo].[all_monitor_info] a inner join symbol_id b on substring(a.item,CHARINDEX('_',a.item)+1,3)=b.S_ID and len(b.Symbol)<3 where isactive=1 and issolved=1  order by updatetime desc"
 	res_solved=ms.dict_sql(sql)
@@ -92,6 +92,24 @@ def realshowmonitor(request):
 
 
 	return render_to_response('realshowmonitor.html',{
+		'data':'',
+		'lilunres':'',
+		'res1':res1,
+		# 'realres':realres,
+
+
+	})	
+
+
+
+def rt(request):
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+	#获取没有解决的问题
+	sql="SELECT id, [type],[item] ,[msg], classcode ,[updatetime]FROM [LogRecord].[dbo].[all_monitor_info] where isactive=1 and issolved=0 order by updatetime "
+	res1=ms.dict_sql(sql)
+
+
+	return render_to_response('rt.html',{
 		'data':'',
 		'lilunres':'',
 		'res1':res1,

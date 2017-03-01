@@ -91,8 +91,3 @@ def write_position_csv(type,symbol,endtime='2017-11-12',df1=1):
 
 
 
-print  1
-#in_putdata()
-# get_delta_info('ru')
-#write_position_csv(11,1)
-exit()
