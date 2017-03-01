@@ -81,6 +81,26 @@ def realshowmonitor_newalert(request):
 	result=simplejson.dumps(result,ensure_ascii = False)
 	return HttpResponse(result,mimetype='application/json')
 
+def rt_newalert(request):
+	ms= MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+	sql="SELECT a.id,a.[type],a.[item],a.[msg],'symbol' as symbol, classcode ,convert(nvarchar,[inserttime],120) as updatetime FROM [LogRecord].[dbo].[all_monitor_info] a where type='Account' and isactive=1 and issolved=0 order by updatetime "
+	account_distinct=ms.dict_sql(sql)
+
+	sql="SELECT a.id,a.[type],a.[item],a.[msg],'symbol' as symbol, classcode ,convert(nvarchar,[inserttime],120) as updatetime FROM [LogRecord].[dbo].[all_monitor_info] a where type='Thunder' and isactive=1 and issolved=0 order by updatetime "
+	Thunder=ms.dict_sql(sql)
+
+	sql="SELECT a.id,a.[type],a.[item],a.[msg],'symbol' as symbol, classcode ,convert(nvarchar,[inserttime],120) as updatetime FROM [LogRecord].[dbo].[all_monitor_info] a where type='quotes' and isactive=1 and issolved=0 order by updatetime "
+	quotes=ms.dict_sql(sql)
+
+	sql="SELECT a.id,a.[type],a.[item],a.[msg],'symbol' as symbol, classcode ,convert(nvarchar,[inserttime],120) as updatetime FROM [LogRecord].[dbo].[all_monitor_info] a where type='AB' and isactive=1 and issolved=0 order by updatetime "
+	AB=ms.dict_sql(sql)
+
+
+
+	result={'account_distinct':account_distinct,'Thunder':Thunder,'quotes':quotes,'AB':AB}
+	result=simplejson.dumps(result,ensure_ascii = False)
+	return HttpResponse(result,mimetype='application/json')
+
 
 
 
