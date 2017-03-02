@@ -5,9 +5,7 @@ from django.http import HttpResponse,HttpResponseRedirect
 from django.shortcuts import render_to_response
 import datetime
 import time
-import pandas as pd
 import csv
-import numpy as np
 import math
 from django.utils import simplejson
 import hashlib
