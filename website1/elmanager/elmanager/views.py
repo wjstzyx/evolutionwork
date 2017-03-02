@@ -2849,7 +2849,7 @@ def acwantedequlitynew(request):
 	res2=res[aa:]
 
 	#sql="select distinct ac from p_follow where ac like '%stepmulti%' and ac not in ('StepMultiI300w','StepMulti2') order by ac"
-	sql="select bb.* from (select distinct ac from p_follow where ac like '%stepmulti%' )aa inner join (select a.ac,convert(nvarchar,MIN(inserttime),102) as starttime from [LogRecord].[dbo].[update_p_follow] a inner join (SELECT distinct ac  FROM [LogRecord].[dbo].[update_p_follow] where ac like '%Stepmulti%'  and ac not in ('StepMultiI300w','StepMulti2','StepMultigaosheng2','StepMultidnhiboth')) b on a.AC=b.AC group by a.AC )bb on aa.AC=bb.AC order by bb.AC"
+	sql="select bb.* from (select distinct ac from p_follow where ac like '%stepmulti%' )aa inner join (select a.ac,convert(nvarchar,MIN(inserttime),102) as starttime from [LogRecord].[dbo].[update_p_follow] a inner join (SELECT distinct ac  FROM [LogRecord].[dbo].[update_p_follow] where ac like '%Stepmulti%'  and ac not in ('StepMultiI300w','StepMulti2','StepMultigaosheng2')) b on a.AC=b.AC group by a.AC )bb on aa.AC=bb.AC order by bb.AC"
 	res3=ms.dict_sql(sql)
 
 
