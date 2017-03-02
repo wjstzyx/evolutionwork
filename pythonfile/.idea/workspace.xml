@@ -45,14 +45,33 @@
       <file leaf-file-name="real_time_monitor.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/real_time_monitor.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="157">
-              <caret line="174" column="20" selection-start-line="174" selection-start-column="20" selection-end-line="174" selection-end-column="20" />
+            <state relative-caret-position="452">
+              <caret line="154" column="0" selection-start-line="154" selection-start-column="0" selection-end-line="154" selection-end-column="0" />
               <folding>
-                <element signature="e#425#781#0" expanded="false" />
                 <element signature="e#812#1059#0" expanded="false" />
                 <element signature="e#1107#2388#0" expanded="false" />
                 <element signature="e#2428#4310#0" expanded="false" />
-                <element signature="e#5588#6109#0" expanded="false" />
+                <element signature="e#4353#5554#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="dog.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/../../dog/dog/dog.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="555">
+              <caret line="96" column="0" selection-start-line="96" selection-start-column="0" selection-end-line="96" selection-end-column="0" />
+              <folding>
+                <element signature="n#!!doc" expanded="false" />
+                <element signature="e#240#296#0" expanded="false" />
+                <element signature="e#390#779#0" expanded="false" />
+                <element signature="e#794#959#0" expanded="false" />
+                <element signature="e#973#1094#0" expanded="false" />
+                <element signature="e#1111#1280#0" expanded="false" />
+                <element signature="e#1294#1458#0" expanded="false" />
+                <element signature="e#1476#1645#0" expanded="false" />
+                <element signature="e#1661#1829#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -222,6 +241,7 @@
         <option value="$PROJECT_DIR$/site_main_distinct.py" />
         <option value="$PROJECT_DIR$/dbconn.py" />
         <option value="$PROJECT_DIR$/test_20170301.py" />
+        <option value="$PROJECT_DIR$/../../dog/dog/dog.py" />
         <option value="$PROJECT_DIR$/real_time_monitor.py" />
       </list>
     </option>
@@ -300,24 +320,7 @@
       <recent name="C:\YYfiles\evolutionwork\pythonfile" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.real_time_monitor">
-    <configuration default="false" name="new_cal_quayi_V2_cplus_real_st" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="pythonfile" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/new_cal_quayi_V2_cplus_real_st.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <method />
-    </configuration>
+  <component name="RunManager" selected="Python.dog">
     <configuration default="false" name="new_cal_quayi_V2_real_st" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -382,6 +385,23 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="pythonfile" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/real_time_monitor.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="dog" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../dog/dog" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="pythonfile" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../../dog/dog/dog.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
@@ -521,19 +541,19 @@
       <method />
     </configuration>
     <list size="5">
-      <item index="0" class="java.lang.String" itemvalue="Python.new_cal_quayi_V2_cplus_real_st" />
-      <item index="1" class="java.lang.String" itemvalue="Python.new_cal_quayi_V2_real_st" />
-      <item index="2" class="java.lang.String" itemvalue="Python.site_main_distinct" />
-      <item index="3" class="java.lang.String" itemvalue="Python.test_20170301" />
-      <item index="4" class="java.lang.String" itemvalue="Python.real_time_monitor" />
+      <item index="0" class="java.lang.String" itemvalue="Python.new_cal_quayi_V2_real_st" />
+      <item index="1" class="java.lang.String" itemvalue="Python.site_main_distinct" />
+      <item index="2" class="java.lang.String" itemvalue="Python.test_20170301" />
+      <item index="3" class="java.lang.String" itemvalue="Python.real_time_monitor" />
+      <item index="4" class="java.lang.String" itemvalue="Python.dog" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.real_time_monitor" />
-        <item index="1" class="java.lang.String" itemvalue="Python.test_20170301" />
-        <item index="2" class="java.lang.String" itemvalue="Python.site_main_distinct" />
-        <item index="3" class="java.lang.String" itemvalue="Python.new_cal_quayi_V2_real_st" />
-        <item index="4" class="java.lang.String" itemvalue="Python.new_cal_quayi_V2_cplus_real_st" />
+        <item index="0" class="java.lang.String" itemvalue="Python.dog" />
+        <item index="1" class="java.lang.String" itemvalue="Python.real_time_monitor" />
+        <item index="2" class="java.lang.String" itemvalue="Python.test_20170301" />
+        <item index="3" class="java.lang.String" itemvalue="Python.site_main_distinct" />
+        <item index="4" class="java.lang.String" itemvalue="Python.new_cal_quayi_V2_real_st" />
       </list>
     </recent_temporary>
   </component>
@@ -551,7 +571,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1066" extended-state="7" />
+    <frame x="-8" y="-8" width="1936" height="1066" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25625" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
@@ -559,11 +579,11 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3218391" sideWeight="0.50208336" order="0" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32946146" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.30094042" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.30094042" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24555904" sideWeight="0.49791667" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24555904" sideWeight="0.49791667" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -629,12 +649,11 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="131" />
+      <option name="time" value="132" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/_step1_multi_lilun_real_time_equity_model_理论.py" />
     <entry file="file://$PROJECT_DIR$/导入主力合约数据_from_csv.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="236">
@@ -1278,16 +1297,33 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/../../dog/dog/dog.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="555">
+          <caret line="96" column="0" selection-start-line="96" selection-start-column="0" selection-end-line="96" selection-end-column="0" />
+          <folding>
+            <element signature="n#!!doc" expanded="false" />
+            <element signature="e#240#296#0" expanded="false" />
+            <element signature="e#390#779#0" expanded="false" />
+            <element signature="e#794#959#0" expanded="false" />
+            <element signature="e#973#1094#0" expanded="false" />
+            <element signature="e#1111#1280#0" expanded="false" />
+            <element signature="e#1294#1458#0" expanded="false" />
+            <element signature="e#1476#1645#0" expanded="false" />
+            <element signature="e#1661#1829#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/real_time_monitor.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="157">
-          <caret line="174" column="20" selection-start-line="174" selection-start-column="20" selection-end-line="174" selection-end-column="20" />
+        <state relative-caret-position="452">
+          <caret line="154" column="0" selection-start-line="154" selection-start-column="0" selection-end-line="154" selection-end-column="0" />
           <folding>
-            <element signature="e#425#781#0" expanded="false" />
             <element signature="e#812#1059#0" expanded="false" />
             <element signature="e#1107#2388#0" expanded="false" />
             <element signature="e#2428#4310#0" expanded="false" />
-            <element signature="e#5588#6109#0" expanded="false" />
+            <element signature="e#4353#5554#0" expanded="false" />
           </folding>
         </state>
       </provider>
