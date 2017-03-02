@@ -162,7 +162,7 @@ def input_groupbyquanyi(ac,symbol,quanyisymbol=''):
 		# 	print item 
 		##插入数据库
 		lastrecordtime=datetime.datetime(2015,01,01,01,00)
-		sql="select max(stockdate) as stockdate  from [Future].[dbo].[real_quanyi_log_groupby_v2] where ac='%s' and symbol='%s'" % (ac,symbol)
+		sql="select max(stockdate) as stockdate  from [Future].[dbo].[quanyi_log_groupby_v3] where ac='%s' and symbol='%s'" % (ac,symbol)
 		timeinfo=ms.dict_sql(sql)[0]
 		if timeinfo['stockdate'] is None:
 			lastrecordtime=datetime.datetime(2015,01,01,01,00)
@@ -177,7 +177,7 @@ def input_groupbyquanyi(ac,symbol,quanyisymbol=''):
 				numofinsert=numofinsert+1
 			if numofinsert>700:
 				insertvalue=insertvalue.strip(',')
-				sql="insert into [Future].[dbo].[real_quanyi_log_groupby_v2](ac,symbol,type,ClosePrice,stockdate,totalposition,totalNum) values%s" % insertvalue
+				sql="insert into [Future].[dbo].[quanyi_log_groupby_v3](ac,symbol,type,ClosePrice,stockdate,totalposition,totalNum) values%s" % insertvalue
 				ms.insert_sql(sql)
 				numofinsert=0
 				insertvalue=""
@@ -185,18 +185,18 @@ def input_groupbyquanyi(ac,symbol,quanyisymbol=''):
 
 		if insertvalue !="":
 			insertvalue=insertvalue.strip(',')
-			sql="insert into [Future].[dbo].[real_quanyi_log_groupby_v2](ac,symbol,type,ClosePrice,stockdate,totalposition,totalNum) values%s" % insertvalue
+			sql="insert into [Future].[dbo].[quanyi_log_groupby_v3](ac,symbol,type,ClosePrice,stockdate,totalposition,totalNum) values%s" % insertvalue
 			ms.insert_sql(sql)
 			# print sql
 		##--end
 
 		#从表中选取
-		sql="select q.stockdate,t.C,q.totalposition from real_quanyi_log_groupby_v2 q   inner join TSymbol_quotes_backup t   on q.stockdate=t.StockDate and t.Symbol='%s' where q.ac='%s' and q.symbol='%s'   order by q.stockdate" % (quanyisymbol,ac,symbol)
+		sql="select q.stockdate,t.C,q.totalposition from quanyi_log_groupby_v3 q   inner join TSymbol_quotes_backup t   on q.stockdate=t.StockDate and t.Symbol='%s' where q.ac='%s' and q.symbol='%s'   order by q.stockdate" % (quanyisymbol,ac,symbol)
 		res=ms.find_sql(sql)
 		return res,totalsum
 		
 	else:
-		sql="select q.stockdate,t.C,q.totalposition from real_quanyi_log_groupby_v2 q   inner join TSymbol_quotes_backup t   on q.stockdate=t.StockDate and t.Symbol='%s' where q.ac='%s' and q.symbol='%s'   order by q.stockdate" % (quanyisymbol,ac,symbol)
+		sql="select q.stockdate,t.C,q.totalposition from quanyi_log_groupby_v3 q   inner join TSymbol_quotes_backup t   on q.stockdate=t.StockDate and t.Symbol='%s' where q.ac='%s' and q.symbol='%s'   order by q.stockdate" % (quanyisymbol,ac,symbol)
 		res=ms.find_sql(sql)
 		if res:
 			return res,totalsum
@@ -242,7 +242,7 @@ def cal_quanyi(ac,myquotes,totalsum,symbolto):
 	#得到总的需要计算日期的天数
 	#dayquanyilist=[quanyi,times,ref(-1)position]
 	dayquanyilist={}
-	sql="select distinct CONVERT(varchar(10), stockdate, 120 ) as datename from [Future].[dbo].[real_quanyi_log_groupby_v2] order by datename"
+	sql="select distinct CONVERT(varchar(10), stockdate, 120 ) as datename from [Future].[dbo].[quanyi_log_groupby_v3] order by datename"
 	datelist=ms.dict_sql(sql)
 	for item in datelist:
 		mytime=item['datename'].replace('-','')
@@ -642,7 +642,7 @@ def main_fun_sumps():
 
 
 def delete_info_from_V3(stepname):
-	sql="delete from real_quanyi_log_groupby_v2 where ac in (select f_ac from p_follow where ac='%s' )" % (stepname)
+	sql="delete from quanyi_log_groupby_v3 where ac in (select f_ac from p_follow where ac='%s' )" % (stepname)
 	ms.insert_sql(sql)
 	print 'delete quanyi_log_groupby_v3'
 
@@ -656,7 +656,8 @@ def main_fun(stepname):
 		quanyisymbol=item['quanyisymbol']
 		(myquotes,totalsum)=input_groupbyquanyi(item['acname'],positionsymbol,quanyisymbol)
 
-
-stepname='StepMultiI300w_up'
-delete_info_from_V3(stepname)
-main_fun(stepname)
+stepmultilist=['StepMultituji1','StepMultiI300w_up']
+for aitem in stepmultilist:
+	stepname=aitem
+	delete_info_from_V3(stepname)
+	main_fun(stepname)

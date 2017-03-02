@@ -660,6 +660,8 @@ def main_fun(stepname):
 		(myquotes,totalsum)=input_groupbyquanyi(item['acname'],positionsymbol,quanyisymbol)
 		cal_quanyi(item['acname'], myquotes, totalsum, quanyisymbol)
 
-stepname='StepMultiI300w_up'
-delete_info_from_V2(stepname)
-main_fun(stepname)
+stepmultilist=['StepMultigaosheng1','StepMultituji1','StepMultituji2','StepMultituji3','StepMultiI300w_up']
+for aitem in stepmultilist:
+	stepname=aitem
+	delete_info_from_V2(stepname)
+	main_fun(stepname)

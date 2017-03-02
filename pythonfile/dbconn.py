@@ -86,6 +86,8 @@ class MSSQL:
         self.conn.commit()
         # self.conn.close()
 
+
+
 def dictfetchall(cursor):
     desc = cursor.description
     return [

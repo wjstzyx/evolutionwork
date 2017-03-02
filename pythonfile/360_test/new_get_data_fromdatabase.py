@@ -40,7 +40,7 @@ if __name__ == "__main__":
 	starttime='2015-01-01'
 	dataroot=r'E:'
 	datatype='day'
-	datatype=sys.argv[1]
+	#datatype=sys.argv[1]
 	#datatype='daynight'
 	pool = multiprocessing.Pool(processes=threads_N)
 	for symbol in symbolList:

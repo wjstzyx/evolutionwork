@@ -30,6 +30,11 @@ global totalresult_df3
 
 
 accountlist={"257188832":['StepMultiI300w_up',2.2],"666061010":['StepMultiI300w_up',2.2],"1636737":['StepMultigaosheng1',1]}
+accountlist['StepMultiI300w_up']=['StepMultiI300w_up',1]
+accountlist['StepMultigaosheng1']=['StepMultigaosheng1',1]
+accountlist['StepMultituji1']=['StepMultituji1',1]
+accountlist['StepMultituji2']=['StepMultituji2',1]
+accountlist['StepMultituji3']=['StepMultituji3',1]
 
 # step_acname='StepMultiI300w_up'
 # account='666061010'
@@ -38,6 +43,7 @@ accountlist={"257188832":['StepMultiI300w_up',2.2],"666061010":['StepMultiI300w_
 # equity_day='2017-02-15'
 
 account='257188832'
+account=sys.argv[1]
 step_acname=accountlist[account][0]
 
 nowday=datetime.datetime.now().strftime("%Y-%m-%d")
@@ -53,7 +59,7 @@ res=ms.dict_sql(sql)
 
 totalratio=accountlist[account][1]
 
-backday=41
+backday=45
 cache_num=36
 #mytype= 'lilun' 'position' 'huibao'
 
@@ -755,12 +761,12 @@ def main_get_huibao_position(account,step_acname):
 #
 
 #mytype= 'lilun' 'position' 'huibao'
-mytype="real_ab_lilun"
-if mytype=='lilun':
+mytype="lilun"
+if mytype=='lilun' or 1==1:
 	# 计算理论当天权益
 	main_get_lilun(step_acname,totalratio)
 
-if mytype=='real_ab_lilun':
+if mytype=='real_ab_lilun' or 1==1:
 	# 计算理论当天权益
 	main_get_real_ab_lilun(step_acname,totalratio)
 
