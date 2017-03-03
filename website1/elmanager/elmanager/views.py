@@ -68,11 +68,11 @@ def realshowmonitor_hulue(request):
 
 def realshowmonitor_newalert(request):
 	ms= MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
-	sql="SELECT a.id,a.[type],a.[item]+'_'+b.Symbol as item  ,a.[msg], b.Symbol,classcode ,convert(nvarchar,[inserttime],120) as updatetime FROM [LogRecord].[dbo].[all_monitor_info] a inner join symbol_id b on substring(a.item,CHARINDEX('_',a.item)+1,3)=b.S_ID and len(b.Symbol)<3 where isactive=1 and issolved=0 order by updatetime "
+	sql="SELECT a.id,a.[type],a.[item],a.[msg],'symbol' as symbol, classcode ,convert(nvarchar,[inserttime],120) as updatetime FROM [LogRecord].[dbo].[all_monitor_info] a where isactive=1 and issolved=0 order by updatetime desc "
 	res1=ms.dict_sql(sql)
-	sql="SELECT top 50 a.id,a.[type],a.[item]+'_'+b.Symbol as item  ,a.[msg], b.Symbol,classcode ,convert(nvarchar,[inserttime],120) as updatetime FROM [LogRecord].[dbo].[all_monitor_info] a inner join symbol_id b on substring(a.item,CHARINDEX('_',a.item)+1,3)=b.S_ID and len(b.Symbol)<3 where isactive=1 and issolved=1  order by updatetime desc"
+	sql="SELECT top 50 a.id,a.[type],a.[item],a.[msg],'symbol' as symbol, classcode ,convert(nvarchar,[inserttime],120) as updatetime FROM [LogRecord].[dbo].[all_monitor_info] a where isactive=1 and issolved=1 order by updatetime desc "
 	res_solved=ms.dict_sql(sql)
-	sql="SELECT a.id,a.[type],a.[item]+'_'+b.Symbol as item  ,a.[msg], b.Symbol,classcode ,convert(nvarchar,[inserttime],120) as updatetime FROM [LogRecord].[dbo].[all_monitor_info] a inner join symbol_id b on substring(a.item,CHARINDEX('_',a.item)+1,3)=b.S_ID and len(b.Symbol)<3 where isactive=0 and issolved=0  order by updatetime desc"
+	sql="SELECT a.id,a.[type],a.[item],a.[msg],'symbol' as symbol, classcode ,convert(nvarchar,[inserttime],120) as updatetime FROM [LogRecord].[dbo].[all_monitor_info] a where isactive=0 and issolved=0 order by updatetime desc "
 	res_noactive=ms.dict_sql(sql)
 
 	result={'res1':res1,'res_solved':res_solved,'res_noactive':res_noactive}
