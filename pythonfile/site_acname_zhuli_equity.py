@@ -250,7 +250,7 @@ def get_Tsymbol_by_symbol(symbol,postionpd):
 	zhuliroot=r'Y:\data_yangzhen\future_1m_zhuli'
 	filemane=symbol+"_zl_20150101.csv"
 	#read csv to pd
-	df1=pd.read_csv(zhuliroot+"\\"+filemane,)
+	df1=pd.read_csv(zhuliroot+"\\"+filemane,names=['date','time','O','H','L','C','V','OPI','conid','delta'])
 
 	sql="select stockdate,C from TSymbol_allfuture where symbol='%s' and StockDate>='%s' and StockDate<='%s' order by StockDate" % (symbol,begintime,endtime)
 	quotes=ms.dict_sql(sql)
