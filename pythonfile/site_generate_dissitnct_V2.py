@@ -35,6 +35,10 @@ accountlist['StepMultigaosheng1']=['StepMultigaosheng1',1]
 accountlist['StepMultituji1']=['StepMultituji1',1]
 accountlist['StepMultituji2']=['StepMultituji2',1]
 accountlist['StepMultituji3']=['StepMultituji3',1]
+accountlist['StepMultidnhiboth']=['StepMultidnhiboth',1]
+accountlist['StepMultidnhiprofit']=['StepMultidnhiprofit',1]
+accountlist['StepMultidnhisharp']=['StepMultidnhisharp',1]
+accountlist['StepMultidnshort']=['StepMultidnshort',1]
 
 # step_acname='StepMultiI300w_up'
 # account='666061010'
@@ -42,7 +46,7 @@ accountlist['StepMultituji3']=['StepMultituji3',1]
 # backday=40
 # equity_day='2017-02-15'
 
-account='257188832'
+account='StepMultidnhiboth'
 account=sys.argv[1]
 step_acname=accountlist[account][0]
 
@@ -224,8 +228,7 @@ def get_origin_position_list(p_followac,acname,ratio=1):
 
 
 def get_origin_position_list_real_ab_lilun(p_followac,acname,ratio=1):
-	sql="select q.ClosePrice,q.stockdate,round(q.totalposition*mr.ratio*%s,0) as totalposition ,q.symbol,sid.S_ID from p_follow p inner join real_quanyi_log_groupby_v2 q on p.F_ac=q.AC and p.AC='%s' inner join LogRecord.dbo.test_margin mr on q.symbol=mr.symbol inner join symbol_id sid on q.symbol=sid.Symbol where q.AC='%s' and stockdate>='%s' and stockdate<='%s' order by stockdate,q.id" % (ratio,p_followac,acname,begintime,endtime)
-
+	sql="select q.ClosePrice,q.stockdate,round(q.totalposition*mr.ratio*%s,0) as totalposition ,q.symbol,sid.S_ID from p_follow p inner join quanyi_log_groupby_v3 q on p.F_ac=q.AC and p.AC='%s' inner join LogRecord.dbo.test_margin mr on q.symbol=mr.symbol inner join symbol_id sid on q.symbol=sid.Symbol where q.AC='%s' and stockdate>='%s' and stockdate<='%s' order by stockdate,q.id" % (ratio,p_followac,acname,begintime,endtime)
 	res1=ms.dict_sql(sql)
 	if res1:
 		symbol=res1[0]['symbol']
@@ -761,7 +764,7 @@ def main_get_huibao_position(account,step_acname):
 #
 
 #mytype= 'lilun' 'position' 'huibao'
-mytype="lilun"
+mytype="real_ab_lilun"
 if mytype=='lilun' or 1==1:
 	# 计算理论当天权益
 	main_get_lilun(step_acname,totalratio)
