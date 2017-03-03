@@ -81,7 +81,11 @@ def quotes_monitor():
 		selectres=[]
 		for item in res:
 			if item['Symbol'] in selectsymbol:
-				selectres.append(item)
+				if item['Symbol'] in ('T','IC','IF','TF','IH'):
+					if nowtime>='0931':
+						selectres.append(item)
+				else:
+					selectres.append(item)
 		day_lost_quotes=selectres
 		print 'day_lost_quotes',day_lost_quotes
 		lostinfo=day_lost_quotes
