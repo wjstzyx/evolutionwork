@@ -47,7 +47,7 @@ accountlist['StepMultidnshort']=['StepMultidnshort',1]
 # equity_day='2017-02-15'
 
 account='StepMultidnhiboth'
-#account=sys.argv[1]
+account=sys.argv[1]
 step_acname=accountlist[account][0]
 
 nowday=datetime.datetime.now().strftime("%Y-%m-%d")
@@ -669,10 +669,10 @@ def merge_position_price(df1,df2):
 
 def cal_ac_day_equity(p_followac,acname,ratio=1):
 	postionpd, symbol = get_origin_position_list(p_followac, acname, ratio)
-	postionpd.to_csv(r'E:\test\zhuli_position.csv')
+	#postionpd.to_csv(r'E:\test\zhuli_position.csv')
 	#获取 指数 价格 系列权益
 	totalpo = get_Tsymbol_by_symbol(symbol, postionpd)
-	totalpo.to_csv(r'E:\test\zhuli_position_close.csv')
+	#totalpo.to_csv(r'E:\test\zhuli_position_close.csv')
 	newtotalpo = cal_equity(symbol, totalpo)
 	#write_position_csv(type='Lilun', symbol=symbol, endtime=equity_day, df1=newtotalpo)
 	day_equity = equity_resharp(newtotalpo)
@@ -751,11 +751,10 @@ def main_get_lilun(step_acname,totalratio):
 	myres=ms.dict_sql(sql)
 	for myitem in myres:
 		#print myitem
-		step_acname='StepMultiI300w_up'
-		myitem['f_ac']='buStepMultiI_up'
-		totalratio=1
+		# step_acname='StepMultiI300w_up'
+		# myitem['f_ac']='buStepMultiI_up'
+		# totalratio=1
 		cal_ac_day_equity(step_acname,myitem['f_ac'],totalratio)
-		exit()
 
 	print '####lilun_total',sum(lilun_total)
 	totalresult_df1=pd.DataFrame(lilun_result)

@@ -124,7 +124,11 @@ def equity_resharp(newtotalpo):
 
 #仓位入数据库 quanyi_log_symbol_V3
 def write_to_database_position(df1,symbol,acname):
-	sql="select max(stockdate) as stockdate from quanyi_log_groupby_v3 where acname='%s' and symbol='%s'" % (acname,symbol)
+	df1=df1.fillna(0)
+	nowday=datetime.datetime.now().strftime("%Y-%m-%d")
+	sql="delete from quanyi_log_groupby_v3 where ac='%s' and symbol='%s' and stockdate>='%s'" % (acname,symbol,nowday)
+	ms.insert_sql(sql)
+	sql="select max(stockdate) as stockdate from quanyi_log_groupby_v3 where ac='%s' and symbol='%s'" % (acname,symbol)
 	res=ms.dict_sql(sql)[0]['stockdate']
 	if res is None:
 		pass
@@ -132,7 +136,14 @@ def write_to_database_position(df1,symbol,acname):
 	else:
 		firsttime=res
 		df1=df1[df1['stockdate']>firsttime]
-	datalist=list(df1)
+	df2=df1.as_matrix()
+	totalsql=""
+	for aaa in df2:
+		sql="insert into [Future].[dbo].[quanyi_log_groupby_v3](ac,symbol,type,closeprice,stockdate,totalposition) values('%s','%s','%s','%s','%s','%s')" % (acname,symbol,0,aaa[1],aaa[0],aaa[2])
+		totalsql=totalsql+';'+sql
+	ms.insert_sql(totalsql)
+	totalsql=""
+
 
 
 
@@ -144,9 +155,11 @@ def write_to_database_position(df1,symbol,acname):
 
 #这是夜盘的权益计算
 #看看 日盘 或者 日夜连做的权益是否一样计算
-
-position = get_position(acname='csStepMultiI_up',symbol='cs')
-newposition = generate_new_position(position,symbol='cs')
+import datetime
+atime=datetime.datetime.now()
+position = get_position(acname='ppStepMultigaosheng1',symbol='pp')
+newposition = generate_new_position(position,symbol='pp')
+#newposition.to_csv(r'C:\Users\YuYang\Desktop\dog\aaa.csv')
 write_to_database_position(newposition,symbol='cs')
 equity_split=cal_equity('cs',newposition)
 equity_day=equity_resharp(equity_split)
