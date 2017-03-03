@@ -148,7 +148,7 @@ def Thunder():
 		nowtime= myitem['nowtime'].strftime('%H%M%S')
 		nowtime=int(nowtime)
 		chayi = minusmin(lasttime, nowtime)
-		if (chayi > 70 or chayi < -70) and  ((nowtime>75500 and nowtime<150400) or  (nowtime>205000 and nowtime<233000)):
+		if (chayi > 70 or chayi < -70) and  ((nowtime>85500 and nowtime<150400) or  (nowtime>205000 and nowtime<233000)):
 			msg='延迟【%s】秒' % (abs(chayi))
 			getrecordlist.append({'item':myitem['name'],'msg':msg})
 	update_target_table(getrecordlist, 'Thunder')
