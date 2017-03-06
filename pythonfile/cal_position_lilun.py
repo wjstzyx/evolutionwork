@@ -208,7 +208,7 @@ def account_database_isdistinct_V2():
 		nowtime=datetime.datetime.strptime(nowtime,'%H:%M:%S')
 		starttime=datetime.datetime.strptime(starttime,'%H:%M:%S')
 		endtime=datetime.datetime.strptime(endtime,'%H:%M:%S')
-		if nowtime>starttime and nowtime<=endtime or 1==1:
+		if nowtime>starttime and nowtime<=endtime :
 			nowday=datetime.datetime.now().strftime('%Y%m%d')
 			sql="select kaa.userid as account_userid,kaa.stockid as account_stockid,kaa.position as account_position,kaa.sendposition,kaa.inserttime as account_time,kbb.* from (select a.userID,a.stockID,(a.longhave-a.shorthave) as position,([longsend]-[shortsend]) as sendposition ,inserttime from [LogRecord].[dbo].[account_position] a inner join (  select MAX(time) as 	time  ,userid   FROM [LogRecord].[dbo].[account_position]  where date='%s' group by userid) b  on a.time=b.time and a.userID=b.userID and a.date='%s' where not ((a.longhave-a.shorthave)=0 and ([longsend]-[shortsend])=0)) kaa full outer join ( select userID,stockID,sum(position)as position,MAX(inserttime)as inserttime  from [LogRecord].[dbo].[account_position_lilun]  group by 	userID,stockID  having sum(position)<>0  ) kbb on kaa.userID=kbb.userID and kaa.stockID=kbb.stockID   where kaa.userID is null or kbb.stockID is null or not  (kaa.position=kbb.position and kaa.sendposition=0)" % (nowday,nowday)
 			print sql 
