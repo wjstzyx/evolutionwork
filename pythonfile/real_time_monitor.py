@@ -143,7 +143,7 @@ def AB_st_day(mytype=2):
 
 #Thunder st_heart
 def Thunder():
-	# 检测最新更新时间与当时的时间差，如果相差70s就报警
+	# 检测最新更新时间与当时的时间差，如果相差80s就报警
 	sql = "SELECT [name],time ,getdate() as nowtime,[isific],isnight FROM [future].[dbo].[Program] where isactive=1 order by id  "
 	res = ms1.dict_sql(sql)
 	getrecordlist=[]
@@ -152,13 +152,13 @@ def Thunder():
 		nowtime= myitem['nowtime'].strftime('%H%M%S')
 		nowtime=int(nowtime)
 		chayi = minusmin(lasttime, nowtime)
-		if myitem['isific']==0 and (chayi > 70 or chayi < -70) and  ((nowtime>85400 and nowtime<150400)):
+		if myitem['isific']==0 and (chayi > 80 or chayi < -80) and  ((nowtime>85400 and nowtime<150400)):
 			msg='延迟【%s】秒' % (abs(chayi))
 			getrecordlist.append({'item':myitem['name'],'msg':msg})
-		if myitem['isific']==1 and (chayi > 70 or chayi < -70) and  ((nowtime>92400 and nowtime<151500)):
+		if myitem['isific']==1 and (chayi > 80 or chayi < -80) and  ((nowtime>92700 and nowtime<151500)):
 			msg='延迟【%s】秒' % (abs(chayi))
 			getrecordlist.append({'item':myitem['name'],'msg':msg})	
-		if myitem['isnight']==1 and (chayi > 70 or chayi < -70) and  ((nowtime>205000 and nowtime<233000)):
+		if myitem['isnight']==1 and (chayi > 80 or chayi < -80) and  ((nowtime>205000 and nowtime<233000)):
 			msg='延迟【%s】秒' % (abs(chayi))
 			getrecordlist.append({'item':myitem['name'],'msg':msg})	
 

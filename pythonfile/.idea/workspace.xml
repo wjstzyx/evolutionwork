@@ -151,7 +151,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="cal_position_lilun.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="cal_position_lilun.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/cal_position_lilun.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="299">
@@ -190,6 +190,16 @@
                 <element signature="e#10300#10570#0" expanded="false" />
                 <element signature="e#10421#10570#0" expanded="false" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="real_time_monitor.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/real_time_monitor.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="475">
+              <caret line="157" column="18" selection-start-line="157" selection-start-column="18" selection-end-line="157" selection-end-column="18" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -280,7 +290,6 @@
         <option value="$PROJECT_DIR$/new_cal_quayi_V2_real_st.py" />
         <option value="$PROJECT_DIR$/dbconn.py" />
         <option value="$PROJECT_DIR$/../../dog/dog/dog.py" />
-        <option value="$PROJECT_DIR$/real_time_monitor.py" />
         <option value="$PROJECT_DIR$/test_20170301.py" />
         <option value="$PROJECT_DIR$/site_generate_dissitnct_V2.py" />
         <option value="$PROJECT_DIR$/site_acname_zhuli_equity.py" />
@@ -289,6 +298,7 @@
         <option value="$PROJECT_DIR$/site_main_distinct.py" />
         <option value="$PROJECT_DIR$/360_test/initial.py" />
         <option value="$PROJECT_DIR$/cal_position_lilun.py" />
+        <option value="$PROJECT_DIR$/real_time_monitor.py" />
       </list>
     </option>
   </component>
@@ -1133,14 +1143,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/real_time_monitor.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="475">
-          <caret line="155" column="18" selection-start-line="155" selection-start-column="18" selection-end-line="155" selection-end-column="18" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://E:/AB_python/MarketClose_NewAnalysis/MarketClose-1.export_data_to_ab.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="299">
@@ -1567,6 +1569,14 @@
             <element signature="e#10300#10570#0" expanded="false" />
             <element signature="e#10421#10570#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/real_time_monitor.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="475">
+          <caret line="157" column="18" selection-start-line="157" selection-start-column="18" selection-end-line="157" selection-end-column="18" />
+          <folding />
         </state>
       </provider>
     </entry>
