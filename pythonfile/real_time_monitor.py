@@ -179,21 +179,23 @@ def Account_lilun_distinct():
 
 
 
-try:
-	Thunder()
-	AB_st_day(1)
-	AB_st_day(2)
-	quotes_monitor()
-except:
-	print 'Find Error'
-	subject = '实时总监控脚本出错'
-	msg = '实时总监控脚本出错'
+for i in range(3):
 	try:
-		(mailtolist, sendmessage) = get_messagelist()
+		Thunder()
+		AB_st_day(1)
+		AB_st_day(2)
+		quotes_monitor()
 	except:
-		mailtolist='yuyang@evolutionlabs.com.cn,13764504303@139.com'
-		sendmessage='13764504303,13764048827,13661579047'
-	sql = "insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject, mailtolist, msg, 0, sendmessage)
-	ms.insert_sql(sql)
+		print 'Find Error'
+		subject = '实时总监控脚本出错'
+		msg = '实时总监控脚本出错'
+		try:
+			(mailtolist, sendmessage) = get_messagelist()
+		except:
+			mailtolist='yuyang@evolutionlabs.com.cn,13764504303@139.com'
+			sendmessage='13764504303,13764048827,13661579047'
+		sql = "insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject, mailtolist, msg, 0, sendmessage)
+		ms.insert_sql(sql)
+	time.sleep(19)
 
 

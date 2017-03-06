@@ -139,13 +139,56 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="maze_generator.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="maze_generator.py" pinned="false" current-in-tab="false">
         <entry file="file://Z:/神经网络内部培训/RL-Exercise/maze_generator.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="345">
               <caret line="15" column="30" selection-start-line="15" selection-start-column="30" selection-end-line="15" selection-end-column="30" />
               <folding>
                 <element signature="e#0#13#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="cal_position_lilun.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/cal_position_lilun.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="299">
+              <caret line="32" column="10" selection-start-line="30" selection-start-column="10" selection-end-line="98" selection-end-column="27" />
+              <folding>
+                <element signature="n#!!doc" expanded="false" />
+                <element signature="e#256#312#0" expanded="false" />
+                <element signature="e#378#734#0" expanded="false" />
+                <element signature="e#531#633#0" expanded="false" />
+                <element signature="e#1133#1674#0" expanded="false" />
+                <element signature="e#1176#1259#0" expanded="false" />
+                <element signature="e#1273#1478#0" expanded="false" />
+                <element signature="e#1498#1674#0" expanded="false" />
+                <element signature="e#2020#2568#0" expanded="false" />
+                <element signature="e#2053#2137#0" expanded="false" />
+                <element signature="e#2151#2369#0" expanded="false" />
+                <element signature="e#2389#2568#0" expanded="false" />
+                <element signature="e#3242#3515#0" expanded="false" />
+                <element signature="e#3563#3725#0" expanded="false" />
+                <element signature="e#4019#4037#0" expanded="false" />
+                <element signature="e#5715#6163#0" expanded="false" />
+                <element signature="e#6244#6264#0" expanded="false" />
+                <element signature="e#7142#8855#0" expanded="false" />
+                <element signature="e#7223#7468#0" expanded="false" />
+                <element signature="e#7484#8855#0" expanded="false" />
+                <element signature="e#7746#8855#0" expanded="false" />
+                <element signature="e#7746#7758#0" expanded="false" />
+                <element signature="e#8406#8570#0" expanded="false" />
+                <element signature="e#8590#8855#0" expanded="false" />
+                <element signature="e#8906#10265#0" expanded="false" />
+                <element signature="e#9140#9242#0" expanded="false" />
+                <element signature="e#9315#9333#0" expanded="false" />
+                <element signature="e#9532#10265#0" expanded="false" />
+                <element signature="e#9926#10265#0" expanded="false" />
+                <element signature="e#9926#9938#0" expanded="false" />
+                <element signature="e#10300#10570#0" expanded="false" />
+                <element signature="e#10421#10570#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -245,6 +288,7 @@
         <option value="$PROJECT_DIR$/new_position_generate.py" />
         <option value="$PROJECT_DIR$/site_main_distinct.py" />
         <option value="$PROJECT_DIR$/360_test/initial.py" />
+        <option value="$PROJECT_DIR$/cal_position_lilun.py" />
       </list>
     </option>
   </component>
@@ -815,48 +859,6 @@
             <element signature="e#6725#6958#0" expanded="false" />
             <element signature="e#7093#7402#0" expanded="false" />
             <element signature="e#9059#9490#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/cal_position_lilun.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="617">
-          <caret line="150" column="59" selection-start-line="150" selection-start-column="51" selection-end-line="150" selection-end-column="59" />
-          <folding>
-            <element signature="n#!!doc" expanded="false" />
-            <element signature="e#256#312#0" expanded="false" />
-            <element signature="e#378#734#0" expanded="false" />
-            <element signature="e#531#633#0" expanded="false" />
-            <element signature="e#775#3911#0" expanded="false" />
-            <element signature="e#1133#1674#0" expanded="false" />
-            <element signature="e#1176#1259#0" expanded="false" />
-            <element signature="e#1273#1478#0" expanded="false" />
-            <element signature="e#1498#1674#0" expanded="false" />
-            <element signature="e#2020#2568#0" expanded="false" />
-            <element signature="e#2053#2137#0" expanded="false" />
-            <element signature="e#2151#2369#0" expanded="false" />
-            <element signature="e#2389#2568#0" expanded="false" />
-            <element signature="e#3242#3515#0" expanded="false" />
-            <element signature="e#3563#3725#0" expanded="false" />
-            <element signature="e#4019#4037#0" expanded="false" />
-            <element signature="e#5701#6149#0" expanded="false" />
-            <element signature="e#6230#6250#0" expanded="false" />
-            <element signature="e#7128#8841#0" expanded="false" />
-            <element signature="e#7209#7454#0" expanded="false" />
-            <element signature="e#7470#8841#0" expanded="false" />
-            <element signature="e#7732#8841#0" expanded="false" />
-            <element signature="e#7732#7744#0" expanded="false" />
-            <element signature="e#8392#8556#0" expanded="false" />
-            <element signature="e#8576#8841#0" expanded="false" />
-            <element signature="e#8892#10251#0" expanded="false" />
-            <element signature="e#9126#9228#0" expanded="false" />
-            <element signature="e#9301#9319#0" expanded="false" />
-            <element signature="e#9518#10251#0" expanded="false" />
-            <element signature="e#9912#10251#0" expanded="false" />
-            <element signature="e#9912#9924#0" expanded="false" />
-            <element signature="e#10286#10556#0" expanded="false" />
-            <element signature="e#10407#10556#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1523,6 +1525,47 @@
           <caret line="15" column="30" selection-start-line="15" selection-start-column="30" selection-end-line="15" selection-end-column="30" />
           <folding>
             <element signature="e#0#13#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cal_position_lilun.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="299">
+          <caret line="32" column="10" selection-start-line="30" selection-start-column="10" selection-end-line="98" selection-end-column="27" />
+          <folding>
+            <element signature="n#!!doc" expanded="false" />
+            <element signature="e#256#312#0" expanded="false" />
+            <element signature="e#378#734#0" expanded="false" />
+            <element signature="e#531#633#0" expanded="false" />
+            <element signature="e#1133#1674#0" expanded="false" />
+            <element signature="e#1176#1259#0" expanded="false" />
+            <element signature="e#1273#1478#0" expanded="false" />
+            <element signature="e#1498#1674#0" expanded="false" />
+            <element signature="e#2020#2568#0" expanded="false" />
+            <element signature="e#2053#2137#0" expanded="false" />
+            <element signature="e#2151#2369#0" expanded="false" />
+            <element signature="e#2389#2568#0" expanded="false" />
+            <element signature="e#3242#3515#0" expanded="false" />
+            <element signature="e#3563#3725#0" expanded="false" />
+            <element signature="e#4019#4037#0" expanded="false" />
+            <element signature="e#5715#6163#0" expanded="false" />
+            <element signature="e#6244#6264#0" expanded="false" />
+            <element signature="e#7142#8855#0" expanded="false" />
+            <element signature="e#7223#7468#0" expanded="false" />
+            <element signature="e#7484#8855#0" expanded="false" />
+            <element signature="e#7746#8855#0" expanded="false" />
+            <element signature="e#7746#7758#0" expanded="false" />
+            <element signature="e#8406#8570#0" expanded="false" />
+            <element signature="e#8590#8855#0" expanded="false" />
+            <element signature="e#8906#10265#0" expanded="false" />
+            <element signature="e#9140#9242#0" expanded="false" />
+            <element signature="e#9315#9333#0" expanded="false" />
+            <element signature="e#9532#10265#0" expanded="false" />
+            <element signature="e#9926#10265#0" expanded="false" />
+            <element signature="e#9926#9938#0" expanded="false" />
+            <element signature="e#10300#10570#0" expanded="false" />
+            <element signature="e#10421#10570#0" expanded="false" />
           </folding>
         </state>
       </provider>
