@@ -116,8 +116,8 @@ def main_import_data_v2():
 #获得afl 和配置文件的对应关系
 def main_run_afl():
 	#truncate table st_report_test
-	# sql="truncate table st_report_test"
-	# ms.insert_sql(sql)
+	sql="truncate table st_report_test"
+	ms.insert_sql(sql)
 
 	#todo:解析symbl 直接赋值给Ticker
 	aflfiledir=ABautoroot+"\\ABautofile\\aflfile"
@@ -500,5 +500,5 @@ main_run_afl()
 # #5
 
 # #检测st_repoet_test中的策略是不是虚拟组有且唯一的策略号 type=0 严格执行， type=1 直接复制
-test_is_all_ac_st(type=0)
+# test_is_all_ac_st(type=1)
 # show_progress(87,100)
