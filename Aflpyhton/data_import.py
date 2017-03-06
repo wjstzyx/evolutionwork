@@ -20,8 +20,6 @@ import re
 import pandas as pd
 import numpy as np
 import math
-
-
 ABautoroot=r'E:'
 dirformat=r'D:\Program Files\AmiBroker\Formats\custom3.format'
 #database=r'D:\Program Files\AmiBroker\newlianxu'

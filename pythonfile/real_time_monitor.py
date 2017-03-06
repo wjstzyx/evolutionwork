@@ -153,13 +153,13 @@ def Thunder():
 		beizhi='lastupdatetime=%s,database_nowtime=%s' % (lasttime,nowtime)
 		nowtime=int(nowtime)
 		chayi = minusmin(lasttime, nowtime)
-		if myitem['isific']==0 and (chayi > 80 or chayi < -80) and  ((nowtime>85400 and nowtime<150100)):
+		if myitem['isific']==0 and (chayi > 80 or chayi < -80) and  ((nowtime>85500 and nowtime<150100)):
 			msg='延迟【%s】秒 %s' % (abs(chayi),beizhi)
 			getrecordlist.append({'item':myitem['name'],'msg':msg})
 		if myitem['isific']==1 and (chayi > 80 or chayi < -80) and  ((nowtime>92700 and nowtime<150100)):
 			msg='延迟【%s】秒 %s' % (abs(chayi),beizhi)
 			getrecordlist.append({'item':myitem['name'],'msg':msg})	
-		if myitem['isnight']==1 and (chayi > 80 or chayi < -80) and  ((nowtime>205000 and nowtime<233000)):
+		if myitem['isnight']==1 and (chayi > 80 or chayi < -80) and  ((nowtime>205500 and nowtime<233000)):
 			msg='延迟【%s】秒 %s' % (abs(chayi),beizhi)
 			getrecordlist.append({'item':myitem['name'],'msg':msg})	
 
