@@ -342,13 +342,13 @@ def crontab_delete_record():
 		ms.insert_sql(sql)
 
 
+try:
+	print "begin: cal_position_lilun"
+	cal_position_lilun()
+	print "begin: account_database_isdistinct_V2"
+	account_database_isdistinct_V2()
+	crontab_delete_record()
 
-print "begin: cal_position_lilun"
-cal_position_lilun()
-print "begin: account_database_isdistinct_V2"
-account_database_isdistinct_V2()
-crontab_delete_record()
-
-
-	# monitor_add_errorinfo('crontab','cal_position_lilun')
-	# print '$$$send error info'
+except:
+	monitor_add_errorinfo('crontab','cal_position_lilun')
+	print '$$$send error info'
