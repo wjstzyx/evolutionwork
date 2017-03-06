@@ -85,7 +85,6 @@ def cal_position_lilun():
 	sql="SELECT a.account,a.symbol,sum(a.ratio*b.position ) as Position  FROM [future].[dbo].[account_position_stock_yingshe] a left join [future].[dbo].[RealPosition] b on a.acanme=b.Name group by a.account,a.symbol"
 	res=ms1.dict_sql(sql)
 	for item in res:
-		print "'"+item['symbol']+"'"
 		symbol_id=symboldict[item['symbol']]
 		sql="insert into [LogRecord].[dbo].account_position_lilun([userID],[stockID],[position],[inserttime]) values('%s','%s','%s',getdate())" % (item['account'],symbol_id,item['Position'])
 		ms.insert_sql(sql)
@@ -188,6 +187,95 @@ def account_database_isdistinct():
 							ms.insert_sql(sql)
 
 
+#仓位报警-差异超过3分钟就报警
+def account_database_isdistinct_V2():
+	#查询发件人
+	(mailtolist,sendmessage)=get_messagelist()
+	# print mailtolist
+	#待检测的ABmachine列表
+	sql="select item,starttime,endtime from [LogRecord].[dbo].[monitorconfig] where type='Account_distinguish' and ismonitor=1"
+	res=ms.dict_sql(sql)
+	for item in res:
+		symbol=item['item']
+		starttime=item['starttime']
+		endtime=item['endtime']
+		sql="select getdate()"
+		getnow=ms.find_sql(sql)[0][0]
+		nowtime=getnow.strftime('%H:%M:%S')
+		nowtime=datetime.datetime.strptime(nowtime,'%H:%M:%S')
+		starttime=datetime.datetime.strptime(starttime,'%H:%M:%S')
+		endtime=datetime.datetime.strptime(endtime,'%H:%M:%S')
+		if nowtime>starttime and nowtime<=endtime:
+			nowday=datetime.datetime.now().strftime('%Y%m%d')
+			sql="select kaa.userid as account_userid,kaa.stockid as account_stockid,kaa.position as account_position,kaa.sendposition,kaa.inserttime as account_time,kbb.* from (select a.userID,a.stockID,(a.longhave-a.shorthave) as position,([longsend]-[shortsend]) as sendposition ,inserttime from [LogRecord].[dbo].[account_position] a inner join (  select MAX(time) as 	time  ,userid   FROM [LogRecord].[dbo].[account_position]  where date='%s' group by userid) b  on a.time=b.time and a.userID=b.userID and a.date='%s' where not ((a.longhave-a.shorthave)=0 and ([longsend]-[shortsend])=0)) kaa full outer join ( select userID,stockID,sum(position)as position,MAX(inserttime)as inserttime  from [LogRecord].[dbo].[account_position_lilun]  group by 	userID,stockID  having sum(position)<>0  ) kbb on kaa.userID=kbb.userID and kaa.stockID=kbb.stockID   where kaa.userID is null or kbb.stockID is null or not  (kaa.position=kbb.position and kaa.sendposition=0)" % (nowday,nowday)
+			res=ms.dict_sql(sql)
+			newrecord=[]
+			#[[userid,stockid,account_posiiotn,account_sendposition,position,account_time,inserttime]]
+			for item in res:
+				if item['account_userid'] is None:
+					temp=[item['userID'],item['stockID'],0,0,item['position'],item['inserttime'],item['inserttime']]
+				if item['userID'] is None:
+					temp=[item['account_userid'],item['account_stockid'],item['account_position'],item['sendposition'],0,item['account_time'],item['account_time']]
+				if item['account_userid'] is not None and item['userID'] is not None:
+					temp=[item['account_userid'],item['account_stockid'],item['account_position'],item['sendposition'],item['position'],item['account_time'],item['inserttime']]
+				newrecord.append(temp)
+			#listnew
+			newlistquotes=[aa[0]+'_'+str(int(aa[1])) for aa in newrecord]
+			#print newlistquotes
+			# for item in newrecord:
+			# 	print item 
+			sql="SELECT id,[userID]   ,[stockID]   ,[realposition]   ,[lilunposition]    ,[inserttime] FROM [LogRecord].[dbo].[account_position_temp_compare]"
+			res=ms.dict_sql(sql)
+			#delete 
+			oldlistquotes=[]
+			for item in res:
+				oldlistquotes.append(item['userID']+'_'+str(int(item['stockID'])))
+				if item['userID']+'_'+str(int(item['stockID'])) not in newlistquotes:
+					myuniqueid=item['userID']+'_'+str(int(item['stockID']))
+					print myuniqueid,'delete'
+					id=item['id']
+					sql="delete from [LogRecord].[dbo].[account_position_temp_compare] where id=%s" % (id)
+					ms.insert_sql(sql)
+					#置为isactive=0
+					sql="update [LogRecord].[dbo].[all_monitor_info] set [issolved]=1 where TYPE='Account' and item='%s' and [issolved]=0" % (myuniqueid)
+					ms.insert_sql(sql)
+			#update and insert 
+			for aa in newrecord:
+				uniquekey=aa[0]+'_'+str(int(aa[1]))
+				if uniquekey  not in oldlistquotes:
+					print ' insert'
+					sql="insert into [LogRecord].[dbo].[account_position_temp_compare](userID,stockID,realposition,lilunposition,inserttime) values('%s','%s','%s','%s',getdate())" % (aa[0],aa[1],aa[2],int(aa[3]))
+					ms.insert_sql(sql)
+				else:
+					sql="SELECT DATEDIFF(MINUTE, inserttime,getdate()) as timediff,inserttime, getdate() as nowtime FROM [LogRecord].[dbo].[account_position_temp_compare] where userID='%s' and stockID='%s'" %	 (aa[0],int(aa[1]))
+					mytime=ms.dict_sql(sql)
+					atime=mytime[0]['timediff']
+					print atime
+					if atime>4:
+						# print '报警'
+						# print "@@@@@@@@@@@@@ERROE@@@@@@@@@@@@@@"
+						# subject='%s 实盘仓位与数据库不一致' % (aa[0])
+						# msg=subject
+						# sql="insert into [LogRecord].[dbo].[maillist](subject,mailtolist,msg,type,inserttime,sendmessage) values('%s','%s','%s',%s,getdate(),'%s')" % (subject,	mailtolist,msg,0,sendmessage)
+						# #print sql 
+						# ms.insert_sql(sql)
+						#插入信息显示
+						type='Account'
+						item=uniquekey
+						msg='实盘仓位与数据库不一致 lasttime:%s nowtime:%s' % (mytime[0]['inserttime'],mytime[0]['nowtime'])
+						classcode='fa-comment'
+						sql="select 1 from [LogRecord].[dbo].[all_monitor_info] where type='%s' and item='%s' and issolved=0" % (type,item)
+						res=ms.dict_sql(sql)
+						#print sql 
+						if res:
+							sql="update [LogRecord].[dbo].[all_monitor_info] set updatetime=getdate()  where type='%s' and item='%s'" % (type,item)
+							#print sql 
+							ms.insert_sql(sql)
+						else:
+							sql=" insert into [LogRecord].[dbo].[all_monitor_info](type,item,msg,[issolved],[isactive],[inserttime],[updatetime],[classcode]) values('%s','%s','%s','%s','%s',getdate(),getdate(),'%s')" % (type,item,msg,0,1,classcode)
+							#print sql 
+							ms.insert_sql(sql)
+
 
 
 
@@ -246,11 +334,12 @@ def crontab_delete_record():
 
 
 
-try:
-	cal_position_lilun()
-	account_database_isdistinct()
-	crontab_delete_record()
+print "begin: cal_position_lilun"
+cal_position_lilun()
+print "begin: account_database_isdistinct_V2"
+account_database_isdistinct_V2()
+crontab_delete_record()
 
-except:
-	monitor_add_errorinfo('crontab','cal_position_lilun')
-	print '$$$send error info'
+
+# monitor_add_errorinfo('crontab','cal_position_lilun')
+# print '$$$send error info'
