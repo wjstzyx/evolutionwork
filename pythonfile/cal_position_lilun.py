@@ -243,7 +243,7 @@ def account_database_isdistinct_V2():
 			for aa in newrecord:
 				uniquekey=aa[0]+'_'+str(int(aa[1]))
 				if uniquekey  not in oldlistquotes:
-					print ' insert'
+					print 'insert'
 					sql="insert into [LogRecord].[dbo].[account_position_temp_compare](userID,stockID,realposition,lilunposition,inserttime) values('%s','%s','%s','%s',getdate())" % (aa[0],aa[1],aa[2],int(aa[3]))
 					ms.insert_sql(sql)
 				else:
@@ -333,13 +333,13 @@ def crontab_delete_record():
 		ms.insert_sql(sql)
 
 
+try:
+	print "begin: cal_position_lilun"
+	cal_position_lilun()
+	print "begin: account_database_isdistinct_V2"
+	account_database_isdistinct_V2()
+	crontab_delete_record()
 
-print "begin: cal_position_lilun"
-cal_position_lilun()
-print "begin: account_database_isdistinct_V2"
-account_database_isdistinct_V2()
-crontab_delete_record()
-
-
-# monitor_add_errorinfo('crontab','cal_position_lilun')
-# print '$$$send error info'
+except:
+	monitor_add_errorinfo('crontab','cal_position_lilun')
+	print '$$$send error info'
