@@ -252,6 +252,42 @@
                             </li>
                         </ul>
                     </li>
+                    <li>
+                        <a href="javascript:;" data-toggle="collapse" data-target="#equity_analysis"><i class="fa fa-fw fa-arrows-v"></i> 权益分析 <i class="fa fa-fw fa-caret-down"></i></a>
+                        <ul id="equity_analysis" class="collapse">
+                            <li>
+                                <a href="{% url 'elmanager.views.st_heart' %}">心跳存活信息</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'elmanager.views.lasttime_p_basic' %}">策略时间异常</a>
+                                
+                            </li>
+<!--                             <li>
+                                <a href="{% url 'elmanager.views.jieti_position_monitor' %}">阶梯策略仓位监控</a>
+                                
+                            </li> -->
+                            <li>
+                                <a href="{% url 'elmanager.views.jieti_st_position' %}">阶梯型策略监控</a>
+                                
+                            </li>
+                            <li>
+                                <a href="{% url 'elmanager.views.account_lilun_distinct' %}">账户权益差异监控</a>
+                                
+                            </li>
+                            <li>
+                                <a href="{% url 'elmanager.views.total_monitor' %}">日常报警查询</a>
+                                
+                            </li>
+                            <li>
+                                <a href="{% url 'elmanager.views.realshowmonitor' %}">报警配置</a>
+                                
+                            </li>
+                            <li>
+                                <a href="{% url 'elmanager.views.rt' %}">实时报警显示</a>
+                                
+                            </li>
+                        </ul>
+                    </li>
 
                 </ul>
             </div>
