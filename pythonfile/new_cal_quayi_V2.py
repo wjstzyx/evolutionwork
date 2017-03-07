@@ -17,6 +17,7 @@ ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 
 # 获取原始的仓位
 def get_position(acname,symbol):
+	print acname,symbol
 	sql="select p.AC,p.P_size*a.ratio/100.0*s.P as p,s.ST as st,s.stockdate from P_BASIC p inner join AC_RATIO a on p.AC=a.AC and p.AC='%s' inner join st_report s on p.ST=s.ST order by stockdate asc,s.id asc" % (acname)
 	res=ms.dict_sql(sql)
 	deltepositionlist={}
@@ -196,6 +197,7 @@ def write_to_database_equity(df1,symbol,acname):
 
 
 def sub_main(acname,day_night_symbol,quanyi_symbol):
+	#ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 	sql="select symbol from symbol_id where s_id in (select s_id from symbol_id where symbol='%s')  and LEN(symbol)<3" % (day_night_symbol)
 	quotes_symbol=ms.dict_sql(sql)[0]['symbol']
 	sql="select symbol from symbol_id where s_id in (select s_id from symbol_id where symbol='%s')  and LEN(symbol)<3" % (quanyi_symbol)
@@ -216,7 +218,7 @@ def sub_main(acname,day_night_symbol,quanyi_symbol):
 
 
 if __name__=="__main__":
-    threads_N=7
+    threads_N=1
     multiprocessing.freeze_support()
 
     pool = multiprocessing.Pool(processes = threads_N)
@@ -228,10 +230,10 @@ if __name__=="__main__":
         acname=item['acname']
         day_night_symbol=item['positionsymbol']
         quanyi_symbol=item['quanyisymbol']
-        print item['id'],acname,day_night_symbol,quanyi_symbol
+        #print item['id'],acname,day_night_symbol,quanyi_symbol
         # add process to pool
         if threads_N > 1:
-            print multiprocessing.current_process().name
+            #print multiprocessing.current_process().name
             pool.apply_async(sub_main, (acname,day_night_symbol,quanyi_symbol) )
         else:
             sub_main(acname,day_night_symbol,quanyi_symbol)
