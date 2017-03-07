@@ -26,8 +26,8 @@
       <file leaf-file-name="site_main_distinct.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/site_main_distinct.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="318">
-              <caret line="27" column="0" selection-start-line="27" selection-start-column="0" selection-end-line="27" selection-end-column="0" />
+            <state relative-caret-position="180">
+              <caret line="21" column="0" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -147,7 +147,6 @@
     <setting file="file://$PROJECT_DIR$/new_cal_quayi_V2_daynight.py" root0="SKIP_INSPECTION" />
     <setting file="file://$PROJECT_DIR$/site_acname_zhuli_equity.py" root0="SKIP_INSPECTION" />
     <setting file="file://$USER_HOME$/Desktop/generate_afl_signal/new_cal_quayi_V2_cal_stepmulti - 副本.py" root0="SKIP_INSPECTION" />
-    <setting file="file://$PROJECT_DIR$/new_position_generate.py" root0="SKIP_INSPECTION" />
     <setting file="file://$PROJECT_DIR$/导入主力合约数据_from_csv.py" root0="SKIP_INSPECTION" />
   </component>
   <component name="IdeDocumentHistory">
@@ -531,7 +530,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1066" extended-state="6" />
+    <frame x="-8" y="-8" width="1936" height="1066" extended-state="7" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25625" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
@@ -1235,33 +1234,14 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="334">
           <caret line="243" column="0" selection-start-line="243" selection-start-column="0" selection-end-line="243" selection-end-column="0" />
-          <folding>
-            <element signature="e#383#1574#0" expanded="false" />
-            <element signature="e#684#1529#0" expanded="false" />
-            <element signature="e#704#1058#0" expanded="false" />
-            <element signature="e#1235#1355#0" expanded="false" />
-            <element signature="e#1539#1571#0" expanded="false" />
-            <element signature="e#1640#2842#0" expanded="false" />
-            <element signature="e#1952#2797#0" expanded="false" />
-            <element signature="e#1972#2326#0" expanded="false" />
-            <element signature="e#2807#2839#0" expanded="false" />
-            <element signature="e#2908#3955#0" expanded="false" />
-            <element signature="e#4241#4304#0" expanded="false" />
-            <element signature="e#5932#7277#0" expanded="false" />
-            <element signature="e#7329#7922#0" expanded="false" />
-            <element signature="e#7624#7884#0" expanded="false" />
-            <element signature="e#7930#7964#0" expanded="false" />
-            <marker date="1488877108771" expanded="false" signature="0:36" ph="..." />
-            <marker date="1488877108771" expanded="false" signature="37:81" ph="import ..." />
-            <marker date="1488877108771" expanded="false" signature="3995:4775" ph="..." />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/site_main_distinct.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="318">
-          <caret line="27" column="0" selection-start-line="27" selection-start-column="0" selection-end-line="27" selection-end-column="0" />
+        <state relative-caret-position="180">
+          <caret line="21" column="0" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
           <folding />
         </state>
       </provider>
