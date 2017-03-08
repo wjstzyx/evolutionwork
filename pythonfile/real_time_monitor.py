@@ -133,7 +133,6 @@ def AB_st_day(mytype=2):
 		for item in machine:
 			sql="SELECT top 2 a.st,a.TradName,b.address,b.stockdate ,getdate() as nowtime FROM [Future].[dbo].[Trading_logSymbol] a  inner join(  SELECT [st],address,stockdate   FROM [LogRecord].[dbo].[ST_heart] where DATEDIFF(MINUTE, [stockdate], getdate())>=3 and type in (%s,12)  ) b on a.ST=b.st where address='%s'" % (mytype,item['address'])
 			res1=ms.dict_sql(sql)
-			print sql 
 			for item1 in res1:
 				myitem=item['address']+' 【'+ str(item1['st'])+'】'
 				msg=item1['stockdate'].strftime("%Y-%m-%d %H:%M")+' '+item1['TradName']+ "database_nowtime："+item1['nowtime'].strftime('%H:%M')
