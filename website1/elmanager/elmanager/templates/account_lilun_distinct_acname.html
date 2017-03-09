@@ -33,7 +33,7 @@ function add_new_monitor(){
 </script>
 
   <div id="page-wrapper"> 
-   <div class="container-fluid" style="height: 900px"> 
+   <div class="container-fluid" style="height: 1400px"> 
     <!-- Page Heading --> 
     <div class="row"> 
      <div class="col-lg-12"> 
@@ -48,7 +48,7 @@ function add_new_monitor(){
      <div class="col-lg-11"> 
       <div class="panel panel-default"> 
        <div class="panel-heading"> 
-        <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>每日权益 {{day}} 历史日期：{% for item in datlist %}【<a href='/index/quanyi/account_lilun_distinct/?date={{item.date}}'>{{item.date}}</a>】 {% endfor %}</h3> 
+        <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>每日权益 {{day}}</h3> 
        </div>
        {% if isres == 2 %} 
        <div>
@@ -73,7 +73,7 @@ function add_new_monitor(){
           <tbody id="mailtotable"> 
             {% for item in data %}
            <tr> 
-            <td align=center ><a href='/index/quanyi/account_lilun_distinct_acname/?date={{day}}&acname={{item.account}}'>{{item.account}}</a></td> 
+            <td align=center ><a href="/index/quanyi/account_lilun_distinct_st/?date={{item.mydate}}&acname={{item.account}}" target="blank">{{item.account}}</a> <a href='/index/quanyi/acname_distinct_showaccompare/?acname={{item.account}}&fromdate={{item.mydate}}' target='blank'>(仓位)</a></td> 
             <td align=center >{{item.mydate}}</td> 
             <td align=center >{{item.lilun_zhishu}}</td> 
             <td align=center >{{item.lilun_zhuli}}</td>

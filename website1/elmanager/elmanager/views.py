@@ -17,27 +17,92 @@ from dbconn import MSSQL
 # ms1 = MSSQL(host="139.196.104.105",user="future",pwd="K@ra0Key",db="future")
 
 
-def account_lilun_distinct(request):
+
+
+def account_lilun_distinct_st(request):
 	data=""
 	isres=0
+	if request.GET:
+		acname=request.GET.get("acname","")
+		date=request.GET.get("date","")
+		day=int(date)
+	else:
+		acname='StepMultiI300w_up'
+		day='20170306'
+
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
-	if request.POST:
-		sttype=request.POST.get("sttype","")
-		print sttype
-		if sttype=='day':
-			sql="SELECT top 400 a.st,a.TradName,b.address,b.stockdate  FROM [Future].[dbo].[Trading_logSymbol] a  inner join(  SELECT [st],address,stockdate   FROM [LogRecord].[dbo].[ST_heart]   where DATEDIFF(MINUTE, [stockdate], getdate())>=3 and type in (1,12)  ) b on a.ST=b.st"
-		else:
-			sql="SELECT top 400 a.st,a.TradName,b.address,b.stockdate  FROM [Future].[dbo].[Trading_logSymbol] a  inner join(  SELECT [st],address,stockdate   FROM [LogRecord].[dbo].[ST_heart]   where DATEDIFF(MINUTE, [stockdate], getdate())>=3 and type in (2,12)  ) b on a.ST=b.st"
-		res=ms.dict_sql(sql)
-		data=res
-		if data:
-			isres=1
-		else:
-			isres=2
+	sql="select top 1 p.*,a.Symbol from p_follow p inner join symbol_id a on p.stock=a.S_ID and len(a.Symbol)<3 where p.f_ac='%s' and p.ac like 'StepMul%%'" % (acname)
+	res=ms.dict_sql(sql)
+	symbol=res[0]['Symbol']
+	ac=res[0]['AC']
+	day=str(day)+" 16:00:00"
+	sql="select a.acname,a.P,(a.P*a.ratio) as total_P,a.ST,convert(nvarchar,a.stockdate,120) as stockdate,a.symbol from (select * from st_report_ABpython  where acname='%s' and symbol='%s' and stockdate<='%s') a inner join (select MAX(stockdate) as stockdate,st from st_report_ABpython  where acname='%s' and symbol='%s' and stockdate<='%s'group by st) b on a.stockdate=b.stockdate and a.st=b.ST order by a.P" % (ac,symbol,day,ac,symbol,day)
+	res1=ms.dict_sql(sql)
+
+	sql="select kka.AC,kka.P,kka.total_P,kka.ST,convert(nvarchar,kka.stockdate,120) as stockdate ,tt.TradName from (select s.P,round((s.P*p.P_size*aa.ratio/100.0),1) as total_P,s.st,s.stockdate,p.AC,p.P_size,aa.ratio from real_st_report s inner join P_BASIC p on s.ST=p.ST inner join AC_RATIO aa  on p.AC=aa.AC and p.AC='%s' and s.stockdate<='%s') kka  inner join (select MAX(stockdate) as stockdate,s.st from real_st_report s inner join P_BASIC p on s.ST=p.ST inner join AC_RATIO aa  on p.AC=aa.AC and p.AC='%s' and s.stockdate<='%s'  group by s.ST ) kkb on kka.stockdate=kkb.stockdate and kka.ST=kkb.ST inner join Trading_logSymbol tt on kka.ST=tt.ST  order by kka.P" % (acname,day,acname,day)
+	res2=ms.dict_sql(sql)
+
+
+	return render_to_response('account_lilun_distinct_st.html',{
+		'data':res,
+		'day':day,
+		'res1':res1,
+		'res2':res2,
+		'isres':isres
+	})	
+
+
+
+def account_lilun_distinct_acname(request):
+	data=""
+	isres=0
+	if request.GET:
+		acname=request.GET.get("acname","")
+		date=request.GET.get("date","")
+		day=int(date)
+	else:
+		acname='StepMultiI300w_up'
+		day=20170306
+
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	sql="select acname as account,'%s' AS mydate,[lilun_zhishu],[lilun_zhuli],[real_ab_zhishu],[real_ab_zhuli],([lilun_zhuli]-[lilun_zhishu]) as lilunzl_zs,([real_ab_zhuli]-[lilun_zhishu]) as realzl_lilunzs from [LogRecord].[dbo].[account_lilun_distinct_acname] where date='%s'   and account='%s'  order by ABS([real_ab_zhuli]-[lilun_zhishu]) desc" % (day,day,acname)
+	print sql 
+	res=ms.dict_sql(sql)
+	# res[-1]['account']='【total】'
+
+	return render_to_response('account_lilun_distinct_acname.html',{
+		'data':res,
+		'day':day,
+		'isres':isres
+	})	
+
+
+
+def account_lilun_distinct(request):
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
+	data=""
+	isres=0
+	if request.GET:
+		date=request.GET.get("date","")
+		day=int(date)
+		print 'date',day
+	else:
+		sql="SELECT MAX(date) as date  FROM [LogRecord].[dbo].[account_lilun_distinct_acname] "
+		day=ms.dict_sql(sql)[0]['date']
+		day=int(day)
+	
+	sql="SELECT [account]  ,'%s' as mydate, sum([lilun_zhishu]) as [lilun_zhishu]    ,sum([lilun_zhuli]) as [lilun_zhuli]    ,sum([real_ab_zhishu]) as [real_ab_zhishu]     ,sum([real_ab_zhuli]) as [real_ab_zhuli]     ,(sum([lilun_zhuli])-sum([lilun_zhishu])) as 'lilunzl_zs'    ,(sum([real_ab_zhuli])-sum([lilun_zhishu])) as 'realzl_lilunzs'   FROM [LogRecord].[dbo].[account_lilun_distinct_acname] where date='%s'  group by account with rollup" % (day,day)
+	res=ms.dict_sql(sql)
+	res[-1]['account']='【total】'
+	res[-1]['mydate']=''
+	sql='SELECT distinct top 8  date FROM [LogRecord].[dbo].[account_lilun_distinct_acname] order by date desc'
+	datlist=ms.dict_sql(sql)
 
 	return render_to_response('account_lilun_distinct.html',{
-		'data':data,
-		'isres':isres
+		'data':res,
+		'day':day,
+		'isres':isres,
+		'datlist':datlist
 	})	
 
 
@@ -3316,6 +3381,64 @@ def realcompare(request):
 	})	
 
 
+def acname_distinct_showaccompare(requst):
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+	if requst.GET:
+		acname=requst.GET.get('acname','')
+		fromdate=requst.GET.get('fromdate','')
+	else:
+		acname='Rb_QGpLud'
+		fromdate='2017-03-01'
+	#acname='9KDHPM'
+	#fromdate=fromdate[0:4]+"-"+fromdate[4:6]+'-'+fromdate[6:8]
+	fromdate=datetime.datetime.strptime(fromdate,'%Y%m%d')-datetime.timedelta(days=2)
+	fromdate=fromdate.strftime("%Y-%m-%d")
+	print fromdate
+	totaldata=[]
+	for i in range(1):
+		sql="select stockdate,round(totalposition,1)as totalposition  from quanyi_log_groupby_v4_ABpython where ac='%s'  and stockdate>='%s' order by stockdate " % (acname,fromdate)
+		res1=ms.dict_sql(sql)
+		data1=[]
+		if res1:
+			for item  in res1:
+				stockdate=(item['stockdate']+ datetime.timedelta(hours = 8)).strftime("%Y-%m-%d %H:%M:%S")
+				timeArray = time.strptime(stockdate, "%Y-%m-%d %H:%M:%S")
+				timeStamp = int(time.mktime(timeArray))
+				totalposition=round(item['totalposition'],3)
+				tempdata1=[timeStamp,totalposition]
+				data1.append(tempdata1)
+			newdata1=change_scatter_tocontinue(data1)
+		else:
+			newdata1=[]
+
+		sql="select stockdate,round(totalposition,1)as totalposition  from quanyi_log_groupby_v3 where ac='%s'  and stockdate>='%s' order by stockdate " % (acname,fromdate)
+		res2=ms.dict_sql(sql)
+		data2=[]
+		if res2:
+			for item  in res2:
+				stockdate=(item['stockdate']+ datetime.timedelta(hours = 8)).strftime("%Y-%m-%d %H:%M:%S")
+				timeArray = time.strptime(stockdate, "%Y-%m-%d %H:%M:%S")
+				timeStamp = int(time.mktime(timeArray))
+				totalposition=round(item['totalposition'],3)
+				tempdata1=[timeStamp,totalposition]
+				data2.append(tempdata1)
+			newdata2=change_scatter_tocontinue(data2)
+		else:
+			newdata2=[]
+		totaldata.append([acname,newdata1,newdata2])
+
+
+	return render_to_response('showaccompare.html',{
+		'data':acname,
+		'data1':newdata1,
+		'data2':newdata2,
+		'totaldata':totaldata,
+	})	
+
+
+
+
+
 
 def showaccompare(requst):
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
@@ -3339,6 +3462,7 @@ def showaccompare(requst):
 		nowtime=(datetime.datetime.now()-datetime.timedelta(days=10)).strftime("%Y-%m-%d %H:%M:%S")
 		sql="select q.stockdate,round(q.totalposition*1,0) as totalposition ,q.symbol,sid.S_ID from p_follow p inner join quanyi_log_groupby_v2 q on p.F_ac=q.AC and p.AC='%s' inner join LogRecord.dbo.test_margin mr on q.symbol=mr.symbol inner join symbol_id sid on q.symbol=sid.Symbol where q.AC='%s' and stockdate>='%s' and stockdate<='%s' order by stockdate" % (p_followac,acname,begintime,endtime)
 		res1=ms.dict_sql(sql)
+		print sql 
 		data1=[]
 		if res1:
 			for item  in res1:
