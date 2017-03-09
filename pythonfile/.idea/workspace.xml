@@ -23,21 +23,47 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="site_main_distinct.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="site_main_distinct.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/site_main_distinct.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="322">
-              <caret line="25" column="42" selection-start-line="25" selection-start-column="18" selection-end-line="25" selection-end-column="42" />
+            <state relative-caret-position="598">
+              <caret line="36" column="29" selection-start-line="36" selection-start-column="29" selection-end-line="36" selection-end-column="29" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="site_generate_dissitnct_V4.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="new_cal_quayi_V2_real.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/new_cal_quayi_V2_real.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="438">
+              <caret line="176" column="0" selection-start-line="176" selection-start-column="0" selection-end-line="176" selection-end-column="0" />
+              <folding>
+                <element signature="n#!!doc" expanded="false" />
+                <marker date="1489053240550" expanded="false" signature="388:1604" ph="..." />
+                <marker date="1489053240550" expanded="false" signature="714:1562" ph="..." />
+                <marker date="1489053240550" expanded="false" signature="733:1091" ph="..." />
+                <marker date="1489053240550" expanded="false" signature="1264:1388" ph="..." />
+                <marker date="1489053240550" expanded="false" signature="1569:1604" ph="..." />
+                <marker date="1489053240550" expanded="false" signature="1671:2872" ph="..." />
+                <marker date="1489053240550" expanded="false" signature="1982:2830" ph="..." />
+                <marker date="1489053240550" expanded="false" signature="2001:2359" ph="..." />
+                <marker date="1489053240550" expanded="false" signature="2532:2656" ph="..." />
+                <marker date="1489053240550" expanded="false" signature="2837:2872" ph="..." />
+                <marker date="1489053240550" expanded="false" signature="2939:3988" ph="..." />
+                <marker date="1489053240550" expanded="false" signature="4028:4808" ph="..." />
+                <marker date="1489053240550" expanded="false" signature="4271:4337" ph="..." />
+                <marker date="1489053240550" expanded="false" signature="4862:5881" ph="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="site_generate_dissitnct_V4.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/site_generate_dissitnct_V4.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="443">
-              <caret line="256" column="16" selection-start-line="256" selection-start-column="16" selection-end-line="256" selection-end-column="16" />
+            <state relative-caret-position="144">
+              <caret line="222" column="21" selection-start-line="222" selection-start-column="21" selection-end-line="222" selection-end-column="21" />
               <folding>
                 <element signature="n#!!doc" expanded="false" />
                 <element signature="e#411#489#0" expanded="false" />
@@ -137,6 +163,7 @@
     <setting file="file://$PROJECT_DIR$/aaa_test.py" root0="SKIP_INSPECTION" />
     <setting file="file://$PROJECT_DIR$/real_time_monitor.py" root0="SKIP_INSPECTION" />
     <setting file="file://$PROJECT_DIR$/new_cal_quayi_V2_cplus_real_st.py" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/new_cal_quayi_V2_real.py" root0="SKIP_INSPECTION" />
     <setting file="file://$PROJECT_DIR$/360_test/aa.py" root0="SKIP_INSPECTION" />
     <setting file="file://$PROJECT_DIR$/test_merge_csv.py" root0="SKIP_INSPECTION" />
     <setting file="file://$PROJECT_DIR$/site_generate_dissitnct_V4.py" root0="SKIP_INSPECTION" />
@@ -150,7 +177,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/every_gererate_distinct.py" />
         <option value="$PROJECT_DIR$/multi_lilun_real_time_equity_模块化.py" />
         <option value="$PROJECT_DIR$/导入主力合约数据_from_csv.py" />
         <option value="$PROJECT_DIR$/new_cal_quayi_V2_daynight11111111111111111.py" />
@@ -201,6 +227,7 @@
         <option value="$PROJECT_DIR$/策略闪单分析.py" />
         <option value="$PROJECT_DIR$/site_main_distinct.py" />
         <option value="$PROJECT_DIR$/site_acname_zhuli_equity.py" />
+        <option value="$PROJECT_DIR$/new_cal_quayi_V2_real.py" />
       </list>
     </option>
   </component>
@@ -236,7 +263,24 @@
     </navigator>
     <panes>
       <pane id="ProjectPane">
-        <subPane />
+        <subPane>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="pythonfile" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="pythonfile" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="pythonfile" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+        </subPane>
       </pane>
       <pane id="Scratches" />
       <pane id="Scope" />
@@ -264,23 +308,6 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="pythonfile" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/site_main_distinct.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <method />
-    </configuration>
-    <configuration default="false" name="new_position_generate_V2" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="pythonfile" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/new_position_generate_V2.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
@@ -332,6 +359,23 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="pythonfile" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/策略闪单分析.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="new_cal_quayi_V2_real" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="pythonfile" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/new_cal_quayi_V2_real.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
@@ -472,18 +516,18 @@
     </configuration>
     <list size="5">
       <item index="0" class="java.lang.String" itemvalue="Python.site_main_distinct" />
-      <item index="1" class="java.lang.String" itemvalue="Python.new_position_generate_V2" />
-      <item index="2" class="java.lang.String" itemvalue="Python.site_generate_dissitnct_V4" />
-      <item index="3" class="java.lang.String" itemvalue="Python.new_position_generate" />
-      <item index="4" class="java.lang.String" itemvalue="Python.策略闪单分析" />
+      <item index="1" class="java.lang.String" itemvalue="Python.site_generate_dissitnct_V4" />
+      <item index="2" class="java.lang.String" itemvalue="Python.new_position_generate" />
+      <item index="3" class="java.lang.String" itemvalue="Python.策略闪单分析" />
+      <item index="4" class="java.lang.String" itemvalue="Python.new_cal_quayi_V2_real" />
     </list>
     <recent_temporary>
       <list size="5">
         <item index="0" class="java.lang.String" itemvalue="Python.site_main_distinct" />
-        <item index="1" class="java.lang.String" itemvalue="Python.策略闪单分析" />
-        <item index="2" class="java.lang.String" itemvalue="Python.new_position_generate" />
-        <item index="3" class="java.lang.String" itemvalue="Python.site_generate_dissitnct_V4" />
-        <item index="4" class="java.lang.String" itemvalue="Python.new_position_generate_V2" />
+        <item index="1" class="java.lang.String" itemvalue="Python.new_cal_quayi_V2_real" />
+        <item index="2" class="java.lang.String" itemvalue="Python.策略闪单分析" />
+        <item index="3" class="java.lang.String" itemvalue="Python.new_position_generate" />
+        <item index="4" class="java.lang.String" itemvalue="Python.site_generate_dissitnct_V4" />
       </list>
     </recent_temporary>
   </component>
@@ -501,15 +545,15 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1066" extended-state="7" />
-    <editor active="true" />
+    <frame x="-8" y="-8" width="1936" height="1066" extended-state="6" />
+    <editor active="false" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.19114584" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.19114584" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3218391" sideWeight="0.50208336" order="0" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32946146" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.30094042" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.30094042" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
@@ -576,6 +620,11 @@
           <line>642</line>
           <option name="timeStamp" value="168" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/new_cal_quayi_V2_real.py</url>
+          <line>229</line>
+          <option name="timeStamp" value="205" />
+        </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
@@ -584,12 +633,11 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="205" />
+      <option name="time" value="206" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$USER_HOME$/Desktop/generate_afl_signal/2_import_ab.py" />
     <entry file="file://E:/AB_python/MarketClose_NewAnalysis/prepare_ab_db_timeframe.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="112">
@@ -921,14 +969,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/site_main_distinct.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="322">
-          <caret line="25" column="42" selection-start-line="25" selection-start-column="18" selection-end-line="25" selection-end-column="42" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/site_acname_zhuli_equity.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="236">
@@ -1092,8 +1132,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/site_generate_dissitnct_V4.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="443">
-          <caret line="256" column="16" selection-start-line="256" selection-start-column="16" selection-end-line="256" selection-end-column="16" />
+        <state relative-caret-position="144">
+          <caret line="222" column="21" selection-start-line="222" selection-start-column="21" selection-end-line="222" selection-end-column="21" />
           <folding>
             <element signature="n#!!doc" expanded="false" />
             <element signature="e#411#489#0" expanded="false" />
@@ -1165,6 +1205,38 @@
             <element signature="e#32892#33114#0" expanded="false" />
             <element signature="e#32954#32964#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/new_cal_quayi_V2_real.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="438">
+          <caret line="176" column="0" selection-start-line="176" selection-start-column="0" selection-end-line="176" selection-end-column="0" />
+          <folding>
+            <element signature="n#!!doc" expanded="false" />
+            <marker date="1489053240550" expanded="false" signature="388:1604" ph="..." />
+            <marker date="1489053240550" expanded="false" signature="714:1562" ph="..." />
+            <marker date="1489053240550" expanded="false" signature="733:1091" ph="..." />
+            <marker date="1489053240550" expanded="false" signature="1264:1388" ph="..." />
+            <marker date="1489053240550" expanded="false" signature="1569:1604" ph="..." />
+            <marker date="1489053240550" expanded="false" signature="1671:2872" ph="..." />
+            <marker date="1489053240550" expanded="false" signature="1982:2830" ph="..." />
+            <marker date="1489053240550" expanded="false" signature="2001:2359" ph="..." />
+            <marker date="1489053240550" expanded="false" signature="2532:2656" ph="..." />
+            <marker date="1489053240550" expanded="false" signature="2837:2872" ph="..." />
+            <marker date="1489053240550" expanded="false" signature="2939:3988" ph="..." />
+            <marker date="1489053240550" expanded="false" signature="4028:4808" ph="..." />
+            <marker date="1489053240550" expanded="false" signature="4271:4337" ph="..." />
+            <marker date="1489053240550" expanded="false" signature="4862:5881" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/site_main_distinct.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="598">
+          <caret line="36" column="29" selection-start-line="36" selection-start-column="29" selection-end-line="36" selection-end-column="29" />
+          <folding />
         </state>
       </provider>
     </entry>

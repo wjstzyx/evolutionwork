@@ -36,10 +36,10 @@ def account_lilun_distinct_st(request):
 	symbol=res[0]['Symbol']
 	ac=res[0]['AC']
 	day=str(day)+" 16:00:00"
-	sql="select a.acname,a.P,(a.P*a.ratio) as total_P,a.ST,convert(nvarchar,a.stockdate,120) as stockdate,a.symbol from (select * from st_report_ABpython  where acname='%s' and symbol='%s' and stockdate<='%s') a inner join (select MAX(stockdate) as stockdate,st from st_report_ABpython  where acname='%s' and symbol='%s' and stockdate<='%s'group by st) b on a.stockdate=b.stockdate and a.st=b.ST order by a.P" % (ac,symbol,day,ac,symbol,day)
+	sql="select a.acname,a.P,(a.P*a.ratio) as total_P,a.ST,convert(nvarchar,a.stockdate,120) as stockdate,a.symbol from (select * from st_report_ABpython  where acname='%s' and symbol='%s' and stockdate<='%s') a inner join (select MAX(stockdate) as stockdate,st from st_report_ABpython  where acname='%s' and symbol='%s' and stockdate<='%s'group by st) b on a.stockdate=b.stockdate and a.st=b.ST order by a.ST" % (ac,symbol,day,ac,symbol,day)
 	res1=ms.dict_sql(sql)
 
-	sql="select kka.AC,kka.P,kka.total_P,kka.ST,convert(nvarchar,kka.stockdate,120) as stockdate ,tt.TradName from (select s.P,round((s.P*p.P_size*aa.ratio/100.0),1) as total_P,s.st,s.stockdate,p.AC,p.P_size,aa.ratio from real_st_report s inner join P_BASIC p on s.ST=p.ST inner join AC_RATIO aa  on p.AC=aa.AC and p.AC='%s' and s.stockdate<='%s') kka  inner join (select MAX(stockdate) as stockdate,s.st from real_st_report s inner join P_BASIC p on s.ST=p.ST inner join AC_RATIO aa  on p.AC=aa.AC and p.AC='%s' and s.stockdate<='%s'  group by s.ST ) kkb on kka.stockdate=kkb.stockdate and kka.ST=kkb.ST inner join Trading_logSymbol tt on kka.ST=tt.ST  order by kka.P" % (acname,day,acname,day)
+	sql="select kka.AC,kka.P,kka.total_P,kka.ST,convert(nvarchar,kka.stockdate,120) as stockdate ,tt.TradName from (select s.P,round((s.P*p.P_size*aa.ratio/100.0),1) as total_P,s.st,s.stockdate,p.AC,p.P_size,aa.ratio from real_st_report s inner join P_BASIC p on s.ST=p.ST inner join AC_RATIO aa  on p.AC=aa.AC and p.AC='%s' and s.stockdate<='%s') kka  inner join (select MAX(stockdate) as stockdate,s.st from real_st_report s inner join P_BASIC p on s.ST=p.ST inner join AC_RATIO aa  on p.AC=aa.AC and p.AC='%s' and s.stockdate<='%s'  group by s.ST ) kkb on kka.stockdate=kkb.stockdate and kka.ST=kkb.ST inner join Trading_logSymbol tt on kka.ST=tt.ST  order by tt.TradName" % (acname,day,acname,day)
 	res2=ms.dict_sql(sql)
 
 
