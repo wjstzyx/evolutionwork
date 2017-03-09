@@ -120,10 +120,10 @@ def AB_st_day(mytype=2):
 	nowtime=datetime.datetime.now().strftime('%H%M')
 	isbegin=0
 	if mytype==1:
-		if nowtime>='0850' and nowtime<='1540':
+		if nowtime>='0855' and nowtime<='1540':
 			isbegin=1
 	if mytype==2:
-		if nowtime>='2050' and nowtime<='2330':
+		if nowtime>='2055' and nowtime<='2330':
 			isbegin=1
 	print 'isbegin',isbegin
 	if isbegin==1:

@@ -210,7 +210,7 @@ def write_position_csv(type,symbol,endtime='2017-11-12',df1=1):
 #################general steps ########################
 ### setp 1 获取原始仓位序列 #####
 def get_origin_position_list(p_followac,acname,ratio=1):
-	sql="select q.ClosePrice,q.stockdate,round(q.totalposition*mr.ratio*%s,0) as totalposition ,q.symbol,sid.S_ID from p_follow p inner join quanyi_log_groupby_v2 q on p.F_ac=q.AC and p.AC='%s' inner join LogRecord.dbo.test_margin mr on q.symbol=mr.symbol inner join symbol_id sid on q.symbol=sid.Symbol where q.AC='%s' and stockdate>='%s' and stockdate<='%s' order by stockdate,q.id" % (ratio,p_followac,acname,begintime,endtime)
+	sql="select q.ClosePrice,q.stockdate,round(q.totalposition*mr.ratio*%s,0) as totalposition ,q.symbol,sid.S_ID from p_follow p inner join quanyi_log_groupby_v4_ABpython q on p.F_ac=q.AC and p.AC='%s' inner join LogRecord.dbo.test_margin mr on q.symbol=mr.symbol inner join symbol_id sid on q.symbol=sid.Symbol where q.AC='%s' and stockdate>='%s' and stockdate<='%s' order by stockdate,q.id" % (ratio,p_followac,acname,begintime,endtime)
 	res1=ms.dict_sql(sql)
 	if res1:
 		symbol=res1[0]['symbol']
