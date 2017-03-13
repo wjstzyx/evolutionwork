@@ -246,14 +246,20 @@ def account_database_isdistinct_V2():
 			#update and insert 
 			for aa in newrecord:
 				uniquekey=aa[0]+'_'+str(int(aa[1]))
+				now_real_position=aa[2]
 				if uniquekey  not in oldlistquotes:
 					#print 'insert'
 					sql="insert into [LogRecord].[dbo].[account_position_temp_compare](userID,stockID,realposition,lilunposition,inserttime) values('%s','%s','%s','%s',getdate())" % (aa[0],aa[1],aa[2],int(aa[3]))
 					ms.insert_sql(sql)
 				else:
-					sql="SELECT DATEDIFF(MINUTE, inserttime,getdate()) as timediff,inserttime, getdate() as nowtime FROM [LogRecord].[dbo].[account_position_temp_compare] where userID='%s' and stockID='%s'" %	 (aa[0],int(aa[1]))
+					sql="SELECT DATEDIFF(MINUTE, inserttime,getdate()) as timediff,inserttime, getdate() as nowtime,realposition FROM [LogRecord].[dbo].[account_position_temp_compare] where userID='%s' and stockID='%s'" %	 (aa[0],int(aa[1]))
 					mytime=ms.dict_sql(sql)
 					atime=mytime[0]['timediff']
+					last_real_position=mytime[0]['realposition']
+					if last_real_position<>now_real_position:
+						sql="update account_position_temp_compare set [inserttime]=getdate() where userid='%s' and stockid=%s" % (aa[0],int(aa[1]))
+						ms.insert_sql(sql)
+						continue
 					print atime
 					if atime>4:
 						print 'aa',aa
