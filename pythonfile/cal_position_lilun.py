@@ -256,7 +256,7 @@ def account_database_isdistinct_V2():
 					mytime=ms.dict_sql(sql)
 					atime=mytime[0]['timediff']
 					last_real_position=mytime[0]['realposition']
-					print 'last_real_position',last_real_position,'now_real_position',now_real_position
+					#print 'last_real_position',last_real_position,'now_real_position',now_real_position
 					if int(last_real_position)<>int(now_real_position):
 						sql="update [LogRecord].[dbo].account_position_temp_compare set [inserttime]=getdate() where userid='%s' and stockid=%s" % (aa[0],int(aa[1]))
 						ms.insert_sql(sql)
