@@ -83,6 +83,7 @@ def cal_position_lilun():
 	for item in res:
 		symboldict[item['Symbol']]=item['S_ID']
 	sql="SELECT a.account,a.symbol,sum(a.ratio*b.position ) as Position  FROM [future].[dbo].[account_position_stock_yingshe] a left join [future].[dbo].[RealPosition] b on a.acanme=b.Name group by a.account,a.symbol"
+	print sql 
 	res=ms1.dict_sql(sql)
 	for item in res:
 		symbol_id=symboldict[item['symbol']]
@@ -190,14 +191,53 @@ def account_database_isdistinct():
 							ms.insert_sql(sql)
 
 
+
+
+
+# update getrecordlist=[{'item':myitem['name'],'msg':msg},{},{}]
+def update_target_table(getrecordlist,type):
+	sql="SELECT [id]   ,[type]    ,[item]    ,[msg]     ,[issolved]    ,[isactive]    ,[inserttime] ,[updatetime]     ,[classcode]    FROM [LogRecord].[dbo].[all_monitor_info] where type='%s' and issolved=0 and isactive=1 order by id " % (type)
+	res2=ms.dict_sql(sql)
+	res2item=[[aa['item'],aa['id']] for aa in res2]
+	res1item=[aa['item'] for aa in getrecordlist]
+	#1 set some to issovlved
+	for item in res2item:
+		if item[0] not in res1item:
+			sql="update [LogRecord].[dbo].[all_monitor_info] set issolved=1 where type='%s' and id=%s" % (type,item[1])
+			ms.insert_sql(sql)
+	#2 update or insert to all_monitor_info
+	for item in getrecordlist:
+		sql = "select 1 from [LogRecord].[dbo].[all_monitor_info] where type='%s' and item='%s' and issolved=0" % (
+		type, item['item'])
+		res = ms.dict_sql(sql)
+		if res:
+			sql = "update [LogRecord].[dbo].[all_monitor_info] set updatetime=getdate()  where type='%s' and item='%s'" % (
+			type, item['item'])
+			# print sql
+			ms.insert_sql(sql)
+		else:
+			sql = " insert into [LogRecord].[dbo].[all_monitor_info](type,item,msg,[issolved],[isactive],[inserttime],[updatetime],[classcode]) values('%s','%s','%s','%s','%s',getdate(),getdate(),'%s')" % (
+			type, item['item'], item['msg'], 0, 1, 'fa-bolt')
+			# print sql
+			ms.insert_sql(sql)
+
+
+
+
+
+
+
 #仓位报警-差异超过3分钟就报警
 def account_database_isdistinct_V2():
+	getrecordlist=[]
 	#查询发件人
 	(mailtolist,sendmessage)=get_messagelist()
 	# print mailtolist
 	#待检测的ABmachine列表
 	sql="select item,starttime,endtime from [LogRecord].[dbo].[monitorconfig] where type='Account_distinguish' and ismonitor=1"
 	res=ms.dict_sql(sql)
+	nowhour=datetime.datetime.now().strftime('%H%M')
+	nowhour=int(nowhour)
 	for item in res:
 		symbol=item['item']
 		starttime=item['starttime']
@@ -211,7 +251,6 @@ def account_database_isdistinct_V2():
 		if nowtime>starttime and nowtime<=endtime :
 			nowday=datetime.datetime.now().strftime('%Y%m%d')
 			sql="select kaa.userid as account_userid,kaa.stockid as account_stockid,kaa.position as account_position,kaa.sendposition,kaa.inserttime as account_time,kbb.* from (select a.userID,a.stockID,(a.longhave-a.shorthave) as position,([longsend]-[shortsend]) as sendposition ,inserttime from [LogRecord].[dbo].[account_position] a inner join (  select MAX(time) as 	time  ,userid   FROM [LogRecord].[dbo].[account_position]  where date='%s' group by userid) b  on a.time=b.time and a.userID=b.userID and a.date='%s' where not ((a.longhave-a.shorthave)=0 and ([longsend]-[shortsend])=0)) kaa full outer join ( select userID,stockID,sum(position)as position,MAX(inserttime)as inserttime  from [LogRecord].[dbo].[account_position_lilun]  group by 	userID,stockID  having sum(position)<>0  ) kbb on kaa.userID=kbb.userID and kaa.stockID=kbb.stockID   where kaa.userID is null or kbb.stockID is null or not  (kaa.position=kbb.position and kaa.sendposition=0)" % (nowday,nowday)
-			print sql 
 			res=ms.dict_sql(sql)
 			newrecord=[]
 			#[[userid,stockid,account_posiiotn,account_sendposition,position,account_time,inserttime]]
@@ -256,14 +295,21 @@ def account_database_isdistinct_V2():
 					mytime=ms.dict_sql(sql)
 					atime=mytime[0]['timediff']
 					last_real_position=mytime[0]['realposition']
-					#print 'last_real_position',last_real_position,'now_real_position',now_real_position
+					print 'last_real_position',last_real_position,'now_real_position',now_real_position
 					if int(last_real_position)<>int(now_real_position):
 						sql="update [LogRecord].[dbo].account_position_temp_compare set [inserttime]=getdate() where userid='%s' and stockid=%s" % (aa[0],int(aa[1]))
 						ms.insert_sql(sql)
 						continue
-					print atime
-					if atime>4:
+					print 'atime',atime
+					if atime>4 and ((nowhour>=901 and nowhour<=1130) or (nowhour>=1331 and nowhour<=1459)):
 						print 'aa',aa
+						if int(aa[1]) in (11,4) and nowhour>931:
+							getrecordlist.append({'item':uniquekey,'msg':'仓位不一致 real:%s database:%s' % (aa[2],aa[4])})
+						if int(aa[1]) not in (11,4):
+							getrecordlist.append({'item':uniquekey,'msg':'仓位不一致 real:%s database:%s' % (aa[2],aa[4])})
+
+	update_target_table(getrecordlist, 'Account')
+
 						# if aa[3]<>0:
 						# 	if 
 						# 算上send position 再比较
@@ -276,21 +322,21 @@ def account_database_isdistinct_V2():
 						# #print sql 
 						# ms.insert_sql(sql)
 						#插入信息显示
-						type='Account'
-						item=uniquekey
-						msg='实盘仓位与数据库不一致 lasttime:%s nowtime:%s' % (mytime[0]['inserttime'],mytime[0]['nowtime'])
-						classcode='fa-comment'
-						sql="select 1 from [LogRecord].[dbo].[all_monitor_info] where type='%s' and item='%s' and issolved=0" % (type,item)
-						res=ms.dict_sql(sql)
-						#print sql 
-						if res:
-							sql="update [LogRecord].[dbo].[all_monitor_info] set updatetime=getdate()  where type='%s' and item='%s'" % (type,item)
-							#print sql 
-							ms.insert_sql(sql)
-						else:
-							sql=" insert into [LogRecord].[dbo].[all_monitor_info](type,item,msg,[issolved],[isactive],[inserttime],[updatetime],[classcode]) values('%s','%s','%s','%s','%s',getdate(),getdate(),'%s')" % (type,item,msg,0,1,classcode)
-							#print sql 
-							ms.insert_sql(sql)
+						# type='Account'
+						# item=uniquekey
+						# msg='实盘仓位与数据库不一致 lasttime:%s nowtime:%s' % (mytime[0]['inserttime'],mytime[0]['nowtime'])
+						# classcode='fa-comment'
+						# sql="select 1 from [LogRecord].[dbo].[all_monitor_info] where type='%s' and item='%s' and issolved=0" % (type,item)
+						# res=ms.dict_sql(sql)
+						# #print sql 
+						# if res:
+						# 	sql="update [LogRecord].[dbo].[all_monitor_info] set updatetime=getdate()  where type='%s' and item='%s'" % (type,item)
+						# 	#print sql 
+						# 	ms.insert_sql(sql)
+						# else:
+						# 	sql=" insert into [LogRecord].[dbo].[all_monitor_info](type,item,msg,[issolved],[isactive],[inserttime],[updatetime],[classcode]) values('%s','%s','%s','%s','%s',getdate(),getdate(),'%s')" % (type,item,msg,0,1,classcode)
+						# 	#print sql 
+						# 	ms.insert_sql(sql)
 
 
 

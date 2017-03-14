@@ -23,23 +23,52 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="site_main_distinct.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="site_main_distinct.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/site_main_distinct.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="253">
-              <caret line="27" column="0" selection-start-line="27" selection-start-column="0" selection-end-line="27" selection-end-column="0" />
+            <state relative-caret-position="307">
+              <caret line="29" column="17" selection-start-line="29" selection-start-column="17" selection-end-line="29" selection-end-column="17" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="myRL_mdp_Q.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="z_t_get_all_acname_inuse.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/z_t_get_all_acname_inuse.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="716">
+              <caret line="85" column="28" selection-start-line="85" selection-start-column="28" selection-end-line="85" selection-end-column="28" />
+              <folding>
+                <element signature="e#37#70#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="myRL_mdp_Q.py" pinned="false" current-in-tab="true">
         <entry file="file://$USER_HOME$/Desktop/RL-Exercise/myRL_mdp_Q.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="541">
-              <caret line="195" column="0" selection-start-line="195" selection-start-column="0" selection-end-line="195" selection-end-column="0" />
+            <state relative-caret-position="479">
+              <caret line="162" column="20" selection-start-line="162" selection-start-column="20" selection-end-line="162" selection-end-column="20" />
               <folding>
-                <element signature="e#0#21#0" expanded="true" />
+                <element signature="e#1079#1571#0" expanded="false" />
+                <element signature="e#1659#1747#0" expanded="false" />
+                <element signature="e#1683#1747#0" expanded="false" />
+                <element signature="e#2045#2330#0" expanded="false" />
+                <element signature="e#2629#3239#0" expanded="false" />
+                <element signature="e#2650#3239#0" expanded="false" />
+                <element signature="e#2700#2816#0" expanded="false" />
+                <element signature="e#2838#2954#0" expanded="false" />
+                <element signature="e#2975#3093#0" expanded="false" />
+                <element signature="e#3118#3239#0" expanded="false" />
+                <element signature="e#3291#3645#0" expanded="false" />
+                <element signature="e#3353#3482#0" expanded="false" />
+                <element signature="e#3512#3645#0" expanded="false" />
+                <marker date="1489453831961" expanded="false" signature="204:302" ph="..." />
+                <marker date="1489453831961" expanded="false" signature="438:525" ph="..." />
+                <marker date="1489453831961" expanded="false" signature="1594:1781" ph="..." />
+                <marker date="1489453831961" expanded="false" signature="1807:2001" ph="..." />
+                <marker date="1489453831961" expanded="false" signature="2069:2307" ph="..." />
               </folding>
             </state>
           </provider>
@@ -48,8 +77,8 @@
       <file leaf-file-name="new_cal_quayi_V2_real.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/new_cal_quayi_V2_real.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="507">
-              <caret line="181" column="23" selection-start-line="181" selection-start-column="23" selection-end-line="181" selection-end-column="23" />
+            <state relative-caret-position="185">
+              <caret line="167" column="26" selection-start-line="167" selection-start-column="26" selection-end-line="167" selection-end-column="26" />
               <folding>
                 <marker date="1489053240550" expanded="false" signature="0:36" ph="..." />
                 <marker date="1489053240550" expanded="false" signature="37:81" ph="import ..." />
@@ -75,8 +104,8 @@
       <file leaf-file-name="site_generate_dissitnct_V4.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/site_generate_dissitnct_V4.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="98">
-              <caret line="222" column="21" selection-start-line="222" selection-start-column="21" selection-end-line="222" selection-end-column="21" />
+            <state relative-caret-position="489">
+              <caret line="653" column="32" selection-start-line="653" selection-start-column="32" selection-end-line="653" selection-end-column="32" />
               <folding>
                 <element signature="n#!!doc" expanded="false" />
                 <element signature="e#411#489#0" expanded="false" />
@@ -136,17 +165,17 @@
                 <element signature="e#26487#26552#0" expanded="false" />
                 <element signature="e#26755#26822#0" expanded="false" />
                 <element signature="e#27026#27119#0" expanded="false" />
-                <element signature="e#28768#29619#0" expanded="false" />
-                <element signature="e#29687#30442#0" expanded="false" />
-                <element signature="e#30643#30656#0" expanded="false" />
-                <element signature="e#31329#31787#0" expanded="false" />
-                <element signature="e#31518#31648#0" expanded="false" />
-                <element signature="e#31841#32253#0" expanded="false" />
-                <element signature="e#32030#32162#0" expanded="false" />
-                <element signature="e#32257#32319#0" expanded="false" />
-                <element signature="e#32804#32869#0" expanded="false" />
-                <element signature="e#32892#33114#0" expanded="false" />
-                <element signature="e#32954#32964#0" expanded="false" />
+                <element signature="e#28772#29623#0" expanded="false" />
+                <element signature="e#29691#30446#0" expanded="false" />
+                <element signature="e#30647#30660#0" expanded="false" />
+                <element signature="e#31333#31791#0" expanded="false" />
+                <element signature="e#31522#31652#0" expanded="false" />
+                <element signature="e#31845#32257#0" expanded="false" />
+                <element signature="e#32034#32166#0" expanded="false" />
+                <element signature="e#32261#32323#0" expanded="false" />
+                <element signature="e#32808#32873#0" expanded="false" />
+                <element signature="e#32896#33118#0" expanded="false" />
+                <element signature="e#32958#32968#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -179,7 +208,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/site_generate_account_distinct.py" />
         <option value="$USER_HOME$/Desktop/yuyang/yuyang_stepwise_search.py" />
         <option value="$PROJECT_DIR$/aaa_test.py" />
         <option value="$USER_HOME$/Desktop/yuyang/yuyang_test_stepwise.py" />
@@ -220,15 +248,16 @@
         <option value="E:/AB_python/MarketClose_NewAnalysis/_daynight/py_rt_simnow/57min_getOpenHighLow_getCXVOLUME5_NetProfit-[5].afl" />
         <option value="$PROJECT_DIR$/../Aflpyhton/data_import.py" />
         <option value="$PROJECT_DIR$/new_position_generate_V2.py" />
-        <option value="$PROJECT_DIR$/site_generate_dissitnct_V4.py" />
         <option value="$PROJECT_DIR$/new_position_generate.py" />
         <option value="$PROJECT_DIR$/策略闪单分析.py" />
-        <option value="$PROJECT_DIR$/site_main_distinct.py" />
         <option value="$PROJECT_DIR$/site_acname_zhuli_equity.py" />
         <option value="$PROJECT_DIR$/new_cal_quayi_V2_real.py" />
         <option value="E:/test/RL.py" />
         <option value="$USER_HOME$/Desktop/RL-Exercise/myRL.py" />
         <option value="$USER_HOME$/Desktop/RL-Exercise/myRL_mdp.py" />
+        <option value="$PROJECT_DIR$/z_t_get_all_acname_inuse.py" />
+        <option value="$PROJECT_DIR$/site_generate_dissitnct_V4.py" />
+        <option value="$PROJECT_DIR$/site_main_distinct.py" />
         <option value="$USER_HOME$/Desktop/RL-Exercise/myRL_mdp_Q.py" />
       </list>
     </option>
@@ -297,40 +326,6 @@
     </key>
   </component>
   <component name="RunManager" selected="Python.myRL_mdp_Q">
-    <configuration default="false" name="site_main_distinct" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="pythonfile" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/site_main_distinct.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <method />
-    </configuration>
-    <configuration default="false" name="RL" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="E:/test" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="pythonfile" />
-      <option name="SCRIPT_NAME" value="E:/test/RL.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <method />
-    </configuration>
     <configuration default="false" name="myRL" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -378,6 +373,40 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="pythonfile" />
       <option name="SCRIPT_NAME" value="$USER_HOME$/Desktop/RL-Exercise/myRL_mdp_Q.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="z_t_get_all_acname_inuse" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="pythonfile" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/z_t_get_all_acname_inuse.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="site_main_distinct" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="pythonfile" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/site_main_distinct.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
@@ -517,19 +546,19 @@
       <method />
     </configuration>
     <list size="5">
-      <item index="0" class="java.lang.String" itemvalue="Python.site_main_distinct" />
-      <item index="1" class="java.lang.String" itemvalue="Python.RL" />
-      <item index="2" class="java.lang.String" itemvalue="Python.myRL" />
-      <item index="3" class="java.lang.String" itemvalue="Python.myRL_mdp" />
-      <item index="4" class="java.lang.String" itemvalue="Python.myRL_mdp_Q" />
+      <item index="0" class="java.lang.String" itemvalue="Python.myRL" />
+      <item index="1" class="java.lang.String" itemvalue="Python.myRL_mdp" />
+      <item index="2" class="java.lang.String" itemvalue="Python.myRL_mdp_Q" />
+      <item index="3" class="java.lang.String" itemvalue="Python.z_t_get_all_acname_inuse" />
+      <item index="4" class="java.lang.String" itemvalue="Python.site_main_distinct" />
     </list>
     <recent_temporary>
       <list size="5">
         <item index="0" class="java.lang.String" itemvalue="Python.myRL_mdp_Q" />
-        <item index="1" class="java.lang.String" itemvalue="Python.myRL_mdp" />
-        <item index="2" class="java.lang.String" itemvalue="Python.myRL" />
-        <item index="3" class="java.lang.String" itemvalue="Python.RL" />
-        <item index="4" class="java.lang.String" itemvalue="Python.site_main_distinct" />
+        <item index="1" class="java.lang.String" itemvalue="Python.site_main_distinct" />
+        <item index="2" class="java.lang.String" itemvalue="Python.z_t_get_all_acname_inuse" />
+        <item index="3" class="java.lang.String" itemvalue="Python.myRL_mdp" />
+        <item index="4" class="java.lang.String" itemvalue="Python.myRL" />
       </list>
     </recent_temporary>
   </component>
@@ -547,7 +576,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1066" extended-state="7" />
+    <frame x="-8" y="-8" width="1936" height="1066" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.19114584" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
@@ -608,6 +637,11 @@
           <line>229</line>
           <option name="timeStamp" value="205" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/z_t_get_all_acname_inuse.py</url>
+          <line>63</line>
+          <option name="timeStamp" value="220" />
+        </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
@@ -616,18 +650,11 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="220" />
+      <option name="time" value="223" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/del_select_error_st.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
-          <caret line="24" column="11" selection-start-line="24" selection-start-column="11" selection-end-line="24" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://E:/ABautofile/aflfile/15min-RB-YZ-tupo_1to1_tn2.afl" />
     <entry file="file://E:/ABautofile/aflfile/5min-YY-midday.afl" />
     <entry file="file://E:/ABautofile/aflfile/5min-yy-abl-QSD2-ZS.afl" />
@@ -1140,10 +1167,35 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/new_cal_quayi_V2_real.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="185">
+          <caret line="167" column="26" selection-start-line="167" selection-start-column="26" selection-end-line="167" selection-end-column="26" />
+          <folding>
+            <marker date="1489053240550" expanded="false" signature="0:36" ph="..." />
+            <marker date="1489053240550" expanded="false" signature="37:81" ph="import ..." />
+            <marker date="1489053240550" expanded="false" signature="388:1604" ph="..." />
+            <marker date="1489053240550" expanded="false" signature="714:1562" ph="..." />
+            <marker date="1489053240550" expanded="false" signature="733:1091" ph="..." />
+            <marker date="1489053240550" expanded="false" signature="1264:1388" ph="..." />
+            <marker date="1489053240550" expanded="false" signature="1569:1604" ph="..." />
+            <marker date="1489053240550" expanded="false" signature="1671:2872" ph="..." />
+            <marker date="1489053240550" expanded="false" signature="1982:2830" ph="..." />
+            <marker date="1489053240550" expanded="false" signature="2001:2359" ph="..." />
+            <marker date="1489053240550" expanded="false" signature="2532:2656" ph="..." />
+            <marker date="1489053240550" expanded="false" signature="2837:2872" ph="..." />
+            <marker date="1489053240550" expanded="false" signature="2939:3988" ph="..." />
+            <marker date="1489053240550" expanded="false" signature="4028:4808" ph="..." />
+            <marker date="1489053240550" expanded="false" signature="4271:4337" ph="..." />
+            <marker date="1489053240550" expanded="false" signature="4862:5881" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/site_generate_dissitnct_V4.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="98">
-          <caret line="222" column="21" selection-start-line="222" selection-start-column="21" selection-end-line="222" selection-end-column="21" />
+        <state relative-caret-position="489">
+          <caret line="653" column="32" selection-start-line="653" selection-start-column="32" selection-end-line="653" selection-end-column="32" />
           <folding>
             <element signature="n#!!doc" expanded="false" />
             <element signature="e#411#489#0" expanded="false" />
@@ -1203,61 +1255,63 @@
             <element signature="e#26487#26552#0" expanded="false" />
             <element signature="e#26755#26822#0" expanded="false" />
             <element signature="e#27026#27119#0" expanded="false" />
-            <element signature="e#28768#29619#0" expanded="false" />
-            <element signature="e#29687#30442#0" expanded="false" />
-            <element signature="e#30643#30656#0" expanded="false" />
-            <element signature="e#31329#31787#0" expanded="false" />
-            <element signature="e#31518#31648#0" expanded="false" />
-            <element signature="e#31841#32253#0" expanded="false" />
-            <element signature="e#32030#32162#0" expanded="false" />
-            <element signature="e#32257#32319#0" expanded="false" />
-            <element signature="e#32804#32869#0" expanded="false" />
-            <element signature="e#32892#33114#0" expanded="false" />
-            <element signature="e#32954#32964#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/new_cal_quayi_V2_real.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="507">
-          <caret line="181" column="23" selection-start-line="181" selection-start-column="23" selection-end-line="181" selection-end-column="23" />
-          <folding>
-            <marker date="1489053240550" expanded="false" signature="0:36" ph="..." />
-            <marker date="1489053240550" expanded="false" signature="37:81" ph="import ..." />
-            <marker date="1489053240550" expanded="false" signature="388:1604" ph="..." />
-            <marker date="1489053240550" expanded="false" signature="714:1562" ph="..." />
-            <marker date="1489053240550" expanded="false" signature="733:1091" ph="..." />
-            <marker date="1489053240550" expanded="false" signature="1264:1388" ph="..." />
-            <marker date="1489053240550" expanded="false" signature="1569:1604" ph="..." />
-            <marker date="1489053240550" expanded="false" signature="1671:2872" ph="..." />
-            <marker date="1489053240550" expanded="false" signature="1982:2830" ph="..." />
-            <marker date="1489053240550" expanded="false" signature="2001:2359" ph="..." />
-            <marker date="1489053240550" expanded="false" signature="2532:2656" ph="..." />
-            <marker date="1489053240550" expanded="false" signature="2837:2872" ph="..." />
-            <marker date="1489053240550" expanded="false" signature="2939:3988" ph="..." />
-            <marker date="1489053240550" expanded="false" signature="4028:4808" ph="..." />
-            <marker date="1489053240550" expanded="false" signature="4271:4337" ph="..." />
-            <marker date="1489053240550" expanded="false" signature="4862:5881" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/Desktop/RL-Exercise/myRL_mdp_Q.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="541">
-          <caret line="195" column="0" selection-start-line="195" selection-start-column="0" selection-end-line="195" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#21#0" expanded="true" />
+            <element signature="e#28772#29623#0" expanded="false" />
+            <element signature="e#29691#30446#0" expanded="false" />
+            <element signature="e#30647#30660#0" expanded="false" />
+            <element signature="e#31333#31791#0" expanded="false" />
+            <element signature="e#31522#31652#0" expanded="false" />
+            <element signature="e#31845#32257#0" expanded="false" />
+            <element signature="e#32034#32166#0" expanded="false" />
+            <element signature="e#32261#32323#0" expanded="false" />
+            <element signature="e#32808#32873#0" expanded="false" />
+            <element signature="e#32896#33118#0" expanded="false" />
+            <element signature="e#32958#32968#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/site_main_distinct.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="253">
-          <caret line="27" column="0" selection-start-line="27" selection-start-column="0" selection-end-line="27" selection-end-column="0" />
+        <state relative-caret-position="307">
+          <caret line="29" column="17" selection-start-line="29" selection-start-column="17" selection-end-line="29" selection-end-column="17" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/z_t_get_all_acname_inuse.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="716">
+          <caret line="85" column="28" selection-start-line="85" selection-start-column="28" selection-end-line="85" selection-end-column="28" />
+          <folding>
+            <element signature="e#37#70#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Desktop/RL-Exercise/myRL_mdp_Q.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="479">
+          <caret line="162" column="20" selection-start-line="162" selection-start-column="20" selection-end-line="162" selection-end-column="20" />
+          <folding>
+            <element signature="e#1079#1571#0" expanded="false" />
+            <element signature="e#1659#1747#0" expanded="false" />
+            <element signature="e#1683#1747#0" expanded="false" />
+            <element signature="e#2045#2330#0" expanded="false" />
+            <element signature="e#2629#3239#0" expanded="false" />
+            <element signature="e#2650#3239#0" expanded="false" />
+            <element signature="e#2700#2816#0" expanded="false" />
+            <element signature="e#2838#2954#0" expanded="false" />
+            <element signature="e#2975#3093#0" expanded="false" />
+            <element signature="e#3118#3239#0" expanded="false" />
+            <element signature="e#3291#3645#0" expanded="false" />
+            <element signature="e#3353#3482#0" expanded="false" />
+            <element signature="e#3512#3645#0" expanded="false" />
+            <marker date="1489453831961" expanded="false" signature="204:302" ph="..." />
+            <marker date="1489453831961" expanded="false" signature="438:525" ph="..." />
+            <marker date="1489453831961" expanded="false" signature="1594:1781" ph="..." />
+            <marker date="1489453831961" expanded="false" signature="1807:2001" ph="..." />
+            <marker date="1489453831961" expanded="false" signature="2069:2307" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>

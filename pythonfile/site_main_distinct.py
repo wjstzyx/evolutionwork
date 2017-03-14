@@ -27,7 +27,7 @@ def sub_main(item):
 	os.system(cmd)
 
 if __name__ == "__main__":
-	threads_N = 10
+	threads_N = 6
 	multiprocessing.freeze_support()
 	pool = multiprocessing.Pool(processes=threads_N)
 

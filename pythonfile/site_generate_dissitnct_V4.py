@@ -625,11 +625,11 @@ def cal_ac_day_equity(p_followac,acname,ratio=1):
 	totalpo = get_Tsymbol_by_symbol(symbol, postionpd)
 	#totalpo.to_csv(r'E:\test\zhishu_position_close'+datetime.datetime.now().strftime('%M%S')+'.csv')
 	newtotalpo = cal_equity(symbol, totalpo)
-	write_position_csv(type='Lilun', symbol=symbol, endtime=equity_day, df1=newtotalpo)
+	#write_position_csv(type='Lilun', symbol=symbol, endtime=equity_day, df1=newtotalpo)
 	day_equity = equity_resharp(newtotalpo)
 	tempdf=day_equity
 	tempdf['day']=day_equity.index
-	write_position_csv(type='Lilun_dayli_equity', symbol=symbol, endtime=equity_day, df1=tempdf)
+	#write_position_csv(type='Lilun_dayli_equity', symbol=symbol, endtime=equity_day, df1=tempdf)
 	write_to_database_symbol_equity_lilun(account, acname, tempdf,cache_num)
 	lastday_equity=day_equity['equity'][-1]
 	cal_day=day_equity.index[-1]
@@ -644,11 +644,11 @@ def cal_ac_day_equity_real_ab_lilun(p_followac,acname,ratio=1):
 	#获取 指数 价格 系列权益
 	totalpo = get_Tsymbol_by_symbol(symbol, postionpd)
 	newtotalpo = cal_equity(symbol, totalpo)
-	write_position_csv(type='real_ab_lilun', symbol=symbol, endtime=equity_day, df1=newtotalpo)
+	#write_position_csv(type='real_ab_lilun', symbol=symbol, endtime=equity_day, df1=newtotalpo)
 	day_equity = equity_resharp(newtotalpo)
 	tempdf=day_equity
 	tempdf['day']=day_equity.index
-	write_position_csv(type='real_ab_lilun_dayli_equity', symbol=symbol, endtime=equity_day, df1=tempdf)
+	#write_position_csv(type='real_ab_lilun_dayli_equity', symbol=symbol, endtime=equity_day, df1=tempdf)
 	write_to_database_symbol_equity_real_ab_lilun(account, acname, tempdf,cache_num)
 	lastday_equity=day_equity['equity'][-1]
 	cal_day=day_equity.index[-1]
