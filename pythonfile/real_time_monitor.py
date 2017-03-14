@@ -66,7 +66,7 @@ def update_target_table(getrecordlist,type):
 
 # quotes monitor
 def quotes_monitor():
-	sql="select DATEDIFF(MINUTE,stockdate,GETDATE()) as mydatediff ,stockdate, Symbol,nowtime from (  select MAX(stockdate) as stockdate,Symbol,GETDATE() as nowtime from TSymbol group by Symbol) a  where DATEDIFF(MINUTE,stockdate,GETDATE())>=2 order by DATEDIFF(MINUTE,stockdate,GETDATE()) desc"
+	sql="select DATEDIFF(MINUTE,stockdate,GETDATE()) as mydatediff ,stockdate, Symbol,nowtime from (  select MAX(stockdate) as stockdate,Symbol,GETDATE() as nowtime from TSymbol group by Symbol) a  where DATEDIFF(MINUTE,stockdate,GETDATE())>=2  and symbol not in ('TF') order by DATEDIFF(MINUTE,stockdate,GETDATE()) desc"
 	res=ms.dict_sql(sql)
 	nowtime=res[0]['nowtime'].strftime('%H%M')
 	print nowtime
