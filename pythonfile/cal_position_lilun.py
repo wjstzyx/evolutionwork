@@ -83,11 +83,12 @@ def cal_position_lilun():
 	for item in res:
 		symboldict[item['Symbol']]=item['S_ID']
 	sql="SELECT a.account,a.symbol,sum(a.ratio*b.position ) as Position  FROM [future].[dbo].[account_position_stock_yingshe] a left join [future].[dbo].[RealPosition] b on a.acanme=b.Name group by a.account,a.symbol"
-	print sql 
 	res=ms1.dict_sql(sql)
 	for item in res:
+		#print item 
 		symbol_id=symboldict[item['symbol']]
 		sql="insert into [LogRecord].[dbo].account_position_lilun([userID],[stockID],[position],[inserttime]) values('%s','%s','%s',getdate())" % (item['account'],symbol_id,item['Position'])
+		#print sql 
 		ms.insert_sql(sql)
 
 	totalsql=""
@@ -295,13 +296,13 @@ def account_database_isdistinct_V2():
 					mytime=ms.dict_sql(sql)
 					atime=mytime[0]['timediff']
 					last_real_position=mytime[0]['realposition']
-					print 'last_real_position',last_real_position,'now_real_position',now_real_position
 					if int(last_real_position)<>int(now_real_position):
+						print uniquekey,'last_real_position',last_real_position,'now_real_position',now_real_position
 						sql="update [LogRecord].[dbo].account_position_temp_compare set [inserttime]=getdate() where userid='%s' and stockid=%s" % (aa[0],int(aa[1]))
 						ms.insert_sql(sql)
 						continue
-					print 'atime',atime
 					if atime>4 and ((nowhour>=901 and nowhour<=1130) or (nowhour>=1331 and nowhour<=1459)):
+						print uniquekey,'last_real_position',last_real_position,'now_real_position',now_real_position
 						print 'aa',aa
 						if int(aa[1]) in (11,4) and nowhour>931:
 							getrecordlist.append({'item':uniquekey,'msg':'仓位不一致 real:%s database:%s' % (aa[2],aa[4])})
