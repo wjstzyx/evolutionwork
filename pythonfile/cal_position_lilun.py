@@ -289,7 +289,7 @@ def account_database_isdistinct_V2():
 				now_real_position=aa[2]
 				if uniquekey  not in oldlistquotes:
 					#print 'insert'
-					sql="insert into [LogRecord].[dbo].[account_position_temp_compare](userID,stockID,realposition,lilunposition,inserttime) values('%s','%s','%s','%s',getdate())" % (aa[0],aa[1],aa[2],int(aa[3]))
+					sql="insert into [LogRecord].[dbo].[account_position_temp_compare](userID,stockID,realposition,lilunposition,inserttime) values('%s','%s','%s','%s',getdate())" % (aa[0],aa[1],int(aa[2])+int(aa[3]),int(aa[4]))
 					ms.insert_sql(sql)
 				else:
 					sql="SELECT DATEDIFF(MINUTE, inserttime,getdate()) as timediff,inserttime, getdate() as nowtime,realposition FROM [LogRecord].[dbo].[account_position_temp_compare] where userID='%s' and stockID='%s'" %	 (aa[0],int(aa[1]))
