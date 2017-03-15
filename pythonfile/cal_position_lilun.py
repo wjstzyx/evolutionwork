@@ -286,7 +286,7 @@ def account_database_isdistinct_V2():
 			#update and insert 
 			for aa in newrecord:
 				uniquekey=aa[0]+'_'+str(int(aa[1]))
-				now_real_position=aa[2]
+				now_real_position=int(aa[2])+int(aa[3])
 				if uniquekey  not in oldlistquotes:
 					#print 'insert'
 					sql="insert into [LogRecord].[dbo].[account_position_temp_compare](userID,stockID,realposition,lilunposition,inserttime) values('%s','%s','%s','%s',getdate())" % (aa[0],aa[1],int(aa[2])+int(aa[3]),int(aa[4]))
