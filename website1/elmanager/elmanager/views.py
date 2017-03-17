@@ -4,11 +4,15 @@ from django.template import Context
 from django.http import HttpResponse,HttpResponseRedirect
 from django.shortcuts import render_to_response
 import datetime
+import os 
 import time
 import csv
 import math
 from django.utils import simplejson
 import hashlib
+#### customs funtion
+import  monitor_alert 
+####
 import sys
 reload(sys)
 sys.setdefaultencoding( "utf-8" )
@@ -18,12 +22,27 @@ from dbconn import MSSQL
 
 
 
+def python_AB_monitor_newalert(request):
+
+	al = monitor_alert.PyAB_Alert()
+	res1=al.run()
+
+	result={'account_distinct':res1[0],'Thunder':res1[1],'quotes':res1[2],'AB':res1[3]}
+	result=simplejson.dumps(result,ensure_ascii = False)
+	return HttpResponse(result,mimetype='application/json')
+
+
+
+
+
+
+
 def python_AB_monitor(request):
 	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 	#获取没有解决的问题
-	sql="SELECT id, [type],[item] ,[msg], classcode ,[updatetime]FROM [LogRecord].[dbo].[all_monitor_info] where isactive=1 and issolved=0 order by updatetime "
-	res1=ms.dict_sql(sql)
 
+	al = monitor_alert.PyAB_Alert()
+	res1=al.run()
 
 	return render_to_response('python_AB_monitor.html',{
 		'data':'',

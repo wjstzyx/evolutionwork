@@ -111,74 +111,16 @@ function refresh_alert()
   var quotes='';
   var AB='';
     $.ajax({
-        url:"{% url 'elmanager.views.rt_newalert' %}",
+        url:"{% url 'elmanager.views.python_AB_monitor_newalert' %}",
         data:{"date":"data"},
         type:"POST",
         dataType:"json",
         async:false,
         success:function(result){
-          for (var i=0;i<result.account_distinct.length;i++)
-          { var tempstr='';
-            id=result.account_distinct[i].id;
-            type=result.account_distinct[i].type;
-            msg=result.account_distinct[i].msg;
-            item=result.account_distinct[i].item;
-            classcode=result.account_distinct[i].classcode;
-            datetime=result.account_distinct[i].updatetime;
-            tempstr += '<a class="list-group-item" id="'+id+'" style="background-color:#FF9900">';
-            tempstr += '<i class="fa '+classcode+' fa-fw"></i>';
-            tempstr += type+'&nbsp;&nbsp;&nbsp;&nbsp;'+item+'&nbsp;&nbsp;&nbsp;&nbsp;'+msg;
-            tempstr += '<span class="pull-right text-muted small"><em>'+datetime+'</em>';
-            tempstr += '</span></a>';
-            account_distinct += tempstr;            
-          }
-
-          for (var i=0;i<result.Thunder.length;i++)
-          { var tempstr='';
-            id=result.Thunder[i].id;
-            type=result.Thunder[i].type;
-            msg=result.Thunder[i].msg;
-            item=result.Thunder[i].item;
-            classcode=result.Thunder[i].classcode;
-            datetime=result.Thunder[i].updatetime;
-            tempstr += '<a class="list-group-item" id="'+id+'" style="background-color:#FF9900">';
-            tempstr += '<i class="fa '+classcode+' fa-fw"></i>';
-            tempstr += type+'&nbsp;&nbsp;&nbsp;&nbsp;'+item+'&nbsp;&nbsp;&nbsp;&nbsp;'+msg;
-            tempstr += '<span class="pull-right text-muted small"><em>'+datetime+'</em>';
-            tempstr += '</span></a>';
-            Thunder += tempstr;            
-          }
-          for (var i=0;i<result.quotes.length;i++)
-          { var tempstr='';
-            id=result.quotes[i].id;
-            type=result.quotes[i].type;
-            msg=result.quotes[i].msg;
-            item=result.quotes[i].item;
-            classcode=result.quotes[i].classcode;
-            datetime=result.quotes[i].updatetime;
-            tempstr += '<a class="list-group-item" id="'+id+'" style="background-color:#FF9900">';
-            tempstr += '<i class="fa '+classcode+' fa-fw"></i>';
-            tempstr += type+'&nbsp;&nbsp;&nbsp;&nbsp;'+item+'&nbsp;&nbsp;&nbsp;&nbsp;'+msg;
-            tempstr += '<span class="pull-right text-muted small"><em>'+datetime+'</em>';
-            tempstr += '</span></a>';
-            quotes += tempstr;            
-          }
-          for (var i=0;i<result.AB.length;i++)
-          { var tempstr='';
-            id=result.AB[i].id;
-            type=result.AB[i].type;
-            msg=result.AB[i].msg;
-            item=result.AB[i].item;
-            classcode=result.AB[i].classcode;
-            datetime=result.AB[i].updatetime;
-            tempstr += '<a class="list-group-item" id="'+id+'" style="background-color:#FF9900">';
-            tempstr += '<i class="fa '+classcode+' fa-fw"></i>';
-            tempstr += type+'&nbsp;&nbsp;&nbsp;&nbsp;'+item+'&nbsp;&nbsp;&nbsp;&nbsp;'+msg;
-            tempstr += '<span class="pull-right text-muted small"><em>'+datetime+'</em>';
-            tempstr += '</span></a>';
-            AB += tempstr;            
-          }
-
+          account_distinct=result.account_distinct.html_content
+          Thunder=result.Thunder.html_content
+          quotes=result.quotes.html_content
+          AB=result.AB.html_content
 
             
         }    
@@ -191,7 +133,7 @@ function refresh_alert()
 
 }
 
-timename=setInterval("refresh_alert();",4000);
+timename=setInterval("refresh_alert();",3000);
 
 
 
@@ -210,10 +152,11 @@ timename=setInterval("refresh_alert();",4000);
       <div class="col-lg-6" >
       <div class="panel panel-default">
          <div class="panel-heading">
-             <i class="fa fa-bell fa-fw"></i>账户仓位差异
+             <i class="fa fa-bell fa-fw"></i>{{res1.0.message}}
          </div>
          <div class="panel-body" style=" overflow-y:auto; height:400px;background:#ddd;"  >
              <div class="list-group" id="account_distinct">
+             {{res1.0.html_content|safe}}
 
              </div>
              <!-- /.list-group -->
@@ -225,11 +168,11 @@ timename=setInterval("refresh_alert();",4000);
       <div class="col-lg-6" >
       <div class="panel panel-default">
          <div class="panel-heading">
-             <i class="fa fa-bell fa-fw"></i>Thunder无心跳
+             <i class="fa fa-bell fa-fw"></i>{{res1.1.message}}
          </div>
-         <div class="panel-body" style=" overflow-y:auto; height:400px;background:#ddd;">
+         <div class="panel-body" style=" overflow-y:auto; height:400px;">
              <div class="list-group" id="Thunder">
-             aaa
+              {{res1.1.html_content|safe}}
              </div>
              <!-- /.list-group -->
          </div>
@@ -244,10 +187,11 @@ timename=setInterval("refresh_alert();",4000);
       <div class="col-lg-6" >
       <div class="panel panel-default">
          <div class="panel-heading">
-             <i class="fa fa-bell fa-fw"></i>行情缺失
+             <i class="fa fa-bell fa-fw"></i>{{res1.2.message}}
          </div>
          <div class="panel-body" style=" overflow-y:auto; height:400px;background:#ddd;">
              <div class="list-group" id="quotes">
+             {{res1.2.html_content|safe}}
 
              </div>
              <!-- /.list-group -->
@@ -261,11 +205,12 @@ timename=setInterval("refresh_alert();",4000);
       <div class="col-lg-6">
       <div class="panel panel-default">
          <div class="panel-heading">
-             <i class="fa fa-bell fa-fw"></i> AB无心跳
+             <i class="fa fa-bell fa-fw"></i> {{res1.3.message}}
          </div>
          <!-- /.panel-heading -->
          <div class="panel-body" style=" overflow-y:auto; height:400px;background:#ddd;">
              <div class="list-group" id="AB">
+             {{res1.3.html_content|safe}}
              </div>
          </div>
                               <!-- /.panel-body -->
