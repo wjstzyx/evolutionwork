@@ -1,0 +1,282 @@
+{% extends "base.html" %}
+{% load i18n static %}
+{% load url from future %}
+
+{% block extrahead %}
+
+{% endblock %}
+{% block extrastyle %}
+{% endblock %}
+
+{% block content_title %}{% endblock %}
+{% block content %}
+
+<script>
+function save_monitor_info(id){
+	var id=$("#id_"+id).html();
+	var type=$("#type_"+id).val();
+	var item=$("#item_"+id).val();
+	var ismonitor=$("#ismonitor_"+id).val();
+  var starttime=$("#starttime_"+id).val();
+  var endtime=$("#endtime_"+id).val();
+	data={"id":id,"type":type,"item":item,"ismonitor":ismonitor,"starttime":starttime,"endtime":endtime};
+    $.ajax({
+        url:"{% url 'elmanager.views.save_monitor_info' %}",
+        data:data,
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+            alert("保存成功")
+        }
+
+    });
+}
+
+function aaaadd_whitelist(id){
+	var data={"id":id};
+    $.ajax({
+        url:"{% url 'elmanager.views.delete_monitor_info' %}",
+        data:data,
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+        	window.location.href="/index/monitor/configmonitorlist/";
+        }
+    });
+
+
+
+}
+
+function add_whitelist(r,acname,type,tableid){
+  var data={"acname":acname,"type":type};
+  $.ajax({
+        url:"{% url 'elmanager.views.add_whitelist' %}",
+        data:data,
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+          var i=r.parentNode.parentNode.rowIndex;
+          document.getElementById(tableid).deleteRow(i);      
+        }
+  });
+
+}
+function remove_whitelist(r,acname,type,tableid){
+  var data={"acname":acname,"type":type};
+  $.ajax({
+        url:"{% url 'elmanager.views.remove_whitelist' %}",
+        data:data,
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+          var i=r.parentNode.parentNode.rowIndex;
+          document.getElementById(tableid).deleteRow(i);      
+        }
+  });
+
+}
+
+
+
+
+
+
+function add_new_monitor(){
+    $.ajax({
+        url:"{% url 'elmanager.views.add_new_monitor' %}",
+        data:{"date":"data"},
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+        	window.location.href="/index/monitor/configmonitorlist/"
+            
+        }    
+    });
+
+
+}
+
+
+
+function refresh_alert()
+{ 
+  var account_distinct= '';
+  var Thunder='';
+  var quotes='';
+  var AB='';
+    $.ajax({
+        url:"{% url 'elmanager.views.rt_newalert' %}",
+        data:{"date":"data"},
+        type:"POST",
+        dataType:"json",
+        async:false,
+        success:function(result){
+          for (var i=0;i<result.account_distinct.length;i++)
+          { var tempstr='';
+            id=result.account_distinct[i].id;
+            type=result.account_distinct[i].type;
+            msg=result.account_distinct[i].msg;
+            item=result.account_distinct[i].item;
+            classcode=result.account_distinct[i].classcode;
+            datetime=result.account_distinct[i].updatetime;
+            tempstr += '<a class="list-group-item" id="'+id+'" style="background-color:#FF9900">';
+            tempstr += '<i class="fa '+classcode+' fa-fw"></i>';
+            tempstr += type+'&nbsp;&nbsp;&nbsp;&nbsp;'+item+'&nbsp;&nbsp;&nbsp;&nbsp;'+msg;
+            tempstr += '<span class="pull-right text-muted small"><em>'+datetime+'</em>';
+            tempstr += '</span></a>';
+            account_distinct += tempstr;            
+          }
+
+          for (var i=0;i<result.Thunder.length;i++)
+          { var tempstr='';
+            id=result.Thunder[i].id;
+            type=result.Thunder[i].type;
+            msg=result.Thunder[i].msg;
+            item=result.Thunder[i].item;
+            classcode=result.Thunder[i].classcode;
+            datetime=result.Thunder[i].updatetime;
+            tempstr += '<a class="list-group-item" id="'+id+'" style="background-color:#FF9900">';
+            tempstr += '<i class="fa '+classcode+' fa-fw"></i>';
+            tempstr += type+'&nbsp;&nbsp;&nbsp;&nbsp;'+item+'&nbsp;&nbsp;&nbsp;&nbsp;'+msg;
+            tempstr += '<span class="pull-right text-muted small"><em>'+datetime+'</em>';
+            tempstr += '</span></a>';
+            Thunder += tempstr;            
+          }
+          for (var i=0;i<result.quotes.length;i++)
+          { var tempstr='';
+            id=result.quotes[i].id;
+            type=result.quotes[i].type;
+            msg=result.quotes[i].msg;
+            item=result.quotes[i].item;
+            classcode=result.quotes[i].classcode;
+            datetime=result.quotes[i].updatetime;
+            tempstr += '<a class="list-group-item" id="'+id+'" style="background-color:#FF9900">';
+            tempstr += '<i class="fa '+classcode+' fa-fw"></i>';
+            tempstr += type+'&nbsp;&nbsp;&nbsp;&nbsp;'+item+'&nbsp;&nbsp;&nbsp;&nbsp;'+msg;
+            tempstr += '<span class="pull-right text-muted small"><em>'+datetime+'</em>';
+            tempstr += '</span></a>';
+            quotes += tempstr;            
+          }
+          for (var i=0;i<result.AB.length;i++)
+          { var tempstr='';
+            id=result.AB[i].id;
+            type=result.AB[i].type;
+            msg=result.AB[i].msg;
+            item=result.AB[i].item;
+            classcode=result.AB[i].classcode;
+            datetime=result.AB[i].updatetime;
+            tempstr += '<a class="list-group-item" id="'+id+'" style="background-color:#FF9900">';
+            tempstr += '<i class="fa '+classcode+' fa-fw"></i>';
+            tempstr += type+'&nbsp;&nbsp;&nbsp;&nbsp;'+item+'&nbsp;&nbsp;&nbsp;&nbsp;'+msg;
+            tempstr += '<span class="pull-right text-muted small"><em>'+datetime+'</em>';
+            tempstr += '</span></a>';
+            AB += tempstr;            
+          }
+
+
+            
+        }    
+    });
+
+  $('#account_distinct').html(account_distinct)
+  $('#Thunder').html(Thunder)
+  $('#quotes').html(quotes)
+  $('#AB').html(AB)
+
+}
+
+timename=setInterval("refresh_alert();",4000);
+
+
+
+
+
+
+
+</script>
+
+  <div id="page-wrapper"> 
+   <div class="container-fluid" style="height: 34px"> 
+    <!-- Page Heading --> 
+
+
+      <div class="row">
+      <div class="col-lg-6" >
+      <div class="panel panel-default">
+         <div class="panel-heading">
+             <i class="fa fa-bell fa-fw"></i>账户仓位差异
+         </div>
+         <div class="panel-body" style=" overflow-y:auto; height:400px;background:#ddd;"  >
+             <div class="list-group" id="account_distinct">
+
+             </div>
+             <!-- /.list-group -->
+         </div>
+
+                              <!-- /.panel-body -->
+      </div>
+      </div>
+      <div class="col-lg-6" >
+      <div class="panel panel-default">
+         <div class="panel-heading">
+             <i class="fa fa-bell fa-fw"></i>Thunder无心跳
+         </div>
+         <div class="panel-body" style=" overflow-y:auto; height:400px;background:#ddd;">
+             <div class="list-group" id="Thunder">
+             aaa
+             </div>
+             <!-- /.list-group -->
+         </div>
+
+                              <!-- /.panel-body -->
+      </div>
+      </div>
+
+
+      </div>
+      <div class="row">
+      <div class="col-lg-6" >
+      <div class="panel panel-default">
+         <div class="panel-heading">
+             <i class="fa fa-bell fa-fw"></i>行情缺失
+         </div>
+         <div class="panel-body" style=" overflow-y:auto; height:400px;background:#ddd;">
+             <div class="list-group" id="quotes">
+
+             </div>
+             <!-- /.list-group -->
+         </div>
+
+
+                              <!-- /.panel-body -->
+      </div>
+      </div>
+
+      <div class="col-lg-6">
+      <div class="panel panel-default">
+         <div class="panel-heading">
+             <i class="fa fa-bell fa-fw"></i> AB无心跳
+         </div>
+         <!-- /.panel-heading -->
+         <div class="panel-body" style=" overflow-y:auto; height:400px;background:#ddd;">
+             <div class="list-group" id="AB">
+             </div>
+         </div>
+                              <!-- /.panel-body -->
+      </div>
+      </div>
+      </div>
+
+
+
+    </div>
+  </div> 
+
+
+{% endblock %}

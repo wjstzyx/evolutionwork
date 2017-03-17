@@ -18,6 +18,33 @@ from dbconn import MSSQL
 
 
 
+def python_AB_monitor(request):
+	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
+	#获取没有解决的问题
+	sql="SELECT id, [type],[item] ,[msg], classcode ,[updatetime]FROM [LogRecord].[dbo].[all_monitor_info] where isactive=1 and issolved=0 order by updatetime "
+	res1=ms.dict_sql(sql)
+
+
+	return render_to_response('python_AB_monitor.html',{
+		'data':'',
+		'lilunres':'',
+		'res1':res1,
+		# 'realres':realres,
+
+
+	})	
+
+
+
+
+
+
+
+
+
+
+
+
 
 def account_lilun_distinct_st(request):
 	data=""

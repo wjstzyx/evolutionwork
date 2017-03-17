@@ -63,8 +63,8 @@ res=ms.dict_sql(sql)
 
 totalratio=accountlist[account][1]
 
-backday=90
-cache_num=89
+backday=45
+cache_num=36
 #mytype= 'lilun' 'position' 'huibao'
 
 

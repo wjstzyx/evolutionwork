@@ -21,8 +21,8 @@ stepmultilist=['StepMultigaosheng1','StepMultiI300w_up','StepMultituji1','StepMu
 
 
 def sub_main(item):
-	#cmd = "python site_generate_dissitnct_V4.py %s" % (item)
-	#os.system(cmd)
+	cmd = "python site_generate_dissitnct_V4.py %s" % (item)
+	os.system(cmd)
 	cmd = "python site_acname_zhuli_equity.py %s" % (item)
 	os.system(cmd)
 

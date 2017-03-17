@@ -5,6 +5,7 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
 from dbconn import MSSQL
+import datetime
 import multiprocessing
 from multiprocessing import Lock
 #ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
@@ -32,9 +33,10 @@ def analysis_result(res,seocnds,nums):
 		#print "res["+str(i)+":"+str(i+nums)+"]"
 		#print holdvalue
 		delta=(holdvalue[-1][1]-holdvalue[0][1]).seconds
+		days=(holdvalue[-1][1]-holdvalue[0][1]).days
 		#print 'delta',delta
-		if delta<=seocnds:
-			totalnum.append([holdvalue[0][1]])
+		if delta<=seocnds and holdvalue[-1][0]==holdvalue[0][0] and days==0:
+			totalnum.append('['+holdvalue[0][1].strftime('%Y-%m-%d %H:%M')+']')
 	return len(totalnum),totalnum
 
 
@@ -42,27 +44,37 @@ def analysis_result(res,seocnds,nums):
 def analysis_st(st):
 	print st 
 	ms = MSSQL(host="192.168.0.5", user="future", pwd="K@ra0Key", db="future")
-	sql="select * from real_st_report where st='%s' order by stockdate,id" % (st)
+	nowday=datetime.datetime.now().strftime('%y%m%d')
+	nowday=int(nowday)
+	sql="select * from real_st_report where st='%s'  and D>='%s' order by stockdate,id" % (st,nowday)
 	res=ms.dict_sql(sql)
 	# drop replecate  return [[p,stockdate],[],[]]
 	res=drop_replacate(res)
 	(num60_3,content)=analysis_result(res,60,3)
+	contentstr=','.join(content[:5])
+	contentstr=contentstr[:800]
+	print contentstr
 	(num120_3, content) = analysis_result(res, 120, 3)
 	(num120_4, content) = analysis_result(res, 120, 4)
 	(num120_5, content) = analysis_result(res, 120, 5)
 	aa= [st,num60_3,num120_3,num120_4,num120_5]
-	sql = "insert into [LogRecord].[dbo].[st_shandan_analysis](st,[s60_3],[s120_3],[s120_4],[s120_5]) values('%s',%s,%s,%s,%s);" % (aa[0], aa[1], aa[2], aa[3], aa[4])
-	ms.insert_sql(sql)
+	if aa<>[st,0,0,0,0]:
+		sql = "insert into [LogRecord].[dbo].[st_shandan_analysis](st,[s60_3],[s120_3],[s120_4],[s120_5],s60_content) values('%s',%s,%s,%s,%s,'%s');" % (aa[0], aa[1], aa[2], aa[3], aa[4],contentstr)
+		ms.insert_sql(sql)
+
+
 
 
 
 if __name__ == "__main__":
-	threads_N = 6
+	threads_N = 8
 	lock = Lock()
 	multiprocessing.freeze_support()
 	pool = multiprocessing.Pool(processes=threads_N)
 	ms = MSSQL(host="192.168.0.5", user="future", pwd="K@ra0Key", db="future")
-	sql = "select distinct st from real_st_report order by st"
+	sql="truncate table [LogRecord].[dbo].[st_shandan_analysis]"
+	ms.insert_sql(sql)
+	sql = "select distinct st from real_st_report  where st in (SELECT distinct st  FROM [LogRecord].[dbo].[_del_temp_acname_in_use] a inner join P_BASIC p   on a.acanme=p.AC ) order by st"
 	res1 = ms.dict_sql(sql)
 	for item in res1:
 		st = item['st']
