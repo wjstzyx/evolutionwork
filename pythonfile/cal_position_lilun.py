@@ -308,6 +308,9 @@ def account_database_isdistinct_V2():
 							getrecordlist.append({'item':uniquekey,'msg':'仓位不一致 real:%s database:%s' % (aa[2],aa[4])})
 						if int(aa[1]) not in (11,4):
 							getrecordlist.append({'item':uniquekey,'msg':'仓位不一致 real:%s database:%s' % (aa[2],aa[4])})
+	dayofweek=datetime.datetime.now().weekday()
+	if dayofweek in (5,6):
+		getrecordlist=[]
 
 	update_target_table(getrecordlist, 'Account')
 
