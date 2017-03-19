@@ -112,6 +112,9 @@ def quotes_monitor():
 		msg = myitem['Symbol'] + '    ' + '缺少 ' + str(myitem['mydatediff']) + '分钟 最新更新时间: ' + myitem[
 			'stockdate'].strftime("%Y-%m-%d %H:%M")
 		getrecordlist.append({'item':item,'msg':msg})
+	dayofweek=datetime.datetime.now().weekday()
+	if dayofweek in (5,6):
+		getrecordlist=[]
 	update_target_table(getrecordlist,'quotes')
 
 
@@ -137,6 +140,9 @@ def AB_st_day(mytype=2):
 				myitem=item['address']+' 【'+ str(item1['st'])+'】'
 				msg=item1['stockdate'].strftime("%Y-%m-%d %H:%M")+' '+item1['TradName']+ "database_nowtime："+item1['nowtime'].strftime('%H:%M')
 				getrecordlist.append({'item':myitem,'msg':msg})
+		dayofweek=datetime.datetime.now().weekday()
+		if dayofweek in (5,6):
+			getrecordlist=[]
 		update_target_table(getrecordlist,'AB')
 
 
@@ -147,6 +153,7 @@ def Thunder():
 	sql = "SELECT [name],time ,getdate() as nowtime,[isific],isnight FROM [future].[dbo].[Program] where isactive=1 order by id  "
 	res = ms1.dict_sql(sql)
 	getrecordlist=[]
+
 	for myitem in res:
 		lasttime = myitem['time']
 		nowtime= myitem['nowtime'].strftime('%H%M%S')
@@ -162,7 +169,9 @@ def Thunder():
 		if myitem['isnight']==1 and (chayi > 80 or chayi < -80) and  ((nowtime>205500 and nowtime<233000)):
 			msg='延迟【%s】秒 %s' % (abs(chayi),beizhi)
 			getrecordlist.append({'item':myitem['name'],'msg':msg})	
-
+	dayofweek=datetime.datetime.now().weekday()
+	if dayofweek in (5,6):
+		getrecordlist=[]
 	update_target_table(getrecordlist, 'Thunder')
 
 # Account_distinct
