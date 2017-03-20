@@ -304,7 +304,7 @@ def account_database_isdistinct_V2():
 					if atime>4 and ((nowhour>=901 and nowhour<=1130) or (nowhour>=1331 and nowhour<=1459)):
 						print uniquekey,'last_real_position',last_real_position,'now_real_position',now_real_position
 						print 'aa',aa
-						if int(aa[1]) in (11,4) and nowhour>931:
+						if int(aa[1]) in (11,4) and nowhour>933:
 							getrecordlist.append({'item':uniquekey,'msg':'仓位不一致 real:%s database:%s' % (aa[2],aa[4])})
 						if int(aa[1]) not in (11,4):
 							getrecordlist.append({'item':uniquekey,'msg':'仓位不一致 real:%s database:%s' % (aa[2],aa[4])})
