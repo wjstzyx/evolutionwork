@@ -138,7 +138,7 @@ class PyAB_Alert():
             tf = df['timeframe_in_min'].values[0]
             ctime = datetime.now()
             target_time = df['bar_start_time'] + timedelta(minutes=int(tf))
-            delay_count = (df['last_log_time'] < target_time).sum()
+            delay_count = (df['last_log_time'] > target_time).sum()
             # if not in session that is uncorrected warning
             #print np.datetime64(ctime),(target_time + timedelta(minutes=1)).values[0]
             #print delay_count,self.in_session(session)
