@@ -126,7 +126,7 @@ class PyAB_Alert():
         # session = day,night
         ctime = datetime.now()
         if session == 'day':
-            return ctime > datetime(ctime.year,ctime.month,ctime.day, 9 ,0,0) and ctime < datetime(ctime.year,ctime.month,ctime.day, 15 ,0,0)
+            return ctime > datetime(ctime.year,ctime.month,ctime.day, 9 ,0,0) and ctime < datetime(ctime.year,ctime.month,ctime.day, 15 ,30,0)
         else:
             return ctime > datetime(ctime.year, ctime.month, ctime.day, 21, 0, 0) or ctime < datetime(ctime.year,ctime.month,ctime.day, 2, 30,0)
 
@@ -144,7 +144,7 @@ class PyAB_Alert():
             #print delay_count,self.in_session(session)
 
             if np.datetime64( ctime) > (target_time + timedelta(minutes=1)).values[0] and delay_count > 0 and self.in_session(session):
-                alert(3, df)
+                self.alert(3, df)
 
     def alert_datadelay(self):
         # include day and daynight

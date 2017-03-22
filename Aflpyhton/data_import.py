@@ -494,9 +494,9 @@ def general_data(symbol):
 
 # acname='znStepMultiI'
 # choose_aflfile(acname)
-main_run_afl()
+# main_run_afl()
 # #5
 
 # #检测st_repoet_test中的策略是不是虚拟组有且唯一的策略号 type=0 严格执行， type=1 直接复制
-# test_is_all_ac_st(type=1)
+test_is_all_ac_st(type=1)
 # show_progress(87,100)

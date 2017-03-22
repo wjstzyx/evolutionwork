@@ -36,6 +36,7 @@ def input_date(symbol,tablename):
 	with open(realfile, 'rb') as csvfile:
 		spamreader = csv.reader(csvfile)
 		i=0
+		j=0
 		for row in spamreader:
 			#print row
 			i=i+1
@@ -56,11 +57,17 @@ def input_date(symbol,tablename):
 				if StockDate<=splittime:
 					sql="insert into %s ([Symbol]  ,[O]   ,[C]   ,[H]  ,[L]   ,[V]   ,[OPI]  ,[D]  ,[T]  ,[StockDate]  ,[refc] ) values('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',0);" % (tablename,symbol,O,C,H,L,V,OPI,D,T,StockDate)
 					totalsql=totalsql+sql
-					print sql 	
-					ms.insert_sql(sql)
+					j=j+1
+					if j>500:
+						print j
+						ms.insert_sql(totalsql)
+						totalsql=""
+						j=0
+		if len(totalsql)>10:
+			ms.insert_sql(totalsql)
+
 
 
 
 
 input_date('SM','TSymbol_allfuture')
-input_date('SM','Tsymbol')

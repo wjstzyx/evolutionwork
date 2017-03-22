@@ -78,9 +78,10 @@ def detail_analysis(st,seocnds,nums):
 def analysis_st(st):
 	print st 
 	ms = MSSQL(host="192.168.0.5", user="future", pwd="K@ra0Key", db="future")
-	nowday=datetime.datetime.now().strftime('%y%m%d')
-	nowday=int(nowday)
-	sql="select * from real_st_report where st='%s'  and D>='%s' order by stockdate,id" % (st,nowday)
+	nowday=datetime.datetime.now()-datetime.timedelta(days=1)
+	nowday=nowday.strftime('%Y%m%d')
+	nowday=nowday+' 21:00:00'
+	sql="select * from real_st_report where st='%s'  and stockdate>='%s' order by stockdate,id" % (st,nowday)
 	res=ms.dict_sql(sql)
 	# drop replecate  return [[p,stockdate],[],[]]
 	res=drop_replacate(res)
