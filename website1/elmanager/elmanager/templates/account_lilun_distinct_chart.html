@@ -31,7 +31,7 @@
         <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>理论指数权益</h3> 
        </div>
        <div class="panel-body"> 
-        <div class="col-md-8"><div id='{{item.acname}}' style="min-width:700px;height:400px"></div></div>
+        <div class="col-md-8"><div id='aaaaa' style="min-width:700px;height:400px"></div></div>
 
        </div> 
       </div> 
@@ -67,56 +67,41 @@
   <script type="text/javascript" src="http://cdn.hcharts.cn/highcharts/highcharts.js"></script>
   <script>
       $(function () {
-          $('#{{item.acname}}').highcharts({
+          $('#aaaaa').highcharts({
 
               title: {
-                  text: '{{item.acname}}--{{item.symbol}}--近200日平均日交易次数 {{item.avgtime}}',
+                  text: '近200日平均日交易次数',
               },
               xAxis: [{
-                  categories:{{item.xaxis}},
+                  categories:[1,2,3],
               }],
-              yAxis: [{
+              yAxis: {
                   title: {
                       text: '每手净收益',
-                      style: {
-                          color: Highcharts.getOptions().colors[1]
-                      }
                   },
 
-                  labels: {
-                      style: {
-                          color: Highcharts.getOptions().colors[1]
-                      }},
+                  plotLines: [{
+                      value: 0,
+                      width: 1,
+                      color: '#808080'
+                  }]
 
-              },{
-                  min: -10,
-                  max: 10,
-                  title:{
-                      text:'仓位（总10手）',
-                      style: {
-                          color: Highcharts.getOptions().colors[0]
-                      }
-                },
-
-
-                  labels: {
-                      format: '{value}手',
-                      style: {                          
-                          color: Highcharts.getOptions().colors[0]
-                      }},
-
-                opposite:true,
-              }],
+              },
+              legend: {
+                  layout: 'vertical',
+                  align: 'right',
+                  verticalAlign: 'middle',
+                  borderWidth: 0
+              },
                series: [{
-                  type:'column',
                   name: '虚拟组仓位',
-                  yAxis: 1,
-                  data: {{item.realquanyi}}
+                  data: [1,2,3]
               }, {
                   name: '理论权益',
-                  data: {{item.lilunquanyi}}             
+                  data: [1,4,5]          
               
-              }]
+              }
+              ]
           });
       });
   </script>

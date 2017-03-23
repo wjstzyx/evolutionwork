@@ -39,6 +39,7 @@ accountlist['StepMultidnhiboth']=['StepMultidnhiboth',1]
 accountlist['StepMultidnhiprofit']=['StepMultidnhiprofit',1]
 accountlist['StepMultidnhisharp']=['StepMultidnhisharp',1]
 accountlist['StepMultidnshort']=['StepMultidnshort',1]
+accountlist['newtuji300']=['newtuji300',1]
 
 # step_acname='StepMultiI300w_up'
 # account='666061010'
@@ -63,7 +64,7 @@ res=ms.dict_sql(sql)
 
 totalratio=accountlist[account][1]
 
-backday=45
+backday=40
 cache_num=36
 #mytype= 'lilun' 'position' 'huibao'
 

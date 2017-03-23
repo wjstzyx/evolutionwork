@@ -18,6 +18,7 @@ ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
 
 
 stepmultilist=['StepMultigaosheng1','StepMultiI300w_up','StepMultituji1','StepMultituji2','StepMultituji3','StepMultidnhiboth','StepMultidnhiprofit','StepMultidnhisharp','StepMultidnshort']
+#stepmultilist=['newtuji300']
 
 
 def sub_main(item):
@@ -33,6 +34,7 @@ if __name__ == "__main__":
 
 	stepmultilist = ['StepMultidnhiboth', 'StepMultidnshort', 'StepMultidnhiprofit', 'StepMultidnhisharp',
 	                 'StepMultigaosheng1', 'StepMultiI300w_up', 'StepMultituji1', 'StepMultituji2', 'StepMultituji3']
+	#stepmultilist = ['newtuji300']
 	for item in stepmultilist:
 		# add process to pool
 		if threads_N > 1:

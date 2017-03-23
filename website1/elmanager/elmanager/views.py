@@ -181,7 +181,8 @@ def account_lilun_distinct(request):
 		day=ms.dict_sql(sql)[0]['date']
 		day=int(day)
 	
-	sql="SELECT [account]  ,'%s' as mydate, sum([lilun_zhishu]) as [lilun_zhishu]    ,sum([lilun_zhuli]) as [lilun_zhuli]    ,sum([real_ab_zhishu]) as [real_ab_zhishu]     ,sum([real_ab_zhuli]) as [real_ab_zhuli]     ,(sum([lilun_zhuli])-sum([lilun_zhishu])) as 'lilunzl_zs'    ,(sum([real_ab_zhuli])-sum([lilun_zhishu])) as 'realzl_lilunzs'   FROM [LogRecord].[dbo].[account_lilun_distinct_acname] where date='%s'  group by account with rollup" % (day,day)
+	#sql="SELECT [account]  ,'%s' as mydate, sum([lilun_zhishu]) as [lilun_zhishu]    ,sum([lilun_zhuli]) as [lilun_zhuli]    ,sum([real_ab_zhishu]) as [real_ab_zhishu]     ,sum([real_ab_zhuli]) as [real_ab_zhuli]     ,(sum([lilun_zhuli])-sum([lilun_zhishu])) as 'lilunzl_zs'    ,(sum([real_ab_zhuli])-sum([lilun_zhishu])) as 'realzl_lilunzs'   FROM [LogRecord].[dbo].[account_lilun_distinct_acname] where date='%s'  group by account with rollup" % (day,day)
+	sql="SELECT [account]  ,'%s' as mydate, round(sum([lilun_zhishu]*p.ratio/100.0),0) as [lilun_zhishu]    ,round(sum([lilun_zhuli]*p.ratio/100.0),0) as [lilun_zhuli]   ,round(sum([real_ab_zhishu]*p.ratio/100.0),0) as [real_ab_zhishu]     ,round(sum([real_ab_zhuli]*p.ratio/100.0),0) as [real_ab_zhuli]     ,round((sum([lilun_zhuli]*p.ratio/100.0)-sum([lilun_zhishu]*p.ratio/100.0)),0) as 'lilunzl_zs'    ,round((sum([real_ab_zhuli]*p.ratio/100.0)-sum([lilun_zhishu]*p.ratio/100.0)),0) as 'realzl_lilunzs'   FROM [LogRecord].[dbo].[account_lilun_distinct_acname]  a  inner join p_follow p on a.acname=p.F_ac and a.account=p.AC  where date='%s'  group by account with rollup" % (day,day)
 	res=ms.dict_sql(sql)
 	res[-1]['account']='【total】'
 	res[-1]['mydate']=''

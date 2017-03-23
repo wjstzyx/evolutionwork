@@ -43,7 +43,7 @@ def get_tradeday_list():
 
 
 
-stepmultilist=['StepMultigaosheng1','StepMultiI300w_up','StepMultituji1','StepMultituji2','StepMultituji3','StepMultidnhiboth','StepMultidnhiprofit','StepMultidnhisharp','StepMultidnshort']
+stepmultilist=['StepMultigaosheng1','StepMultiI300w_up','StepMultituji1','StepMultituji2','StepMultituji3','StepMultidnhiboth','StepMultidnhiprofit','StepMultidnhisharp','StepMultidnshort','newtuji300']
 type='zhuli'
 totalpd=[]
 #totalpd.append(get_tradeday_list())
