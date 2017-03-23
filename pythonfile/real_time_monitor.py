@@ -73,7 +73,7 @@ def quotes_monitor():
 	lostinfo=[]
 
 	if (nowtime>='0901' and nowtime<='1014') or (nowtime>='1031' and nowtime<='1130') or (nowtime>='1331' and nowtime<='1500'):
-		sql="SELECT [symbol]  FROM [LogRecord].[dbo].[catch_quotes] where isday in (1,12) and symbol not in ('RMZL')"
+		sql="SELECT [symbol]  FROM [LogRecord].[dbo].[catch_quotes] where isday in (1,12) and symbol not in ('RMZL','SN')"
 		tempres=ms.dict_sql(sql)
 		selectsymbol=[]
 		for item in tempres:

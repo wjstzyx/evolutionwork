@@ -56,6 +56,11 @@ class PyAB_Alert():
 
         self.alert_list = list()
 
+    def getlast3dirs(self, filepath):
+        return '\\'.join(filepath.split('\\')[-3:])
+        
+        
+
     def alert(self,msg_type,df=pd.DataFrame()):
         '''
 
@@ -66,6 +71,10 @@ class PyAB_Alert():
         msg = dict()
         msg['type'] = msg_type
         msg['message'] = self.alert_msgs[msg_type]
+
+        #if 'ps_file' in df.columns.tolist():
+        #    df['ps_file'] = df['ps_file']
+
         msg['html_content'] = df.to_html(index=False).replace('class="dataframe"','class="table table-bordered table-hover table-striped"')
         #df=df.values()
 
@@ -104,7 +113,7 @@ class PyAB_Alert():
     
         
     def alert_barcount(self):
-        df = self.qry2pd("select virtual_group,barcount,timeframe_in_min,ps_file from logrecord.ablog_snapshot where barcount < 2000 order by last_log_time desc , timeframe_in_min desc")
+        df = self.qry2pd("select virtual_group,barcount,period,ps_file from logrecord.ablog_snapshot where barcount < 2000 order by last_log_time desc , period desc")
         if len(df) < 1:
             self.alert(0)
         else:
@@ -126,7 +135,7 @@ class PyAB_Alert():
         # session = day,night
         ctime = datetime.now()
         if session == 'day':
-            return ctime > datetime(ctime.year,ctime.month,ctime.day, 9 ,0,0) and ctime < datetime(ctime.year,ctime.month,ctime.day, 15 ,30,0)
+            return ctime > datetime(ctime.year,ctime.month,ctime.day, 9 ,0,0) and ctime < datetime(ctime.year,ctime.month,ctime.day, 15 ,50,0)
         else:
             return ctime > datetime(ctime.year, ctime.month, ctime.day, 21, 0, 0) or ctime < datetime(ctime.year,ctime.month,ctime.day, 2, 30,0)
 
@@ -135,7 +144,7 @@ class PyAB_Alert():
         if len(df) < 1:
             self.alert(0)
         else:
-            tf = df['timeframe_in_min'].values[0]
+            tf = df['period'].values[0]
             ctime = datetime.now()
             target_time = df['bar_start_time'] + timedelta(minutes=int(tf))
             delay_count = (df['last_log_time'] > target_time).sum()
@@ -148,9 +157,9 @@ class PyAB_Alert():
 
     def alert_datadelay(self):
         # include day and daynight
-        day_qry = "select last_log_time,timeframe_in_min,bar_start_time,ps_file from logrecord.ablog_snapshot where ps_file like '%\\\\_day%'  order by timeframe_in_min asc, last_log_time desc limit 5"
+        day_qry = "select last_log_time,period,bar_start_time,ps_file from logrecord.ablog_snapshot where ps_file like '%\\\\_day%'  order by period asc, last_log_time desc limit 5"
         # include night and daynight
-        night_qry = "select last_log_time,timeframe_in_min,bar_start_time,ps_file from logrecord.ablog_snapshot where ps_file like '%night\\\\%'  order by timeframe_in_min asc, last_log_time desc limit 5"
+        night_qry = "select last_log_time,period,bar_start_time,ps_file from logrecord.ablog_snapshot where ps_file like '%night\\\\%'  order by period asc, last_log_time desc limit 5"
 
         self.qry_datadelay(day_qry,'day')
         self.qry_datadelay(night_qry,'night')

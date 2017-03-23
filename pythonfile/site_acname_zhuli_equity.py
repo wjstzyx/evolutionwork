@@ -274,8 +274,6 @@ def get_Tsymbol_by_symbol(symbol,postionpd):
 	fisrsttime=postionpd['stockdate'].iloc[[0]].values[0]
 	quotes_pd = quotes_pd[quotes_pd['stockdate']>=fisrsttime]
 
-	# # 主力价格 和指数价格合在一起
-	# quotes_pd=pd.merge(quotes_pd,quotes_pd_zl,'outer',left_on='stockdate',right_on='stockdate')
 
 	total=pd.merge(quotes_pd,postionpd,'outer',left_on='stockdate',right_on='stockdate')
 	#排序
@@ -284,12 +282,20 @@ def get_Tsymbol_by_symbol(symbol,postionpd):
 	total=total[pd.notnull(total['totalposition'])]
 	total=total.drop_duplicates()
 	total=total[['stockdate','C','totalposition']]
+	# 截止到现在，相当于将 positionpd 中的C update 一下
+
 	addcont_lastposition=addcont_lastposition[['stockdate','C','totalposition']]
 	total=pd.concat([total,addcont_lastposition],ignore_index=True)
-	total.reset_index(drop=True)
+	total=total.reset_index(drop=True)
 	total['myindex']=total.index
 	total=total.sort_values(['stockdate','myindex'])
 	total['totalposition'] = total['totalposition'].fillna(method='ffill')
+	# 讲头几行的NAN 变成0
+	total['totalposition'] = total['totalposition'].fillna(0)
+	total=total.reset_index(drop=True)
+	total['myindex'] = total.index
+
+
 
 	total = pd.concat([total, addcont_zeroposition], ignore_index=True)
 	total['myindex'] = total.index
