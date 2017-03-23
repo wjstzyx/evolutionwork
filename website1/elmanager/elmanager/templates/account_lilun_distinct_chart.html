@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% load i18n static %}
+{% load url from future %}
+
+{% block extrahead %}
+
+{% endblock %}
+{% block extrastyle %}
+{% endblock %}
+
+{% block content_title %}{% endblock %}
+{% block content %}
+
+
+  <div id="page-wrapper"> 
+   <div class="container-fluid" style="height: 900px"> 
+    <!-- Page Heading --> 
+    <div class="row"> 
+     <div class="col-lg-12"> 
+      <h1 class="page-header"> 阶梯组综合权益 </h1> 
+      <ol class="breadcrumb"> 
+       <li class="active"> <i class="fa fa-dashboard"></i> 监控信息-->阶梯组综合权益</li> 
+      </ol> 
+     </div> 
+    </div>
+
+    <div class="row"> 
+     <div class="col-lg-12"> 
+      <div class="panel panel-default"> 
+       <div class="panel-heading"> 
+        <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>理论指数权益</h3> 
+       </div>
+       <div class="panel-body"> 
+        <div class="col-md-8"><div id='{{item.acname}}' style="min-width:700px;height:400px"></div></div>
+
+       </div> 
+      </div> 
+     </div> 
+    </div> 
+
+
+
+    <div class="row"> 
+     <div class="col-lg-12"> 
+      <div class="panel panel-default"> 
+       <div class="panel-heading"> 
+        <h3 class="panel-title"><i class="fa fa-money fa-fw"></i>理论主力权益</h3> 
+       </div>
+       <div class="panel-body"> 
+       ddd
+       ddd
+
+       </div> 
+      </div> 
+     </div> 
+    </div> 
+
+
+   </div> 
+  </div>
+
+{% endblock %}
+
+
+
+{% block extrabodyscript %}
+  <script type="text/javascript" src="http://cdn.hcharts.cn/highcharts/highcharts.js"></script>
+  <script>
+      $(function () {
+          $('#{{item.acname}}').highcharts({
+
+              title: {
+                  text: '{{item.acname}}--{{item.symbol}}--近200日平均日交易次数 {{item.avgtime}}',
+              },
+              xAxis: [{
+                  categories:{{item.xaxis}},
+              }],
+              yAxis: [{
+                  title: {
+                      text: '每手净收益',
+                      style: {
+                          color: Highcharts.getOptions().colors[1]
+                      }
+                  },
+
+                  labels: {
+                      style: {
+                          color: Highcharts.getOptions().colors[1]
+                      }},
+
+              },{
+                  min: -10,
+                  max: 10,
+                  title:{
+                      text:'仓位（总10手）',
+                      style: {
+                          color: Highcharts.getOptions().colors[0]
+                      }
+                },
+
+
+                  labels: {
+                      format: '{value}手',
+                      style: {                          
+                          color: Highcharts.getOptions().colors[0]
+                      }},
+
+                opposite:true,
+              }],
+               series: [{
+                  type:'column',
+                  name: '虚拟组仓位',
+                  yAxis: 1,
+                  data: {{item.realquanyi}}
+              }, {
+                  name: '理论权益',
+                  data: {{item.lilunquanyi}}             
+              
+              }]
+          });
+      });
+  </script>
+
+{% endblock %}
