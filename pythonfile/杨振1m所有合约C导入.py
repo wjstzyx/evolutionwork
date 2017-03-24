@@ -32,4 +32,7 @@ with open(dateroot+"\\"+filename) as fh:
 			i=0
 	if len(totalsql)>10:
 		ms.insert_sql(totalsql)
+sql="update top(500000) LogRecord.dbo.[every_con_close] set symbol=Future.dbo.m_getstr(con) where symbol is null"
+ms.insert_sql(sql)
+
 

@@ -12,6 +12,7 @@ from django.utils import simplejson
 import hashlib
 #### customs funtion
 import  monitor_alert 
+import total_jieti_merge_equity
 ####
 import sys
 reload(sys)
@@ -133,30 +134,12 @@ def account_lilun_distinct_acname(request):
 
 
 def account_lilun_distinct_chart(request):
-	ms = MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future") 
-	data=""
-	isres=0
-	if request.GET:
-		date=request.GET.get("date","")
-		day=int(date)
-		print 'date',day
-	else:
-		sql="SELECT MAX(date) as date  FROM [LogRecord].[dbo].[account_lilun_distinct_acname] "
-		day=ms.dict_sql(sql)[0]['date']
-		day=int(day)
-	
-	sql="SELECT [account]  ,'%s' as mydate, sum([lilun_zhishu]) as [lilun_zhishu]    ,sum([lilun_zhuli]) as [lilun_zhuli]    ,sum([real_ab_zhishu]) as [real_ab_zhishu]     ,sum([real_ab_zhuli]) as [real_ab_zhuli]     ,(sum([lilun_zhuli])-sum([lilun_zhishu])) as 'lilunzl_zs'    ,(sum([real_ab_zhuli])-sum([lilun_zhishu])) as 'realzl_lilunzs'   FROM [LogRecord].[dbo].[account_lilun_distinct_acname] where date='%s'  group by account with rollup" % (day,day)
-	res=ms.dict_sql(sql)
-	res[-1]['account']='【total】'
-	res[-1]['mydate']=''
-	sql='SELECT distinct top 8  date FROM [LogRecord].[dbo].[account_lilun_distinct_acname] order by date desc'
-	datlist=ms.dict_sql(sql)
-
+	result=total_jieti_merge_equity.total_jie_main()
 	return render_to_response('account_lilun_distinct_chart.html',{
-		'data':res,
-		'day':day,
-		'isres':isres,
-		'datlist':datlist
+		'data':1,
+		'day':1,
+		'isres':1,
+		'result':result
 	})	
 
 

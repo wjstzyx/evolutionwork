@@ -58,16 +58,18 @@ def total_jie_main():
 		aa=aa.fillna(method='ffill')
 		aa.to_csv(r'E:\test\%s.csv' % (type))
 		columns=aa.columns.values.tolist()
+		daylist=aa.index.values.tolist()
+		daylist=[int(item) for item in daylist]
 		if type=='zhuli':
-			zhuli_result.append(aa.index.values.tolist())
+			zhuli_result.append(daylist)
 			for item in columns:
-				zhuli_result.append([item,aa[item].values.tolist()])
+				zhuli_result.append([str(item),aa[item].values.tolist()])
 
 		if type == 'zhishu':
-			zhishu_result.append(aa.index.values.tolist())
+			zhishu_result.append(daylist)
 			for item in columns:
-				zhuli_result.append([item, aa[item].values.tolist()])
-	return [{'type':'zhuli','content':zhuli_result},{'type':'zhishu','content':zhishu_result}]
+				zhishu_result.append([str(item), aa[item].values.tolist()])
+	return [{'type':'主力','xvalue':zhuli_result[0],'content':zhuli_result[1:]},{'type':'指数','xvalue':zhishu_result[0],'content':zhishu_result[1:]}]
 
 
 
