@@ -181,8 +181,8 @@ def account_lilun_distinct(request):
 		day=ms.dict_sql(sql)[0]['date']
 		day=int(day)
 	
-	#sql="SELECT [account]  ,'%s' as mydate, sum([lilun_zhishu]) as [lilun_zhishu]    ,sum([lilun_zhuli]) as [lilun_zhuli]    ,sum([real_ab_zhishu]) as [real_ab_zhishu]     ,sum([real_ab_zhuli]) as [real_ab_zhuli]     ,(sum([lilun_zhuli])-sum([lilun_zhishu])) as 'lilunzl_zs'    ,(sum([real_ab_zhuli])-sum([lilun_zhishu])) as 'realzl_lilunzs'   FROM [LogRecord].[dbo].[account_lilun_distinct_acname] where date='%s'  group by account with rollup" % (day,day)
-	sql="SELECT [account]  ,'%s' as mydate, round(sum([lilun_zhishu]*p.ratio/100.0),0) as [lilun_zhishu]    ,round(sum([lilun_zhuli]*p.ratio/100.0),0) as [lilun_zhuli]   ,round(sum([real_ab_zhishu]*p.ratio/100.0),0) as [real_ab_zhishu]     ,round(sum([real_ab_zhuli]*p.ratio/100.0),0) as [real_ab_zhuli]     ,round((sum([lilun_zhuli]*p.ratio/100.0)-sum([lilun_zhishu]*p.ratio/100.0)),0) as 'lilunzl_zs'    ,round((sum([real_ab_zhuli]*p.ratio/100.0)-sum([lilun_zhishu]*p.ratio/100.0)),0) as 'realzl_lilunzs'   FROM [LogRecord].[dbo].[account_lilun_distinct_acname]  a  inner join p_follow p on a.acname=p.F_ac and a.account=p.AC  where date='%s'  group by account with rollup" % (day,day)
+	sql="SELECT [account]  ,'%s' as mydate, sum([lilun_zhishu]) as [lilun_zhishu]    ,sum([lilun_zhuli]) as [lilun_zhuli]    ,sum([real_ab_zhishu]) as [real_ab_zhishu]     ,sum([real_ab_zhuli]) as [real_ab_zhuli]     ,(sum([lilun_zhuli])-sum([lilun_zhishu])) as 'lilunzl_zs'    ,(sum([real_ab_zhuli])-sum([lilun_zhishu])) as 'realzl_lilunzs'   FROM [LogRecord].[dbo].[account_lilun_distinct_acname] where date='%s'  group by account with rollup" % (day,day)
+	#sql="SELECT [account]  ,'%s' as mydate, round(sum([lilun_zhishu]*p.ratio/100.0),0) as [lilun_zhishu]    ,round(sum([lilun_zhuli]*p.ratio/100.0),0) as [lilun_zhuli]   ,round(sum([real_ab_zhishu]*p.ratio/100.0),0) as [real_ab_zhishu]     ,round(sum([real_ab_zhuli]*p.ratio/100.0),0) as [real_ab_zhuli]     ,round((sum([lilun_zhuli]*p.ratio/100.0)-sum([lilun_zhishu]*p.ratio/100.0)),0) as 'lilunzl_zs'    ,round((sum([real_ab_zhuli]*p.ratio/100.0)-sum([lilun_zhishu]*p.ratio/100.0)),0) as 'realzl_lilunzs'   FROM [LogRecord].[dbo].[account_lilun_distinct_acname]  a  inner join p_follow p on a.acname=p.F_ac and a.account=p.AC  where date='%s'  group by account with rollup" % (day,day)
 	res=ms.dict_sql(sql)
 	res[-1]['account']='【total】'
 	res[-1]['mydate']=''
@@ -1063,92 +1063,95 @@ def futureaccounttotal(request):
 		#month=int(datetime.datetime.now().strftime('%Y%m'))*100
 		sql="SELECT MAX(date) as date  FROM [LogRecord].[dbo].[AccountsBalance] where userid='%s' " % (userid)
 		month=ms.dict_sql(sql)[0]['date']
-		month=int(month)
-		month=int(month/100.0)*100
-		#month=20160900
-		#print 'month',month
-		#计算月初权益
-		sql="SELECT top 1 [date] ,[userid],[CloseBalance],Withdraw FROM [LogRecord].[dbo].[AccountsBalance] where userid='%s'  and date< '%s' order by date desc" % (userid,month)
-		temp1res=ms.dict_sql(sql)
-		if temp1res:
-			equity_on_month_begin=round(float(temp1res[0]['CloseBalance']+temp1res[0]['Withdraw']),1)
-			Withdraw_on_month_begin=round(float(temp1res[0]['Withdraw']),1)
+		if month is None:
+			returnlist.append(['','','无权益记录',userid])
 		else:
-			equity_on_month_begin=0.1
-			Withdraw_on_month_begin=0
-		tempbegin=equity_on_month_begin
-		if item['primarymoney']>10 and equity_on_month_begin<10:
-			equity_on_month_begin=item['primarymoney']
-		real_equity_on_month_begin=equity_on_month_begin-Withdraw_on_month_begin
-
-		#获得当天权益，如果有出金，则标记出来
-		sql="SELECT top 2 [date] ,[userid] ,[prebalance] ,[deposit] ,[Withdraw] ,[CloseProfit]  ,[PositionProfit]  ,[Commission]  ,[CloseBalance]  FROM [LogRecord].[dbo].[AccountsBalance] where userid='%s'  and date>='%s' order by date desc" % (userid,month)
-		res=ms.dict_sql(sql)
-		if len(res)>=1:
-			todays_equity=round((res[0]['CloseBalance']+res[0]['Withdraw']),2)
-			todays1_withdraw=res[0]['Withdraw']
-		else:
-			todays_equity=0
-			todays1_withdraw=0
-		if len(res)==2:
-			yesterdays_equity=round((res[1]['CloseBalance']+res[1]['Withdraw']),2)
-		else:
-			yesterdays_equity=equity_on_month_begin
-
-
-		#计算每月收益
-		sql="select sum(Withdraw-deposit) as deltawithdeposit from  [LogRecord].[dbo].[AccountsBalance] where userid='%s'  and date>='%s'" % (userid,month)
-		temp1res=ms.dict_sql(sql)
-		if temp1res[0]['deltawithdeposit'] is not None:
-			deltawithdeposit=temp1res[0]['deltawithdeposit']
-		else:
-			deltawithdeposit=0
-		# print  "################"
-		# print (todays_equity-todays1_withdraw)
-		# print (equity_on_month_begin-Withdraw_on_month_begin)
-		# print deltawithdeposit
-		real_equity_on_month_begin=real_equity_on_month_begin-deltawithdeposit+todays1_withdraw
-		monthly_equity=(todays_equity-todays1_withdraw)-(tempbegin-Withdraw_on_month_begin)+deltawithdeposit
-		monthly_rate=round(monthly_equity/(real_equity_on_month_begin+0.00002)*100,2)
-
-		#lastmonth
-		sql="SELECT distinct floor([date]/100)*100 as date FROM [LogRecord].[dbo].[AccountsBalance] order by  floor([date]/100)*100 desc "
-		tmep11res=ms.dict_sql(sql)
-		lastmonth=tmep11res[-2]['date']
-		sql="SELECT [date] ,[userid] ,[prebalance] ,[deposit] ,[Withdraw] ,[CloseProfit]  ,[PositionProfit]  ,[Commission]  ,[CloseBalance]  FROM [LogRecord].[dbo].[AccountsBalance] where userid='%s'  and date>='%s' order by date" % (userid,lastmonth)
-		tempres=ms.dict_sql(sql)
-		equity=0
-		monthly_commitssion=0
-		daily_profit=0
-		daily_rate=0
-		commission=0
-		if tempres:
-			#计算当月手续费		
-			for item1 in tempres:
-				monthly_commitssion=monthly_commitssion+item1['Commission']
-			#计算当日盈利率：
-			if len(tempres)>=2:			
-				yesterdays_equity=tempres[-2]['CloseBalance']+tempres[-2]['Withdraw']
-				yesterdays_withdraw=tempres[-2]['Withdraw']
+			month=int(month)
+			month=int(month/100.0)*100
+			#month=20160900
+			#print 'month',month
+			#计算月初权益
+			sql="SELECT top 1 [date] ,[userid],[CloseBalance],Withdraw FROM [LogRecord].[dbo].[AccountsBalance] where userid='%s'  and date< '%s' order by date desc" % (userid,month)
+			temp1res=ms.dict_sql(sql)
+			if temp1res:
+				equity_on_month_begin=round(float(temp1res[0]['CloseBalance']+temp1res[0]['Withdraw']),1)
+				Withdraw_on_month_begin=round(float(temp1res[0]['Withdraw']),1)
 			else:
-				yesterdays_equity=0
-				yesterdays_withdraw=0
-			if len(tempres)>=1:
-				equity=tempres[-1]['CloseBalance']+tempres[-1]['Withdraw']
-				todays_withdraw=tempres[-1]['Withdraw']
-				todays_deposit=tempres[-1]['deposit']
+				equity_on_month_begin=0.1
+				Withdraw_on_month_begin=0
+			tempbegin=equity_on_month_begin
+			if item['primarymoney']>10 and equity_on_month_begin<10:
+				equity_on_month_begin=item['primarymoney']
+			real_equity_on_month_begin=equity_on_month_begin-Withdraw_on_month_begin
+
+			#获得当天权益，如果有出金，则标记出来
+			sql="SELECT top 2 [date] ,[userid] ,[prebalance] ,[deposit] ,[Withdraw] ,[CloseProfit]  ,[PositionProfit]  ,[Commission]  ,[CloseBalance]  FROM [LogRecord].[dbo].[AccountsBalance] where userid='%s'  and date>='%s' order by date desc" % (userid,month)
+			res=ms.dict_sql(sql)
+			if len(res)>=1:
+				todays_equity=round((res[0]['CloseBalance']+res[0]['Withdraw']),2)
+				todays1_withdraw=res[0]['Withdraw']
 			else:
-				equity=0
+				todays_equity=0
+				todays1_withdraw=0
+			if len(res)==2:
+				yesterdays_equity=round((res[1]['CloseBalance']+res[1]['Withdraw']),2)
+			else:
+				yesterdays_equity=equity_on_month_begin
+
+
+			#计算每月收益
+			sql="select sum(Withdraw-deposit) as deltawithdeposit from  [LogRecord].[dbo].[AccountsBalance] where userid='%s'  and date>='%s'" % (userid,month)
+			temp1res=ms.dict_sql(sql)
+			if temp1res[0]['deltawithdeposit'] is not None:
+				deltawithdeposit=temp1res[0]['deltawithdeposit']
+			else:
+				deltawithdeposit=0
+			# print  "################"
+			# print (todays_equity-todays1_withdraw)
+			# print (equity_on_month_begin-Withdraw_on_month_begin)
+			# print deltawithdeposit
+			real_equity_on_month_begin=real_equity_on_month_begin-deltawithdeposit+todays1_withdraw
+			monthly_equity=(todays_equity-todays1_withdraw)-(tempbegin-Withdraw_on_month_begin)+deltawithdeposit
+			monthly_rate=round(monthly_equity/(real_equity_on_month_begin+0.00002)*100,2)
+
+			#lastmonth
+			sql="SELECT distinct floor([date]/100)*100 as date FROM [LogRecord].[dbo].[AccountsBalance] order by  floor([date]/100)*100 desc "
+			tmep11res=ms.dict_sql(sql)
+			lastmonth=tmep11res[-2]['date']
+			sql="SELECT [date] ,[userid] ,[prebalance] ,[deposit] ,[Withdraw] ,[CloseProfit]  ,[PositionProfit]  ,[Commission]  ,[CloseBalance]  FROM [LogRecord].[dbo].[AccountsBalance] where userid='%s'  and date>='%s' order by date" % (userid,lastmonth)
+			tempres=ms.dict_sql(sql)
+			equity=0
+			monthly_commitssion=0
+			daily_profit=0
+			daily_rate=0
+			commission=0
+			if tempres:
+				#计算当月手续费		
+				for item1 in tempres:
+					monthly_commitssion=monthly_commitssion+item1['Commission']
+				#计算当日盈利率：
+				if len(tempres)>=2:			
+					yesterdays_equity=tempres[-2]['CloseBalance']+tempres[-2]['Withdraw']
+					yesterdays_withdraw=tempres[-2]['Withdraw']
+				else:
+					yesterdays_equity=0
+					yesterdays_withdraw=0
+				if len(tempres)>=1:
+					equity=tempres[-1]['CloseBalance']+tempres[-1]['Withdraw']
+					todays_withdraw=tempres[-1]['Withdraw']
+					todays_deposit=tempres[-1]['deposit']
+				else:
+					equity=0
+					todays_withdraw=0
+					todays_deposit=0		
+				commission=tempres[-1]['Commission']
+				daily_profit=round(equity-todays_deposit-yesterdays_equity+yesterdays_withdraw,2)
+				daily_rate=round(daily_profit/(yesterdays_equity+0.00002)*100,2)
+				templist=[tempres[-1]['date'],int(item['primarymoney']),item['future_company'],item['userid'],round(equity_on_month_begin,1),round(monthly_equity,1),str(monthly_rate)+"%",round(equity,1),round(commission,1),round(daily_profit,1),str(daily_rate)+"%",item['beizhu'],todays_withdraw]
+			else:
 				todays_withdraw=0
-				todays_deposit=0		
-			commission=tempres[-1]['Commission']
-			daily_profit=round(equity-todays_deposit-yesterdays_equity+yesterdays_withdraw,2)
-			daily_rate=round(daily_profit/(yesterdays_equity+0.00002)*100,2)
-			templist=[tempres[-1]['date'],int(item['primarymoney']),item['future_company'],item['userid'],round(equity_on_month_begin,1),round(monthly_equity,1),str(monthly_rate)+"%",round(equity,1),round(commission,1),round(daily_profit,1),str(daily_rate)+"%",item['beizhu'],todays_withdraw]
-		else:
-			todays_withdraw=0
-			templist=[19900101,int(item['primarymoney']),item['future_company'],item['userid'],round(equity_on_month_begin,1),round(monthly_equity,1),str(monthly_rate)+"%",round(equity,1),round(commission,1),round(daily_profit,1),str(daily_rate)+"%",item['beizhu'],todays_withdraw]		
-		returnlist.append(templist)
+				templist=[19900101,int(item['primarymoney']),item['future_company'],item['userid'],round(equity_on_month_begin,1),round(monthly_equity,1),str(monthly_rate)+"%",round(equity,1),round(commission,1),round(daily_profit,1),str(daily_rate)+"%",item['beizhu'],todays_withdraw]		
+			returnlist.append(templist)
 	return render_to_response('futureaccounttotal.html',{
 		'data':returnlist,
 		'username':username,

@@ -29,17 +29,6 @@ global totalresult_df2
 global totalresult_df3
 
 
-accountlist={"257188832":['StepMultiI300w_up',2.2],"666061010":['StepMultiI300w_up',2.2],"1636737":['StepMultigaosheng1',1]}
-accountlist['StepMultiI300w_up']=['StepMultiI300w_up',1]
-accountlist['StepMultigaosheng1']=['StepMultigaosheng1',1]
-accountlist['StepMultituji1']=['StepMultituji1',1]
-accountlist['StepMultituji2']=['StepMultituji2',1]
-accountlist['StepMultituji3']=['StepMultituji3',1]
-accountlist['StepMultidnhiboth']=['StepMultidnhiboth',1]
-accountlist['StepMultidnhiprofit']=['StepMultidnhiprofit',1]
-accountlist['StepMultidnhisharp']=['StepMultidnhisharp',1]
-accountlist['StepMultidnshort']=['StepMultidnshort',1]
-accountlist['newtuji300']=['newtuji300',1]
 
 # step_acname='StepMultiI300w_up'
 # account='666061010'
@@ -47,9 +36,9 @@ accountlist['newtuji300']=['newtuji300',1]
 # backday=40
 # equity_day='2017-02-15'
 
-account='StepMultidnhiboth'
+account='newtuji300'
 account=sys.argv[1]
-step_acname=accountlist[account][0]
+step_acname=account
 
 nowday=datetime.datetime.now().strftime("%Y-%m-%d")
 equity_day=nowday
@@ -62,8 +51,7 @@ res=ms.dict_sql(sql)
 # 	print 'Please input data first!!!!'
 # 	exit()
 
-totalratio=accountlist[account][1]
-
+totalratio=1
 backday=120
 cache_num=110
 #mytype= 'lilun' 'position' 'huibao'
@@ -101,7 +89,7 @@ def write_to_database_symbol_equity_lilun(account,acname,df1,cache_num=3):
 	df1=df1.iloc[-cache_num:]
 	df1=df1.fillna(0)
 	alist=df1.as_matrix()
-	sql="select date,round([lilun_zhuli],1)  from [LogRecord].[dbo].[account_lilun_distinct_acname] where [account]='%s' and [acname]='%s' order by date" % (account,acname)
+	sql="select date,round([lilun_zhishu],1)   from [LogRecord].[dbo].[account_lilun_distinct_acname] where [account]='%s' and [acname]='%s' order by date" % (account,acname)
 	res=ms.find_sql(sql)
 	datalist=[item[0] for item in res]
 
@@ -111,9 +99,9 @@ def write_to_database_symbol_equity_lilun(account,acname,df1,cache_num=3):
 			pass
 		else:
 			if item[3] in datalist:
-				sql="update [LogRecord].[dbo].[account_lilun_distinct_acname] set [lilun_zhuli]=%s ,[inserttime]=getdate() where account='%s' and acname='%s' and date='%s'" % (value[1],account,acname,value[0])
+				sql="update [LogRecord].[dbo].[account_lilun_distinct_acname] set lilun_zhishu=%s ,[inserttime]=getdate() where account='%s' and acname='%s' and date='%s'" % (value[1],account,acname,value[0])
 			else:
-				sql="insert into [LogRecord].[dbo].[account_lilun_distinct_acname]([account],[acname],[date],[lilun_zhuli],[inserttime]) values('%s','%s','%s',%s,getdate())" % (account,acname,value[0],value[1])
+				sql="insert into [LogRecord].[dbo].[account_lilun_distinct_acname]([account],[acname],[date],[lilun_zhishu],[inserttime]) values('%s','%s','%s',%s,getdate())" % (account,acname,value[0],value[1])
 			print sql
 			ms.insert_sql(sql)
 
@@ -122,7 +110,7 @@ def write_to_database_symbol_equity_real_ab_lilun(account,acname,df1,cache_num=3
 	df1=df1.iloc[-cache_num:]
 	df1=df1.fillna(0)
 	alist=df1.as_matrix()
-	sql="select date,round([real_ab_zhuli],1)  from [LogRecord].[dbo].[account_lilun_distinct_acname] where [account]='%s' and [acname]='%s' order by date" % (account,acname)
+	sql="select date,round([real_ab_zhishu],1)    from [LogRecord].[dbo].[account_lilun_distinct_acname] where [account]='%s' and [acname]='%s' order by date" % (account,acname)
 	res=ms.find_sql(sql)
 	datalist=[item[0] for item in res]
 
@@ -132,9 +120,9 @@ def write_to_database_symbol_equity_real_ab_lilun(account,acname,df1,cache_num=3
 			pass
 		else:
 			if item[3] in datalist:
-				sql="update [LogRecord].[dbo].[account_lilun_distinct_acname] set [real_ab_zhuli]=%s ,[inserttime]=getdate() where account='%s' and acname='%s' and date='%s'" % (value[1],account,acname,value[0])
+				sql="update [LogRecord].[dbo].[account_lilun_distinct_acname] set real_ab_zhishu=%s ,[inserttime]=getdate() where account='%s' and acname='%s' and date='%s'" % (value[1],account,acname,value[0])
 			else:
-				sql="insert into [LogRecord].[dbo].[account_lilun_distinct_acname]([account],[acname],[date],[real_ab_zhuli],[inserttime]) values('%s','%s','%s',%s,getdate())" % (account,acname,value[0],value[1])
+				sql="insert into [LogRecord].[dbo].[account_lilun_distinct_acname]([account],[acname],[date],[real_ab_zhishu],[inserttime]) values('%s','%s','%s',%s,getdate())" % (account,acname,value[0],value[1])
 			print sql
 			ms.insert_sql(sql)
 
@@ -203,13 +191,9 @@ def write_position_csv(type,symbol,endtime='2017-11-12',df1=1):
 	if  not os.path.isdir(a_parent):
 		os.makedirs(a_parent)
 	df1.to_csv(newpath,sep=',',index=False)
-	#print '## generate  position file ',symbol,newpath
 
 
 
-
-#################general steps ########################
-### setp 1 获取原始仓位序列 #####
 def get_origin_position_list(p_followac,acname,ratio=1):
 	sql="select q.ClosePrice,q.stockdate,round(q.totalposition*mr.ratio*%s,0) as totalposition ,q.symbol,sid.S_ID from p_follow p inner join quanyi_log_groupby_v4_ABpython q on p.F_ac=q.AC and p.AC='%s' inner join LogRecord.dbo.test_margin mr on q.symbol=mr.symbol inner join symbol_id sid on q.symbol=sid.Symbol where q.AC='%s' and stockdate>='%s' and stockdate<='%s' order by stockdate,q.id" % (ratio,p_followac,acname,begintime,endtime)
 	res1=ms.dict_sql(sql)
@@ -247,35 +231,11 @@ def get_origin_position_list_real_ab_lilun(p_followac,acname,ratio=1):
 
 
 def get_Tsymbol_by_symbol(symbol,postionpd):
-	symbol=symbol.upper()
-	zhuliroot=r'Y:\data_yangzhen\future_1m_zhuli'
-	filemane=symbol+"_zl_20150101.csv"
-	#read csv to pd
-	#df1=pd.read_csv(zhuliroot+"\\"+filemane,names=['date','time','O','H','L','C','V','OPI','conid','delta'])
-	df1=pd.read_csv(zhuliroot+"\\"+filemane,parse_dates={'stockdate':['date','time']},names=['date','time','O','H','L','C','V','OPI','conid','delta'])
-	df1=df1.sort_values(['stockdate'])
-	df1['myindex']=df1.index
-	lastconid_index=df1.groupby(['conid'])['myindex'].min()
-	addcont_lastposition=[]
-	addcont_zeroposition = []
-	for index in lastconid_index:
-		if index>0:
-			tempa_stockdate=df1.loc[index]['stockdate']
-			tempa_C=df1.loc[index]['C']
-			addcont_lastposition.append({'stockdate':tempa_stockdate,'C':tempa_C,'totalposition':np.nan})
-			index=index-1
-			tempa_stockdate = df1.loc[index]['stockdate']
-			tempa_C = df1.loc[index]['C']
-			addcont_zeroposition.append({'stockdate': tempa_stockdate, 'C':tempa_C,'totalposition':0})
-	addcont_lastposition=pd.DataFrame(addcont_lastposition)
-	addcont_zeroposition = pd.DataFrame(addcont_zeroposition)
-
-
-	quotes_pd=df1[['stockdate','C']]
+	sql="select stockdate,C from TSymbol_allfuture where symbol='%s' and StockDate>='%s' and StockDate<='%s' order by StockDate" % (symbol,begintime,endtime)
+	quotes=ms.dict_sql(sql)
+	quotes_pd=pd.DataFrame(quotes)
 	fisrsttime=postionpd['stockdate'].iloc[[0]].values[0]
 	quotes_pd = quotes_pd[quotes_pd['stockdate']>=fisrsttime]
-
-
 	total=pd.merge(quotes_pd,postionpd,'outer',left_on='stockdate',right_on='stockdate')
 	#排序
 	total=total.sort_values(['stockdate'])
@@ -283,33 +243,6 @@ def get_Tsymbol_by_symbol(symbol,postionpd):
 	total=total[pd.notnull(total['totalposition'])]
 	total=total.drop_duplicates()
 	total=total[['stockdate','C','totalposition']]
-	# 截止到现在，相当于将 positionpd 中的C update 一下
-
-	addcont_lastposition=addcont_lastposition[['stockdate','C','totalposition']]
-	total=pd.concat([total,addcont_lastposition],ignore_index=True)
-	total=total.reset_index(drop=True)
-	total['myindex']=total.index
-	total=total.sort_values(['stockdate','myindex'])
-	total['totalposition'] = total['totalposition'].fillna(method='ffill')
-	# 讲头几行的NAN 变成0
-	total['totalposition'] = total['totalposition'].fillna(0)
-	total=total.reset_index(drop=True)
-	total['myindex'] = total.index
-
-
-
-	total = pd.concat([total, addcont_zeroposition], ignore_index=True)
-	total['myindex'] = total.index
-	total = total.sort_values(['stockdate', 'myindex'],ascending=['True','False'])
-	total = total[total['stockdate'] >= fisrsttime]
-	total=total[['stockdate','C','totalposition']]
-
-
-
-
-
-	#add conid stockdate
-
 	return total
 
 
@@ -674,19 +607,19 @@ def merge_position_price(df1,df2):
 
 
 
-def cal_ac_day_equity(p_followac,acname,ratio=1):
-	postionpd, symbol = get_origin_position_list(p_followac, acname, ratio)
-	#postionpd.to_csv(r'E:\test\zhuli_position.csv')
+def cal_ac_day_equity(p_followac,symbol,s_id,ratio=1):
+	postionpd, symbol = get_origin_position_list(p_followac, symbol, s_id,ratio)
+	#postionpd.to_csv(r'E:\test\zhishu_position'+datetime.datetime.now().strftime('%M%S')+'.csv')
 	#获取 指数 价格 系列权益
 	totalpo = get_Tsymbol_by_symbol(symbol, postionpd)
-	#totalpo.to_csv(r'E:\test\zhuli_position_close.csv')
+	#totalpo.to_csv(r'E:\test\zhishu_position_close'+datetime.datetime.now().strftime('%M%S')+'.csv')
 	newtotalpo = cal_equity(symbol, totalpo)
 	#write_position_csv(type='Lilun', symbol=symbol, endtime=equity_day, df1=newtotalpo)
 	day_equity = equity_resharp(newtotalpo)
 	tempdf=day_equity
 	tempdf['day']=day_equity.index
 	#write_position_csv(type='Lilun_dayli_equity', symbol=symbol, endtime=equity_day, df1=tempdf)
-	write_to_database_symbol_equity_lilun(account, acname, tempdf,cache_num)
+	write_to_database_symbol_equity_lilun(account, symbol, tempdf,cache_num)
 	lastday_equity=day_equity['equity'][-1]
 	cal_day=day_equity.index[-1]
 	lilun_total.append(lastday_equity)
@@ -754,14 +687,15 @@ def cal_ac_day_equity_huibao(account, symbolid, symbol,acanme):
 
 
 def main_get_lilun(step_acname,totalratio):
-	sql="select * from (select distinct f_ac from p_follow where ac='%s') a   order by f_ac" % (step_acname)
+	sql="  select a.s_id,a.Symbol from  ( select distinct stock from p_follow where ac='%s') p   inner join symbol_id a on p.stock=a.S_ID and LEN(a.symbol)<3" % (step_acname)
 	myres=ms.dict_sql(sql)
 	for myitem in myres:
 		#print myitem
 		# step_acname='StepMultiI300w_up'
 		# myitem['f_ac']='buStepMultiI_up'
 		# totalratio=1
-		cal_ac_day_equity(step_acname,myitem['f_ac'],totalratio)
+		cal_ac_day_equity(step_acname,myitem['symbol'],myitem['s_id'],totalratio)
+
 
 	print '####lilun_total',sum(lilun_total)
 	totalresult_df1=pd.DataFrame(lilun_result)
@@ -799,9 +733,15 @@ def main_get_huibao_position(account,step_acname):
 
 
 
+# cal_ac_day_equity('StepMultiI300w_up','srStepMultiI_up',2.2)
+# cal_ac_day_equity_real(account,3,'sr')
+# cal_ac_day_equity_huibao(account,7,'yy')
+# cal_ac_day_equity_huibao(account,52,'zc')
+# cal_ac_day_equity_huibao(account,8,'zn')
+# cal_ac_day_equity_huibao(account,53,'bu')
+#
 
-
-
+#mytype= 'lilun' 'position' 'huibao'
 mytype="real_ab_lilun"
 if mytype=='lilun' or 1==1:
 	# 计算理论当天权益

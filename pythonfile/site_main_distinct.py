@@ -27,6 +27,14 @@ def sub_main(item):
 	cmd = "python site_acname_zhuli_equity.py %s" % (item)
 	os.system(cmd)
 
+
+def sub_main_merge(item):
+	cmd = "python site_generate_dissitnct_V4.py %s" % (item)
+	os.system(cmd)
+	cmd = "python site_acname_zhuli_equity.py %s" % (item)
+	os.system(cmd)
+
+
 if __name__ == "__main__":
 	threads_N = 6
 	multiprocessing.freeze_support()
@@ -46,7 +54,18 @@ if __name__ == "__main__":
 	print "Process Pool Closed, Waiting for sub Process Finishing..."
 	pool.close()
 	pool.join()
+	print 'Finished sub_main'
 
-	print 'Finished'
-
-
+	# meger_jieti = ['newtuji300']
+	# for item in meger_jieti:
+	# 	# add process to pool
+	# 	if threads_N > 1:
+	# 		# print multiprocessing.current_process().name
+	# 		pool.apply_async(sub_main_merge, (item,))
+	# 	else:
+	# 		sub_main_merge(item, )
+	#
+	# print "Process Pool Closed, Waiting for sub Process Finishing..."
+	# pool.close()
+	# pool.join()
+	# print 'Finished sub_main_merge'
