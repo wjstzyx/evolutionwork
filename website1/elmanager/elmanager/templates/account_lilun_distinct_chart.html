@@ -93,16 +93,13 @@
                   verticalAlign: 'middle',
                   borderWidth: 0
               },
-               series: [{
-                  name: '虚拟组仓位',
-                  data: [1,2,3]
-              }
-              {% for aaa in item.content %}
-              , {
+               series: [
+               {% for aaa in item.content %}
+              {
                   name: '{{aaa.0}}',
                   data: {{aaa.1}}          
               
-              }
+              },
               {% endfor %}
               ]
           });
