@@ -23,11 +23,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="site_main_distinct.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="site_main_distinct.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/site_main_distinct.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="391">
-              <caret line="21" column="0" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
+              <caret line="28" column="0" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -105,69 +105,6 @@
                 <element signature="e#34303#34368#0" expanded="false" />
                 <element signature="e#34391#34613#0" expanded="false" />
                 <element signature="e#34453#34463#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="total_jieti_merge_equity.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/total_jieti_merge_equity.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="426">
-              <caret line="74" column="10" selection-start-line="74" selection-start-column="10" selection-end-line="74" selection-end-column="10" />
-              <folding>
-                <element signature="e#456#1982#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="dbconn.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/dbconn.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="368">
-              <caret line="28" column="116" selection-start-line="28" selection-start-column="20" selection-end-line="28" selection-end-column="116" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="shandan.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/shandan.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="630">
-              <caret line="67" column="0" selection-start-line="67" selection-start-column="0" selection-end-line="67" selection-end-column="0" />
-              <folding>
-                <element signature="n#!!doc" expanded="false" />
-                <element signature="e#222#294#0" expanded="false" />
-                <element signature="e#420#636#0" expanded="false" />
-                <element signature="e#562#624#0" expanded="false" />
-                <element signature="e#680#1105#0" expanded="false" />
-                <element signature="e#726#1074#0" expanded="false" />
-                <element signature="e#752#792#0" expanded="false" />
-                <element signature="e#2879#3092#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="merge.py" pinned="false" current-in-tab="false">
-        <entry file="file://C:/Python27/Lib/site-packages/pandas/tools/merge.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="313">
-              <caret line="845" column="0" selection-start-line="845" selection-start-column="0" selection-end-line="845" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="z_t_get_all_acname_inuse.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/z_t_get_all_acname_inuse.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="518">
-              <caret line="78" column="43" selection-start-line="78" selection-start-column="43" selection-end-line="78" selection-end-column="43" />
-              <folding>
-                <element signature="e#37#70#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -340,6 +277,22 @@
     <option name="width" value="1936" />
     <option name="height" value="1066" />
   </component>
+  <component name="ProjectInspectionProfilesVisibleTreeState">
+    <entry key="Project Default">
+      <profile-state>
+        <expanded-state>
+          <State>
+            <id />
+          </State>
+        </expanded-state>
+        <selected-state>
+          <State>
+            <id>HTML</id>
+          </State>
+        </selected-state>
+      </profile-state>
+    </entry>
+  </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
     <OptionsSetting value="true" id="Add" />
     <OptionsSetting value="true" id="Remove" />
@@ -397,7 +350,7 @@
       <recent name="C:\YYfiles\evolutionwork\pythonfile" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.total_jieti_merge_equity">
+  <component name="RunManager" selected="Python.site_main_distinct">
     <configuration default="false" name="site_main_distinct" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -626,9 +579,9 @@
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.total_jieti_merge_equity" />
-        <item index="1" class="java.lang.String" itemvalue="Python.site_acname_zhuli_equity" />
-        <item index="2" class="java.lang.String" itemvalue="Python.site_main_distinct" />
+        <item index="0" class="java.lang.String" itemvalue="Python.site_main_distinct" />
+        <item index="1" class="java.lang.String" itemvalue="Python.total_jieti_merge_equity" />
+        <item index="2" class="java.lang.String" itemvalue="Python.site_acname_zhuli_equity" />
         <item index="3" class="java.lang.String" itemvalue="Python.site_generate_dissitnct_V4" />
         <item index="4" class="java.lang.String" itemvalue="Python.1.create_vote_foroptimizeAndforevaluate" />
       </list>
@@ -648,7 +601,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1066" extended-state="6" />
+    <frame x="-8" y="-8" width="1936" height="1066" extended-state="7" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.19114584" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
@@ -992,10 +945,7 @@
             <element signature="e#222#294#0" expanded="false" />
             <element signature="e#420#636#0" expanded="false" />
             <element signature="e#562#624#0" expanded="false" />
-            <element signature="e#680#1105#0" expanded="false" />
-            <element signature="e#726#1074#0" expanded="false" />
             <element signature="e#752#792#0" expanded="false" />
-            <element signature="e#2879#3092#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1026,14 +976,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/dbconn.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="368">
-          <caret line="28" column="116" selection-start-line="28" selection-start-column="20" selection-end-line="28" selection-end-column="116" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/new_cal_quayi_V2_real.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="185">
@@ -1060,7 +1002,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/z_t_get_all_acname_inuse.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="518">
+        <state relative-caret-position="449">
           <caret line="78" column="43" selection-start-line="78" selection-start-column="43" selection-end-line="78" selection-end-column="43" />
           <folding>
             <element signature="e#37#70#0" expanded="true" />
@@ -1068,11 +1010,21 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/site_main_distinct.py">
+    <entry file="file://$PROJECT_DIR$/dbconn.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="391">
-          <caret line="21" column="0" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
+        <state relative-caret-position="368">
+          <caret line="28" column="116" selection-start-line="28" selection-start-column="20" selection-end-line="28" selection-end-column="116" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/total_jieti_merge_equity.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="541">
+          <caret line="67" column="32" selection-start-line="67" selection-start-column="32" selection-end-line="67" selection-end-column="32" />
+          <folding>
+            <element signature="e#456#1982#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1228,13 +1180,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/total_jieti_merge_equity.py">
+    <entry file="file://$PROJECT_DIR$/site_main_distinct.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="426">
-          <caret line="74" column="10" selection-start-line="74" selection-start-column="10" selection-end-line="74" selection-end-column="10" />
-          <folding>
-            <element signature="e#456#1982#0" expanded="false" />
-          </folding>
+        <state relative-caret-position="391">
+          <caret line="28" column="0" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
