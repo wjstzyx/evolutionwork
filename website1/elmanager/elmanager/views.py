@@ -4355,7 +4355,7 @@ def cal_distinct_position_lilun():
 		userid=item['userid']
 		ispass=0
 		try:
-			sql="select 1 from future.dbo.view_%s" % (userid)
+			sql="select 1 from Fun_account_position_all_V2('%s')" % (userid)
 			ms.insert_sql(sql)
 			ispass=1
 		except:
@@ -4363,7 +4363,7 @@ def cal_distinct_position_lilun():
 			print sql
 			ms.insert_sql(sql)
 		if ispass==1:
-			tempsql="select '%s' as [userID],STOCK as [stockID],Expr1 as position,GETDATE() as nowtime from future.dbo.view_%s" % (userid,userid)
+			tempsql="select '%s' as [userID],STOCK as [stockID],Expr1 as position,GETDATE() as nowtime from Fun_account_position_all_V2('%s')" % (userid,userid)
 			totalsql=totalsql+" union all "+tempsql
 	totalsql=totalsql.strip(" union all ")
 	totalsql="insert into [LogRecord].[dbo].account_position_lilun([userID],[stockID],[position],[inserttime]) "+ totalsql
