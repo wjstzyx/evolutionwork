@@ -23,88 +23,23 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="site_main_distinct.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="site_main_distinct.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/site_main_distinct.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="391">
+            <state relative-caret-position="368">
               <caret line="28" column="0" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="site_acname_zhuli_equity.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/site_acname_zhuli_equity.py">
+      <file leaf-file-name="find_quptes_short.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/find_quptes_short.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="345">
-              <caret line="49" column="27" selection-start-line="49" selection-start-column="27" selection-end-line="49" selection-end-column="27" />
+            <state relative-caret-position="468">
+              <caret line="87" column="29" selection-start-line="87" selection-start-column="29" selection-end-line="87" selection-end-column="29" />
               <folding>
-                <element signature="n#!!doc" expanded="false" />
-                <element signature="e#411#489#0" expanded="false" />
-                <element signature="e#1426#1459#0" expanded="false" />
-                <element signature="e#1815#1833#0" expanded="false" />
-                <element signature="e#2753#3629#0" expanded="false" />
-                <element signature="e#3094#3629#0" expanded="false" />
-                <element signature="e#3165#3629#0" expanded="false" />
-                <element signature="e#3715#4597#0" expanded="false" />
-                <element signature="e#4058#4597#0" expanded="false" />
-                <element signature="e#4129#4597#0" expanded="false" />
-                <element signature="e#4680#5667#0" expanded="false" />
-                <element signature="e#5054#5667#0" expanded="false" />
-                <element signature="e#5142#5667#0" expanded="false" />
-                <element signature="e#5748#6644#0" expanded="false" />
-                <element signature="e#6105#6644#0" expanded="false" />
-                <element signature="e#6176#6644#0" expanded="false" />
-                <element signature="e#6719#7050#0" expanded="false" />
-                <element signature="e#7052#7103#0" expanded="false" />
-                <element signature="e#8919#9480#0" expanded="false" />
-                <element signature="e#12045#12693#0" expanded="false" />
-                <element signature="e#12289#12352#0" expanded="false" />
-                <element signature="e#12734#13559#0" expanded="false" />
-                <element signature="e#12978#13041#0" expanded="false" />
-                <element signature="e#13596#13921#0" expanded="false" />
-                <element signature="e#13962#14287#0" expanded="false" />
-                <element signature="e#14291#14381#0" expanded="false" />
-                <element signature="e#14615#15820#0" expanded="false" />
-                <element signature="e#15078#15133#0" expanded="false" />
-                <element signature="e#15864#16016#0" expanded="false" />
-                <element signature="e#15906#15990#0" expanded="false" />
-                <element signature="e#16066#22135#0" expanded="false" />
-                <element signature="e#16066#16145#0" expanded="false" />
-                <element signature="e#16183#16645#0" expanded="false" />
-                <element signature="e#16655#17151#0" expanded="false" />
-                <element signature="e#17793#17879#0" expanded="false" />
-                <element signature="e#17889#17925#0" expanded="false" />
-                <element signature="e#19572#19658#0" expanded="false" />
-                <element signature="e#19668#19704#0" expanded="false" />
-                <element signature="e#20241#20327#0" expanded="false" />
-                <element signature="e#20337#20373#0" expanded="false" />
-                <element signature="e#21432#21518#0" expanded="false" />
-                <element signature="e#21528#21565#0" expanded="false" />
-                <element signature="e#22201#28264#0" expanded="false" />
-                <element signature="e#22317#22774#0" expanded="false" />
-                <element signature="e#22784#23280#0" expanded="false" />
-                <element signature="e#23923#24009#0" expanded="false" />
-                <element signature="e#24019#24055#0" expanded="false" />
-                <element signature="e#25701#25787#0" expanded="false" />
-                <element signature="e#25797#25833#0" expanded="false" />
-                <element signature="e#26370#26456#0" expanded="false" />
-                <element signature="e#26466#26502#0" expanded="false" />
-                <element signature="e#27561#27647#0" expanded="false" />
-                <element signature="e#27657#27694#0" expanded="false" />
-                <element signature="e#28306#28649#0" expanded="false" />
-                <element signature="e#28388#28453#0" expanded="false" />
-                <element signature="e#28656#28723#0" expanded="false" />
-                <element signature="e#28927#28975#0" expanded="false" />
-                <element signature="e#30583#31434#0" expanded="false" />
-                <element signature="e#31502#32257#0" expanded="false" />
-                <element signature="e#33143#33601#0" expanded="false" />
-                <element signature="e#33332#33462#0" expanded="false" />
-                <element signature="e#33655#34067#0" expanded="false" />
-                <element signature="e#33844#33976#0" expanded="false" />
-                <element signature="e#34303#34368#0" expanded="false" />
-                <element signature="e#34391#34613#0" expanded="false" />
-                <element signature="e#34453#34463#0" expanded="false" />
+                <element signature="e#620#1655#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -201,6 +136,7 @@
     <setting file="file://$PROJECT_DIR$/new_position_generate_V2.py" root0="SKIP_INSPECTION" />
     <setting file="file://$PROJECT_DIR$/real_time_monitor.py" root0="SKIP_INSPECTION" />
     <setting file="file://$USER_HOME$/Desktop/模板/TradeHelper.afl" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/find_quptes_short.py" root0="SKIP_INSPECTION" />
     <setting file="file://$PROJECT_DIR$/new_cal_quayi_V2_cal_stepmulti.py" root0="SKIP_INSPECTION" />
     <setting file="file://$PROJECT_DIR$/new_cal_quayi_V2_cplus_real_st.py" root0="SKIP_INSPECTION" />
     <setting file="file://$PROJECT_DIR$/account_AB_dissitnct_V1.py" root0="SKIP_INSPECTION" />
@@ -217,8 +153,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/aaa_test.py" />
-        <option value="$USER_HOME$/Desktop/yuyang/yuyang_test_stepwise.py" />
         <option value="$PROJECT_DIR$/_step1_multi_lilun_real_time_equity_model - 副本.py" />
         <option value="$PROJECT_DIR$/_step1_multi_lilun_real_time_equity_model_理论.py" />
         <option value="$PROJECT_DIR$/test_merge_csv.py" />
@@ -268,6 +202,8 @@
         <option value="$PROJECT_DIR$/site_generate_dissitnct_V4.py" />
         <option value="$PROJECT_DIR$/site_acname_zhuli_equity.py" />
         <option value="$PROJECT_DIR$/total_jieti_merge_equity.py" />
+        <option value="$PROJECT_DIR$/input_date_from_KingTrade.py" />
+        <option value="$PROJECT_DIR$/find_quptes_short.py" />
       </list>
     </option>
   </component>
@@ -350,7 +286,7 @@
       <recent name="C:\YYfiles\evolutionwork\pythonfile" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.site_main_distinct">
+  <component name="RunManager" selected="Python.find_quptes_short">
     <configuration default="false" name="site_main_distinct" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -364,23 +300,6 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="pythonfile" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/site_main_distinct.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <method />
-    </configuration>
-    <configuration default="false" name="1.create_vote_foroptimizeAndforevaluate" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$USER_HOME$/Desktop/20161227-night-30min-train20151231-ALL" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="pythonfile" />
-      <option name="SCRIPT_NAME" value="$USER_HOME$/Desktop/20161227-night-30min-train20151231-ALL/1.create_vote_foroptimizeAndforevaluate.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
@@ -432,6 +351,23 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="pythonfile" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/site_generate_dissitnct_V4.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="find_quptes_short" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="pythonfile" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/find_quptes_short.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
@@ -572,18 +508,18 @@
     </configuration>
     <list size="5">
       <item index="0" class="java.lang.String" itemvalue="Python.site_main_distinct" />
-      <item index="1" class="java.lang.String" itemvalue="Python.1.create_vote_foroptimizeAndforevaluate" />
-      <item index="2" class="java.lang.String" itemvalue="Python.site_acname_zhuli_equity" />
-      <item index="3" class="java.lang.String" itemvalue="Python.total_jieti_merge_equity" />
-      <item index="4" class="java.lang.String" itemvalue="Python.site_generate_dissitnct_V4" />
+      <item index="1" class="java.lang.String" itemvalue="Python.site_acname_zhuli_equity" />
+      <item index="2" class="java.lang.String" itemvalue="Python.total_jieti_merge_equity" />
+      <item index="3" class="java.lang.String" itemvalue="Python.site_generate_dissitnct_V4" />
+      <item index="4" class="java.lang.String" itemvalue="Python.find_quptes_short" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.site_main_distinct" />
-        <item index="1" class="java.lang.String" itemvalue="Python.total_jieti_merge_equity" />
-        <item index="2" class="java.lang.String" itemvalue="Python.site_acname_zhuli_equity" />
-        <item index="3" class="java.lang.String" itemvalue="Python.site_generate_dissitnct_V4" />
-        <item index="4" class="java.lang.String" itemvalue="Python.1.create_vote_foroptimizeAndforevaluate" />
+        <item index="0" class="java.lang.String" itemvalue="Python.find_quptes_short" />
+        <item index="1" class="java.lang.String" itemvalue="Python.site_main_distinct" />
+        <item index="2" class="java.lang.String" itemvalue="Python.total_jieti_merge_equity" />
+        <item index="3" class="java.lang.String" itemvalue="Python.site_acname_zhuli_equity" />
+        <item index="4" class="java.lang.String" itemvalue="Python.site_generate_dissitnct_V4" />
       </list>
     </recent_temporary>
   </component>
@@ -601,7 +537,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1066" extended-state="7" />
+    <frame x="-8" y="-8" width="1936" height="1066" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.19114584" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
@@ -609,7 +545,7 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3218391" sideWeight="0.50208336" order="0" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32946146" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.38035527" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1985371" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
@@ -685,19 +621,11 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="242" />
+      <option name="time" value="243" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://E:/ABautofile/aflfile/5min-P-midday.afl" />
-    <entry file="file://$PROJECT_DIR$/new_test.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="502">
-          <caret line="39" column="46" selection-start-line="39" selection-start-column="4" selection-end-line="39" selection-end-column="46" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://Z:/俞洋/all_futures_quotes.py" />
     <entry file="file://C:/_wenhua_/wh6all/all_futures_quotes.py">
       <provider selected="true" editor-type-id="text-editor">
@@ -1105,10 +1033,18 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/site_main_distinct.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="368">
+          <caret line="28" column="0" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/site_acname_zhuli_equity.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="345">
-          <caret line="49" column="27" selection-start-line="49" selection-start-column="27" selection-end-line="49" selection-end-column="27" />
+        <state relative-caret-position="62">
+          <caret line="321" column="0" selection-start-line="321" selection-start-column="0" selection-end-line="321" selection-end-column="0" />
           <folding>
             <element signature="n#!!doc" expanded="false" />
             <element signature="e#411#489#0" expanded="false" />
@@ -1133,7 +1069,6 @@
             <element signature="e#12289#12352#0" expanded="false" />
             <element signature="e#12734#13559#0" expanded="false" />
             <element signature="e#12978#13041#0" expanded="false" />
-            <element signature="e#13596#13921#0" expanded="false" />
             <element signature="e#13962#14287#0" expanded="false" />
             <element signature="e#14291#14381#0" expanded="false" />
             <element signature="e#14615#15820#0" expanded="false" />
@@ -1180,11 +1115,21 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/site_main_distinct.py">
+    <entry file="file://$PROJECT_DIR$/input_date_from_KingTrade.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="391">
-          <caret line="28" column="0" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
+        <state relative-caret-position="347">
+          <caret line="54" column="46" selection-start-line="54" selection-start-column="46" selection-end-line="54" selection-end-column="46" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/find_quptes_short.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="468">
+          <caret line="87" column="29" selection-start-line="87" selection-start-column="29" selection-end-line="87" selection-end-column="29" />
+          <folding>
+            <element signature="e#620#1655#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>

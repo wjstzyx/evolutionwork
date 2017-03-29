@@ -41,14 +41,14 @@ def cal_position_lilun():
 		userid=item['userid']
 		ispass=0
 		try:
-			sql="select 1 from future.dbo.view_%s" % (userid)
+			sql="select 1 from Fun_account_position_all_V2('%s')" % (userid)
 			ms.insert_sql(sql)
 			ispass=1
 		except:
 			sql="insert into [LogRecord].[dbo].account_position_lilun([userID],[stockID],[position],[inserttime],beizhu) values('%s',0,'%s',getdate(),'%s')" % (userid,0,'No view in 0.5 database')
 			ms.insert_sql(sql)
 		if ispass==1:
-			tempsql="select '%s' as [userID],STOCK as [stockID],Expr1 as position,GETDATE() as nowtime from future.dbo.view_%s" % (userid,userid)
+			tempsql="select '%s' as [userID],STOCK as [stockID],Expr1 as position,GETDATE() as nowtime from Fun_account_position_all_V2('%s')" % (userid,userid)
 			totalsql=totalsql+" union all "+tempsql
 	totalsql=totalsql.strip(" union all ")
 	totalsql="insert into [LogRecord].[dbo].account_position_lilun([userID],[stockID],[position],[inserttime]) "+ totalsql
@@ -397,6 +397,8 @@ def crontab_delete_record():
 	if hour==19 and (minutes>=0 or minutes<=5):
 		sql="delete from [LogRecord].[dbo].[all_monitor_info] where issolved=1 and isactive=1 and  DATEDIFF(day,updatetime,GETDATE())>5"
 		ms.insert_sql(sql)
+
+
 
 
 try:

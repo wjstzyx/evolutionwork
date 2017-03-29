@@ -31,20 +31,25 @@ def changeTimetype(tablename):
 	if tablename in ('Tsymbol','TSymbol_alltime','TSymbol_quotes_backup'):
 		sql="select id,D,T,stockdate,symbol from %s where stockdate>'2015-05-20 13:00:00.000'" % (tablename)
 		res=ms.dict_sql(sql)
+		totalsql=""
+		ii=0
 		for item in res:
 			stockdate=str(item['stockdate'])
 			newD=stockdate[0:4]+'/'+stockdate[5:7]+'/'+stockdate[8:10]
 			newT=stockdate[11:16]
 			if len(item['D'])!=10 or len(item['T'])!=5 or newD!=item['D'] or newT!=item['T']:
 				print item['symbol'] 
-				sql="update Tsymbol set D='%s',T='%s' where id=%s" % (newD,newT,item['id'])
-				print sql 
-				ms.insert_sql(sql)
-				scroptsql="update Tsymbol set D='%s',T='%s' where id=%s and symbol='%s' ;" % (item['D'],item['T'],item['id'],item['symbol'])
-				# print scroptsql
-			
-
-
+				sql="update %s set D='%s',T='%s' where id=%s;" % (tablename,newD,newT,item['id'])
+				#print sql 
+				totalsql=totalsql+sql
+				ii=ii+1
+				if ii>1000:
+					print ii
+					ms.insert_sql(totalsql)
+					totalsql=""
+					ii=0
+		if len(totalsql)>10:
+			ms.insert_sql(totalsql)
 
 
 # changeTimetype()
