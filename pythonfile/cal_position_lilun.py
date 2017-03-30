@@ -82,7 +82,7 @@ def cal_position_lilun():
 	symboldict={}
 	for item in res:
 		symboldict[item['Symbol']]=item['S_ID']
-	sql="SELECT a.account,a.symbol,sum(a.ratio*b.position ) as Position  FROM [future].[dbo].[account_position_stock_yingshe] a left join [future].[dbo].[RealPosition] b on a.acanme=b.Name group by a.account,a.symbol"
+	sql="SELECT a.account,a.symbol,sum(a.ratio*b.position ) as Position  FROM [future].[dbo].[account_position_stock_yingshe] a left join [future].[dbo].[RealPosition] b on a.acanme=b.Name group by a.account,a.symbol having a.account not in ('666061008')"
 	res=ms1.dict_sql(sql)
 	for item in res:
 		#print item 
