@@ -6,11 +6,11 @@ class MyLog:
         self.name = name
         self.log = logging.getLogger(name)
         self.log.setLevel(logging.INFO)
-        # console = logging.StreamHandler()
-        # console.setLevel(logging.INFO)
-        # console_formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
-        # console.setFormatter(console_formatter)
-        # self.log.addHandler(console)
+        console = logging.StreamHandler()
+        console.setLevel(logging.INFO)
+        console_formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
+        console.setFormatter(console_formatter)
+        self.log.addHandler(console)
 
     def set_path(self, path):
         file_name = path + self.name + '.log'
