@@ -15,15 +15,11 @@ if 'Windows' in name:
 	log_path='E:\\test\\'
 if 'Linux' in name:
 	log_path='/home/yuyang/myfile/logfile/'
-print log_path
+
 log_name='Account_distinct'
 logger = MyLog(log_name)
 logger.set_path(log_path)
 log = logger.log
-log.info('ddddd')
-exit()
-
-
 
 
 # 获取收件人名单
@@ -152,8 +148,6 @@ def compare_position(account,lilun,real,log):
 				todo_sql = todo_sql + sql
 	#print todo_sql
 	ms.insert_sql(todo_sql)
-
-
 
 
 

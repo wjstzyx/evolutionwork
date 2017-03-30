@@ -36,15 +36,15 @@
       <file leaf-file-name="monitor_acocunt_position.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/monitor_acocunt_position.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="506">
-              <caret line="23" column="6" selection-start-line="23" selection-start-column="6" selection-end-line="23" selection-end-column="6" />
+            <state relative-caret-position="547">
+              <caret line="81" column="0" selection-start-line="81" selection-start-column="0" selection-end-line="81" selection-end-column="0" />
               <folding>
-                <element signature="e#550#982#0" expanded="false" />
-                <element signature="e#1014#1249#0" expanded="false" />
-                <element signature="e#1311#3798#0" expanded="false" />
-                <element signature="e#3860#7058#0" expanded="false" />
-                <element signature="e#7177#8535#0" expanded="false" />
-                <element signature="e#8572#9812#0" expanded="false" />
+                <element signature="e#509#941#0" expanded="false" />
+                <element signature="e#973#1208#0" expanded="false" />
+                <element signature="e#1270#3757#0" expanded="false" />
+                <element signature="e#3819#7017#0" expanded="false" />
+                <element signature="e#7134#8492#0" expanded="false" />
+                <element signature="e#8529#9769#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -553,7 +553,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1066" extended-state="6" />
+    <frame x="-8" y="-8" width="1936" height="1066" extended-state="7" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.19114584" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
@@ -1148,15 +1148,15 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/monitor_acocunt_position.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="506">
-          <caret line="23" column="6" selection-start-line="23" selection-start-column="6" selection-end-line="23" selection-end-column="6" />
+        <state relative-caret-position="547">
+          <caret line="81" column="0" selection-start-line="81" selection-start-column="0" selection-end-line="81" selection-end-column="0" />
           <folding>
-            <element signature="e#550#982#0" expanded="false" />
-            <element signature="e#1014#1249#0" expanded="false" />
-            <element signature="e#1311#3798#0" expanded="false" />
-            <element signature="e#3860#7058#0" expanded="false" />
-            <element signature="e#7177#8535#0" expanded="false" />
-            <element signature="e#8572#9812#0" expanded="false" />
+            <element signature="e#509#941#0" expanded="false" />
+            <element signature="e#973#1208#0" expanded="false" />
+            <element signature="e#1270#3757#0" expanded="false" />
+            <element signature="e#3819#7017#0" expanded="false" />
+            <element signature="e#7134#8492#0" expanded="false" />
+            <element signature="e#8529#9769#0" expanded="false" />
           </folding>
         </state>
       </provider>
