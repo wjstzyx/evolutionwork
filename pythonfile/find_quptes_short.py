@@ -108,9 +108,10 @@ def fix_data_by_Tsymbol_test(ms,fixtable,symbol,refer_df,begintime,endtime):
 
 daylist=[[u'A',u'A'], [u'AG', u'AG'], [u'AL', u'AL'], [u'AU', u'AU'], [u'bu', u'bu'], [u'c', u'c'], [u'CF', u'CF'], [u'cs', u'cs'], [u'CU', u'CU'], [u'FG', u'FG'], [u'hc', u'hc'], [u'I', u'I'], [u'IC', u'IC'], [u'IF', u'IF'], [u'IH', u'IH'], [u'J', u'J'], [u'jd', u'jd']]
 nightlist=[[u'AGN', u'AG'], [u'AUN', u'AU'], [u'CUN', u'CU'], [u'Inight', u'I'],  [u'Pnight', u'P'], [u'RBnight', u'RB']]
-nightlist=[[u'CUN', u'CU']]
-begintime='2014-08-01'
-endtime='2018-01-01'
+#nightlist=[[u'Pnight', u'P']]
+#daylist=[[u'RB',u'RB']]
+begintime='2017-01-01'
+endtime='2020-01-01'
 for item in nightlist:
 	symbol_refer = item[1]
 	symbol = item[0]
@@ -118,6 +119,23 @@ for item in nightlist:
 	df1 = get_infer_quotes(symbol_refer, begintime, endtime, type=type)
 	for fixtable in ('TSymbol','TSymbol_quotes_backup'):
 		fix_data_by_Tsymbol_test(ms05,fixtable,symbol,df1,begintime,endtime)
+
+for item in daylist:
+	symbol_refer = item[1]
+	symbol = item[0]
+	type = 'day'
+	df1 = get_infer_quotes(symbol_refer, begintime, endtime, type=type)
+	for fixtable in ('TSymbol','TSymbol_quotes_backup'):
+		fix_data_by_Tsymbol_test(ms05,fixtable,symbol,df1,begintime,endtime)
+
+for item in daylist:
+	symbol_refer = item[1]
+	symbol = item[0]
+	type = 'all'
+	df1 = get_infer_quotes(symbol_refer, begintime, endtime, type=type)
+	for fixtable in ['TSymbol_allfuture']:
+		fix_data_by_Tsymbol_test(ms05, fixtable, symbol, df1, begintime, endtime)
+
 # sql="select distinct symbol  from symbol_id where LEN(symbol)>=3 order by symbol"
 # res=ms05.dict_sql(sql)
 # total=[]
@@ -126,6 +144,6 @@ for item in nightlist:
 # print 	total
 
 
-delete_info=[['AGN',('330','180','150')],['RBnight',('240','60','180','120')],['AUN',('330','180','150')],['CUN',('240','60','180')]]
+delete_info=[['AGN',('330','180','150')],['RBnight',('240','60','180','120')],['AUN',('330','180','150')],['CUN',('240','60','180')],['Inight',('330','150')]]
 
 

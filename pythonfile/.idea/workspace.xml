@@ -33,14 +33,13 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="find_quptes_short.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/find_quptes_short.py">
+      <file leaf-file-name="monitor_acocunt_position.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/monitor_acocunt_position.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="531">
-              <caret line="128" column="130" selection-start-line="128" selection-start-column="130" selection-end-line="128" selection-end-column="130" />
+            <state relative-caret-position="669">
+              <caret line="57" column="18" selection-start-line="57" selection-start-column="18" selection-end-line="57" selection-end-column="18" />
               <folding>
-                <marker date="1490783009581" expanded="false" signature="618:1652" ph="..." />
-                <marker date="1490783009581" expanded="false" signature="1774:2525" ph="..." />
+                <element signature="e#297#653#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -138,6 +137,7 @@
     <setting file="file://$PROJECT_DIR$/real_time_monitor.py" root0="SKIP_INSPECTION" />
     <setting file="file://$USER_HOME$/Desktop/模板/TradeHelper.afl" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/find_quptes_short.py" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/monitor_acocunt_position.py" root0="SKIP_INSPECTION" />
     <setting file="file://$PROJECT_DIR$/new_cal_quayi_V2_cal_stepmulti.py" root0="SKIP_INSPECTION" />
     <setting file="file://$PROJECT_DIR$/new_cal_quayi_V2_cplus_real_st.py" root0="SKIP_INSPECTION" />
     <setting file="file://$PROJECT_DIR$/account_AB_dissitnct_V1.py" root0="SKIP_INSPECTION" />
@@ -154,7 +154,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/_step1_multi_lilun_real_time_equity_model - 副本.py" />
         <option value="$PROJECT_DIR$/_step1_multi_lilun_real_time_equity_model_理论.py" />
         <option value="$PROJECT_DIR$/test_merge_csv.py" />
         <option value="$PROJECT_DIR$/_step2_merge_all_future.py" />
@@ -205,6 +204,7 @@
         <option value="$PROJECT_DIR$/site_generate_dissitnct_V4.py" />
         <option value="$PROJECT_DIR$/site_acname_zhuli_equity.py" />
         <option value="$PROJECT_DIR$/find_quptes_short.py" />
+        <option value="$PROJECT_DIR$/monitor_acocunt_position.py" />
       </list>
     </option>
   </component>
@@ -287,7 +287,7 @@
       <recent name="C:\YYfiles\evolutionwork\pythonfile" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.find_quptes_short">
+  <component name="RunManager" selected="Python.monitor_acocunt_position">
     <configuration default="false" name="site_main_distinct" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -339,23 +339,6 @@
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
     </configuration>
-    <configuration default="false" name="site_generate_dissitnct_V4" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="pythonfile" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/site_generate_dissitnct_V4.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <method />
-    </configuration>
     <configuration default="false" name="find_quptes_short" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -369,6 +352,23 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="pythonfile" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/find_quptes_short.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="monitor_acocunt_position" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="pythonfile" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/monitor_acocunt_position.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
@@ -511,16 +511,16 @@
       <item index="0" class="java.lang.String" itemvalue="Python.site_main_distinct" />
       <item index="1" class="java.lang.String" itemvalue="Python.site_acname_zhuli_equity" />
       <item index="2" class="java.lang.String" itemvalue="Python.total_jieti_merge_equity" />
-      <item index="3" class="java.lang.String" itemvalue="Python.site_generate_dissitnct_V4" />
-      <item index="4" class="java.lang.String" itemvalue="Python.find_quptes_short" />
+      <item index="3" class="java.lang.String" itemvalue="Python.find_quptes_short" />
+      <item index="4" class="java.lang.String" itemvalue="Python.monitor_acocunt_position" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.find_quptes_short" />
-        <item index="1" class="java.lang.String" itemvalue="Python.site_main_distinct" />
-        <item index="2" class="java.lang.String" itemvalue="Python.total_jieti_merge_equity" />
-        <item index="3" class="java.lang.String" itemvalue="Python.site_acname_zhuli_equity" />
-        <item index="4" class="java.lang.String" itemvalue="Python.site_generate_dissitnct_V4" />
+        <item index="0" class="java.lang.String" itemvalue="Python.monitor_acocunt_position" />
+        <item index="1" class="java.lang.String" itemvalue="Python.find_quptes_short" />
+        <item index="2" class="java.lang.String" itemvalue="Python.site_main_distinct" />
+        <item index="3" class="java.lang.String" itemvalue="Python.total_jieti_merge_equity" />
+        <item index="4" class="java.lang.String" itemvalue="Python.site_acname_zhuli_equity" />
       </list>
     </recent_temporary>
   </component>
@@ -622,7 +622,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://Z:/俞洋/all_futures_quotes.py" />
     <entry file="file://C:/_wenhua_/wh6all/all_futures_quotes.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="97">
@@ -1034,14 +1033,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/site_main_distinct.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="623">
-          <caret line="48" column="58" selection-start-line="48" selection-start-column="58" selection-end-line="48" selection-end-column="58" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/site_generate_dissitnct_V4.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="460">
@@ -1121,11 +1112,29 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/find_quptes_short.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="531">
-          <caret line="128" column="130" selection-start-line="128" selection-start-column="130" selection-end-line="128" selection-end-column="130" />
+        <state relative-caret-position="138">
+          <caret line="123" column="26" selection-start-line="123" selection-start-column="26" selection-end-line="123" selection-end-column="26" />
           <folding>
-            <marker date="1490783009581" expanded="false" signature="618:1652" ph="..." />
-            <marker date="1490783009581" expanded="false" signature="1774:2525" ph="..." />
+            <element signature="e#620#1655#0" expanded="false" />
+            <element signature="e#1776#2525#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/site_main_distinct.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="623">
+          <caret line="48" column="58" selection-start-line="48" selection-start-column="58" selection-end-line="48" selection-end-column="58" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/monitor_acocunt_position.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="669">
+          <caret line="57" column="18" selection-start-line="57" selection-start-column="18" selection-end-line="57" selection-end-column="18" />
+          <folding>
+            <element signature="e#297#653#0" expanded="false" />
           </folding>
         </state>
       </provider>
