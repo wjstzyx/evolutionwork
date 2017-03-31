@@ -220,7 +220,7 @@ def realshowmonitor_newalert(request):
 
 def rt_newalert(request):
 	ms= MSSQL(host="192.168.0.5",user="future",pwd="K@ra0Key",db="future")
-	sql="SELECT a.id,a.[type],a.[item],a.[msg],'symbol' as symbol, classcode ,convert(nvarchar,[inserttime],120) as updatetime FROM [LogRecord].[dbo].[all_monitor_info] a where type='Account' and isactive=1 and issolved=0 order by updatetime "
+	sql="SELECT a.id,'Account' as [type],a.[item],a.[msg],'symbol' as symbol, classcode ,convert(nvarchar,[inserttime],120) as updatetime FROM [LogRecord].[dbo].[all_monitor_info] a where type in ('Account','Account2') and isactive=1 and issolved=0 order by updatetime "
 	account_distinct=ms.dict_sql(sql)
 
 	sql="SELECT a.id,a.[type],a.[item],a.[msg],'symbol' as symbol, classcode ,convert(nvarchar,[inserttime],120) as updatetime FROM [LogRecord].[dbo].[all_monitor_info] a where type='Thunder' and isactive=1 and issolved=0 order by updatetime "

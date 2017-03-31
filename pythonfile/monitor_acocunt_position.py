@@ -220,6 +220,6 @@ res_lists=get_all_monitor_list()
 result= get_real_lilun_position(res_lists[0])
 compare_position(result[0],result[1],result[2],log)
 getrecordlist=select_alert(result[0])
-update_target_table(getrecordlist,'Account')
+update_target_table(getrecordlist,'Account2')
 
 
