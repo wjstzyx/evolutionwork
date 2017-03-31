@@ -16,7 +16,9 @@ if 'Windows' in name:
 if 'Linux' in name:
 	log_path='/home/yuyang/myfile/logfile/'
 
-log_name='Account_distinct'
+log_name='_Account_distinct'
+pre_fix=datetime.datetime.now().strftime('%Y%m%d')
+log_name=pre_fix+log_name
 logger = MyLog(log_name)
 logger.set_path(log_path)
 log = logger.log
@@ -41,7 +43,7 @@ def get_messagelist():
 
 def get_all_monitor_list():
 	ms = MSSQL(host="192.168.0.5", user="future", pwd="K@ra0Key", db="future")
-	sql="SELECT [account] ,[isdoCommodity]   ,[isdoIFICIH]   ,[realposition_source] FROM [LogRecord].[dbo].[monitor_accountlist]"
+	sql="SELECT [account] ,[isdoCommodity]   ,[isdoIFICIH]   ,[realposition_source] FROM [LogRecord].[dbo].[monitor_accountlist] where (isdoCommodity+isdoIFICIH)>0"
 	res=ms.dict_sql(sql)
 	return res
 # 获取实际账户 和理论仓位
@@ -185,6 +187,7 @@ def update_target_table(getrecordlist,type):
 
 # 精确报警逻辑
 def select_alert(account):
+	# 可以添加
 	ms = MSSQL(host="192.168.0.5", user="future", pwd="K@ra0Key", db="future")
 	sql="SELECT DATEDIFF(MINUTE, inserttime,getdate()) as timediff,inserttime, getdate() as nowtime,[longhave]   ,[longsend]  ,[shorthave]   ,[shortsend] ,[lilun_position],conid FROM [LogRecord].[dbo].[account_position_temp_compare_v2]  where userid='%s'" % (account)
 	res=ms.dict_sql(sql)
@@ -214,9 +217,9 @@ def select_alert(account):
 
 # 10s 运行完 40个账户
 res_lists=get_all_monitor_list()
-result= get_real_lilun_position(res_lists[1])
+result= get_real_lilun_position(res_lists[0])
 compare_position(result[0],result[1],result[2],log)
 getrecordlist=select_alert(result[0])
-update_target_table(getrecordlist,'test')
+update_target_table(getrecordlist,'Account')
 
 
